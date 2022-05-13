@@ -1,5 +1,5 @@
 # MAS-Extra+
-Un submod que agrega pequeña adiciones para Monika After Story, algo que se debe de aclarar es que aun no he a revisado por los desarrolladores por ello es posible que ocurran errores. Pero me tardare lo suficiente para que todo sea funcional, aun no hay fecha de lanzamiento.
+A submod that adds small additions to Monika After Story, something that should be clarified is that I have not yet been reviewed by the developers so it is possible that bugs may occur. But it will take me enough time to make everything functional, there is no release date yet.
 
 Here you can see the official Monika After Story repository!
 
