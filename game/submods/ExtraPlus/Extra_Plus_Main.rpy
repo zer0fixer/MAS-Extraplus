@@ -49,6 +49,8 @@ define chibi_ypos = 430
 
 #????
 define extra_old_bg = ""
+define extra_chair = ""
+define extra_table = ""
 define ver_night = ""
 define rng_global = ""
 define show_chibika = None

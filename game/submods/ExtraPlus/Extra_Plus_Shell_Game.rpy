@@ -336,7 +336,7 @@ label shell_game_result:
                 m 1rtd "Although I wonder where this idea of yours [player] came from."
                 m 1gsu "I'd better keep my doubt to myself, I'm going to see how far you can go."
             elif difficulty_sg == 3:
-                m 1eka "Considering that you are in the difficult difficulty."
+                m 1eka "Considering that you are in the hard difficulty."
                 m 1hua "I feel you have given your best effort to achieve a challenge."
                 m 1etb "You wanted to get to more than [current_turn] turns with failures?"
                 m 1eub "Well I encourage you to make it!"

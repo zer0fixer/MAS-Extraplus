@@ -25,14 +25,17 @@ label hide_images_psr:
     return
 
 label restore_bg:
-    $ HKBHideButtons()
-    $ mas_current_background = extra_old_bg
+    python:
+        store.monika_chr.tablechair.chair = extra_chair
+        store.monika_chr.tablechair.table = extra_table
+        HKBHideButtons()
+        mas_current_background = extra_old_bg
     if show_chibika is True:
         hide screen chibika_chill
     hide monika
     scene black
     with dissolve
-    $ renpy.pause(2.0, hard=True)
+    pause 2.0
     call spaceroom(scene_change=True)
     $ HKBShowButtons()
     jump comment_cafe
@@ -409,7 +412,7 @@ label mas_backup:
     m 1hub "I'm glad you want to make a backup!"
     m 3eub "I'll open the route for you."
     m 1dsa "Wait a moment.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-    $ renpy.pause(1.0, hard=True)
+    pause 0.5
     window hide
     python:
         import os
@@ -497,13 +500,13 @@ label boop_nop:
     m 1rksdrb "[player]..."
     m 1rksdra "....I was so excited for you to do it again."
     m "..."
-    m 3hub "Well, never mind!"
+    m 3hub "Well, nevermind!"
     jump return_extra
     return
 
 label boop_yep:
     m 1eublb "Thank you [mas_get_player_nickname()]!"
-    m 1hua "EE~"
+    m 1hua "Ehehe~"
     jump return_extra
     return
 

@@ -6,7 +6,11 @@ label go_to_cafe:
         $ show_chibika = True
     else:
         $ show_chibika = False
-    $ extra_old_bg = mas_current_background
+    python:
+        extra_chair = store.monika_chr.tablechair.chair
+        extra_table = store.monika_chr.tablechair.table
+        extra_old_bg = mas_current_background
+
     if mas_curr_affection == mas_affection.HAPPY or mas_curr_affection == mas_affection.AFFECTIONATE:
         jump sorry_player
     if renpy.seen_label("check_label_cafe"):
@@ -65,7 +69,7 @@ label cafe_init:
     hide monika
     scene black
     with dissolve
-    $ renpy.pause(2.0, hard=True)
+    pause 2.0
     call mas_background_change(submod_background_cafe, skip_leadin=True, skip_outro=True)
     show monika 1eua at t11
     $ HKBShowButtons()
@@ -79,7 +83,7 @@ label cafe_cakes:
     m 1hua "Speaking of nice, I'm in the mood for dessert."
     m 3eub "I'll go pick it up, wait a minute."
     call mas_transition_to_emptydesk from monika_hide_exp_2
-    $ renpy.pause(3.0, hard=True)
+    pause 2.0
     if mas_isDayNow():
         $ monika_chr.wear_acs(extraplus_acs_chocolatecake)
     elif not mas_isDayNow():
@@ -154,7 +158,7 @@ label cafe_hide_acs:
             $ monika_chr.remove_acs(extraplus_acs_emptyplate)
         
     call mas_transition_to_emptydesk from monika_hide_exp_3
-    $ renpy.pause(3.0, hard=True)
+    pause 2.0
     call mas_transition_from_emptydesk("monika 1eua")
     m 1hua "Okay, let's go [player]!"
     jump restore_bg
@@ -248,7 +252,7 @@ label extra_talk_feel:
 
 label extra_talk_you:
     show monika idle at t11
-    m 3dkc "I know, [mas_get_player_nickname()]"
+    m 3dkc "I know, [mas_get_player_nickname()]."
     m 3ekd "We are on a date, a way to get to know each other better."
     m "You only have preconfigured options to answer based on the question I ask..."
     m 3ekc "After all this is a visual novel, "
