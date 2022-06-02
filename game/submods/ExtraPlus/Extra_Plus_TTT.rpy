@@ -259,7 +259,7 @@ label minigame_ttt_m_turn:
 ################################################################################
 label minigame_ttt_quit:
     hide notebook
-    pause 0.5
+    pause 0.3
     show monika 1hua at t11
     if ttt.score[0] == ttt.score[1]:
         if ttt.score[0] == 0 and ttt.score[1] == 0:

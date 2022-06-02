@@ -104,7 +104,7 @@ init python:
             ver_night = ""
         elif not mas_isDayNow():
             ver_night = "-n"
-        renpy.call_screen("interactions")
+        renpy.call_screen("submod_interactions")
 
     def ExtraButton():
         if not ExtraVisible():
@@ -131,7 +131,7 @@ init python:
                         drags[0].ypos = 430
             return
 
-    # Also this code from line 142 to 166 doesn't belong to me, all the credit goes to the developers, 
+    # Also this code from line 144 to 168 doesn't belong to me, all the credit goes to the developers, 
     # I used it so that monika had several expressions during the Extra+ loop. If the devs don't like me using it, 
     # they can tell me and I will remove it to avoid inconvenience.
 
@@ -382,7 +382,7 @@ screen extraplus_button():
                 textbutton _("Extra+") action Jump("show_extraplus")
 
 #Areas where you can interact with moni
-screen interactions():
+screen submod_interactions():
     zorder 50
     style_prefix "hkb"
     vbox:
@@ -390,43 +390,43 @@ screen interactions():
         yanchor 1.0
         ypos 170
 
-        textbutton _("Close") action [Hide("interactions"), Jump("back_extra")]
+        textbutton _("Close") action [Hide("submod_interactions"), Jump("back_extra")]
 
-        textbutton _("Go to") action [Hide("interactions"), Jump("walk_extra")]
+        textbutton _("Go to") action [Hide("submod_interactions"), Jump("walk_extra")]
 
-        textbutton _("Minigame") action [Hide("interactions"), Jump("minigames_extra")]
+        textbutton _("Minigame") action [Hide("submod_interactions"), Jump("minigames_extra")]
 
-        textbutton _("Addition") action [Hide("interactions"), Jump("tools_extra")]
+        textbutton _("Addition") action [Hide("submod_interactions"), Jump("tools_extra")]
 
     #Head
     imagebutton:
         idle "zonetwo"
         xpos 550
         ypos 10
-        action [Hide("interactions"), Jump("monika_headpatbeta")]
-        alternate [Hide("interactions"), Jump("monika_headpat_long")]
+        action [Hide("submod_interactions"), Jump("monika_headpatbeta")]
+        alternate [Hide("submod_interactions"), Jump("monika_headpat_long")]
 
     #Nose
     imagebutton:
         idle "zoneone"
         xpos 618
         ypos 235
-        action [Hide("interactions"), Jump("monika_boopbeta")]
-        alternate [Hide("interactions"), Jump("monika_boopbeta_war")]
+        action [Hide("submod_interactions"), Jump("monika_boopbeta")]
+        alternate [Hide("submod_interactions"), Jump("monika_boopbeta_war")]
 
     #Cheeks
     imagebutton:
         idle "zonethree"
         xpos 675
         ypos 256
-        action [Hide("interactions"), Jump("monika_cheeksbeta")]
-        alternate [Hide("interactions"), Jump("monika_cheeks_long")]
+        action [Hide("submod_interactions"), Jump("monika_cheeksbeta")]
+        alternate [Hide("submod_interactions"), Jump("monika_cheeks_long")]
     imagebutton:
         idle "zonethree"
         xpos 570
         ypos 256
-        action [Hide("interactions"), Jump("monika_cheeksbeta")]
-        alternate [Hide("interactions"), Jump("monika_cheeks_long")]
+        action [Hide("submod_interactions"), Jump("monika_cheeksbeta")]
+        alternate [Hide("submod_interactions"), Jump("monika_cheeks_long")]
 
 #Will be displayed when the player selects a cup
 screen shell_game_minigame():
@@ -587,18 +587,18 @@ screen boop_event(timelock, endlabel, editlabel):
             idle "zonetwo"
             xpos 550
             ypos 10
-            action [Hide("interactions"), Jump("headpat_dis")]
+            action [Hide("boop_event"), Jump("headpat_dis")]
         #Cheeks
         imagebutton:
             idle "zoneone"
             xpos 700
             ypos 256
-            action [Hide("interactions"), Jump("cheeks_dis")]
+            action [Hide("boop_event"), Jump("cheeks_dis")]
         imagebutton:
             idle "zoneone"
             xpos 550
             ypos 256
-            action [Hide("interactions"), Jump("cheeks_dis")]
+            action [Hide("boop_event"), Jump("cheeks_dis")]
 
     if boop_war_count >= 1:
         add "note_score"
