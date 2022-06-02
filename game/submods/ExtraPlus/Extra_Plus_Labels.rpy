@@ -214,7 +214,7 @@ label tools_extra:
     python:
         tools_menu = []
         tools_menu.append((_("View [m_name]'s Affection"), "affection"))
-        tools_menu.append((_("[m_name] you can flip a coin?"), "coin"))
+        tools_menu.append((_("[m_name], can you flip a coin?"), "coin"))
         tools_menu.append((_("[m_name], I want to make a backup"), "backup"))
         tools_menu.append((_("Create a gift for [m_name]"), "gift"))
         tools_menu.append((_("Github Repository"), "github"))
