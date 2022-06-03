@@ -52,13 +52,13 @@ label psr_loop:
         show e_scissors zorder 12:
             xalign 0.9
             yalign 0.7
-        m 1eub "Rock,{w=0.3} Paper,{w=0.3} Scissors{w=0.3}.{nw}"
+        m 1eub "Rock,{w=0.3} Paper,{w=0.3} Scissors{w=0.3}!{nw}"
         hide card_back with dissolve
         if rng_global == 1:
             show e_rock zorder 12 as e_rock_1 with dissolve:
                 xalign 0.7
                 yalign 0.1
-            m 3hub "A rock against another rock, ahaha~"
+            m 3hub "A rock against another rock, ahahaha~"
             m 1hua "It is a tie."
 
         elif rng_global == 2:
@@ -66,7 +66,7 @@ label psr_loop:
                 xalign 0.7
                 yalign 0.1
             m 1dub "The paper wraps the rock."
-            m 1tub "I regret to inform you that you have lost."
+            m 1tub "So sorry, [player], you have lost!"
             $ moni_wins += 1
 
         elif rng_global == 3:
@@ -88,7 +88,7 @@ label psr_loop:
         show e_scissors zorder 12:
             xalign 0.9
             yalign 0.7
-        m 1eub "Rock,{w=0.3} Paper,{w=0.3} Scissors{w=0.3}.{nw}"
+        m 1eub "Rock,{w=0.3} Paper,{w=0.3} Scissors{w=0.3}!{nw}"
         hide card_back with dissolve
         if rng_global == 1:
             show e_rock zorder 12 as e_rock_1 with dissolve:
@@ -102,8 +102,9 @@ label psr_loop:
             show e_paper zorder 12 as e_paper_1 with dissolve:
                 xalign 0.7
                 yalign 0.1
-            m 1hua "We both selected paper."
+            m 1hua "We both chose paper!"
             m 1tua "We're in a tie and you should stop reading my mind [mas_get_player_nickname()]~"
+            m 1tua "Ahahahaha~"
 
         elif rng_global == 3:
             show e_scissors zorder 12 as e_scissors_1 with dissolve:
@@ -124,30 +125,30 @@ label psr_loop:
             yoffset -20
             xalign 0.9
             yalign 0.7
-        m 1eub "Rock,{w=0.3} Paper,{w=0.3} Scissors{w=0.3}.{nw}"
+        m 1eub "Rock,{w=0.3} Paper,{w=0.3} Scissors{w=0.3}!{nw}"
         hide card_back with dissolve
         if rng_global == 1:
             show e_rock zorder 12 as e_rock_1 with dissolve:
                 xalign 0.7
                 yalign 0.1
-            m 1mub "Say goodbye to your scissors, [player]."
-            m "You couldn't beat me~"
+            m 1mub "Say goodbye to your scissors, [player]~"
+            m "You couldn't beat me! Ahahaha~"
             $ moni_wins += 1
 
         elif rng_global == 2:
             show e_paper zorder 12 as e_paper_1 with dissolve:
                 xalign 0.7
                 yalign 0.1
-            m 1hssdrb "The scissors cut the paper."
-            m 1eua "I award you the victory."
+            m 1hssdrb "The scissors cuts the paper."
+            m 1eua "I award you the victory!"
             $ player_wins += 1
 
         elif rng_global == 3:
             show e_scissors zorder 12 as e_scissors_1 with dissolve:
                 xalign 0.7
                 yalign 0.1
-            m 2hkb "We can't do anything if we have a pair of scissors, [player]."
-            m 2hub "Although it's funny that you thought the same thing, ehehe~"
+            m 2hkb "Two scissors equals a tie, [player]!"
+            m 2hub "Although it's funny that you thought the same thing, ehehehe~"
     show monika 1hua at t21
     $ your_choice = 0
     jump hide_images_psr
@@ -166,7 +167,7 @@ label psr_quit:
     show e_scissors zorder 12 as r3:
         xalign 0.9
         yalign 0.7
-        
+
     show card_back zorder 12:
         xalign 0.7
         yalign 0.1
@@ -178,7 +179,7 @@ label psr_quit:
     hide e_rock as r1
     hide card_back as v1
     pause 0.1
-    
+
     show e_paper zorder 12:
         xalign 0.7
         yalign 0.7
@@ -214,25 +215,25 @@ label psr_result:
             m 3hua "But don't worry, I know you have changed your mind and are not in the mood to play."
             m 3hub "So I hope we can play another time!"
         else:
-            m 1sua "Wow, we're in a tie."
-            m 1tua "It's because we are a couple and we think the same."
+            m 1sua "Wow, it's a tie."
+            m 1tua "It's because we are such a couple that our minds are one!"
             m 1hub "Ehehe~"
             m 3hua "But we have to break the tie, [player]."
             m 3hub "We will see who wins next time, good luck!"
     #Monika wins
     elif moni_wins > player_wins:
         m 3eub "This time I won, [player]~"
-        m "I've had some luck."
+        m 3eub "I've had some luck."
         m 3eubsa "But don't feel bad, what matters most to me is that we both have fun."
-        m 1hub "Next time I know you will beat me, trust you!"
+        m 1hub "Next time I know you will beat me, I trust you!"
     #Player wins
     elif moni_wins < player_wins:
         m 1hub "You beat me [player], congratulations."
-        m "I'm proud of you~"
+        m 1hub "I'm proud of you~"
         m 2tub "But I warn you that next time I will try to read your mind."
         m 2hub "I'm likely to win!"
         m 2hua "So be careful when we play again."
-        m "Ehehe~"
+        m 2hua "Ehehe~"
     jump return_extra
     return
 
@@ -243,22 +244,22 @@ label cheat_psr:
     else:
         jump check_cheat_psr
 label check_cheat_psr:
-    m 1hkb "Emm, to be honest I don't know how to respond to what you have done."
+    m 1hkb "Uhhh, to be honest, I don't know how to respond to what you have done."
     if moni_wins == player_wins:
         m 3eua "Even if we are tied."
     elif moni_wins > player_wins:
         m 3lkb "It feels bad that I'm beating you..."
     elif moni_wins < player_wins:
-        m 1hsb "You are ahead without starting the game."
-    m 1hua "I don't think it's worth it for you to do so"
+        m 1hsb "You are ahead without even starting the game."
+    m 1hua "I don't think it's worth it for you to do so..."
     m 1dua "And I don't see the need to talk about whether modifying the minigame is wrong or not."
     m 2fub "After all, I have a feeling that you did it more out of curiosity than to get an easy victory."
-    m 1etd "I know you're thinking, 'Are you angry [m]?'"
+    m 1etd "I guess you must be thinking, 'Are you angry [m_name]?'"
     m 3hub "Of course not!"
-    m 3dub "Getting angry about something simple, like cheating in a mini-game."
+    m 3dub "Imagine getting angry about something so simple, like cheating in a mini-game."
     m 1eua "Well I hope you don't do it in other video games."
     m 1lud "Eventually you will feel empty..."
     m 1lkb "And I don't want that to happen to you, "
-    extend 1hubsb "just have fun without hurting anyone!"
+    extend 1hubsb "so just have fun fair and square!"
     jump return_extra
     return

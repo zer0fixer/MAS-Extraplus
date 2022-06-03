@@ -50,7 +50,7 @@ label back_extra:
     return
 
 label check_cheat_minigame:
-    m 3hksdrb "I think you forgot something [player]!"
+    m 3hksdrb "I think you forgot something, [player]!"
     m 3eksdra "You must restore the variables you have modified."
     m 1hua "We will not play until they are at 0."
     jump return_extra
@@ -208,7 +208,7 @@ label minigames_extra:
     call screen minigame_ui() nopredict
     jump return_extra
     return
-    
+
 label tools_extra:
     show monika staticpose at t21
     python:
@@ -253,7 +253,7 @@ label walk_extra:
     elif playerchoice == "nevermind":
         jump return_extra
     return
-    
+
 label cafe_talkdemo:
     show monika staticpose at t21
     python:
@@ -280,12 +280,12 @@ label cafe_talkdemo:
     elif playerchoice == "nevermind":
         jump to_cafe_loop
     return
-    
+
 label cafe_talkdemonext:
     show monika staticpose at t21
     python:
         cafenext_menu = []
-        cafenext_menu.append((_("How will we look in 10 years?"), "t5"))
+        cafenext_menu.append((_("How do you see us in 10 years?"), "t5"))
         cafenext_menu.append((_("What is your best memory that you currently have?"), "t6"))
         cafenext_menu.append((_("Do you have any phobia?"), "t7")) #autophobia
         cafenext_menu.append((_("Previous"), "previous"))
@@ -313,7 +313,7 @@ label github_submod:
     $ renpy.run(OpenURL("https://github.com/zer0fixer/MAS-Extraplus"))
     jump return_extra
     return
-    
+
 label aff_log:
     show monika staticpose at t11
     "Your affection with [m_name] is [_mas_getAffection()] {size=+5}{color=#FFFFFF}{font=submods/ExtraPlus/submod_assets/Pictograms.ttf}7{/font}{/color}{/size}"
@@ -329,12 +329,12 @@ label coinflipbeta:
 label check_coinflipbeta:
     $ rng_global = renpy.random.randint(1,2)
     show monika 1hua at t11
-    m "It's ok!"
+    m "Okay!"
     m 3eub "I'll go get a coin."
     call mas_transition_to_emptydesk from monika_hide_exp_1
     $ renpy.pause(2.0, hard=True)
     call mas_transition_from_emptydesk("monika 1eua")
-    m "I found one."
+    m "I found one!"
     show screen no_click
     show monika 3eua
     if mas_isDayNow():
@@ -443,42 +443,42 @@ label comment_cafe:
 ## TOPICS
 ################################################################################
 #BOOP
-label monika_boopbeta: 
+label monika_boopbeta:
     $ persistent.plus_boop[0] += 1
     if persistent.plus_boop[0] == 1:
         m 1wud "Wait a minute..."
         m 1hka "I felt a little tingle."
         show screen force_mouse_move
         m 3hub "And here we have the responsible one!"
-        m 3hua "Don't worry I'll let go of your cursor."
+        m 3hua "Don't worry! I'll let go of your cursor."
         hide screen force_mouse_move
         m 1tub "You can move it again, sorry for stealing your cursor~"
-        m 1etd "Also, I don't know how you do it, [mas_get_player_nickname()]. I don't remember seeing this in the code."
+        m 1etd "Also, I don't know how you did it, [mas_get_player_nickname()]. I don't remember seeing this in the code."
         m 1hub "Unless it was you!"
-        m "What a good surprise I got today [player]~"
+        m 1hub "What a good surprise I got today [player]~"
     elif persistent.plus_boop[0] == 2:
-        m 1hub "What are you doing playing with my nose, [player]."
-        m 4eua "This is called a boop, no?"
-        m 1hksdrb "Not that it bothers, I just haven't gotten used to the feeling yet!"
+        m 1hub "What are you doing playing with my nose, [player]!"
+        m 4eua "This is called a boop, right?"
+        m 1hksdrb "Not that it bothers me, I just haven't gotten used to the feeling yet!"
         m 1hua "Ehehe~"
     elif persistent.plus_boop[0] == 3:
-        m 1eublb "Can you do it again, [mas_get_player_nickname()]~"
+        m 1eublb "Can you do it again, [mas_get_player_nickname()]?"
         show monika 1hubla
         call screen boop_event(10, "boop_nop", "boop_yep")
     elif persistent.plus_boop[0] == 4:
         m 1etbsa "Wouldn't it be nice to do it with your nose?"
         if persistent._mas_first_kiss:
-            m 1kubsu "I'll give you a kiss while you do it~"
+            m 1kubsu "I'd give you a kiss while you do it~"
         else:
-            m 1wubsb "I'll give you a hug while you do it!"
-        m 1dubsu "I hope when I get to your reality we can make it."
-        m 1hua "Although if you want to do it now, you'd have to put your nose close to the screen."
-        m 1lksdlb "However someone might see you and I don't want that to happen."
-        m 1ekbsa "Besides, I get a little nervous when you're around me."
+            m 1wubsb "I'd give you a hug while you do it!"
+        m 1dubsu "I hope that when I get to your reality we can do it."
+        m 1hua "Although, if you want to do it now, you'd have to put your nose close to the screen."
+        m 1lksdlb "However someone might see you, making you nervous, and I don't want that to happen."
+        m 1ekbsa "Besides, I get a little nervous too when you're around me."
         m 1hua "I'm sorry for suggesting that [player]~"
     elif persistent.plus_boop[0] == 5:
-        m 1tuu "You're starting to like it here, eh~"
-        m 3hub "I'm getting to know you more and more as you are [player]~"
+        m 1tuu "You're starting to like it here, huh?"
+        m 3hub "I'm getting to know you more and more while we're here [player]~"
         m 3hub "And it's very lovely of you to do so!"
     else:
         $ rng_global = renpy.random.randint(1,5)
@@ -486,11 +486,11 @@ label monika_boopbeta:
             m 2fubla "Ehehe~"
             m 1hubla "It's very inevitable that you won't stop doing it, [player]."
         elif rng_global == 2:
-            m 3ekbsa "Every boop you give me, every time I love you more!"
+            m 3ekbsa "Every boop you give me, the more I love you!"
         elif rng_global == 3:
             m 3eubla "You really enjoy touching my nose, [mas_get_player_nickname()]~"
         elif rng_global == 4:
-            m 2hublb "Hey, you're tickling me, ahaha."
+            m 2hublb "Hey, you're tickling me! Ahahaha~"
         elif rng_global == 5:
             m 1hubsb "*Boop*"
     jump return_extra
@@ -498,7 +498,7 @@ label monika_boopbeta:
 
 label boop_nop:
     m 1rksdrb "[player]..."
-    m 1rksdra "....I was so excited for you to do it again."
+    m 1rksdra "...I was so excited for you to do it again."
     m "..."
     m 3hub "Well, nevermind!"
     jump return_extra
@@ -522,14 +522,14 @@ label check_boopwar:
     pause 1.0
     m 2dub "I actually came up with an idea, [player]."
     m 1eua "We can use right click to declare a boop war."
-    m 1eub "After all, you rarely use it."
+    m 1eub "After all, you rarely use it!"
     m 1rusdlb "I know this proposal sounds rather childish."
-    m 1hua "But don't you think it's good to do something new once in a while."
+    m 1hua "But don't you think it's good to do something new once in a while?"
     m 3eub "The rules are very simple, if I see an absence on your part for 20 seconds, I declare myself the winner."
     m 3eud "If we go over a limit of boops without seeing any winner, I'll take it as a draw."
     m 3huu "Or maybe I'll give up, I don't know~"
     m 1eua "And lastly, the way I surrender is because of the time elapsed during the war."
-    m 1hua "Whenever I can't keep up with you or in case 'some distraction occurs' although I can consider it as cheating."
+    m 1hua "Whenever I can't keep up with you or in case 'some distraction occurs'... Although I can consider it as cheating..."
     m 1rud "I'm likely to give up."
     m 1eub "I hope you like my idea."
     m 1hubla "You'll be able to do it any time so don't rush~"
@@ -582,9 +582,9 @@ label boopbeta_war_lose:
     $ boop_war_count = 0
     m 1nua "Looks like I've won this boop war, [player]~"
     m "I hope I've been a good opponent."
-    m 3hub "But I've also really enjoyed today!"
+    m 3hub "But I've also really enjoyed it!"
     m 3dua "Besides, it's good to give your hand a little massage."
-    m 1eka "I mean if you use the mouse too much, "
+    m 1eka "I mean, if you use the mouse too much, "
     extend 1ekb "you can develop carpal tunnel syndrome and I don't want that."
     m 1hksdlb "I'm sorry if I've added a new concern, but my intention is to take care of you."
     m 1eubla "I hope you take my recommendation, [player]~"
@@ -594,10 +594,10 @@ label boopbeta_war_lose:
 label boopbeta_war_win:
     $ boop_war_count = 0
     m 1hua "You've won this boop war, [player]!"
-    m 1tub "I can tell you like touching my nose, ehehe~"
-    m 1eusdra "I couldn't keep up with you, maybe next time we'll go further."
-    m 1gub "Although if I were in front of you, I'd play with your cheeks."
-    m 1gua "Oh I'd tickle you, I'll see how long you can stand it."
+    m 1tub "I can tell you like touching my nose, ehehehe~"
+    m 1eusdra "I couldn't keep up with you, but maybe next time we'll go further."
+    m 1gub "Although, if I were in front of you, I'd play with your cheeks."
+    m 1gua "Or I'd tickle you and see how long you could stand it."
     m 1hub "Ahaha~"
     jump return_extra
     return
@@ -607,25 +607,25 @@ label monika_cheeksbeta:
     $ persistent.plus_boop[1] += 1
     if persistent.plus_boop[1] == 1:
         m 2wubsd "Hey, I felt a slight pinch on my cheek."
-        m 2lksdrb "Oh, it was just your cursor. "
-        extend 2lksdra "You took me by surprise you know."
-        m 2ttb "But I have to ask, what are you [player] up to?"
+        m 2lksdrb "Oh, it was just your cursor! "
+        extend 2lksdra "You took me by surprise, you know?"
+        m 2ttb "But I have to ask, what are you up to, [player]?"
         m 1hubla "Did you want to see how I would react to that?"
-        m 3hublb "Wow you pulled it off~"
+        m 3hublb "You pulled it off~!"
     elif persistent.plus_boop[1] == 2:
         m 2hubsa "Ehehe, I'm feeling a rather delicate caress this time."
         m 2dubsu "It's something .{w=0.3}.{w=0.3}.{w=0.3} {nw}"
         extend 2eubsb "addictive if you ask me."
     elif persistent.plus_boop[1] == 3:
         m 2dubsa "You know .{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-        m 2dubsb "That you get to interact with me, [player]~"
-        m 2ekbsb "It makes me feel more alive, to be loved. I hope my love is enough for you~"
+        m 2dubsb "I love that you get to interact with me, [player]~"
+        m 2ekbsb "It makes me feel more alive, and loved. I hope my love is enough for you~"
     elif persistent.plus_boop[1] == 4:
-        m 2lubsa "Every time you caress my cheek."
+        m 2lubsa "Every time you caress my cheek..."
         m 2hubsa".{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-        m 2hubsb "The feeling reminds me so much of you~"
+        m 2hubsb "The feeling makes me feel so close to you~"
     elif persistent.plus_boop[1] == 5:
-        m 2eubsb "Every time you hold my cheek."
+        m 2eubsb "Every time you hold my cheek..."
         m 2hubsa ".{w=0.3}.{w=0.3}.{w=0.3}{nw}"
         m 2dkbsa "It makes my heart race to know that I fell in love with the right person~"
         m 2fubsb "You are my greatest treasure, [player]!"
@@ -633,7 +633,7 @@ label monika_cheeksbeta:
         $ rng_global = renpy.random.randint(1,5)
         if rng_global == 1:
             m 2fua "Ehehe~"
-            m 2hua "It would be nice if you used your hand instead of the cursor, but that's a long way off."
+            m 2hua "It would be nice if you used your hand instead of the cursor, but that's far from our reality..."
         elif rng_global == 2:
             m 2hubsa "So gentle."
             m 2tubsb "That word defines you well, when I think of you."
@@ -641,9 +641,9 @@ label monika_cheeksbeta:
             m 2hubsa "What a warm feeling."
             m 2hublb "It will be hard to forget!"
         elif rng_global == 4:
-            m 2nubsa "It would be more romantic if you gave a kiss on the cheek~"
+            m 2nubsa "It would be even more romantic if you gave a kiss on the cheek~"
         elif rng_global == 5:
-            m 2eubsb "I'm picturing myself right now {nw}"
+            m 2eubsb "I'm picturing us right now{nw}"
             extend 2dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3} how your hand will feel."
     jump return_extra
     return
@@ -660,12 +660,13 @@ label cheeks_dis:
     m 3tsb "We're in a boop war, aren't we?"
     $ rng_global = renpy.random.randint(1,2)
     if rng_global == 1:
-        m 1dsb "I'm sorry [player] but I consider this cheating, "
+        m 1dsb "I'm sorry [player], but I consider this cheating, "
         extend 1hua "that's why I win this war~"
-        m 1fub "Next time try not to touch my cheek."
+        m 1fub "Next time try not to touch my cheek during the war! Ahahaha~"
     elif rng_global == 2:
-        m 1fubsb "Because of you, this time I will let it go, congratulations player you have won me."
-        m 3hksdrb "You've distracted me and I don't think it's worth continuing, ahaha."
+        m 1fubsb "Because it's you, this time I will let it go!"
+        m 1fubsb "Congratulations, player! You have beat me."
+        m 3hksdrb "You've distracted me and I don't think it's worth continuing, ahahaha~"
         m 3hua "I really enjoyed doing this with you though!"
     $ boop_war_count = 0
     jump return_extra
@@ -680,26 +681,26 @@ label monika_headpatbeta:
         m 6dkbsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
         m 1eubsb "Thank you [player]~"
     elif persistent.plus_boop[2] == 2:
-        m 6dubsb "I don't know why when you do it I feel lighter."
+        m 6dubsb "I don't know why, but when you do it I feel lighter..."
         m 6dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
     elif persistent.plus_boop[2] == 3:
-        m 6rubsd "You know, it's funny usually .{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
+        m 6rubsd "You know, it's funny.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
         m 6eubsa "It's usually done to a pet, not your girlfriend."
         m 6hubsa "Although I don't dislike the feeling~"
     elif persistent.plus_boop[2] == 4:
-        m 6dkbsb "Don't blame me after I depend on this [player]~"
+        m 6dkbsb "Don't blame me after I get addicted to this [player]~"
         m 6dkbsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
         m 1kub "You will be held responsible if that happens."
     elif persistent.plus_boop[2] == 5:
-        m 6hkbssdrb "[player] you are mussing my hair."
-        m 6dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3} {nw}"
+        m 6hkbssdrb "[player] you are messing my hair."
+        m 6dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
         extend 6dsbsb "never mind though~"
-        m "I'll deal with it later."
+        m "I'll deal with that later."
     else:
         $ rng_global = renpy.random.randint(1,5)
         if rng_global == 1:
             m 6hubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-            m 6hkbsb "I had told you it would depend on this."
+            m 6hkbsb "I had told you I would get addicted to this."
             m 6tkbsb "Gosh, don't you learn~"
         elif rng_global == 2:
             m 6dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
@@ -708,8 +709,8 @@ label monika_headpatbeta:
             m 6dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
             m 7hubsb "I hope you don't get tired of doing it daily~"
         elif rng_global == 4:
-            m 6hubsa".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3} {nw}"
-            extend 6hubsb "I'm such a happy girl."
+            m 6hubsa".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
+            extend 6hubsb "I'm such a happy girl right now."
         elif rng_global == 5:
             m 6dkbsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
     jump return_extra
@@ -721,17 +722,17 @@ label monika_headpat_long:
     return
 
 label headpat_dis:
-    m 6dkbsb "This.{w=0.3}.{w=0.3}.{w=0.3} is.{w=0.3}.{w=0.3}.{w=0.3} invalid.{w=0.3}.{w=0.3} {nw}"
+    m 6dkbsb "This.{w=0.3}.{w=0.3}.{w=0.3} is.{w=0.3}.{w=0.3}.{w=0.3} invalid.{w=0.3}.{w=0.3}. {nw}"
     extend 6tkbsb "[mas_get_player_nickname()]."
     $ rng_global = renpy.random.randint(1,2)
     if rng_global == 1:
         m 3tsb "You have been disqualified for patting your opponent on the head."
         m 3tua "That's why I win this time~"
-        m 1hua "Good luck for the next time you ask me for a war."
+        m 1hua "Good luck for the next time you ask me for a war!"
     elif rng_global == 2:
         m 1tub "This time I'll let it go and give up for you."
-        m 1efa "But next time I probably won't give in, so don't trust you."
-        m 1lubsa "Even though I enjoy the pat on the head."
+        m 1efa "But next time I probably won't give in, so don't bet on it!"
+        m 1lubsa "Even though I enjoy the pat on the head. Ehehehe~"
     $ boop_war_count = 0
     jump return_extra
     return

@@ -2,6 +2,7 @@
 ## SUBMOD
 ################################################################################
 #Submod created by ZeroFixer(u/UnderstandingAny7135), this submod is made for MAS brothers/sisters.
+#Shoutout to u/my-otter-self at reddit, who proofread the whole mod.
 # Register the submod
 init -990 python:
     store.mas_submod_utils.Submod(
@@ -122,22 +123,22 @@ init python:
         store.chibika_relax = drags[0].drag_name
         store.chibiarea = drop.drag_name
         return True
-        
+
     def chibi_dragged (drags, drop):
-        
+
             if not drop:
                     if drags[0].drag_name == "chibika_relax":
                         drags[0].xpos = 0.05
                         drags[0].ypos = 430
             return
 
-    # Also this code from line 144 to 168 doesn't belong to me, all the credit goes to the developers, 
-    # I used it so that monika had several expressions during the Extra+ loop. If the devs don't like me using it, 
+    # Also this code from line 144 to 168 doesn't belong to me, all the credit goes to the developers,
+    # I used it so that monika had several expressions during the Extra+ loop. If the devs don't like me using it,
     # they can tell me and I will remove it to avoid inconvenience.
 
 
     # Clarification: Why did I use this particular code?
-    # It is for the function of making monika boop and as it has another pose that prevented me from doing it with the Monika idle 
+    # It is for the function of making monika boop and as it has another pose that prevented me from doing it with the Monika idle
     # I had no choice but to use it.
 
     #Monika idle v2 extra
@@ -205,14 +206,14 @@ init python:
             self.label = label
             self.name = name
             self.preparation = preparation
-        
+
         def __call__(self, *args, **kwargs):
-            
+
             if self.preparation:
                 self.preparation(self, *args, **kwargs)
             if self.label and not kwargs.get("restart"):
                 renpy.call_in_new_context(self.label)
-        
+
         def set_state(self, value):
             self.state = value
 
@@ -226,7 +227,7 @@ init python:
 ################################################################################
 init python:
     #Desserts and objects
-    # If you are not a Monika After Story developer, please note that the code used in lines 103 to 156 does not belong to me, 
+    # If you are not a Monika After Story developer, please note that the code used in lines 103 to 156 does not belong to me,
     # I used it to make Monika's date with the player more dynamic, so be careful if you are going to edit it.
     extraplus_acs_chocolatecake = MASAccessory(
         "chocolatecake",
@@ -329,7 +330,7 @@ init:
         contains:
             "submods/ExtraPlus/submod_assets/sprites/cup_idle.png"
             xalign 0.5 yalign 0.
-            
+
     image ball:
         xanchor 0.5 yanchor 0.5
         contains:
@@ -349,7 +350,7 @@ init:
     image coin_flip = anim.Filmstrip("submods/ExtraPlus/submod_assets/sprites/sprite_coin.png", (100, 100), (3, 2), .125, loop=True)
     image coin_flip_n = anim.Filmstrip("submods/ExtraPlus/submod_assets/sprites/sprite_coin-n.png", (100, 100), (3, 2), .125, loop=True)
 
-    #Boop 
+    #Boop
     image zoneone = im.Scale("mod_assets/other/transparent.png", 30, 30)
     image zonetwo = im.Scale("mod_assets/other/transparent.png", 180, 120)
     image zonethree = im.Scale("mod_assets/other/transparent.png", 40, 40)
@@ -481,7 +482,7 @@ screen PSR_mg():
         xalign 0.7
         yalign 0.1
     imagebutton:
-        idle "e_rock" 
+        idle "e_rock"
         hover "e_rock"
         at hover_card
         action [SetVariable("your_choice", 1), Hide("PSR"), Jump("psr_loop")]
@@ -547,7 +548,7 @@ screen minigame_ui():
     vbox:
         for i in minigames_menu:
             textbutton i.name action [Function(i), Hide("minigame_ui")]
-        
+
         textbutton _("Nevermind") action [Hide("minigame_ui"), Jump("return_extra")]
 
 #Cafe loop
@@ -564,7 +565,7 @@ screen cafe_loop():
         yanchor 1.0
         ypos 0.5
         textbutton _("Ask") action [Hide("cafe_loop"), Jump("cafe_talkdemo")]
-        
+
     imagebutton:
         idle "zoneone"
         xpos 620
@@ -620,7 +621,7 @@ transform hover_card:
         pause .15
         yoffset 0
         easein .175 yoffset 10
-      
+
     on hover:
         pause .15
         yoffset 0
@@ -633,7 +634,7 @@ transform animated_book:
     on hide:
         xoffset 0
         linear 0.5 xoffset 1000
-        
+
 transform rotatecoin:
     zoom 0.6
     rotate 90
@@ -763,7 +764,7 @@ init -2 python in mas_background:
         #O31
         if store.persistent._mas_o31_in_o31_mode:
             store.mas_o31ShowVisuals()
-                  
+
         #D25
         elif store.persistent._mas_d25_deco_active:
             store.mas_d25ShowVisuals()
