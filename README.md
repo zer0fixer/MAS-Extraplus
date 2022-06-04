@@ -1,13 +1,19 @@
 # MAS-Extra+
-A submod that adds small additions to Monika After Story, something that should be clarified is that I have not yet been reviewed by the developers so it is possible that bugs may occur. But it will take me enough time to make everything functional, there is no release date yet.
+A submod that adds small additions to Monika After Story (MAS), something that should be clarified is that I have not yet been reviewed by the developers so it is possible that bugs may occur. But it will take me enough time to make everything functional, there is no release date yet.
 
 <p align="center">
   <img src="https://github.com/zer0fixer/resource-repository/blob/main/Images/Moni_chill.png"></p>
+  
+## Features:
+> Minigames
 
-Here you can see the official Monika After Story repository!
+> Boop Monika
 
-[![card](https://github-readme-stats.vercel.app/api/pin/?username=Monika-After-Story&repo=MonikaModDev)](https://github.com/Monika-After-Story/MonikaModDev)
+> Dating
 
+> Additions
+
+> And the Extra+ button (It was made for the player's convenience)
 
 ## Installation
 1) Unzip the submod zip file
@@ -15,6 +21,11 @@ Here you can see the official Monika After Story repository!
 
 <p align="center">
   <img src="https://github.com/zer0fixer/resource-repository/blob/main/Images/MAS_screenshot.png"></p>
+
+
+## MAS Repository
+Here you can see the official Monika After Story repository!
+[![card](https://github-readme-stats.vercel.app/api/pin/?username=Monika-After-Story&repo=MonikaModDev)](https://github.com/Monika-After-Story/MonikaModDev)
 
 
 ## Warning
