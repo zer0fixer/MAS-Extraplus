@@ -3,25 +3,23 @@
 ################################################################################
 #Shell Game
 label minigame_sg:
-    if correct_answers > 0 or current_turn > 0:
-        jump cheat_sg
     show monika 1eub at t11
     m 1hua "Okay, what difficulty do you want?{nw}"
     menu:
         "Okay, what difficulty do you want?{fast}"
         "Easy":
-            m 1eua "You want to play something simple, [player]?"
-            extend 1eua "Okay!"
+            m 1eua "You want to play something simple, [player]? "
+            extend 1hua "Okay!"
             $ cup_speed += 0.5
             $ difficulty_sg = 1
         "Normal":
-            m 3eub "You want to start casual?"
-            extend 3eub "Okay!"
+            m 3eub "You want to start casual? "
+            extend 3hub "Okay!"
             $ cup_speed = 0.5
             $ difficulty_sg = 2
         "Hard":
             m 1eub "You want to play hard, huh?"
-            m 1eub "Ahahaha, okay!"
+            m 1hub "Ahahaha, okay!"
             $ cup_speed -= 0.3
             $ difficulty_sg = 3
 

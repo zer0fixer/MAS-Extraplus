@@ -91,6 +91,8 @@ label cafe_cakes:
     call mas_transition_from_emptydesk("monika 1eua")
     if monika_chr.is_wearing_acs(mas_acs_mug):
         m 1hua "Plus, it goes well with coffee~"
+    elif monika_chr.is_wearing_acs(mas_acs_hotchoc_mug):
+        m 1hua "It would be better with a cup of coffee, but hot chocolate is also welcome~"
     else:
         $ monika_chr.wear_acs(extraplus_acs_coffeecup)
         m 1hua "And I mustn't forget the cup of coffee to go with the dessert~"
@@ -165,7 +167,7 @@ label cafe_hide_acs:
     return
 
 label monika_no_dessert:
-    show monika idle at t11
+    show monika staticpose at t11
     if monika_chr.is_wearing_acs(extraplus_acs_fruitcake):
         $ monika_chr.remove_acs(extraplus_acs_fruitcake)
         $ monika_chr.wear_acs(extraplus_acs_emptyplate)
@@ -199,7 +201,7 @@ label monika_no_dessert:
     return
 
 label monika_boopcafebeta:
-    show monika idle at t11
+    show monika staticpose at t11
     if monika_chr.is_wearing_acs(extraplus_acs_chocolatecake) or monika_chr.is_wearing_acs(extraplus_acs_fruitcake):
         m 1ttp "...?"
         m 1eka "Hey, I'm enjoying my dessert."
@@ -223,7 +225,7 @@ label sorry_player:
 ## DIALOGUES
 ################################################################################
 label extra_talk_feel:
-    show monika idle at t11
+    show monika staticpose at t11
     $ rng_global = renpy.random.randint(1,3)
     if rng_global == 1:
         m 1hkbsb "I'm feeling a little nervous, we're on a date after all!"
@@ -251,7 +253,7 @@ label extra_talk_feel:
     return
 
 label extra_talk_you:
-    show monika idle at t11
+    show monika staticpose at t11
     m 3dkc "I know, [mas_get_player_nickname()]."
     m 3ekd "We are on a date, a way to get to know each other better."
     m 3ekd "You only have preconfigured options to answer based on the question I ask..."
@@ -272,13 +274,13 @@ label extra_talk_you:
     m 1eka "But our way of communicating is very limited because of what I said earlier."
     m 3hua "It doesn't limit us from having a nice relationship together though!"
     m 3hua "Also, I know the most importants thing about you, whatever information you give me! "
-    extend 3hua "Even if it's just the tiniest thing."
+    extend 3hub "Even if it's just the tiniest thing."
     m 3eub "I really appreciate it~"
     jump to_cafe_loop
     return
 
 label extra_talk_phobia:
-    show monika idle at t11
+    show monika staticpose at t11
     m 1rtd "The truth is that's a good question, I haven't even thought about which fear I would have."
     m 1hua "After all, I'm not human, I'm just a cute little character. "
     extend 1dksdlb "Although I'm aware of everything going on around me."
@@ -303,7 +305,7 @@ label extra_talk_phobia:
     return
 
 label extra_talk_ambition:
-    show monika idle at t11
+    show monika staticpose at t11
     m 1tubsb "{i}You{/i}, you are my great ambition."
     m 1hkbsa "Just to think that I am so far away and so close at the same time."
     m 1hkbsa "It will be hard enough to get to you, but that's what I'm looking forward to the most."
@@ -318,7 +320,7 @@ label extra_talk_ambition:
     return
 
 label extra_talk_teen:
-    show monika idle at t11
+    show monika staticpose at t11
     m 1eua "That's a rather curious question, [mas_get_player_nickname()]"
     m 1dua "{i}How will we be 10 years from now?{/i}"
     if mas_anni.isAnniOneMonth():
@@ -377,7 +379,7 @@ label extra_talk_teen:
     return
 
 label extra_talk_memory:
-    show monika idle at t11
+    show monika staticpose at t11
     m 1dubsa "I can tell you, "
     extend 1subsa "I met a person who has made me feel very happy."
     if persistent._mas_acs_enable_promisering:

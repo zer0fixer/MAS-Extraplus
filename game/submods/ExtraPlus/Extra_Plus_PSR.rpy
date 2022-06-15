@@ -234,6 +234,8 @@ label psr_result:
         m 2hub "I'm likely to win!"
         m 2hua "So be careful when we play again."
         m 2hua "Ehehe~"
+    $ moni_wins = 0
+    $ player_wins = 0
     jump return_extra
     return
 

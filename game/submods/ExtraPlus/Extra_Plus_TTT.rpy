@@ -121,7 +121,6 @@ init 10 python:
     minigames_menu.append(psr)
 
 screen minigame_ttt_grid():
-    #add "notebook"
     for i in range(2):
         add "line_black" pos (700, 260 + 192*i) zoom 0.8
         add "line_black" pos (600 + 192*i, 80) rotate 90 zoom 0.8
@@ -172,14 +171,14 @@ screen minigame_ttt_scr():
 
         text "[m_name]: " + str(ttt.score[0])  style "monika_text":
             if not ttt.playerTurn:
-                color "#009D71"
+                color "#ff4646"
     vbox:
         xpos 0.9
         ypos 0.900
 
         text "[player]: " + str(ttt.score[1])  style "monika_text":
             if ttt.playerTurn:
-                color "#002fff"
+                color "#2e97ff"
     vbox:
         style_prefix "hkb"
         xpos 0.05
@@ -194,7 +193,12 @@ label minigame_ttt:
     show monika 1hua at t21
     if ttt.score[0] > 0 or ttt.score[1] > 0:
         jump cheat_ttt
-    show notebook zorder 12 at animated_book
+    if renpy.loadable("submods/ExtraPlus/submod_assets/sprites/notebook.png"):
+        show notebook zorder 12 at animated_book
+    else:
+        show paper zorder 12 at animated_book:
+            xzoom 0.76
+            xpos 0.53
     pause 0.5
     call screen minigame_ttt_scr() nopredict
     return
@@ -258,6 +262,7 @@ label minigame_ttt_m_turn:
 ## TALKING GAME
 ################################################################################
 label minigame_ttt_quit:
+    hide paper
     hide notebook
     pause 0.3
     show monika 1hua at t11

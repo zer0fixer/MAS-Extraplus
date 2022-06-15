@@ -1,9 +1,12 @@
 ################################################################################
 ## R_LABELS
 ################################################################################
+
 label show_extraplus:
-    $ store.mas_sprites.reset_zoom()
-    $ mas_RaiseShield_dlg()
+    python:
+        player_zoom = store.mas_sprites.zoom_level
+        store.mas_sprites.reset_zoom()
+        mas_RaiseShield_dlg()
     show monika staticpose at t11
     $ Extraplus_show()
     return
@@ -44,8 +47,10 @@ label restore_bg:
 label back_extra:
     if renpy.get_screen("chibika_chill"):
         hide screen chibika_chill
-        with dissolve
-    $ mas_DropShield_dlg()
+    python:
+        store.mas_sprites.zoom_level = player_zoom
+        store.mas_sprites.adjust_zoom()
+        mas_DropShield_dlg()
     jump ch30_loop
     return
 
@@ -59,6 +64,7 @@ label check_cheat_minigame:
 ################################################################################
 ## GIFTS
 ################################################################################
+
 label make_gift:
     show monika staticpose at t11
     menu:
@@ -68,6 +74,8 @@ label make_gift:
             jump groceries
         "Objects":
             jump objects
+        "Ribbons":
+            jump ribbons
         "Nevermind":
             jump tools_extra
     return
@@ -75,11 +83,17 @@ label make_gift:
 label make_file:
     python:
         import os
-        makegift = mas_input("Write the name and extension (.gift, .txt, .chr, etc...)")
+        makegift = mas_input(_("Write the name and extension (.gift, .txt, .chr, etc..."),
+                            allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_",
+                            screen_kwargs={"use_return_button": True, "return_button_value": "nevermind"})
         filepath = os.path.join(renpy.config.basedir + '/characters',makegift)
         f = open(filepath,"a")
-    "Has been successfully created."
-    jump make_gift
+    if makegift == "nevermind":
+        jump make_gift
+    else:
+        "Has been successfully created."
+        jump make_gift
+    jump back_extra
     return
 
 label groceries:
@@ -88,35 +102,35 @@ label groceries:
             python:
                 filepath = os.path.join(renpy.config.basedir + '/characters','coffee.gift')
                 f = open(filepath,"a")
-            "Has been successfully created."
+            "The Coffee has been successfully created."
             jump make_gift
 
         "Chocolates":
             python:
                 filepath = os.path.join(renpy.config.basedir + '/characters','chocolates.gift')
                 f = open(filepath,"a")
-            "Has been successfully created."
+            "The Chocolates has been successfully created."
             jump make_gift
 
         "Cupcake":
             python:
                 filepath = os.path.join(renpy.config.basedir + '/characters', 'cupcake.gift')
                 f = open(filepath, "a")
-            "Has been successfully created."
+            "The Cupcake has been successfully created."
             jump make_gift
 
         "Fudge":
             python:
                 filepath = os.path.join(renpy.config.basedir + '/characters','fudge.gift')
                 f = open(filepath,"a")
-            "Has been successfully created."
+            "The Fudge has been successfully created."
             jump make_gift
 
         "Hot Chocolate":
             python:
                 filepath = os.path.join(renpy.config.basedir + '/characters','hotchocolate.gift')
                 f = open(filepath,"a")
-            "Has been successfully created."
+            "The Hot Chocolate has been successfully created."
             jump make_gift
 
         "Next":
@@ -132,28 +146,28 @@ label groceries_next:
             python:
                 filepath = os.path.join(renpy.config.basedir + '/characters','candy.gift')
                 f = open(filepath,"a")
-            "Has been successfully created."
+            "The Candy has been successfully created."
             jump make_gift
 
         "Candy Canes":
             python:
                 filepath = os.path.join(renpy.config.basedir + '/characters','candycane.gift')
                 f = open(filepath,"a")
-            "Has been successfully created."
+            "The Candy Canes has been successfully created."
             jump make_gift
 
         "Candy Corn":
             python:
                 filepath = os.path.join(renpy.config.basedir + '/characters','candycorn.gift')
                 f = open(filepath,"a")
-            "Has been successfully created."
+            "The Candy Corn has been successfully created."
             jump make_gift
 
         "Christmas Cookies":
             python:
                 filepath = os.path.join(renpy.config.basedir + '/characters','christmascookies.gift')
                 f = open(filepath,"a")
-            "Has been successfully created."
+            "The Christmas Cookies has been successfully created."
             jump make_gift
 
         "Previous":
@@ -169,37 +183,207 @@ label objects:
             python:
                 filepath = os.path.join(renpy.config.basedir + '/characters','promisering.gift')
                 f = open(filepath,"a")
-            "Has been successfully created."
+            "The Promise Ring has been successfully created."
             jump make_gift
 
         "Roses":
             python:
                 filepath = os.path.join(renpy.config.basedir + '/characters','roses.gift')
                 f = open(filepath,"a")
-            "Has been successfully created."
+            "The Roses has been successfully created."
             jump make_gift
 
         "Quetzal Plushie":
             python:
                 filepath = os.path.join(renpy.config.basedir + '/characters','quetzalplushie.gift')
                 f = open(filepath,"a")
-            "Has been successfully created."
+            "The Quetzal Plushie has been successfully created."
             jump make_gift
 
         "Thermos Mug":
             python:
                 filepath = os.path.join(renpy.config.basedir + '/characters','justmonikathermos.gift')
                 f = open(filepath,"a")
-            "Has been successfully created."
+            "The Thermos Mug has been successfully created."
             jump make_gift
 
         "Nevermind":
             jump make_gift
     return
 
+label ribbons:
+    menu:
+        "Black Ribbon":
+            python:
+                filepath = os.path.join(renpy.config.basedir + '/characters','blackribbon.gift')
+                f = open(filepath,"a")
+            "The Black Ribbon has been successfully created."
+            jump make_gift
+
+        "Blue Ribbon":
+            python:
+                filepath = os.path.join(renpy.config.basedir + '/characters','blueribbon.gift')
+                f = open(filepath,"a")
+            "The Blue Ribbon has been successfully created."
+            jump make_gift
+
+        "Dark Purple Ribbon":
+            python:
+                filepath = os.path.join(renpy.config.basedir + '/characters','darkpurpleribbon.gift')
+                f = open(filepath,"a")
+            "The Dark Purple Ribbon has been successfully created."
+            jump make_gift
+
+        "Emerald Ribbon":
+            python:
+                filepath = os.path.join(renpy.config.basedir + '/characters','emeraldribbon.gift')
+                f = open(filepath,"a")
+            "The Emerald Ribbon has been successfully created."
+            jump make_gift
+
+        "Gray Ribbon":
+            python:
+                filepath = os.path.join(renpy.config.basedir + '/characters','grayribbon.gift')
+                f = open(filepath,"a")
+            "The Gray Ribbon has been successfully created."
+            jump make_gift
+
+        "Green Ribbon":
+            python:
+                filepath = os.path.join(renpy.config.basedir + '/characters','greenribbon.gift')
+                f = open(filepath,"a")
+            "The Green Ribbon has been successfully created."
+            jump make_gift
+
+        "Next":
+            jump ribbons_next
+
+        "Nevermind":
+            jump make_gift
+    return
+
+label ribbons_next:
+    menu:
+        "Light Purple Ribbon":
+            python:
+                filepath = os.path.join(renpy.config.basedir + '/characters','lightpurpleribbon.gift')
+                f = open(filepath,"a")
+            "The Light Purple Ribbon has been successfully created."
+            jump make_gift
+
+        "Peach Ribbon":
+            python:
+                filepath = os.path.join(renpy.config.basedir + '/characters','peachribbon.gift')
+                f = open(filepath,"a")
+            "The Peach Ribbon has been successfully created."
+            jump make_gift
+
+        "Pink Ribbon":
+            python:
+                filepath = os.path.join(renpy.config.basedir + '/characters','pinkribbon.gift')
+                f = open(filepath,"a")
+            "The Pink Ribbon has been successfully created."
+            jump make_gift
+
+        "Platinum Ribbon":
+            python:
+                filepath = os.path.join(renpy.config.basedir + '/characters','platinumribbon.gift')
+                f = open(filepath,"a")
+            "The Platinum Ribbon has been successfully created."
+            jump make_gift
+
+        "Red Ribbon":
+            python:
+                filepath = os.path.join(renpy.config.basedir + '/characters','redribbon.gift')
+                f = open(filepath,"a")
+            "The Red Ribbon has been successfully created."
+            jump make_gift
+
+        "Previous":
+            jump ribbons
+
+        "Next":
+            jump ribbons_nextp2
+
+        "Nevermind":
+            jump make_gift
+    return
+
+label ribbons_nextp2:
+    menu:
+        "Ruby Ribbon":
+            python:
+                filepath = os.path.join(renpy.config.basedir + '/characters','rubyribbon.gift')
+                f = open(filepath,"a")
+            "The Ruby Ribbon has been successfully created."
+            jump make_gift
+
+        "Sapphire Ribbon":
+            python:
+                filepath = os.path.join(renpy.config.basedir + '/characters','sapphireribbon.gift')
+                f = open(filepath,"a")
+            "The Sapphire Ribbon has been successfully created."
+            jump make_gift
+
+        "Silver Ribbon":
+            python:
+                filepath = os.path.join(renpy.config.basedir + '/characters','silverribbon.gift')
+                f = open(filepath,"a")
+            "The Silver Ribbon has been successfully created."
+            jump make_gift
+
+        "Teal Ribbon":
+            python:
+                filepath = os.path.join(renpy.config.basedir + '/characters','tealribbon.gift')
+                f = open(filepath,"a")
+            "The Teal Ribbon has been successfully created."
+            jump make_gift
+
+        "Yellow Ribbon":
+            python:
+                filepath = os.path.join(renpy.config.basedir + '/characters','yellowribbon.gift')
+                f = open(filepath,"a")
+            "The Yellow Ribbon has been successfully created."
+            jump make_gift
+
+        "Previous":
+            jump ribbons_next
+
+        "Nevermind":
+            jump make_gift
+    return
+################################################################################
+## HELP
+################################################################################
+label helpextra:
+    show monika staticpose at t11
+    menu:
+        "How can I interact with [m_name]?":
+            "You can do this when you are in the Extra+ options. Touch Monika's nose, cheek, or head and she will react."
+            "Something to keep in mind about this submod."
+            "You can only click or boop, as you prefer to call it. When the options (Go To, Minigame, and Addition) are present."
+            "So if you had the zoom set to a certain level, don't be surprised that it has been reset due to the boop function."
+            "Don't worry though, that's already been fixed."
+            "I hope you find the explanation of how it works useful."
+        
+        "Because I can't go out to the cafe with [m_name].":
+            "It depends on [m]'s experience with coding."
+            if mas_curr_affection == mas_affection.HAPPY or mas_curr_affection == mas_affection.AFFECTIONATE:
+                "You must increase your affection with [m], so that she will tell you that she can use the rooms."
+                "So you can have your date with her."
+            elif mas_curr_affection == mas_affection.ENAMORED or mas_curr_affection == mas_affection.LOVE:
+                "In your case, it is already available and [m] already knows how to use the rooms."
+                "Although I imagine you already know that."
+                "But if you have a feeling it's a mistake, please talk to me on 'Discord: ZeroFixer#3405', or on '{a=https://www.reddit.com/user/UnderstandingAny7135}Reddit{/a}'."
+            "Thank you for reading."
+        "Nevermind":
+            jump tools_extra
+    jump return_extra
+    return
 ################################################################################
 ## MENUS
 ################################################################################
+
 label minigames_extra:
     show monika staticpose at t21
     python:
@@ -218,6 +402,7 @@ label tools_extra:
         tools_menu.append((_("[m_name], I want to make a backup"), "backup"))
         tools_menu.append((_("Create a gift for [m_name]"), "gift"))
         tools_menu.append((_("Github Repository"), "github"))
+        tools_menu.append((_("Help"), "help"))
         tools_menu.append((_("Nevermind"),"nevermind"))
 
         playerchoice = renpy.display_menu(tools_menu, screen="talk_choice")
@@ -232,6 +417,8 @@ label tools_extra:
         jump make_gift
     elif playerchoice == "github":
         jump github_submod
+    elif playerchoice == "help":
+        jump helpextra
     elif playerchoice == "nevermind":
         jump return_extra
     return
@@ -308,9 +495,10 @@ label cafe_talkdemonext:
 ################################################################################
 ## ADDS
 ################################################################################
+
 label github_submod:
     show monika staticpose at t11
-    $ renpy.run(OpenURL("https://github.com/zer0fixer/MAS-Extraplus"))
+    $ renpy.run(OpenURL("https://github.com/zer0fixer/MAS_Extraplus"))
     jump return_extra
     return
 
@@ -345,7 +533,7 @@ label check_coinflipbeta:
         show coin_flip_n zorder 12 at rotatecoin:
             xalign 0.5
             yalign 0.5
-    play sound "submods/ExtraPlus/submod_assets/sfx/coin_flip_sfx.wav"
+    play sound "submods/ExtraPlus/submod_assets/sfx/coin_flip_sfx.ogg"
     pause 1.0
     hide coin_flip
     hide coin_flip_n
@@ -442,10 +630,12 @@ label comment_cafe:
 ################################################################################
 ## TOPICS
 ################################################################################
+
 #BOOP
 label monika_boopbeta:
     $ persistent.plus_boop[0] += 1
     if persistent.plus_boop[0] == 1:
+        $ mas_gainAffection(3,bypass=True)
         m 1wud "Wait a minute..."
         m 1hka "I felt a little tingle."
         show screen force_mouse_move
@@ -606,6 +796,7 @@ label boopbeta_war_win:
 label monika_cheeksbeta:
     $ persistent.plus_boop[1] += 1
     if persistent.plus_boop[1] == 1:
+        $ mas_gainAffection(3,bypass=True)
         m 2wubsd "Hey, I felt a slight pinch on my cheek."
         m 2lksdrb "Oh, it was just your cursor! "
         extend 2lksdra "You took me by surprise, you know?"
@@ -676,6 +867,7 @@ label cheeks_dis:
 label monika_headpatbeta:
     $ persistent.plus_boop[2] += 1
     if persistent.plus_boop[2] == 1:
+        $ mas_gainAffection(3,bypass=True)
         m 6subsa "You're patting me on the head!"
         m 6eubsb "It's really comforting."
         m 6dkbsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"

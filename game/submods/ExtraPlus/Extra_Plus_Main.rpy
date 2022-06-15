@@ -1,6 +1,7 @@
 ################################################################################
 ## SUBMOD
 ################################################################################
+
 #Submod created by ZeroFixer(u/UnderstandingAny7135), this submod is made for MAS brothers/sisters.
 #Shoutout to u/my-otter-self at reddit, who proofread the whole mod.
 # Register the submod
@@ -8,8 +9,9 @@ init -990 python:
     store.mas_submod_utils.Submod(
         author="ZeroFixer",
         name="Extra Plus",
-        description="A submod that adds an Extra+ button, as well as adding more content!",
-        version="1.0"
+        description="A submod that adds an Extra+ button, as well as adding more content!\nV 1.0.1 (Bug fixes)",
+        version="1.0.1",
+        version_updates={}
     )
 
 # Register the updater
@@ -19,12 +21,16 @@ init -990 python:
             submod="Extra Plus",
             user_name="zer0fixer",
             repository_name="MAS-Extraplus",
-            update_dir=""
+            update_dir="",
+            redirected_files=(
+                "README.md"
+            )
         )
 
 ################################################################################
 ## VARIABLES
 ################################################################################
+
 #Menus dialogues
 default monika_talk = ""
 define minigames_talk = [
@@ -96,6 +102,7 @@ define not_met = [
 ################################################################################
 ## FUNCTIONS/CLASSES
 ################################################################################
+
 init python:
     def Extraplus_show():
         probability = renpy.random.randint(1,50)
@@ -117,22 +124,11 @@ init python:
     def chibika_relax_drag(drags, drop):
 
         if not drop:
-            drags[0].snap(chibi_xpos, chibi_ypos, 0.1)
+            drags[0].snap(chibi_xpos, chibi_ypos, 0.6)
             return
-
-        store.chibika_relax = drags[0].drag_name
-        store.chibiarea = drop.drag_name
         return True
 
-    def chibi_dragged (drags, drop):
-
-            if not drop:
-                    if drags[0].drag_name == "chibika_relax":
-                        drags[0].xpos = 0.05
-                        drags[0].ypos = 430
-            return
-
-    # Also this code from line 144 to 168 doesn't belong to me, all the credit goes to the developers,
+    # Also this code from line 137 to 161 doesn't belong to me, all the credit goes to the developers,
     # I used it so that monika had several expressions during the Extra+ loop. If the devs don't like me using it,
     # they can tell me and I will remove it to avoid inconvenience.
 
@@ -186,7 +182,7 @@ init python:
 
             if self.index == self.check_index:
                 global comments_good
-                comments_good = renpy.substitute(renpy.random.choice(complies))
+                comments_good = renpy.random.choice(complies)
                 if self.final_label == "check_label":
                     global correct_answers
                     global comment
@@ -197,7 +193,7 @@ init python:
                 global comments_bad
                 global comment
                 comment = False
-                comments_bad = renpy.substitute(renpy.random.choice(not_met))
+                comments_bad = renpy.random.choice(not_met)
                 renpy.jump(self.final_label)
 
     #A class that is used to display a list of available minigames, I had to do so because I didn't know how to adapt the TTT to the submod, sorry :p
@@ -225,6 +221,7 @@ init python:
 ################################################################################
 ## IMAGES
 ################################################################################
+
 init python:
     #Desserts and objects
     # If you are not a Monika After Story developer, please note that the code used in lines 103 to 156 does not belong to me,
@@ -293,18 +290,18 @@ init:
     image line_player = "submods/ExtraPlus/submod_assets/sprites/line_player.png"
     image line_moni = "submods/ExtraPlus/submod_assets/sprites/line_moni.png"
     image ttt_cross:
-        Text("8", font = "submods/ExtraPlus/submod_assets/Pictograms.ttf", size = 200, color = "#002fff", outlines = [])
+        Text("'", font = "submods/ExtraPlus/submod_assets/Pictograms.ttf", size = 180, color = "#2e97ff", outlines = [])
         on show:
             alpha 0.5
             linear 0.25 alpha 1.0
 
     image ttt_cross_cursor:
-        Text("8", font = "submods/ExtraPlus/submod_assets/Pictograms.ttf", size = 200, color = "#ff00f2", outlines = [])
+        Text("'", font = "submods/ExtraPlus/submod_assets/Pictograms.ttf", size = 180, color = "#2e97ff", outlines = [])
         alpha 0.25
         truecenter
 
     image ttt_circle:
-        Text("7", font = "submods/ExtraPlus/submod_assets/Pictograms.ttf", size = 200, color = "#009D71", outlines = [])
+        Text("0", font = "submods/ExtraPlus/submod_assets/Pictograms.ttf", size = 180, color = "#ff4646", outlines = [])
         on show:
             alpha 0.0
             linear 0.25 alpha 1.0
@@ -361,6 +358,7 @@ init:
 ################################################################################
 ## SCREEN
 ################################################################################
+
 #Simply display the button in the loop
 screen extraplus_button():
     zorder 12
@@ -535,7 +533,6 @@ screen chibika_chill():
     zorder 60
     draggroup:
         drag:
-            drag_name "chibika_relax"
             idle_child "sticker_sleep"
             hover_child "sticker_up"
             selected_hover_child "sticker_baka"
@@ -547,7 +544,7 @@ screen minigame_ui():
     style_prefix "talk_choice"
     vbox:
         for i in minigames_menu:
-            textbutton i.name action [Function(i), Hide("minigame_ui")]
+            textbutton i.name action [Function(i), Hide("minigame_ui"), Jump("return_extra")]
 
         textbutton _("Nevermind") action [Hide("minigame_ui"), Jump("return_extra")]
 
@@ -556,7 +553,7 @@ screen cafe_loop():
     if monika_chr.is_wearing_acs(extraplus_acs_emptyplate):
         pass
     else:
-        timer 1800.0 action [Hide("cafe_loop"), Jump("monika_no_dessert")]
+        timer 900.0 action [Hide("cafe_loop"), Jump("monika_no_dessert")]
 
     style_prefix "hkb"
     zorder 50
@@ -616,11 +613,13 @@ screen force_mouse_move():
 ################################################################################
 ## TRANSFORM
 ################################################################################
+
 transform hover_card:
     on idle:
         pause .15
         yoffset 0
         easein .175 yoffset 10
+        easein .175 yoffset 0
 
     on hover:
         pause .15
@@ -647,6 +646,7 @@ transform rotatecoin:
 ################################################################################
 ## BACKGROUNG
 ################################################################################
+
 #Day images
 image submod_background_cafe_day = "submods/ExtraPlus/submod_assets/backgrounds/cafe.png"
 image submod_background_cafe_rain = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
