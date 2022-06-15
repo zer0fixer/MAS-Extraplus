@@ -498,7 +498,7 @@ label cafe_talkdemonext:
 
 label github_submod:
     show monika staticpose at t11
-    $ renpy.run(OpenURL("https://github.com/zer0fixer/MAS_Extraplus"))
+    $ renpy.run(OpenURL("https://github.com/zer0fixer/MAS-Extraplus"))
     jump return_extra
     return
 
