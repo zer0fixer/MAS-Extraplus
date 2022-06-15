@@ -128,7 +128,7 @@ init python:
             return
         return True
 
-    # Also this code from line 137 to 161 doesn't belong to me, all the credit goes to the developers,
+    # Also this code from line 141 to 165 doesn't belong to me, all the credit goes to the developers,
     # I used it so that monika had several expressions during the Extra+ loop. If the devs don't like me using it,
     # they can tell me and I will remove it to avoid inconvenience.
 
