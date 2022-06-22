@@ -182,7 +182,7 @@ init python:
 
             if self.index == self.check_index:
                 global comments_good
-                comments_good = renpy.random.choice(complies)
+                comments_good = renpy.substitute(renpy.random.choice(complies))
                 if self.final_label == "check_label":
                     global correct_answers
                     global comment
@@ -193,7 +193,7 @@ init python:
                 global comments_bad
                 global comment
                 comment = False
-                comments_bad = renpy.random.choice(not_met)
+                comments_bad = renpy.substitute(renpy.random.choice(not_met))
                 renpy.jump(self.final_label)
 
     #A class that is used to display a list of available minigames, I had to do so because I didn't know how to adapt the TTT to the submod, sorry :p

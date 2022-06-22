@@ -365,7 +365,7 @@ label helpextra:
             "So if you had the zoom set to a certain level, don't be surprised that it has been reset due to the boop function."
             "Don't worry though, that's already been fixed."
             "I hope you find the explanation of how it works useful."
-        
+
         "Because I can't go out to the cafe with [m_name].":
             "It depends on [m]'s experience with coding."
             if mas_curr_affection == mas_affection.HAPPY or mas_curr_affection == mas_affection.AFFECTIONATE:
@@ -387,7 +387,7 @@ label helpextra:
 label minigames_extra:
     show monika staticpose at t21
     python:
-        monika_talk = renpy.random.choice(minigames_talk)
+        monika_talk = renpy.substitute(renpy.random.choice(minigames_talk))
         renpy.say(m, monika_talk, interact=False)
     call screen minigame_ui() nopredict
     jump return_extra
@@ -426,7 +426,7 @@ label tools_extra:
 label walk_extra:
     show monika staticpose at t21
     python:
-        monika_talk = renpy.random.choice(date_talk)
+        monika_talk = renpy.substitute(renpy.random.choice(date_talk))
         walk_menu = []
         walk_menu.append((_("Cafe"), "cafe"))
         walk_menu.append((_("Nevermind"), "nevermind"))
