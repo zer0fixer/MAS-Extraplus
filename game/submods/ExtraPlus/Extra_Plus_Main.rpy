@@ -9,8 +9,8 @@ init -990 python:
     store.mas_submod_utils.Submod(
         author="ZeroFixer",
         name="Extra Plus",
-        description="A submod that adds an Extra+ button, as well as adding more content!\nV 1.0.1 (Bug fixes)",
-        version="1.0.1",
+        description="A submod that adds an Extra+ button, as well as adding more content!\nV 1.0.2 (Bug Fix: Player's name was not displayed correctly)",
+        version="1.0.2",
         version_updates={}
     )
 
@@ -110,7 +110,7 @@ init python:
             renpy.show_screen("chibika_chill")
         if mas_isDayNow():
             ver_night = ""
-        elif not mas_isDayNow():
+        elif mas_isNightNow():
             ver_night = "-n"
         renpy.call_screen("submod_interactions")
 
@@ -128,7 +128,7 @@ init python:
             return
         return True
 
-    # Also this code from line 141 to 165 doesn't belong to me, all the credit goes to the developers,
+    # Also this code from line 137 to 161 doesn't belong to me, all the credit goes to the developers,
     # I used it so that monika had several expressions during the Extra+ loop. If the devs don't like me using it,
     # they can tell me and I will remove it to avoid inconvenience.
 
@@ -182,7 +182,7 @@ init python:
 
             if self.index == self.check_index:
                 global comments_good
-                comments_good = renpy.random.choice(complies)
+                comments_good = renpy.substitute(renpy.random.choice(complies))
                 if self.final_label == "check_label":
                     global correct_answers
                     global comment
@@ -193,7 +193,7 @@ init python:
                 global comments_bad
                 global comment
                 comment = False
-                comments_bad = renpy.random.choice(not_met)
+                comments_bad = renpy.substitute(renpy.random.choice(not_met))
                 renpy.jump(self.final_label)
 
     #A class that is used to display a list of available minigames, I had to do so because I didn't know how to adapt the TTT to the submod, sorry :p
@@ -338,8 +338,22 @@ init:
     image sticker_baka = "submods/ExtraPlus/submod_assets/sprites/sticker_baka[ver_night].png"
     image sticker_sleep = "submods/ExtraPlus/submod_assets/sprites/sticker_sleep[ver_night].png"
     image sticker_up = "submods/ExtraPlus/submod_assets/sprites/sticker_up[ver_night].png"
-    image pop_effect = anim.Filmstrip("submods/ExtraPlus/submod_assets/sprites/pop_effect.png", (170, 170), (3, 3), .125, loop=False)
-    image pop_effect_n = anim.Filmstrip("submods/ExtraPlus/submod_assets/sprites/pop_effect-n.png", (170, 170), (3, 3), .125, loop=False)
+    image sticker_eyes:
+        "sticker_up"
+        choice:
+            9.5
+        choice:
+            7.5
+        choice:
+            "sticker_sleep"
+            5.5
+        choice:
+            3.5
+        choice:
+            1.5
+        "sticker_sleep"
+        .25
+        repeat
 
     #Flip
     image coin_heads = "submods/ExtraPlus/submod_assets/sprites/coin_heads[ver_night].png"
@@ -533,8 +547,7 @@ screen chibika_chill():
     zorder 60
     draggroup:
         drag:
-            idle_child "sticker_sleep"
-            hover_child "sticker_up"
+            child "sticker_eyes"
             selected_hover_child "sticker_baka"
             dragged chibika_relax_drag
             xpos chibi_xpos ypos chibi_ypos

@@ -84,7 +84,7 @@ label make_file:
     python:
         import os
         makegift = mas_input(_("Write the name and extension (.gift, .txt, .chr, etc..."),
-                            allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_",
+                            allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_.0123456789",
                             screen_kwargs={"use_return_button": True, "return_button_value": "nevermind"})
         filepath = os.path.join(renpy.config.basedir + '/characters',makegift)
         f = open(filepath,"a")
@@ -387,7 +387,7 @@ label helpextra:
 label minigames_extra:
     show monika staticpose at t21
     python:
-        monika_talk = renpy.random.choice(minigames_talk)
+        monika_talk = renpy.substitute(renpy.random.choice(minigames_talk))
         renpy.say(m, monika_talk, interact=False)
     call screen minigame_ui() nopredict
     jump return_extra
@@ -426,7 +426,7 @@ label tools_extra:
 label walk_extra:
     show monika staticpose at t21
     python:
-        monika_talk = renpy.random.choice(date_talk)
+        monika_talk = renpy.substitute(renpy.random.choice(date_talk))
         walk_menu = []
         walk_menu.append((_("Cafe"), "cafe"))
         walk_menu.append((_("Nevermind"), "nevermind"))
@@ -529,7 +529,7 @@ label check_coinflipbeta:
         show coin_flip zorder 12 at rotatecoin:
             xalign 0.5
             yalign 0.5
-    elif not mas_isDayNow():
+    elif mas_isNightNow():
         show coin_flip_n zorder 12 at rotatecoin:
             xalign 0.5
             yalign 0.5
@@ -567,11 +567,11 @@ label view_coinflipbeta:
         show coin_flip zorder 12 at rotatecoin:
             xalign 0.5
             yalign 0.5
-    elif not mas_isDayNow():
+    elif mas_isNightNow():
         show coin_flip_n zorder 12 at rotatecoin:
             xalign 0.5
             yalign 0.5
-    play sound "submods/ExtraPlus/submod_assets/sfx/coin_flip_sfx.wav"
+    play sound "submods/ExtraPlus/submod_assets/sfx/coin_flip_sfx.ogg"
     pause 1.0
     hide coin_flip
     hide coin_flip_n

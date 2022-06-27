@@ -30,7 +30,7 @@ label gtcafe:
         m 1hubsb "Okay, let's go [mas_get_player_nickname()]~"
         jump cafe_init
 
-    elif not mas_isDayNow():
+    elif mas_isNightNow():
         m 3sub "Oh, you want to go out to the cafe?"
         m 3hub "It's pretty sweet that you decided to go tonight."
         m 1eubsa "This date night is going to be great!"
@@ -49,7 +49,7 @@ label gtcafev2:
         m 2eubsa "So glad to hear it [player]!"
         m 1hubsb "Well, let's go [mas_get_player_nickname()]~"
         jump cafe_init
-    elif not mas_isDayNow():
+    elif mas_isNightNow():
         m 3wub "Oh, do you want to go out to the cafe again?"
         m 2hub "The previous time we went, it was very romantic~"
         m 2eubsa "So glad to go again [player]!"
@@ -86,7 +86,7 @@ label cafe_cakes:
     pause 2.0
     if mas_isDayNow():
         $ monika_chr.wear_acs(extraplus_acs_chocolatecake)
-    elif not mas_isDayNow():
+    elif mas_isNightNow():
         $ monika_chr.wear_acs(extraplus_acs_fruitcake)
     call mas_transition_from_emptydesk("monika 1eua")
     if monika_chr.is_wearing_acs(mas_acs_mug):
