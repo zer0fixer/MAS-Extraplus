@@ -1,4 +1,4 @@
-# MAS-Extra+ (1.0.2)
+# Extra Plus (1.0.2)
 A submod that adds small additions to Monika After Story (MAS), something that should be clarified is that I have not yet been reviewed by the developers so it is possible that bugs may occur. But it will take me enough time to make everything functional, there is no release date yet.
 
 <p align="center">
