@@ -41,3 +41,8 @@ If this submod is edited by another person and sends that modification to the co
 <img alt="youtube" src="https://cdn.icon-icons.com/icons2/1211/PNG/512/1491579609-yumminkysocialmedia08_83079.png" width="100">
 <h4> ZeroFixer#3405 </h4>
 <img alt="discord" src="https://icons-for-free.com/download-icon-super+tiny+icons+discord-1324450718427274623_512.png" width="100">
+
+
+## Donation
+<a href="https://www.paypal.com/paypalme/IsaacRiosMejia">
+<img alt="paypal" src="https://enupal.com/assets/docs/paypal-icon.svg" width="100">
