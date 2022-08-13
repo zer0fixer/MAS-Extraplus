@@ -2,6 +2,7 @@
 A submod that adds small additions to Monika After Story (MAS), something that should be clarified is that I have not yet been reviewed by the developers so it is possible that bugs may occur. But it will take me enough time to make everything functional, there is no release date yet.
 
 [简体中文](README_zhCN.md)
+🌍 Sir.P、ddy、ct1045、Founxious
 
 <p align="center">
   <img src="https://github.com/zer0fixer/resource-repository/blob/main/Images/Moni_chill.png"></p>

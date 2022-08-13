@@ -5,6 +5,7 @@
 <p align="center">
   <img src="https://github.com/zer0fixer/resource-repository/blob/main/Images/Moni_chill.png"></p>
   
+🌍 Sir.P、ddy、ct1045、Founxious
 ## 特色:
 > 迷你小游戏
 
@@ -48,4 +49,4 @@
 <a href="https://www.paypal.com/paypalme/IsaacRiosMejia">
 <img alt="paypal" src="https://enupal.com/assets/docs/paypal-icon.svg" width="100">
 
-🌍 Sir.P、ddy、ct1045、Founxious
+
