@@ -1,26 +1,41 @@
-################################################################################
-## CAFE
-################################################################################
-label go_to_cafe:
-    if renpy.get_screen("chibika_chill"):
-        $ show_chibika = True
-    else:
-        $ show_chibika = False
-    python:
-        extra_chair = store.monika_chr.tablechair.chair
-        extra_table = store.monika_chr.tablechair.table
-        extra_old_bg = mas_current_background
+#===========================================================================================
+# CAFE
+#===========================================================================================
+define cafe_sprite = ["cafe.png","cafe_rain.png","cafe_rain-n.png","cafe_rain-ss.png","cafe-n.png","cafe-ss.png"]
 
-    if mas_curr_affection == mas_affection.HAPPY or mas_curr_affection == mas_affection.AFFECTIONATE:
+#====CAFE BG
+label cafe_talkdemo:
+    show monika staticpose at t21
+    python:
+        store.disable_zoom_button = True
+        cafe_menu = [
+            ("How are you today?", 'extra_talk_feel'),
+            ("What's your greatest ambition?", 'extra_talk_ambition'),
+            ("Our communication is very limited, don't you think?", 'extra_talk_you'),
+            ("How do you see us in 10 years?", 'extra_talk_teen'),
+            ("What is your best memory that you currently have?", 'extra_talk_memory'),
+            ("Do you have any phobia?", 'extra_talk_phobia'),
+            ("Can we leave?", 'cafe_leave')
+        ] 
+    call screen list_scrolling(cafe_menu, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, mas_ui.SCROLLABLE_MENU_XALIGN,"to_cafe_loop",close=False) nopredict
+    return
+    
+label go_to_cafe:
+    $ validate_files(cafe_sprite, type=False)
+    $ mas_extra_location(locate=True)
+    if mas_curr_affection <= 7:
         jump sorry_player
+
     if renpy.seen_label("check_label_cafe"):
         $ mas_gainAffection(1,bypass=True)
         jump gtcafev2
     else:
         $ mas_gainAffection(5,bypass=True)
         pass
+
 label check_label_cafe:
     pass
+
 label gtcafe:
     show monika 1eua at t11
     if mas_isDayNow():
@@ -38,7 +53,7 @@ label gtcafe:
         jump cafe_init
     else:
         m 1eub "Another time then, [mas_get_player_nickname()]."
-        jump return_extra
+        jump screen_extraplus
     return
 
 label gtcafev2:
@@ -57,15 +72,15 @@ label gtcafev2:
         jump cafe_init
     else:
         m 1eub "Next time then, [mas_get_player_nickname()]."
-        jump return_extra
+        jump screen_extraplus
     return
 
-################################################################################
-## MICS
-################################################################################
+#===========================================================================================
+# MICS
+#===========================================================================================
+
 label cafe_init:
     $ HKBHideButtons()
-    hide screen chibika_chill
     hide monika
     scene black
     with dissolve
@@ -75,8 +90,6 @@ label cafe_init:
     $ HKBShowButtons()
 
 label cafe_cakes:
-    if show_chibika is True:
-        show screen chibika_chill
     $ dessert_player = None
     m 1hua "We have arrived [mas_get_player_nickname()]~"
     m 1eub "It's a nice place, don't you think!"
@@ -116,7 +129,8 @@ label cafe_cakes:
 
 label to_cafe_loop:
     show monika staticpose at t11
-    call screen cafe_loop
+    $ store.disable_zoom_button = False
+    call screen dating_loop(extraplus_acs_emptyplate,"cafe_talkdemo","monika_no_dessert","monika_boopcafebeta")
     return
 
 label cafe_leave:
@@ -124,15 +138,17 @@ label cafe_leave:
     m 1eta "Oh, you want us to go back?"
     m 1eub "Sounds good to me!"
     m 3hua "But before we go..."
+
 label cafe_hide_acs:
     #Code inspired by YandereDev
     if monika_chr.is_wearing_acs(extraplus_acs_fruitcake):
         if monika_chr.is_wearing_acs(extraplus_acs_coffeecup) or monika_chr.is_wearing_acs(extraplus_acs_emptycup):
             m 3eub "I have to put this fruitcake away."
             m 3eub "Also, I'll put this cup away, I won't be long."
-            $ monika_chr.remove_acs(extraplus_acs_fruitcake)
-            $ monika_chr.remove_acs(extraplus_acs_coffeecup)
-            $ monika_chr.remove_acs(extraplus_acs_emptycup)
+            python:
+                monika_chr.remove_acs(extraplus_acs_fruitcake)
+                monika_chr.remove_acs(extraplus_acs_coffeecup)
+                monika_chr.remove_acs(extraplus_acs_emptycup)
         else:
             m 3eub "I have to put this fruitcake away, I'll be right back."
             $ monika_chr.remove_acs(extraplus_acs_fruitcake)
@@ -141,9 +157,10 @@ label cafe_hide_acs:
         if monika_chr.is_wearing_acs(extraplus_acs_coffeecup) or monika_chr.is_wearing_acs(extraplus_acs_emptycup):
             m 3eua "I must put this chocolate cake away."
             m 3eua "Also, I'll put this cup away, it won't be long now."
-            $ monika_chr.remove_acs(extraplus_acs_chocolatecake)
-            $ monika_chr.remove_acs(extraplus_acs_coffeecup)
-            $ monika_chr.remove_acs(extraplus_acs_emptycup)
+            python:
+                monika_chr.remove_acs(extraplus_acs_chocolatecake)
+                monika_chr.remove_acs(extraplus_acs_coffeecup)
+                monika_chr.remove_acs(extraplus_acs_emptycup)
         else:
             m 3eua "I must put this chocolate cake away, I'll be right back."
             $ monika_chr.remove_acs(extraplus_acs_chocolatecake)
@@ -152,9 +169,10 @@ label cafe_hide_acs:
         if monika_chr.is_wearing_acs(extraplus_acs_coffeecup) or monika_chr.is_wearing_acs(extraplus_acs_emptycup):
             m 3hua "I'll go put this plate away."
             m 3hua "Also, I'll put this cup away, I won't be long."
-            $ monika_chr.remove_acs(extraplus_acs_emptyplate)
-            $ monika_chr.remove_acs(extraplus_acs_coffeecup)
-            $ monika_chr.remove_acs(extraplus_acs_emptycup)
+            python:
+                monika_chr.remove_acs(extraplus_acs_emptyplate)
+                monika_chr.remove_acs(extraplus_acs_coffeecup)
+                monika_chr.remove_acs(extraplus_acs_emptycup)
         else:
             m 3hua "I'm going to put this plate away, give me a moment."
             $ monika_chr.remove_acs(extraplus_acs_emptyplate)
@@ -163,26 +181,29 @@ label cafe_hide_acs:
     pause 2.0
     call mas_transition_from_emptydesk("monika 1eua")
     m 1hua "Okay, let's go, [player]!"
-    jump restore_bg
+    call extra_restore_bg("comment_cafe")
     return
 
 label monika_no_dessert:
     show monika staticpose at t11
     if monika_chr.is_wearing_acs(extraplus_acs_fruitcake):
-        $ monika_chr.remove_acs(extraplus_acs_fruitcake)
-        $ monika_chr.wear_acs(extraplus_acs_emptyplate)
+        python:
+            monika_chr.remove_acs(extraplus_acs_fruitcake)
+            monika_chr.wear_acs(extraplus_acs_emptyplate)
         m 1hua "Wow, I finished my fruitcake."
         m 1eub "I really enjoyed it~"
     elif monika_chr.is_wearing_acs(extraplus_acs_chocolatecake):
-        $ monika_chr.remove_acs(extraplus_acs_chocolatecake)
-        $ monika_chr.wear_acs(extraplus_acs_emptyplate)
+        python:
+            monika_chr.remove_acs(extraplus_acs_chocolatecake)
+            monika_chr.wear_acs(extraplus_acs_emptyplate)
         m 1hua "Wow, I finished my chocolate cake."
         m 1sua "It tasted so sweet~"
     if monika_chr.is_wearing_acs(extraplus_acs_coffeecup):
-        $ monika_chr.remove_acs(extraplus_acs_coffeecup)
-        $ monika_chr.wear_acs(extraplus_acs_emptycup)
+        python:
+            monika_chr.remove_acs(extraplus_acs_coffeecup)
+            monika_chr.wear_acs(extraplus_acs_emptycup)
         m 3dub "Also, this coffee was also good."
-    if dessert_player is True:
+    if dessert_player == True:
         m 1etb "By the way, have you finished your dessert yet?{nw}"
         $ _history_list.pop()
         menu:
@@ -218,12 +239,13 @@ label sorry_player:
     m 3hua "I know very well that you wanted to go out to the cafe."
     m 1eua "But, someday I will know how to use it, [player]."
     m 1eub "Just be patient, okay~"
-    jump return_extra
+    jump close_extraplus
     return
 
-################################################################################
-## DIALOGUES
-################################################################################
+#===========================================================================================
+# DIALOGUES
+#===========================================================================================
+
 label extra_talk_feel:
     show monika staticpose at t11
     $ rng_global = renpy.random.randint(1,3)
@@ -404,3 +426,139 @@ label extra_talk_memory:
     m 3eka "Until then we'll have to keep it that way, I'm very sorry if you want to talk about your memories..."
     jump to_cafe_loop
     return
+
+label comment_cafe:
+    m 1hubsa "Thank you for asking me out."
+    m 1eubsb "It is nice to have these moments as a couple!"
+    m 1eubsa "I feel very fortunate to have met you and that you keep choosing me every day."
+    m 1ekbsa "I love you, [mas_get_player_nickname()]!"
+    $ mas_DropShield_dlg()
+    $ mas_ILY()
+    jump ch30_visual_skip
+    return
+
+#===========================================================================================
+# BACKGROUNG
+#===========================================================================================
+
+#Day images
+image submod_background_cafe_day = "submods/ExtraPlus/submod_assets/backgrounds/cafe.png"
+image submod_background_cafe_rain = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
+image submod_background_cafe_overcast = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
+image submod_background_cafe_snow = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
+
+#Night images
+image submod_background_cafe_night = "submods/ExtraPlus/submod_assets/backgrounds/cafe-n.png"
+image submod_background_cafe_rain_night = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
+image submod_background_cafe_overcast_night = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
+image submod_background_cafe_snow_night = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
+
+#Sunset images
+image submod_background_cafe_ss = "submods/ExtraPlus/submod_assets/backgrounds/cafe-ss.png"
+image submod_background_cafe_rain_ss = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
+image submod_background_cafe_overcast_ss = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
+image submod_background_cafe_snow_ss = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
+
+init -1 python:
+    submod_background_cafe = MASFilterableBackground(
+        "submod_background_cafe",
+        "Cafe (Extra+)",
+
+        MASFilterWeatherMap(
+            day=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_cafe_day",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_cafe_rain",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_cafe_overcast",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_cafe_snow",
+            }),
+            night=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_cafe_night",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_cafe_rain_night",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_cafe_overcast_night",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_cafe_snow_night",
+            }),
+            sunset=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_cafe_ss",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_cafe_rain_ss",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_cafe_overcast_ss",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_cafe_snow_ss",
+            }),
+        ),
+
+        MASBackgroundFilterManager(
+            MASBackgroundFilterChunk(
+                False,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_NIGHT,
+                    60
+                )
+            ),
+            MASBackgroundFilterChunk(
+                True,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_SUNSET,
+                    60,
+                    30*60,
+                    10,
+                ),
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_DAY,
+                    60
+                ),
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_SUNSET,
+                    60,
+                    30*60,
+                    10,
+                ),
+            ),
+            MASBackgroundFilterChunk(
+                False,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_NIGHT,
+                    60
+                )
+            )
+        ),
+
+        #FOR BACKGROUND PROPERTIES (DON'T TOUCH "ENTRY_PP:/EXIT_PP:)
+        disable_progressive=False,
+        hide_masks=False,
+        hide_calendar=True,
+        unlocked=False,
+        entry_pp=store.mas_background._cafe_entry,
+        exit_pp=store.mas_background._cafe_exit,
+        ex_props={"skip_outro": None}
+    )
+
+init -2 python in mas_background:
+    def _cafe_entry(_old, **kwargs):
+        """
+        Entry programming point for cafe background
+
+        NOTE: ANYTHING IN THE `_old is None` CHECK WILL BE RUN **ON LOAD ONLY**
+        IF IT IS IN THE CORRESPONDING 'else' BLOCK, IT WILL RUN WHEN THE BACKGROUND IS CHANGED DURING THE SESSION
+
+        IF YOU WANT IT TO RUN IN BOTH CASES, SIMPLY PUT IT AFTER THE ELSE BLOCK
+        """
+        if kwargs.get("startup"):
+            pass
+
+        else:
+            store.mas_o31HideVisuals()
+            store.mas_d25HideVisuals()
+
+    def _cafe_exit(_new, **kwargs):
+        """
+        Exit programming point for cafe background
+        """
+        #O31
+        if store.persistent._mas_o31_in_o31_mode:
+            store.mas_o31ShowVisuals()
+
+        #D25
+        elif store.persistent._mas_d25_deco_active:
+            store.mas_d25ShowVisuals()

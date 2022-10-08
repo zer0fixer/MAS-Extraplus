@@ -1,8 +1,10 @@
-################################################################################
-## MINIGAME#1
-################################################################################
-#Shell Game
+#===========================================================================================
+# MINIGAME#1
+#===========================================================================================
+
+#====Shell Game
 label minigame_sg:
+    $ validate_files(cup_list, type=True)
     show monika 1eub at t11
     m 1hua "Okay, what difficulty do you want?{nw}"
     menu:
@@ -10,22 +12,24 @@ label minigame_sg:
         "Easy":
             m 1eua "You want to play something simple, [player]? "
             extend 1hua "Okay!"
-            $ cup_speed += 0.5
-            $ difficulty_sg = 1
+            python:
+                cup_speed += 0.5
+                difficulty_sg = 1
         "Normal":
             m 3eub "You want to start casual? "
             extend 3hub "Okay!"
-            $ cup_speed = 0.5
-            $ difficulty_sg = 2
+            python:
+                cup_speed = 0.5
+                difficulty_sg = 2
         "Hard":
             m 1eub "You want to play hard, huh?"
             m 1hub "Ahahaha, okay!"
-            $ cup_speed -= 0.3
-            $ difficulty_sg = 3
+            python:
+                cup_speed -= 0.3
+                difficulty_sg = 3
 
 label restart_sg:
-    if not persistent._mas_pm_cares_about_dokis:
-        $ cup_skin = renpy.random.choice(["cup", "cup_monika"])
+    $ config.allow_skipping = False
     show monika 1eua at t21
 
     pause 0.2
@@ -70,21 +74,25 @@ label restart_sg:
     show cup as cup_3:
         xpos cup_coordinates[2] ypos 250
 
-    $ cup_coordinates_real[0] = 695
-    $ cup_coordinates_real[1] = 925
-    $ cup_coordinates_real[2] = 1155
+    python:
+        cup_coordinates_real[0] = 695
+        cup_coordinates_real[1] = 925
+        cup_coordinates_real[2] = 1155
 
-    $ original_cup[0] = 0
-    $ original_cup[1] = 1
-    $ original_cup[2] = 2
+        original_cup[0] = 0
+        original_cup[1] = 1
+        original_cup[2] = 2
 
-    $ ball_position = 1
-    $ disable_esc()
-    $ mas_MUMURaiseShield()
+        ball_position = 1
+        disable_esc()
+        mas_MUMURaiseShield()
+        afm_pref = renpy.game.preferences.afm_enable
+        renpy.game.preferences.afm_enable = False
+    show screen score_minigame(game="sg")
 
 label loop_game:
     show monika 1eua
-    show screen no_click
+    show screen extra_no_click
     python:
         move_cup_1 = renpy.random.randint(0,2)
         move_cup_2 = renpy.random.randint(0,2)
@@ -119,14 +127,12 @@ label loop_game:
     show cup as cup_3:
         ease cup_speed xpos cup_coordinates_real[2]
 
-    #Desplasamiento de los vasos.
     if shuffle_cups != 3:
         $ shuffle_cups += 1
         jump loop_game
 
     pause 1.0
 
-    show screen no_click
     show screen shell_game_minigame
 
     "Select a cup:"
@@ -135,7 +141,6 @@ label check_label:
 
     $ current_turn += 1
 
-    hide screen no_click
     hide screen shell_game_minigame
 
     show cup as cup_1:
@@ -146,10 +151,10 @@ label check_label:
 
     show cup as cup_3:
         xpos cup_coordinates[2] ypos 250
-
-    $ cup_coordinates_real[0] = 695
-    $ cup_coordinates_real[1] = 925
-    $ cup_coordinates_real[2] = 1155
+    python:
+        cup_coordinates_real[0] = 695
+        cup_coordinates_real[1] = 925
+        cup_coordinates_real[2] = 1155
 
     #Se muestra los vasos y debe de elegir un vaso
     if your_choice == 0:
@@ -189,7 +194,6 @@ label check_label:
 
         m 1lub "The correct cup was..."
 
-        #Se comprobara en donde esta la bola
         if ball_position == 0:
 
             show cup as cup_1:
@@ -232,12 +236,16 @@ label check_label:
     jump loop_game
     return
 
-################################################################################
-## TALKING GAME
-################################################################################
+#===========================================================================================
+# TALKING GAME
+#===========================================================================================
+
 label shell_game_result:
-    $ enable_esc()
-    $ mas_MUINDropShield()
+    hide screen score_minigame
+    python:
+        enable_esc()
+        mas_MUINDropShield()
+        renpy.game.preferences.afm_enable = afm_pref
     hide ball
     show cup as cup_1:
         xpos cup_coordinates[0] ypos 250
@@ -254,7 +262,7 @@ label shell_game_result:
     hide cup_1
     hide cup_2
     hide cup_3
-    hide screen no_click
+    hide screen extra_no_click
     show monika at t11
 
     if current_turn == 0:
@@ -392,10 +400,11 @@ label shell_game_result:
         m 1dua "And don't worry about me, I'll be waiting for you."
 
     window hide
-    $ cup_speed = 0.5
-    $ current_turn = 0
-    $ correct_answers = 0
-    jump return_extra
+    python:
+        cup_speed = 0.5
+        current_turn = 0
+        correct_answers = 0
+    jump close_extraplus
     return
 
 label cheat_sg:
@@ -404,6 +413,7 @@ label cheat_sg:
         jump check_cheat_minigame
     else:
         jump check_cheat_sg
+
 label check_cheat_sg:
     m 1hub "I'm surprised you modified this minigame, ahahaha~"
     m 3esb "After all it is progressive, there is no winner."
@@ -413,5 +423,5 @@ label check_cheat_sg:
     m 1eud "Or if you want, we can play another time."
     m 1hua "Whatever we do will always be unique with you by my side."
     m 1hua "Ehehe~"
-    jump return_extra
+    jump close_extraplus
     return

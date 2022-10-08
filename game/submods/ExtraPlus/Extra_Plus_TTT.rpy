@@ -1,7 +1,9 @@
-################################################################################
-## MINIGAME#2
-################################################################################
-#Tic-Tac-Toe
+#===========================================================================================
+# MINIGAME#2
+#===========================================================================================
+define ttt_sprite = ["line.png","line_moni.png","line_player.png","notebook.png"]
+
+#====Tic-Tac-Toe
 init 10 python:
     def ttt_prep(self, restart = False, *args, **kwargs):
         self.field = [None] * 9
@@ -112,14 +114,9 @@ init 10 python:
             w = kwargs['winner']
             self.score[w] += 1
 
-    ttt = minigame(_("Tic Tac Toe"), 'minigame_ttt', ttt_prep)
-    sg = minigame(_("Shell Game"), 'minigame_sg', None)
-    psr = minigame(_("Rock Paper Scissors"), 'minigame_psr', None)
-
+    ttt = minigames("Tic Tac Toe", 'minigame_ttt', ttt_prep)
     minigames_menu.append(ttt)
-    minigames_menu.append(sg)
-    minigames_menu.append(psr)
-
+    
 screen minigame_ttt_grid():
     for i in range(2):
         add "line_black" pos (700, 260 + 192*i) zoom 0.8
@@ -180,74 +177,29 @@ screen minigame_ttt_scr():
             if ttt.playerTurn:
                 color "#2e97ff"
     vbox:
-        style_prefix "hkb"
         xpos 0.05
-        yanchor 1.0
+        yanchor 2.0
         ypos 300
 
-        textbutton _("I give up") action [Function(ttt.set_state, -9), Function(ttt.check_state)]
-        textbutton _("Quit") action [Hide("minigame_ttt_scr"), Jump("minigame_ttt_quit")]
+        textbutton _("I give up") style "hkb_button" action [Function(ttt.set_state, -9), Function(ttt.check_state)]
+        null height 6
+        textbutton _("Quit") style "hkb_button" action [Hide("minigame_ttt_scr"), Jump("minigame_ttt_quit")]
 
-
+#====Label
 label minigame_ttt:
+    $ validate_files(ttt_sprite, type=True)
+    if not os.path.isfile(renpy.config.basedir + '/game/submods/ExtraPlus/submod_assets/Pictograms.ttf'):
+        show monika idle at t11
+        call screen dialog("A font is needed here, you know?",ok_action=Jump("close_extraplus"))
+
     show monika 1hua at t21
     if ttt.score[0] > 0 or ttt.score[1] > 0:
         jump cheat_ttt
-    if renpy.loadable("submods/ExtraPlus/submod_assets/sprites/notebook.png"):
-        show notebook zorder 12 at animated_book
-    else:
-        show paper zorder 12 at animated_book:
-            xzoom 0.76
-            xpos 0.53
+    show notebook zorder 12 at animated_book
     pause 0.5
     call screen minigame_ttt_scr() nopredict
     return
-
-label minigame_ttt_m_comment(id = 0):
-    show monika 1hua at t21
-    if id == 0:
-        #Monika Wins
-        $random_id = renpy.random.randint(0, 2)
-        if random_id == 0:
-            m 3hua "Well, I won this game."
-            m 3hub "You should think on a better strategy next time!"
-        elif random_id == 1:
-            m 1sub "Three in a row!"
-            m 1huu "Try again~"
-        else:
-            m 4nub "Don't worry!"
-            m 4hua "I know that you'll win next time."
-        #Player Wins
-    elif id == 1:
-        $random_id = renpy.random.randint(0, 1)
-        if random_id == 0:
-            m 1suo "Great [player], you win!"
-            m 1suo "Next time I will try my best to win, so be prepared."
-        else:
-            m 1hub "Oh, you've won this one."
-            m 1eub "But I'll try to beat you, [mas_get_player_nickname()]!"
-        #Tie
-    elif id == 2:
-        $random_id = renpy.random.randint(0, 1)
-        if random_id == 0:
-            m 1lkb "Oh, the page is full."
-            m 1eub "Let's try again, [mas_get_player_nickname()]!"
-        else:
-            m 3hua "Don't worry, [player]."
-            m 3hua "The plan is for us to have fun as a couple~"
-            m 3hub "I wish you luck, [mas_get_player_nickname()]!"
-        #Reset
-    else:
-        $random_id = renpy.random.randint(0, 1)
-        if random_id == 0:
-            m 1ekd "Are you giving up on this round?"
-            m 1eka "Well, I'm going to restart the game, but I'll take a point!"
-        else:
-            m 1ekd "What's wrong, [player]?"
-            m 3ekd "Were you distracted?"
-            m 1eka "Okay, I'm going to restart the game, but I will be the winner of this round!"
-    return
-
+    
 label minigame_ttt_m_turn:
     show monika 1lua at t21
     python:
@@ -258,9 +210,55 @@ label minigame_ttt_m_turn:
     pause 0.25
     return
 
-################################################################################
-## TALKING GAME
-################################################################################
+#===========================================================================================
+# TALKING GAME
+#===========================================================================================
+
+label minigame_ttt_m_comment(id = 0):
+    show monika 1hua at t21
+    if id == 0:
+        #Monika Wins
+        $ rng_global = renpy.random.randint(0, 2)
+        if rng_global == 0:
+            m 3hua "Well, I won this game."
+            m 3hub "You should think on a better strategy next time!"
+        elif rng_global == 1:
+            m 1sub "Three in a row!"
+            m 1huu "Try again~"
+        else:
+            m 4nub "Don't worry!"
+            m 4hua "I know that you'll win next time."
+        #Player Wins
+    elif id == 1:
+        $ rng_global = renpy.random.randint(0, 1)
+        if rng_global == 0:
+            m 1suo "Great [player], you win!"
+            m 1suo "Next time I will try my best to win, so be prepared."
+        else:
+            m 1hub "Oh, you've won this one."
+            m 1eub "But I'll try to beat you, [mas_get_player_nickname()]!"
+        #Tie
+    elif id == 2:
+        $ rng_global = renpy.random.randint(0, 1)
+        if rng_global == 0:
+            m 1lkb "Oh, the page is full."
+            m 1eub "Let's try again, [mas_get_player_nickname()]!"
+        else:
+            m 3hua "Don't worry, [player]."
+            m 3hua "The plan is for us to have fun as a couple~"
+            m 3hub "I wish you luck, [mas_get_player_nickname()]!"
+        #Reset
+    else:
+        $ rng_global = renpy.random.randint(0, 1)
+        if rng_global == 0:
+            m 1ekd "Are you giving up on this round?"
+            m 1eka "Well, I'm going to restart the game, but I'll take a point!"
+        else:
+            m 1ekd "What's wrong, [player]?"
+            m 3ekd "Were you distracted?"
+            m 1eka "Okay, I'm going to restart the game, but I will be the winner of this round!"
+    return
+
 label minigame_ttt_quit:
     hide paper
     hide notebook
@@ -285,7 +283,7 @@ label minigame_ttt_quit:
         m 1hub "You have won [player], congratulations."
         m 1hub "I am proud of you~"
         m 3hua "I'll do my best next time too!"
-    jump return_extra
+    jump close_extraplus
     return
 
 label cheat_ttt:
@@ -312,5 +310,5 @@ label check_cheat_ttt:
     m 2ltd "Although I have a feeling you did it more out of curiosity."
     m 2hua "I know very well that you don't like cheating!"
     m 2hua "I trust you."
-    jump return_extra
+    jump close_extraplus
     return

@@ -1,8 +1,13 @@
-################################################################################
-## MINIGAME#3
-################################################################################
-#Rock Paper Scissors
+#===========================================================================================
+# MINIGAME#3
+#===========================================================================================
+define psr_sprites = ["card_back.png","paper.png","rock.png","scissors.png"]
+
+#====Rock Paper Scissors
 label minigame_psr:
+    python:
+        validate_files(psr_sprites, type=True)
+        mas_MUMURaiseShield()
     if moni_wins > 0 or player_wins > 0:
         jump cheat_psr
     show monika 1hua at t21
@@ -33,6 +38,7 @@ label minigame_psr:
     hide e_rock
     hide e_paper
     hide e_scissors
+    show screen score_minigame(game="psr")
     call screen PSR_mg
     return
 
@@ -102,9 +108,9 @@ label psr_loop:
             show e_paper zorder 12 as e_paper_1 with dissolve:
                 xalign 0.7
                 yalign 0.1
-            m 1hua "We both chose paper!"
+            m 1eub "We both chose paper!"
             m 1tua "We're in a tie and you should stop reading my mind [mas_get_player_nickname()]~"
-            m 1tua "Ahahahaha~"
+            m 1hub "Ahahahaha~"
 
         elif rng_global == 3:
             show e_scissors zorder 12 as e_scissors_1 with dissolve:
@@ -155,6 +161,8 @@ label psr_loop:
     return
 
 label psr_quit:
+    $ mas_MUINDropShield()
+    hide screen score_minigame
     show card_back zorder 12 as v1:
         xalign 0.7
         yalign 0.1
@@ -202,9 +210,10 @@ label psr_quit:
     jump psr_result
     return
 
-################################################################################
-## TALKING GAME
-################################################################################
+#===========================================================================================
+# TALKING GAME
+#===========================================================================================
+
 label psr_result:
     show monika 1hua at t11
     #Tie
@@ -234,9 +243,10 @@ label psr_result:
         m 2hub "I'm likely to win!"
         m 2hua "So be careful when we play again."
         m 2hua "Ehehe~"
-    $ moni_wins = 0
-    $ player_wins = 0
-    jump return_extra
+    python:
+        moni_wins = 0
+        player_wins = 0
+    jump close_extraplus
     return
 
 label cheat_psr:
@@ -245,6 +255,7 @@ label cheat_psr:
         jump check_cheat_minigame
     else:
         jump check_cheat_psr
+        
 label check_cheat_psr:
     m 1hkb "Uhhh, to be honest, I don't know how to respond to what you have done."
     if moni_wins == player_wins:
@@ -263,5 +274,5 @@ label check_cheat_psr:
     m 1lud "Eventually you will feel empty..."
     m 1lkb "And I don't want that to happen to you, "
     extend 1hubsb "so just have fun fair and square!"
-    jump return_extra
+    jump close_extraplus
     return
