@@ -137,7 +137,6 @@ init 10 python:
         ("[m_name], I want to make a backup", 'mas_backup'),
         ("[m_name], can you flip a coin?", 'coinflipbeta'),
         ("Github Repository", 'github_submod'),
-        # custom_menu(_("Help"), 'helpextra')     
     ]
 
 init python:
@@ -792,7 +791,7 @@ screen list_scrolling(variable, display_area, scroll_align, label, close=None):
                     for l_name in variable:
                         textbutton l_name[0]:
                             xsize display_area[2]
-                            action [Hide("list_scrolling"), Jump(l_name[1]), Jump("close_extraplus")]
+                            action [Hide("list_scrolling"), Jump(l_name[1])]
 
             null height 20
             textbutton ("Nevermind") action [Hide("list_scrolling"), Jump(label)]
