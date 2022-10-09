@@ -1,20 +1,20 @@
 #Day images
-image submod_background_extraplusr_restaurant_day = "Submods/ExtraPlusRestaurant/submod_assets/backgrounds/extraplusr_restaurant.png"
-image submod_background_extraplusr_restaurant_rain = "Submods/ExtraPlusRestaurant/submod_assets/backgrounds/extraplusr_restaurant_rain.png"
-image submod_background_extraplusr_restaurant_overcast = "Submods/ExtraPlusRestaurant/submod_assets/backgrounds/extraplusr_restaurant_overcast.png"
-image submod_background_extraplusr_restaurant_snow = "Submods/ExtraPlusRestaurant/submod_assets/backgrounds/extraplusr_restaurant_snow.png"
+image submod_background_extraplusr_restaurant_day = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant.png"
+image submod_background_extraplusr_restaurant_rain = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain.png"
+image submod_background_extraplusr_restaurant_overcast = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_overcast.png"
+image submod_background_extraplusr_restaurant_snow = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_snow.png"
 
 #Night images
-image submod_background_extraplusr_restaurant_night = "Submods/ExtraPlusRestaurant/submod_assets/backgrounds/extraplusr_restaurant-n.png"
-image submod_background_extraplusr_restaurant_rain_night = "Submods/ExtraPlusRestaurant/submod_assets/backgrounds/extraplusr_restaurant_rain-n.png"
-image submod_background_extraplusr_restaurant_overcast_night = "Submods/ExtraPlusRestaurant/submod_assets/backgrounds/extraplusr_restaurant_overcast-n.png"
-image submod_background_extraplusr_restaurant_snow_night = "Submods/ExtraPlusRestaurant/submod_assets/backgrounds/extraplusr_restaurant_snow-n.png"
+image submod_background_extraplusr_restaurant_night = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant-n.png"
+image submod_background_extraplusr_restaurant_rain_night = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-n.png"
+image submod_background_extraplusr_restaurant_overcast_night = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_overcast-n.png"
+image submod_background_extraplusr_restaurant_snow_night = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_snow-n.png"
 
 #Sunset images
-image submod_background_extraplusr_restaurant_ss = "Submods/ExtraPlusRestaurant/submod_assets/backgrounds/extraplusr_restaurant-ss.png"
-image submod_background_extraplusr_restaurant_rain_ss = "Submods/ExtraPlusRestaurant/submod_assets/backgrounds/extraplusr_restaurant_rain-ss.png"
-image submod_background_extraplusr_restaurant_overcast_ss = "Submods/ExtraPlusRestaurant/submod_assets/backgrounds/extraplusr_restaurant_overcast-ss.png"
-image submod_background_extraplusr_restaurant_snow_ss = "Submods/ExtraPlusRestaurant/submod_assets/backgrounds/extraplusr_restaurant_snow-ss.png"
+image submod_background_extraplusr_restaurant_ss = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant-ss.png"
+image submod_background_extraplusr_restaurant_rain_ss = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-ss.png"
+image submod_background_extraplusr_restaurant_overcast_ss = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_overcast-ss.png"
+image submod_background_extraplusr_restaurant_snow_ss = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_snow-ss.png"
 
 init -1 python:
     submod_background_restaurant = MASFilterableBackground(
