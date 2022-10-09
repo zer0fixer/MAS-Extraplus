@@ -120,7 +120,8 @@ init 10 python:
 
     #====Date
     walk_menu = [
-        ("Cafe", 'go_to_cafe')
+        ("Cafe", 'go_to_cafe'),
+        ("Restaurant", 'go_to_restaurant')
         ]
 
     #====Minigamnes
