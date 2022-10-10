@@ -609,7 +609,7 @@ screen extraplus_button():
                     text ("")
                 else:
                     textbutton ("Extra+")
-            elif mas_curr_affection <= 3:
+            elif mas_curr_affection <= 4:
                 textbutton ("Extra+")
             else:
                 textbutton ("Extra+") action Jump("view_extraplus")
