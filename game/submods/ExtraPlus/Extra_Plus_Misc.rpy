@@ -305,7 +305,7 @@ label headpat_dis:
 #===========================================================================================
 # EXTRAS
 #===========================================================================================
-define coin_sprites = ["sprite_coin.png","sprite_coin-n.png","coin_heads.png","coin_heads-n.png","coin_tails.png","coin_tails-n.png"]
+define coin_sprites = ["sprite_coin.png","sprite_coin-n.png","coin_heads.png","coin_tails.png"]
 
 label aff_log:
     show monika idle at t11
@@ -333,7 +333,7 @@ label check_coinflipbeta:
         rng_global = renpy.random.randint(1,2)
     m "Okay!"
     m 3eub "I'll go get a coin."
-    call mas_transition_to_emptydesk from monika_hide_exp_1
+    call mas_transition_to_emptydesk
     $ renpy.pause(2.0, hard=True)
     call mas_transition_from_emptydesk("monika 1eua")
     m "I found one!"
@@ -442,7 +442,41 @@ label extra_window_title:
         
     call screen list_scrolling(window_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, mas_ui.SCROLLABLE_MENU_XALIGN,"tools_extra",close=True) nopredict
     return
+    
+label extra_change_title:
+    show monika idle at t11
+    python:
+        player_input = mas_input(_("What title do you want to put on this window?"),
+                            allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!?()~-_.0123456789",
+                            screen_kwargs={"use_return_button": True, "return_button_value": "cancel"})
+        if not player_input:
+            renpy.jump("extra_change_title")
+        else:
+            if player_input == "cancel":
+                renpy.jump("extra_window_title")
+            else:
+                persistent.save_window_title = player_input
+                config.window_title = persistent.save_window_title 
+                renpy.notify("The change is done.")
+                renpy.jump("close_extraplus")
+    return
 
+label extra_restore_title:
+    show monika idle at t11
+    python:
+        persistent.save_window_title = backup_window_title
+        config.window_title = persistent.save_window_title 
+        renpy.notify("It has been successfully restored.")
+        renpy.jump("close_extraplus")
+    return
+
+label check_cheat_minigame:
+    m 3hksdrb "I think you forgot something, [player]!"
+    m 3eksdra "You must restore the variables you have modified."
+    m 1hua "We will not play until they are at 0."
+    jump screen_extraplus
+    return
+    
 label github_submod:
     show monika idle at t11
     $ renpy.run(OpenURL("https://github.com/zer0fixer/MAS-Extraplus"))
