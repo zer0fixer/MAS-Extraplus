@@ -10,8 +10,8 @@ init -990 python:
     store.mas_submod_utils.Submod(
         author="ZeroFixer",
         name="Extra Plus",
-        description="A submod that adds an Extra+ button, as well as adding more content!\nV 1.0.3 (Code retouching)",
-        version="1.0.3",
+        description="A submod that adds an Extra+ button, as well as adding more content!\nOne location has been added, the restaurant!",
+        version="1.0.4",
         version_updates={}
     )
 
@@ -56,6 +56,7 @@ define chibi_xpos = 0.05
 define chibi_ypos = 425
 define chibika_sprite = ["sticker_baka.png","sticker_sleep.png","sticker_up.png"]
 #====Misc
+default extra_current_affection = _mas_getAffection()
 define extra_old_bg = None
 define extra_chair = None
 define extra_table = None
@@ -68,7 +69,6 @@ define backup_window_title = "Monika After Story   "
 default persistent.save_window_title = None
 default disable_zoom_button = None
 define extra_error_messages = renpy.random.choice(["Hey, be more careful about adding submods.","The files are not available...","I think you forgot to place the submod files, ahaha~","You do have problems around here."])
-define unused_sprites = ["coin_heads-n.png","coin_tails-n.png","sticker_baka-n.png","sticker_sleep-n.png","sticker_up-n.png"]
 
 #====Minigames variables
 #====Cup coordinates
@@ -194,10 +194,10 @@ init python:
             renpy.call_screen("dialog", message="[extra_error_messages]", ok_action=Jump("close_extraplus"))
 
     #====Function for the creation of a gift
-    def gift_append(ep_name, ep_gift):
+    def gift_append(plus_name, plus_gift):
         global extra_name
-        extra_name = ep_name
-        filepath = os.path.join(renpy.config.basedir + '/characters',ep_gift)
+        extra_name = plus_name
+        filepath = os.path.join(renpy.config.basedir + '/characters',plus_gift)
         f = open(filepath,"a")
         renpy.notify("The [extra_name] File has been successfully created.")
         renpy.jump("make_gift")
@@ -265,8 +265,9 @@ init python:
             store.mas_current_background = store.extra_old_bg
 
     def extra_seen_label(sorry, extra_label, view_label):
-        if store.mas_curr_affection <= 6:
+        if store.extra_current_affection < 399:
             renpy.jump(sorry)
+
         if renpy.seen_label(view_label):
             store.mas_gainAffection(1,bypass=True)
             renpy.jump(extra_label)
@@ -606,10 +607,10 @@ screen extraplus_button():
         if renpy.get_screen("hkb_overlay"):
             if store.mas_hotkeys.talk_enabled is False:
                 if mas_submod_utils.current_label == "mas_piano_setupstart":
-                    text ("")
+                    text Null()
                 else:
                     textbutton ("Extra+")
-            elif mas_curr_affection <= 4:
+            elif store.extra_current_affection < 29:
                 textbutton ("Extra+")
             else:
                 textbutton ("Extra+") action Jump("view_extraplus")
@@ -625,7 +626,7 @@ screen submod_interactions():
 
         textbutton ("Close") action [Hide("submod_interactions"), Jump("close_extraplus")]
 
-        textbutton ("Go to") action [Hide("submod_interactions"), Jump("walk_extra")]
+        textbutton ("Go to") action [Hide("submod_interactions"), Jump("walk_extra")] 
 
         textbutton ("Minigame") action [Hide("submod_interactions"), Jump("minigames_extra")]
 
@@ -1275,6 +1276,10 @@ init -2 python in mas_background:
             store.mas_o31HideVisuals()
             store.mas_d25HideVisuals()
 
+        store.monika_chr.tablechair.table = "submod_restaurant"
+        store.monika_chr.tablechair.chair = "submod_restaurant"
+
+
     def _restaurant_exit(_new, **kwargs):
         """
         Exit programming point for restaurant background
@@ -1286,3 +1291,6 @@ init -2 python in mas_background:
         #D25
         elif store.persistent._mas_d25_deco_active:
             store.mas_d25ShowVisuals()
+
+        store.monika_chr.tablechair.table = "def"
+        store.monika_chr.tablechair.chair = "def"
