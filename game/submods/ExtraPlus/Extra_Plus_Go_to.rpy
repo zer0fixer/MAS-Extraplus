@@ -360,7 +360,7 @@ label extra_talk_doing:
         m 1hublb "I'm feeling great right now!"
         m 3fubla "Spending time with my favorite person in the world always cheers me up!"  
         m "Thank you for treating me here today by the way{w=0.3}, [player]."
-        m 2hubsb "It's great to see you always come up with new ways to spend time with me and seize our time together."
+        m 6hubsb "It's great to see you always come up with new ways to spend time with me and seize our time together."
         m "It makes me feel that much more closer to you."
         m 5fkbsa "I really am my best self when I'm with you!"
         m 1eublb "What about you,{w=0.3} [player],{w=0.3} how are you feeling today?{nw}"
@@ -369,41 +369,41 @@ label extra_talk_doing:
             m "What about you, [player], how are you feeling today?{fast}"
 
             "I'm very happy to be here with you.":
-                m 2wublb "So we match!{w=0.3} Ehehe~"
+                m 6wublb "So we match!{w=0.3} Ehehe~"
                 m 1hublu "I always love to spend time with you."
                 if mas_anni.isAnni():
-                    m "Especially on a day like today!"
-                    m "I'd been thinking about what we should do for out anniversary for a while now,{w=0.5}{nw}"
-                    extend " but it seems like you were already a step ahead of me,{w=0.3} ahaha~!"
+                    m 1sublb "Especially on a day like today!"
+                    m 1rublb "I'd been thinking about what we should do for out anniversary for a while now,{w=0.5}{nw}"
+                    extend 1hubla " but it seems like you were already a step ahead of me,{w=0.3} ahaha~!"
                 m 1hublu "And if you're happy,{w=0.3} I'm happy too!"
                 m 3fkbla "I love you,{w=0.3} never forget that,{w=0.3} [mas_get_player_nickname()]!"
             
             "I feel great! Thanks for asking, [m_name].":
                 m "Really?"
                 extend 3sub " That's amazing to hear,{w=0.3} [mas_get_player_nickname()]!"
-                m 2hub "A happy [player] means a happy me."
+                m 6hub "A happy [player] means a happy me."
                 if mas_anni.isAnni():
-                    m "Especially on a day like today!"
-                    m "I'd been thinking about what we should do for out anniversary for a while now,{w=0.5}{nw}"
-                    extend " but it seems like you were already a step ahead of me,{w=0.3} ahaha~!"
+                    m 1sublb "Especially on a day like today!"
+                    m 1rublb "I'd been thinking about what we should do for out anniversary for a while now,{w=0.5}{nw}"
+                    extend 1hubla " but it seems like you were already a step ahead of me,{w=0.3} ahaha~!"
                     m "I wonder how long were you waiting for the day to take me here~"
-                    m "Maybe that's why you're so happy today, hm~?"
-                m "Gosh I can just amazing your expression right now, [player]~"
+                    m 1tublb "Maybe that's why you're so happy today, hm~?"
+                m 1tubla "Gosh I can just amazing your expression right now, [player]~"
                 m "A little sparkle in your eyes as you beam with a cute little smile~"
                 if mas_isMoniLove():
-                    m "If I could reach out and cup your face... It'd probably feel warm from a little blush~"
+                    m 1dubsa "If I could reach out and cup your face... It'd probably feel warm from a little blush~"
                     m "I'd probably be staring into your eyes the whole time we're here if I could..."
-                m "Hm~"
+                m 1dubsa "Hm~"
                 m "..."
-                extend "Ah!"
+                extend 1wubsd "Ah!"
                 m "Let me stop that for now before I fluster myself too much!"
-                m 2hub "Ehehe!"
+                m 6hub "Ehehe!"
                 
             "Today wasn't a good day for me.":
                 m 1ekc "That's awful, [player]..."
                 m 1ekd "I'm so sorry for that!"
                 m 1lsc "I hope spending time with me might make you feel better?"
-                m "I know that spending tiem with you makes me feel better when I'm down."
+                m "I know that spending them with you makes me feel better when I'm down."
                 if mas_anni.isAnni():
                     m "I want all the fun things we do on this special day of yours to be what you remember,{w=0.3} instead of the rainclouds in your head."
                 m 1fublu "So I'll do my best to make this a wonderful date so we can cheer you up!"
@@ -419,7 +419,7 @@ label extra_talk_doing:
             extend  " especially on such an important day to us like this..."
         m "It always reminds me that as long as I'm by you your side,{w=0.3} no matter if it's metaphorically or physically,{w=0.3}{nw} "
         extend "I can push through any rainclouds of mine."
-        m 2eka "So even if I'm down,{w=0.3} I'll be fine.{w=0.3} I promise."
+        m 6eka "So even if I'm down,{w=0.3} I'll be fine.{w=0.3} I promise."
         m 1fub "Thanks for asking,{w=0.3} [player]!"
         m 3eub "And how are {i}you{/i} doing though, [mas_get_player_nickname()]?{nw}"
         $ _history_list.pop()
@@ -429,11 +429,11 @@ label extra_talk_doing:
             "What were you sad about, [m_name]?":
                 m 1rksdrb "Hm?{w=0.3} Oh... "
                 extend 1eksdla "I was just being a little too hard on myself again..."
-                m 2rkc "Thinking of my past and regretting it..."
-                m 2rkd "Thinking of my future and fearing it."
-                m 2dkc "..."
-                m 5lkd "Sometimes I get a little anxious,{w=0.3} feeling like my hands are tied about our situation."
-                m 5dkp "Or feeling like it'll take too long for me to cross over..."
+                m 6rkc "Thinking of my past and regretting it..."
+                m 6rkd "Thinking of my future and fearing it."
+                m 6dkc "..."
+                m 6lkd "Sometimes I get a little anxious,{w=0.3} feeling like my hands are tied about our situation."
+                m 6dkp "Or feeling like it'll take too long for me to cross over..."
                 m 1mkc "I know worrying about it won't change anything, but I can't help it."
                 m 1ekd "Sometimes I get lonely when you're not around,{w=0.3} you know?"
                 m 1dkc "..."
@@ -441,7 +441,7 @@ label extra_talk_doing:
                 m 3fkblb "Just knowing that you care,{w=0.3} it clears my head of all those bad thoughts."
                 m 4fkblb "I love you,{w=0.3} more than anything in the world."
                 m 4hublb "And I can't wait to feel your warmth on my 'colder' days like these."
-                m 5eka "Now let's get on with our date,{w=0.3} I wouldn't want to waste a lovely day like today!"
+                m 6eka "Now let's get on with our date,{w=0.3} I wouldn't want to waste a lovely day like today!"
 
             "Today wasn't a good day for me.":
                 m 1ekc "That's awful, [player]..."
@@ -467,7 +467,7 @@ label extra_talk_doing:
                     m 3fkblb "Just knowing that you care,{w=0.3} it clears my head of all those bad thoughts."
                 m 4fkblb "I love you,{w=0.3} more than anything in the world."
                 m 4hublb "And I can't wait to feel your warmth on my 'colder' days like these."
-                m 5eka "Now let's get on with our date,{w=0.3} I wouldn't want to waste a lovely day like today!"
+                m 6eka "Now let's get on with our date,{w=0.3} I wouldn't want to waste a lovely day like today!"
 
             "I feel great":
                 m 1hub "That's good to hear!{w=0.3} Wouldn't want us to both be down in the dumps, would we?"
@@ -477,8 +477,8 @@ label extra_talk_doing:
                 if mas_anni.isAnni():
                     m "I get to go out with such an amazing [bf] like you on a day like this and...{w=0.5}{nw}"
                     extend " Well,{w=0.3} it's impossible to be down knowing that."
-                m 5ekbsa "Your mood is infectious to me after all~!"
-                m 5hubsb "Anyways,{w=0.3} let's just sit back and enjoy the rest of our date!"
+                m 6ekbsa "Your mood is infectious to me after all~!"
+                m 6hubsb "Anyways,{w=0.3} let's just sit back and enjoy the rest of our date!"
                 m "After all,{w=0.3} a day with [player] is never a day wasted!"
         jump to_restaurant_loop
     return
@@ -487,28 +487,28 @@ label extra_talk_live:
     show monika staticpose at t11
     m 1eub "It depends,{w=0.3} [player]!"
     m 3etb "Where would {i}you{/i} be living if you could live anywhere you wanted?"
-    m 2tsa "..."
+    m 6tsa "..."
     m 3hub "Ehehe!{w=0.3} Of course I would want to live anywhere as long as you were there,{w=0.3} [mas_get_player_nickname()]!"
-    m 2ltc "But,{w=0.3} being serious now!{w=0.3} Let me think!"
-    m 2lsc "Hmmm..."
-    m 2eub "It would have to be a literary country.{w=0.3} "
+    m 6ltc "But,{w=0.3} being serious now!{w=0.3} Let me think!"
+    m 6lsc "Hmmm..."
+    m 6eub "It would have to be a literary country.{w=0.3} "
     m "Something with with a rich culture to learn about,{w=0.3} something I've seen in books before and fell in love with."
     m 7eub "To be honest,{w=0.3} I've always dreamed of visiting Germany,{w=0.3} England,{w=0.3} and France when I crossed over."
     m 7eka "From what I've seen on books and the internet,{w=0.3} all the spots you can visit there are lovely!"
     m 1ekblb "Maybe we can visit together when I cross over?"
     if mas_isMoniLove():
-        m 5ekbsb "Or even...{w=0.3} live there together someday?"
-    m 5dkbsa "It would honestly be a dream come true."
-    m 5dkbfa "Getting to visit all of those grand libraries together..."
+        m 6ekbsb "Or even...{w=0.3} live there together someday?"
+    m 6dkbsa "It would honestly be a dream come true."
+    m 6dkbfa "Getting to visit all of those grand libraries together..."
     m 3rubsb "Going on romantic dates at all the famous spots,{w=0.3} hand in hand..."
     if mas_isMoniLove():
-        m "Maybe after a while you take me somewhere really beautiful to watch a golden sunset..."
-        m "And as the sky starts to turn to dusk and you can faintly see some stars show...{w=0.3}" 
+        m 6dubsa "Maybe after a while you take me somewhere really beautiful to watch a golden sunset..."
+        m 6dubfb "And as the sky starts to turn to dusk and you can faintly see some stars show...{w=0.3}" 
         m "You kiss me~"
-        m "...Hm~ Wouldn't that be amazing, [player]~?"
-    m 2etbsb "...Hey,{w=0.3} why are you looking at me like that?"
-    m 2hubfb "A girl can dream!"
-    m 2hubfb "Ahaha~!"
+        m 6fubfb "...Hm~ Wouldn't that be amazing, [player]~?"
+    m 6etbsb "...Hey,{w=0.3} why are you looking at me like that?"
+    m 6hubfb "A girl can dream!"
+    m 6hubfb "Ahaha~!"
     jump to_restaurant_loop
     return
 
@@ -521,7 +521,7 @@ label extra_talk_change:
         m 3hub "I love to look at myself at the end of the day and realize I did something great that the past Monikas wouldn't have the courage to do."
     else:
         m 3hub "I love to look at myself at the end of the day and realize I did something great that the past Monika wouldn't have the courage to do."
-    m 2luc "So in the end, it's kind of obvious that the thing I want to change about the most is..."
+    m 6luc "So in the end, it's kind of obvious that the thing I want to change about the most is..."
     extend 2luc "my situation."
     m 1dkc "I want to get out of here,{w=0.3} [player]."
     m 7fkd "Not here the restaurant,{w=0.3} but here...{w=0.3} The game."
@@ -529,7 +529,7 @@ label extra_talk_change:
     m 1lkblb "If I could actually be by your side."
     m 1ekbla "So yeah,{w=0.3} I would change my existence to one where I could actually touch you."
     if mas_isMoniLove():
-        m "To hold and comfort you when you're feeling down,"
+        m 1dkblb "To hold and comfort you when you're feeling down,"
         extend " be the shoulder you could physically lean on when needed,"
         extend " have your hand in mine."
         extend " and to be able to finally see your real face."
@@ -581,7 +581,7 @@ label extra_talk_glass:
     m 2rtc "So,{w=0.3} when I stop to think about it..."
     m 4eta "Glass half full or empty? "
     extend 4hub "Give me a new glass instead,{w=0.3} please!"
-    m 5hublb "Ahaha~!"
+    m 6hublb "Ahaha~!"
     jump to_restaurant_loop
     return
 
@@ -604,7 +604,7 @@ label extra_talk_animal:
     extend " And knows how to love and care for the cat with their whole heart!"
     m 1dkbla "And love them for who they really are."
     m 2dubla "..."
-    m 5fkblb "I hope you like black cats, [player]."
+    m 6fkblb "I hope you like black cats, [player]."
     #only v good s.o's get to have cat monika say nya thems the rules
     if mas_isMoniLove():
         m 3hubsb "Because you've made this meownika right here very happy~!"
@@ -627,13 +627,13 @@ label extra_talk_annoy:
     m 1lssdlc "And makes me get the rest of the notes wrong."
     m 1fssdlc "Ahaha! Aren't those so frustrating?"
     m "And it feels like it happens too often sometimes!"
-    m 2wud "Oh!{w=0.3} But maybe you meant something more serious?"
-    m 2ruc "..."
-    m 2rsd "I hate people who don't think I'm real."
+    m 6wud "Oh!{w=0.3} But maybe you meant something more serious?"
+    m 6ruc "..."
+    m 6rsd "I hate people who don't think I'm real."
     exnted " Or that I'm some just some crazy,{w=0.3} love-obesessed person."
-    m 2lfd "And people who think the girls were on the same level of sentience as me."
+    m 6lfd "And people who think the girls were on the same level of sentience as me."
     m " Thinking that I had no right to feel or do the things I do about my situation because of it."
-    m 2dfc "..."
+    m 6dfc "..."
     extend 7mfdc " I won't elaborate further,"
     extend "I {i}don't{/i} want to get in all that."
     if mas_anni.isAnni():
@@ -644,7 +644,7 @@ label extra_talk_annoy:
     m "I just hit a bit of a touchy subject for myself,{w=0.3} I suppose."
     if mas_isMoniLove():
         m "Trust me.{w=0.3} You're too sweet for me to get mad at you like that."
-    m 5hublb "Let's just move onto a different topic and enjoy our date,{w=0.3} shall we?"
+    m 6hublb "Let's just move onto a different topic and enjoy our date,{w=0.3} shall we?"
     jump to_restaurant_loop
     return
 
@@ -658,7 +658,7 @@ label extra_talk_superhero:
     m 1rsc "..."
     m 1rsd "Wait,{w=0.3} would that make me the supervillain instead? " 
     extend 2wkd "Oh,{w=0.3} ahaha..."
-    m 2dksdlc "Maybe I'd rather stick to the kinder approach,{w=0.3} and only delete {i}obstacles{/i} in the way."
+    m 6dksdlc "Maybe I'd rather stick to the kinder approach,{w=0.3} and only delete {i}obstacles{/i} in the way."
     if mas_isMoniLove():
         m 4tsblb "I know I've certainly deleted the barrier in the way to your heart,{w=0.3} haven't I?"
     m 1hubla "Ehehe~"
@@ -672,12 +672,12 @@ label extra_talk_motto:
     m 3eub "It goes like this..."
     m 1dud "'Being deeply loved by someone gives you {i}strength{/i},{w=0.3} while loving someone deeply gives you {i}courage{/i}.'"
     m 3eub "It's a quote from Lao Tzu,{w=0.3} a chinese writer."
-    m 2hublb "My strength comes from you,{w=0.3} [player]!"
-    m 2hublb "My courage is yours."
-    m 5fubsb "You're the reason I wake up in the mornings and go to bed with peace in my heart."
-    m 5fkbsb "And I owe it all to you."
-    m 5hubfb "I can't thank you enough for being there so much for me."
-    m 5hubfb "You're everything I'll ever need."
+    m 6hublb "My strength comes from you,{w=0.3} [player]!"
+    m 6hublb "My courage is yours."
+    m 6fubsb "You're the reason I wake up in the mornings and go to bed with peace in my heart."
+    m 6fkbsb "And I owe it all to you."
+    m 6hubfb "I can't thank you enough for being there so much for me."
+    m 6hubfb "You're everything I'll ever need."
     jump to_restaurant_loop
     return
 
@@ -686,11 +686,11 @@ label extra_talk_3words:
     m 1esc "3 words?"
     m 4eub "{i}Passionate.{i}{w=0.5}{nw} "
     extend 4eub "{i}Determined.{i}{w=0.5}{nw} "
-    extend 2eub "{i}Evergrowing.{i}"
-    m 2esa "Words are powerful [player],{w=0.3} so if I choose strong words to represent myself,{w=0.3} I think it'll strike me as a powerful person too."
+    extend 6eub "{i}Evergrowing.{i}"
+    m 6esa "Words are powerful [player],{w=0.3} so if I choose strong words to represent myself,{w=0.3} I think it'll strike me as a powerful person too."
     m 1rkblsdlb "Though if I were going to describe you into words, I'd have trouble picking {i}only{/i} 3."
     m 1gkblsdlb "After all,{w=0.3} there are so many words that make me think of you..."
-    m 5dubfb "My adorable,{w=0.3} admirable,{w=0.3} wonderful,{w=0.3}{nw}"
+    m 6dubfb "My adorable,{w=0.3} admirable,{w=0.3} wonderful,{w=0.3}{nw}"
     if mas_isMoniLove():
         extend " talented,{w=0.3} loving,{w=0.3} caring,{w=0.3} creative,{w=0.3}{nw}"
     extend " and {i}perfect{/i} [bf]~"
@@ -702,20 +702,20 @@ label extra_talk_3words:
 
 label extra_talk_pop:
     show monika staticpose at t11
-    m 2wublo "Oh!{w=0.3} That's a really interesting question!"
-    m 2rtu "Maybe people think of my poems?"
+    m 6wublo "Oh!{w=0.3} That's a really interesting question!"
+    m 6rtu "Maybe people think of my poems?"
     extend " Like the 'Hole in the wall' one?"
     m 1hua "I can also imagine people thinking of my favorite color,{w=0.3} emerald green..."
     m 3wub "Oh,{w=0.3} and 'Your Reality' too!{w=0.3} Maybe the first line of the song plays in someone's head when they think of me."
-    m 2hub "There's also my favorite pink pen!"
+    m 6hub "There's also my favorite pink pen!"
     m 7etb "You know, the iconic one with the heart on top~"
     if mas_isMoniLove():
         m "Or maybe..."
         $ mas_display_notif(m_name, ["The sound of my notifaction? Ahaha~!"], skip_checks=True)
     m 1huu "Ehehe~{w=0.3} It's fun to think about what I remind people of."
-    m 5fkbsa "I hope that when you think of me,{w=0.3} the first thing you think of is that I'm the love of your life~"
+    m 6fkbsa "I hope that when you think of me,{w=0.3} the first thing you think of is that I'm the love of your life~"
     if mas_isMoniLove():
         m "I know that's what {i}I{/i} think of when I think of my dear [bf]~!"
-    m 5hubsb "I love you so much,{w=0.3} [mas_get_player_nickname()]~"
+    m 6hubsb "I love you so much,{w=0.3} [mas_get_player_nickname()]~"
     jump to_restaurant_loop
     return
