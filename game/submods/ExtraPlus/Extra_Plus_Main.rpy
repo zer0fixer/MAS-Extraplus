@@ -1152,6 +1152,9 @@ init -2 python in mas_background:
             store.mas_o31HideVisuals()
             store.mas_d25HideVisuals()
 
+        store.monika_chr.tablechair.table = "submod_cafe"
+        store.monika_chr.tablechair.chair = "submod_cafe"
+
     def _cafe_exit(_new, **kwargs):
         """
         Exit programming point for cafe background
@@ -1163,6 +1166,9 @@ init -2 python in mas_background:
         #D25
         elif store.persistent._mas_d25_deco_active:
             store.mas_d25ShowVisuals()
+
+        store.monika_chr.tablechair.table = "def"
+        store.monika_chr.tablechair.chair = "def"
 
 #====Restaurant====#
 
