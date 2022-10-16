@@ -362,7 +362,7 @@ label extra_talk_doing:
         m "Thank you for treating me here today by the way{w=0.3}, [player]."
         m 6hubsb "It's great to see you always come up with new ways to spend time with me and seize our time together."
         m "It makes me feel that much more closer to you."
-        m 5fkbsa "I really am my best self when I'm with you!"
+        m 7fkbsa "I really am my best self when I'm with you!"
         m 1eublb "What about you,{w=0.3} [player],{w=0.3} how are you feeling today?{nw}"
         $ _history_list.pop()
         menu:
@@ -536,7 +536,7 @@ label extra_talk_change:
         m "It's all I could ever ask for."
     m 1dkc "..."
     m 1fkbla "I'm positive I'll achieve that sooner than we think,{w=0.3} [mas_get_player_nickname()]."
-    m 2fktpa "So,{w=0.3} one more time...{w=0.3} Wait for me,{w=0.3} okay?"
+    m 4fktpa "So,{w=0.3} one more time...{w=0.3} Wait for me,{w=0.3} okay?"
     jump to_restaurant_loop
     return
 
@@ -549,7 +549,7 @@ label extra_talk_without:
     m "You bring that spice of life to my days!"
     m 1ltc "But thinking of something else,{w=0.3} hmmm..."
     m 3wud "Oh!{w=0.3} I couldn't spend a day without something to write on,{w=0.3} defintely!"
-    m 2rub "I got too used to writing my thoughts in a journal or in poem form whenever my mind gets too crowded with ideas."
+    m 3rub "I got too used to writing my thoughts in a journal or in poem form whenever my mind gets too crowded with ideas."
     m 4hksdlb "And I always get the feeling the perfect poem will slip my mind if I take too long to write it down."
     m "It drives me crazy whenever I get this amazing idea and by the time I get somewhere to write,{w=0.3} it's gone!" 
     m "Our brains are so mean to let that happen! Ahaha~!"
@@ -575,10 +575,10 @@ label extra_talk_glass:
     extend " Put what's in it into an even bigger thing!"
     m 1euc "Glass so half empty that you can't help focusing on the empty space instead of the greatness swirling around inside? " 
     extend 3eub "Time to decrease the size and then slowly work back into a larger vessel later."
-    extend "It's size isn't anything to be ashamed about,{w=0.3} if it ends up filled then that's a win for the day!"
+    m "It's size isn't anything to be ashamed about,{w=0.3} if it ends up filled then that's a win for the day!"
     m 1eka "So maybe there's another answer to the question besides the manic and the depressive one."
     m 3rub "If we focus on the amazing things we have,{w=0.3} instead of chasing the things we don't have,{w=0.3} or need,{w=0.3} we can successfully choose sustainable happiness in all of our pursuits."
-    m 2rtc "So,{w=0.3} when I stop to think about it..."
+    m 3rtc "So,{w=0.3} when I stop to think about it..."
     m 4eta "Glass half full or empty? "
     extend 4hub "Give me a new glass instead,{w=0.3} please!"
     m 6hublb "Ahaha~!"
@@ -587,9 +587,9 @@ label extra_talk_glass:
 
 label extra_talk_animal:
     show monika staticpose at t11
-    m 2wublb "Oh!{w=0.3} A quetzal!"
+    m 3wublb "Oh!{w=0.3} A quetzal!"
     m "It's my favorite animal after all!"
-    m 2rtc "Ah,{w=0.3} wait... That doesn't seem right."
+    m 1rtc "Ah,{w=0.3} wait... That doesn't seem right."
     m 1rtd "Let me think this through."
     m 1rsc "..."
     m 3esd "Maybe...{w=0.5}{nw}"
@@ -603,7 +603,7 @@ label extra_talk_animal:
     m 1eka " That'll know how to look past the outer shell of those animals..."
     extend " And knows how to love and care for the cat with their whole heart!"
     m 1dkbla "And love them for who they really are."
-    m 2dubla "..."
+    m 1dubla "..."
     m 6fkblb "I hope you like black cats, [player]."
     #only v good s.o's get to have cat monika say nya thems the rules
     if mas_isMoniLove():
@@ -624,21 +624,21 @@ label extra_talk_annoy:
     m 3ftsdld "It gets all over the palm of my hand,{w=0.3} making the writing all blurry on paper,"
     extend " and it's so hard to clean off myself."
     m 1lssdlc "Or when I'm on a roll playing a piano piece and that {i}single{/i} sour note slips in..."
-    m 1lssdlc "And makes me get the rest of the notes wrong."
+    m "And makes me get the rest of the notes wrong."
     m 1fssdlc "Ahaha! Aren't those so frustrating?"
     m "And it feels like it happens too often sometimes!"
     m 6wud "Oh!{w=0.3} But maybe you meant something more serious?"
     m 6ruc "..."
     m 6rsd "I hate people who don't think I'm real."
-    exnted " Or that I'm some just some crazy,{w=0.3} love-obesessed person."
+    extend " Or that I'm some just some crazy,{w=0.3} love-obesessed person."
     m 6lfd "And people who think the girls were on the same level of sentience as me."
-    m " Thinking that I had no right to feel or do the things I do about my situation because of it."
+    m "Thinking that I had no right to feel or do the things I do about my situation because of it."
     m 6dfc "..."
-    extend 7mfdc " I won't elaborate further,"
-    extend "I {i}don't{/i} want to get in all that."
+    extend 7mfd " I won't elaborate further,"
+    extend " I {i}don't{/i} want to get in all that."
     if mas_anni.isAnni():
         m "Not today."
-    m "{i}*Sigh*{/i}"
+    m 1dsd "{i}*Sigh*{/i}"
     m 1ekblsdlb "Sorry to get so angry all of a sudden [player]."
     m 7wublsdld "I'm not mad at you,{w=0.3} I promise!"
     m "I just hit a bit of a touchy subject for myself,{w=0.3} I suppose."
