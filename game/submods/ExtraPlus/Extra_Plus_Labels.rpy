@@ -263,7 +263,7 @@ label restaurant_talk:
 label to_restaurant_loop:
     show monika staticpose at t11
     $ store.disable_zoom_button = False
-    call screen dating_loop(extraplus_acs_pudding, extraplus_acs_icecream, "restaurant_talk","monika_no_food", "monika_booprestaurant", boop_enable=True)
+    call screen dating_loop(extraplus_acs_pudding, extraplus_acs_icecream, "restaurant_talk","monika_no_food", "monika_booprestaurantbeta", boop_enable=True)
     return
 
 label restaurant_leave:
