@@ -39,7 +39,7 @@ If this submod is edited by another person and sends that modification to the co
 <img alt="reddit" src="https://cdn-icons-png.flaticon.com/512/2111/2111459.png" width="100">
 <a href="https://www.youtube.com/c/KashouSenpai">
 <img alt="youtube" src="https://cdn.icon-icons.com/icons2/1211/PNG/512/1491579609-yumminkysocialmedia08_83079.png" width="100">
-<h4> ZeroFixer#3405 </h4>
+<h4> ZeroFixer#3405 (I no longer use Discord.)</h4>
 <img alt="discord" src="https://icons-for-free.com/download-icon-super+tiny+icons+discord-1324450718427274623_512.png" width="100">
 
 
