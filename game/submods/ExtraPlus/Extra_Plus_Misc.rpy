@@ -497,7 +497,7 @@ label coinflip:
         store.mas_sprites.reset_zoom()
         moldable_variable = renpy.random.randint(1,2)
     show screen extra_no_click
-    pause 1.5
+    pause 1.0
     show monika 3eua at t11
     show coin_moni zorder 12 at rotatecoin:
         xalign 0.5

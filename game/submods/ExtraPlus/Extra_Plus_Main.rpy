@@ -334,6 +334,18 @@ init python:
         if not visible_chibika_chill():
             config.overlay_screens.append("chibika_chill")
 
+    def chibika_is_available():
+        try:
+            path = renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/0/"
+            path_1 = renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/1/"
+            chibi_sprites_0 = [(os.path.splitext(archivo)[0]) for archivo in os.listdir(path)]
+            chibi_sprites_1 = [(os.path.splitext(archivo)[0]) for archivo in os.listdir(path_1)]
+            show_chibika_chill()
+
+        except:
+            store.persistent.hichibika = False
+            disable_chibika_chill()
+
     #====Zoom edit
     def extra_visible_zoom():
         return "button_custom_zoom" in config.overlay_screens
@@ -362,8 +374,8 @@ init python:
             store.mas_current_background = store.extra_old_bg
 
     def extra_seen_background(sorry, extra_label, view_label):
-        # if store.extra_current_affection < 399:
-        #     renpy.jump(sorry)
+        if store.extra_current_affection < 399:
+            renpy.jump(sorry)
 
         if renpy.seen_label(view_label):
             store.mas_gainAffection(1,bypass=True)
@@ -382,17 +394,7 @@ init python:
     ExtraButton()
     rng_cup()
     save_title_windows()
-
-    try:
-        path = renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/0/"
-        path_1 = renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/1/"
-        chibi_sprites_0 = [(os.path.splitext(archivo)[0]) for archivo in os.listdir(path)]
-        chibi_sprites_1 = [(os.path.splitext(archivo)[0]) for archivo in os.listdir(path_1)]
-        show_chibika_chill()
-
-    except:
-        store.persistent.hichibika = False
-        disable_chibika_chill()
+    chibika_is_available()
 
 #===========================================================================================
 # CLASSES
