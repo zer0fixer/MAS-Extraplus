@@ -11,7 +11,7 @@ init -990 python:
         author="ZeroFixer",
         name="Extra Plus",
         description="A submod that adds an Extra+ button, as well as adding more content!\n",
-        version="1.0.5"
+        version="1.0.6"
     )
 
 #====Register the updater
