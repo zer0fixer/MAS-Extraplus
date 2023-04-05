@@ -863,8 +863,6 @@ screen chibika_chill():
     if renpy.get_screen("hkb_overlay"):
         drag:
             child "chibika_base"
-            # if persistent.drag_chibika == True:
-            #     selected_hover_child "hover_sticker"
             selected_hover_child "hover_sticker"
             dragged chibika_relax_drag
             if store.mas_submod_utils.isSubmodInstalled("Noises Submod"):
