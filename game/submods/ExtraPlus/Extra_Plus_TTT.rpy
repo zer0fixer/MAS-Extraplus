@@ -114,15 +114,44 @@ init 10 python:
             w = kwargs['winner']
             self.score[w] += 1
 
-    ttt = minigames("Tic Tac Toe", 'minigame_ttt', ttt_prep)
-    minigames_menu.append(ttt)
-    
+
+
+screen ttt_score():
+    vbox:
+        xpos 0.6
+        ypos 0.900
+
+        text "[m_name]: " + str(ttt.score[0])  style "monika_text":
+            if not ttt.playerTurn:
+                color "#a80000"
+    vbox:
+        xpos 0.9
+        ypos 0.900
+
+        text "[player]: " + str(ttt.score[1])  style "monika_text":
+            if ttt.playerTurn:
+                color "#0142a4"
+    vbox:
+        xpos 0.05
+        yanchor 2.0
+        ypos 300
+
+        # spacing 5
+        # xpos 280
+        # yanchor 2.0
+        # ypos 1.0
+
+        textbutton _("I give up") style "hkb_button" action [Function(ttt.set_state, -9), Function(ttt.check_state)]
+        null height 6
+        textbutton _("Quit") style "hkb_button" action [Hide("minigame_ttt_scr"), Jump("minigame_ttt_quit")]
+
 screen minigame_ttt_grid():
     for i in range(2):
         add "line_black" pos (700, 260 + 192*i) zoom 0.8
         add "line_black" pos (600 + 192*i, 80) rotate 90 zoom 0.8
 
 screen minigame_ttt_scr():
+    use ttt_score()
     layer "master"
     zorder 50
 
@@ -162,39 +191,16 @@ screen minigame_ttt_scr():
                 else:
                     add "line_"+color anchor (0.5, 0.5) zoom sc pos (982, 192 * state - 984) # - Fix
 
-    vbox:
-        xpos 0.6
-        ypos 0.900
 
-        text "[m_name]: " + str(ttt.score[0])  style "monika_text":
-            if not ttt.playerTurn:
-                color "#ff4646"
-    vbox:
-        xpos 0.9
-        ypos 0.900
-
-        text "[player]: " + str(ttt.score[1])  style "monika_text":
-            if ttt.playerTurn:
-                color "#2e97ff"
-    vbox:
-        xpos 0.05
-        yanchor 2.0
-        ypos 300
-
-        textbutton _("I give up") style "hkb_button" action [Function(ttt.set_state, -9), Function(ttt.check_state)]
-        null height 6
-        textbutton _("Quit") style "hkb_button" action [Hide("minigame_ttt_scr"), Jump("minigame_ttt_quit")]
 
 #====Label
 label minigame_ttt:
-    $ validate_files(ttt_sprite, type=True)
+    $ check_file_status(ttt_sprite, '/game/submods/ExtraPlus/submod_assets/sprites')
     if not os.path.isfile(renpy.config.basedir + '/game/submods/ExtraPlus/submod_assets/Pictograms.ttf'):
         show monika idle at t11
         call screen dialog("A font is needed here, you know?",ok_action=Jump("close_extraplus"))
 
     show monika 1hua at t21
-    if ttt.score[0] > 0 or ttt.score[1] > 0:
-        jump cheat_ttt
     show notebook zorder 12 at animated_book
     pause 0.5
     call screen minigame_ttt_scr() nopredict
@@ -218,11 +224,11 @@ label minigame_ttt_m_comment(id = 0):
     show monika 1hua at t21
     if id == 0:
         #Monika Wins
-        $ rng_global = renpy.random.randint(0, 2)
-        if rng_global == 0:
+        $ moldable_variable = renpy.random.randint(0, 2)
+        if moldable_variable == 0:
             m 3hua "Well, I won this game."
             m 3hub "You should think on a better strategy next time!"
-        elif rng_global == 1:
+        elif moldable_variable == 1:
             m 1sub "Three in a row!"
             m 1huu "Try again~"
         else:
@@ -230,8 +236,8 @@ label minigame_ttt_m_comment(id = 0):
             m 4hua "I know that you'll win next time."
         #Player Wins
     elif id == 1:
-        $ rng_global = renpy.random.randint(0, 1)
-        if rng_global == 0:
+        $ moldable_variable = renpy.random.randint(0, 1)
+        if moldable_variable == 0:
             m 1suo "Great [player], you win!"
             m 1suo "Next time I will try my best to win, so be prepared."
         else:
@@ -239,8 +245,8 @@ label minigame_ttt_m_comment(id = 0):
             m 1eub "But I'll try to beat you, [mas_get_player_nickname()]!"
         #Tie
     elif id == 2:
-        $ rng_global = renpy.random.randint(0, 1)
-        if rng_global == 0:
+        $ moldable_variable = renpy.random.randint(0, 1)
+        if moldable_variable == 0:
             m 1lkb "Oh, the page is full."
             m 1eub "Let's try again, [mas_get_player_nickname()]!"
         else:
@@ -249,8 +255,8 @@ label minigame_ttt_m_comment(id = 0):
             m 3hub "I wish you luck, [mas_get_player_nickname()]!"
         #Reset
     else:
-        $ rng_global = renpy.random.randint(0, 1)
-        if rng_global == 0:
+        $ moldable_variable = renpy.random.randint(0, 1)
+        if moldable_variable == 0:
             m 1ekd "Are you giving up on this round?"
             m 1eka "Well, I'm going to restart the game, but I'll take a point!"
         else:
@@ -283,32 +289,5 @@ label minigame_ttt_quit:
         m 1hub "You have won [player], congratulations."
         m 1hub "I am proud of you~"
         m 3hua "I'll do my best next time too!"
-    jump close_extraplus
-    return
-
-label cheat_ttt:
-    show monika 1hua at t11
-    if renpy.seen_label("check_cheat_ttt"):
-        jump check_cheat_minigame
-    else:
-        jump check_cheat_ttt
-label check_cheat_ttt:
-    m 1hkb "[player]..."
-    m 1etd "Did you manipulate the score of the mini-game?"
-    if ttt.score[0] == ttt.score[1]:
-        m 1esb "You have placed that we are even."
-    elif ttt.score[0] > ttt.score[1]:
-        m 1lksdla "I feel bad to win without doing anything... Ahaha~"
-    elif ttt.score[0] < ttt.score[1]:
-        m 1esd "You have put in a digit that exceeds my score."
-    m 1hua "But don't worry, it doesn't bother me at all."
-    m 1tua "After all, I caught you before you could check the counter, ehehehe~"
-    m 1hkb "The problem is that we can't play with a munipulated counter."
-    m 1hkb "If your score was saved, it wouldn't be a problem."
-    m 3hua "But we both know that the purpose is to have fun, [player]."
-    m 3hub "I hope you haven't changed something essential, so that we can avoid complications in the future."
-    m 2ltd "Although I have a feeling you did it more out of curiosity."
-    m 2hua "I know very well that you don't like cheating!"
-    m 2hua "I trust you."
     jump close_extraplus
     return

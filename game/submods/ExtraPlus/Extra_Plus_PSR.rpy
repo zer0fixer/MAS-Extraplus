@@ -1,15 +1,13 @@
 #===========================================================================================
 # MINIGAME#3
 #===========================================================================================
-define psr_sprites = ["card_back.png","paper.png","rock.png","scissors.png"]
+define rps_sprites = ["card_back.png","paper.png","rock.png","scissors.png"]
 
 #====Rock Paper Scissors
-label minigame_psr:
+label minigame_rps:
     python:
-        validate_files(psr_sprites, type=True)
+        check_file_status(rps_sprites, '/game/submods/ExtraPlus/submod_assets/sprites')
         mas_MUMURaiseShield()
-    if moni_wins > 0 or player_wins > 0:
-        jump cheat_psr
     show monika 1hua at t21
     show card_back zorder 12:
         xalign 0.7
@@ -38,16 +36,16 @@ label minigame_psr:
     hide e_rock
     hide e_paper
     hide e_scissors
-    show screen score_minigame(game="psr")
-    call screen PSR_mg
+    show screen score_minigame(game="rps")
+    call screen RPS_mg nopredict
     return
 
-label psr_loop:
-    $ rng_global = renpy.random.randint(1,3)
+label rps_loop:
+    $ moldable_variable = renpy.random.randint(1,3)
     show card_back zorder 12:
         xalign 0.7
         yalign 0.1
-    if your_choice == 1:
+    if rps_your_choice == 1:
         show e_rock zorder 12:
             yoffset -20
             xalign 0.5
@@ -60,14 +58,14 @@ label psr_loop:
             yalign 0.7
         m 1eub "Rock,{w=0.3} Paper,{w=0.3} Scissors{w=0.3}!{nw}"
         hide card_back with dissolve
-        if rng_global == 1:
+        if moldable_variable == 1:
             show e_rock zorder 12 as e_rock_1 with dissolve:
                 xalign 0.7
                 yalign 0.1
             m 3hub "A rock against another rock, ahahaha~"
             m 1hua "It is a tie."
 
-        elif rng_global == 2:
+        elif moldable_variable == 2:
             show e_paper zorder 12 as e_paper_1 with dissolve:
                 xalign 0.7
                 yalign 0.1
@@ -75,7 +73,7 @@ label psr_loop:
             m 1tub "So sorry, [player], you have lost!"
             $ moni_wins += 1
 
-        elif rng_global == 3:
+        elif moldable_variable == 3:
             show e_scissors zorder 12 as e_scissors_1 with dissolve:
                 xalign 0.7
                 yalign 0.1
@@ -83,7 +81,7 @@ label psr_loop:
             m 1hua "You beat me, [player]!"
             $ player_wins += 1
 
-    elif your_choice == 2:
+    elif rps_your_choice == 2:
         show e_rock zorder 12:
             xalign 0.5
             yalign 0.7
@@ -96,7 +94,7 @@ label psr_loop:
             yalign 0.7
         m 1eub "Rock,{w=0.3} Paper,{w=0.3} Scissors{w=0.3}!{nw}"
         hide card_back with dissolve
-        if rng_global == 1:
+        if moldable_variable == 1:
             show e_rock zorder 12 as e_rock_1 with dissolve:
                 xalign 0.7
                 yalign 0.1
@@ -104,7 +102,7 @@ label psr_loop:
             m 1lub "You win, [player]."
             $ player_wins += 1
 
-        elif rng_global == 2:
+        elif moldable_variable == 2:
             show e_paper zorder 12 as e_paper_1 with dissolve:
                 xalign 0.7
                 yalign 0.1
@@ -112,7 +110,7 @@ label psr_loop:
             m 1tua "We're in a tie and you should stop reading my mind [mas_get_player_nickname()]~"
             m 1hub "Ahahahaha~"
 
-        elif rng_global == 3:
+        elif moldable_variable == 3:
             show e_scissors zorder 12 as e_scissors_1 with dissolve:
                 xalign 0.7
                 yalign 0.1
@@ -120,7 +118,7 @@ label psr_loop:
             m 3hua "Sorry [player], you lost."
             $ moni_wins += 1
 
-    elif your_choice == 3:
+    elif rps_your_choice == 3:
         show e_rock zorder 12:
             xalign 0.5
             yalign 0.7
@@ -133,7 +131,7 @@ label psr_loop:
             yalign 0.7
         m 1eub "Rock,{w=0.3} Paper,{w=0.3} Scissors{w=0.3}!{nw}"
         hide card_back with dissolve
-        if rng_global == 1:
+        if moldable_variable == 1:
             show e_rock zorder 12 as e_rock_1 with dissolve:
                 xalign 0.7
                 yalign 0.1
@@ -141,7 +139,7 @@ label psr_loop:
             m "You couldn't beat me! Ahahaha~"
             $ moni_wins += 1
 
-        elif rng_global == 2:
+        elif moldable_variable == 2:
             show e_paper zorder 12 as e_paper_1 with dissolve:
                 xalign 0.7
                 yalign 0.1
@@ -149,18 +147,18 @@ label psr_loop:
             m 1eua "I award you the victory!"
             $ player_wins += 1
 
-        elif rng_global == 3:
+        elif moldable_variable == 3:
             show e_scissors zorder 12 as e_scissors_1 with dissolve:
                 xalign 0.7
                 yalign 0.1
             m 2hkb "Two scissors equals a tie, [player]!"
             m 2hub "Although it's funny that you thought the same thing, ehehehe~"
     show monika 1hua at t21
-    $ your_choice = 0
-    jump hide_images_psr
+    $ rps_your_choice = 0
+    jump hide_images_rps
     return
 
-label psr_quit:
+label rps_quit:
     $ mas_MUINDropShield()
     hide screen score_minigame
     show card_back zorder 12 as v1:
@@ -206,15 +204,15 @@ label psr_quit:
     hide e_rock
     hide e_paper
     hide e_scissors
-    $ your_choice = 0
-    jump psr_result
+    $ rps_your_choice = 0
+    jump rps_result
     return
 
 #===========================================================================================
 # TALKING GAME
 #===========================================================================================
 
-label psr_result:
+label rps_result:
     show monika 1hua at t11
     #Tie
     if moni_wins == player_wins:
@@ -229,12 +227,16 @@ label psr_result:
             m 1hub "Ehehe~"
             m 3hua "But we have to break the tie, [player]."
             m 3hub "We will see who wins next time, good luck!"
+
     #Monika wins
     elif moni_wins > player_wins:
         m 3eub "This time I won, [player]~"
+        m 3hubs "You put up a good fight."
         m 3eub "I've had some luck."
         m 3eubsa "But don't feel bad, what matters most to me is that we both have fun."
         m 1hub "Next time I know you will beat me, I trust you!"
+        $ persistent.minigames_won[0] = False
+
     #Player wins
     elif moni_wins < player_wins:
         m 1hub "You beat me [player], congratulations."
@@ -243,36 +245,9 @@ label psr_result:
         m 2hub "I'm likely to win!"
         m 2hua "So be careful when we play again."
         m 2hua "Ehehe~"
+        
     python:
         moni_wins = 0
         player_wins = 0
-    jump close_extraplus
-    return
-
-label cheat_psr:
-    show monika 1hua at t11
-    if renpy.seen_label("check_cheat_psr"):
-        jump check_cheat_minigame
-    else:
-        jump check_cheat_psr
-        
-label check_cheat_psr:
-    m 1hkb "Uhhh, to be honest, I don't know how to respond to what you have done."
-    if moni_wins == player_wins:
-        m 3eua "Even if we are tied."
-    elif moni_wins > player_wins:
-        m 3lkb "It feels bad that I'm beating you..."
-    elif moni_wins < player_wins:
-        m 1hsb "You are ahead without even starting the game."
-    m 1hua "I don't think it's worth it for you to do so..."
-    m 1dua "And I don't see the need to talk about whether modifying the minigame is wrong or not."
-    m 2fub "After all, I have a feeling that you did it more out of curiosity than to get an easy victory."
-    m 1etd "I guess you must be thinking, 'Are you angry [m_name]?'"
-    m 3hub "Of course not!"
-    m 3dub "Imagine getting angry about something so simple, like cheating in a mini-game."
-    m 1eua "Well I hope you don't do it in other video games."
-    m 1lud "Eventually you will feel empty..."
-    m 1lkb "And I don't want that to happen to you, "
-    extend 1hubsb "so just have fun fair and square!"
     jump close_extraplus
     return

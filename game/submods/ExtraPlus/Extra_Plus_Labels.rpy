@@ -4,7 +4,7 @@
 
 label view_extraplus:
     python:
-        player_zoom = store.mas_sprites.zoom_level
+        store.player_zoom = store.mas_sprites.zoom_level
         store.disable_zoom_button = False
         mas_RaiseShield_dlg()
         extra_button_zoom()
@@ -21,7 +21,15 @@ label screen_extraplus:
 label close_extraplus:
     show monika idle at t11
     python:
-        store.mas_sprites.zoom_level = player_zoom
+        store.mas_sprites.zoom_level = store.player_zoom
+        mas_DropShield_dlg()
+        disable_button_zoom()
+    jump ch30_visual_skip
+    return
+
+label close_dev_extraplus:
+    show monika idle at t11
+    python:
         mas_DropShield_dlg()
         disable_button_zoom()
     jump ch30_visual_skip
@@ -38,7 +46,7 @@ label show_boop_screen:
 label return_boop_screen:
     python:
         store.disable_zoom_button = False
-        store.mas_sprites.zoom_level = player_zoom
+        store.mas_sprites.zoom_level = store.player_zoom
         store.mas_sprites.adjust_zoom()
     jump screen_extraplus
     return
@@ -47,21 +55,21 @@ label close_boop_screen:
     show monika idle at t11
     python:
         store.disable_zoom_button = False
-        store.mas_sprites.zoom_level = player_zoom
+        store.mas_sprites.zoom_level = store.player_zoom
         store.mas_sprites.adjust_zoom()
         disable_button_zoom()
     jump ch30_visual_skip
     return
 
-label hide_images_psr:
+label hide_images_rps:
     hide e_rock
     hide e_paper
     hide e_scissors
     hide e_rock_1
     hide e_paper_1
     hide e_scissors_1
-    $ your_choice = 0
-    call screen PSR_mg
+    $ rps_your_choice = 0
+    call screen RPS_mg
     return
 
 label extra_restore_bg(label="ch30_visual_skip"):
@@ -87,9 +95,9 @@ label extra_restore_bg(label="ch30_visual_skip"):
 
 label go_to_cafe:
     python:
-        validate_files(cafe_sprite, type=False)
+        check_file_status(cafe_sprite, '/game/submods/ExtraPlus/submod_assets/backgrounds')
         mas_extra_location(locate=True)
-        extra_seen_label("cafe_sorry_player", "gtcafev2", "check_label_cafe")
+        extra_seen_background("cafe_sorry_player", "gtcafev2", "check_label_cafe")
 
 label check_label_cafe:
     pass
@@ -133,7 +141,7 @@ label gtcafev2:
         jump screen_extraplus
     return
 
-label cafe_talkdemo:
+label cafe_talk:
     show monika staticpose at t21
     python:
         store.disable_zoom_button = True
@@ -143,16 +151,20 @@ label cafe_talkdemo:
             ("Our communication is very limited, don't you think?", 'extra_talk_you'),
             ("How do you see us in 10 years?", 'extra_talk_teen'),
             ("What is your best memory that you currently have?", 'extra_talk_memory'),
-            ("Do you have any phobia?", 'extra_talk_phobia'),
-            ("Can we leave?", 'cafe_leave')
-        ] 
-    call screen list_scrolling(cafe_menu, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, mas_ui.SCROLLABLE_MENU_XALIGN,"to_cafe_loop",close=False) nopredict
+            ("Do you have any phobia?", 'extra_talk_phobia')
+        ]
+
+        items = [
+            ("Can we leave?", 'cafe_leave', 20),
+            ("Nevermind", 'to_cafe_loop', 0)
+        ]
+    call screen extra_gen_list(cafe_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=False)
     return
 
 label to_cafe_loop:
     show monika staticpose at t11
     $ store.disable_zoom_button = False
-    call screen dating_loop(extraplus_acs_emptyplate, extraplus_acs_emptycup, "cafe_talkdemo", "monika_no_dessert", "monika_boopcafebeta", boop_enable=True)
+    call screen dating_loop(extraplus_acs_emptyplate, extraplus_acs_emptycup, "cafe_talk", "monika_no_dessert", "monika_boopcafebeta", boop_enable=True)
     return
 
 label cafe_leave:
@@ -176,9 +188,9 @@ label comment_cafe:
 
 label go_to_restaurant:
     python:
-        validate_files(restaurant_sprite, type=False)
+        check_file_status(restaurant_sprite, '/game/submods/ExtraPlus/submod_assets/backgrounds')
         mas_extra_location(locate=True)
-        extra_seen_label("restaurant_sorry_player", "gtrestaurantv2", "check_label_restaurant")
+        extra_seen_background("restaurant_sorry_player", "gtrestaurantv2", "check_label_restaurant")
 
 label check_label_restaurant:
     pass
@@ -255,15 +267,19 @@ label restaurant_talk:
             ("Describe yourself in three words.", 'extra_talk_3words'),
             ("What do you think is the first thing to pop into everyone's minds when they think about you?", 'extra_talk_pop'),
             ("If you were an animal, what animal would you be?", 'extra_talk_animal'),
-            ("Can we leave?", 'restaurant_leave')
-        ] 
-    call screen list_scrolling(restaurant_menu, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, mas_ui.SCROLLABLE_MENU_XALIGN,"to_restaurant_loop",close=False) nopredict
+        ]
+
+        items = [
+            ("Can we leave?", 'restaurant_leave', 20),
+            ("Nevermind", 'to_restaurant_loop', 0)
+        ]
+    call screen extra_gen_list(restaurant_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=False)
     return
 
 label to_restaurant_loop:
     show monika staticpose at t11
     $ store.disable_zoom_button = False
-    call screen dating_loop(extraplus_acs_pudding, extraplus_acs_icecream, "restaurant_talk","monika_no_food", "monika_booprestaurantbeta", boop_enable=True)
+    call screen dating_loop(extraplus_acs_pudding, extraplus_acs_icecream, "restaurant_talk", "monika_no_food", "monika_booprestaurantbeta", boop_enable=True)
     return
 
 label restaurant_leave:
@@ -420,7 +436,7 @@ label monika_no_food:
     m 1hua "Let me know if you want to come back again."
     jump to_restaurant_loop
     return
-    
+
 label restaurant_hide_acs:
     #Code inspired by YandereDev
     if monika_chr.is_wearing_acs(extraplus_acs_candles):
@@ -432,29 +448,24 @@ label restaurant_hide_acs:
                 monika_chr.remove_acs(extraplus_acs_candles)
                 monika_chr.remove_acs(extraplus_acs_pasta)
                 monika_chr.remove_acs(extraplus_acs_icecream)
+
         else:
             m 3eub "I have to put these candles away."
             m "We can never be too careful with fire!"
             $ monika_chr.remove_acs(extraplus_acs_candles)
 
     elif monika_chr.is_wearing_acs(extraplus_acs_flowers):
-        if monika_chr.is_wearing_acs(extraplus_acs_pancakes) or monika_chr.is_wearing_acs(extraplus_acs_pudding):
+        m 3eua "I'll put these flowers away, I won't be long."
+        python:
+            monika_chr.remove_acs(extraplus_acs_flowers)
+
+    elif not monika_chr.is_wearing_acs(extraplus_acs_flowers):
+        if monika_chr.is_wearing_acs(extraplus_acs_pancakes) or monika_chr.is_wearing_acs(extraplus_acs_pudding) or monika_chr.is_wearing_acs(extraplus_acs_waffles):
             m 3eua "I must put this plate away."
-            m 3eua "Also, I'll put these flowers away, I won't be long."
             python:
-                monika_chr.remove_acs(extraplus_acs_flowers)
+                monika_chr.remove_acs(extraplus_acs_waffles)
                 monika_chr.remove_acs(extraplus_acs_pancakes)
                 monika_chr.remove_acs(extraplus_acs_pudding)
-
-        elif monika_chr.is_wearing_acs(extraplus_acs_waffles):
-            m 3eua "I must put this plate away."
-            m 3eua "Also, I'll put these flowers away, I won't be long."
-            python:
-                monika_chr.remove_acs(extraplus_acs_flowers)
-                monika_chr.remove_acs(extraplus_acs_waffles)
-        else:
-            m 3eua "I'll put these flowers away, I won't be long."
-            $ monika_chr.remove_acs(extraplus_acs_flowers)
 
     call mas_transition_to_emptydesk
     pause 2.0
@@ -463,121 +474,172 @@ label restaurant_hide_acs:
     call extra_restore_bg
     return
 
+
 ################################################################################
 ## MENUS
 ################################################################################
 
-label walk_extra:
+label plus_walk:
     show monika idle at t21
     python:
+        walk_menu = [
+            ("Cafe", 'go_to_cafe'),
+            ("Restaurant", 'go_to_restaurant')
+        ]
         store.disable_zoom_button = True
-        monika_talk = renpy.substitute(renpy.random.choice(date_talk))
-        renpy.say(m, monika_talk, interact=False)
-    call screen list_scrolling(walk_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, mas_ui.SCROLLABLE_MENU_XALIGN,"screen_extraplus",close=True) nopredict
+        m_talk = renpy.substitute(renpy.random.choice(date_talk))
+        renpy.say(m, m_talk, interact=False)
+        items = [
+            ("Nevermind", 'screen_extraplus', 20)
+        ]
+    call screen extra_gen_list(walk_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
     return
 
-label minigames_extra:
+label plus_minigames:
     show monika idle at t21
     python:
+        global ttt
+        minigames_menu = [
+            minigames("Shell Game", 'minigame_sg', None),
+            minigames("Rock Paper Scissors", 'minigame_rps', None)
+        ]
+        ttt = minigames("Tic Tac Toe", 'minigame_ttt', ttt_prep)
+        minigames_menu.append(ttt)
+        
         store.disable_zoom_button = True
         m_talk = renpy.substitute(renpy.random.choice(minigames_talk))
         renpy.say(m, m_talk, interact=False)
-    call screen list_generator(minigames_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, mas_ui.SCROLLABLE_MENU_XALIGN,"screen_extraplus",close=True) nopredict
+        items = [
+            ("Nevermind", 'screen_extraplus', 20)
+        ]
+    call screen extra_gen_list(minigames_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
     return
 
-label tools_extra:
+label plus_tools:
     show monika idle at t21
-    $ store.disable_zoom_button = True
-    call screen list_scrolling(tools_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, mas_ui.SCROLLABLE_MENU_XALIGN,"screen_extraplus",close=True) nopredict
+    python:
+        tools_menu = [
+            ("View [m_name]'s Affection", 'aff_log'),
+            ("Create a gift for [m_name]", 'plus_make_gift'),
+            ("Change the window's title", 'extra_window_title'),
+            ("[m_name], I want to make a backup", 'mas_backup'),
+            ("[m_name], can you flip a coin?", 'coinflip')
+            
+        ]
+        if renpy.has_screen("chibika_chill"):
+            tools_menu.append(("Hi [player]!", 'extra_dev_mode'))
+        store.disable_zoom_button = True
+        items = [
+            ("Github Repository", 'github_submod', 20),
+            ("Nevermind", 'screen_extraplus', 0)
+        ]
+    call screen extra_gen_list(tools_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
     return
 
 ################################################################################
 ## GIFTS
 ################################################################################
 
-label make_gift:
+label plus_make_gift:
     show monika idle at t21
     python:
         gift_menu = [
-            ("Customized gift", 'make_file'),
-            ("Groceries", 'groceries'),
-            ("Objects", 'objects'),
-            ("Ribbons", 'ribbons')
+            ("Customized gift", 'plus_make_file'),
+            ("Groceries", 'plus_groceries'),
+            ("Objects", 'plus_objects'),
+            ("Ribbons", 'plus_ribbons')
         ]
-    call screen list_scrolling(gift_menu, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, mas_ui.SCROLLABLE_MENU_XALIGN,"tools_extra",close=True) nopredict
+
+        items = [
+            ("Nevermind", 'plus_tools', 20)
+        ]
+    call screen extra_gen_list(gift_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
     return
 
-label make_file:
+label plus_make_file:
     show monika idle at t11
+
     python:
-        import os
-        makegift = mas_input(_("Enter the name of the gift."),
-                            allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789",
-                            screen_kwargs={"use_return_button": True, "return_button_value": "cancel"})
+        makegift = mas_input(
+            prompt=("Enter the name of the gift."),
+            allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789",
+            screen_kwargs={"use_return_button": True, "return_button_value": "cancel"},
+        )
+
         if not makegift:
-            renpy.jump("make_file")
+            renpy.jump("plus_make_file")
+        elif makegift == "cancel":
+            renpy.jump("plus_make_gift")
         else:
-            if makegift == "cancel":
-                renpy.jump("make_gift")
-            else:
-                filepath = os.path.join(renpy.config.basedir + '/characters', makegift + '.gift')
-                f = open(filepath,"a")
-                renpy.notify("Has been successfully created.")
-                renpy.jump("make_gift")
+            filepath = os.path.join(renpy.config.basedir, 'characters', makegift + ".gift")
+            with open(filepath, "a"):
+                pass  # just create an empty file
+            renpy.notify("Has been successfully created.")
+            renpy.jump("plus_make_gift")
+            
     return
 
-label groceries:
+label plus_groceries:
     show monika idle at t21
     python:
         groceries_menu = [
-            extra_gift("Coffee", 'coffee.gift', gift_append),
-            extra_gift("Chocolates", 'chocolates.gift', gift_append),
-            extra_gift("Cupcake", 'cupcake.gift', gift_append),
-            extra_gift("Fudge", 'fudge.gift', gift_append),
-            extra_gift("Hot Chocolate", 'hotchocolate.gift', gift_append),
-            extra_gift("Candy", 'candy.gift', gift_append),
-            extra_gift("Candy Canes", 'candycane.gift', gift_append),
-            extra_gift("Candy Corn", 'candycorn.gift', gift_append),
-            extra_gift("Christmas Cookies", 'christmascookies.gift', gift_append)
+            extra_gift("Coffee", 'coffee.gift'),
+            extra_gift("Chocolates", 'chocolates.gift'),
+            extra_gift("Cupcake", 'cupcake.gift'),
+            extra_gift("Fudge", 'fudge.gift'),
+            extra_gift("Hot Chocolate", 'hotchocolate.gift'),
+            extra_gift("Candy", 'candy.gift'),
+            extra_gift("Candy Canes", 'candycane.gift'),
+            extra_gift("Candy Corn", 'candycorn.gift'),
+            extra_gift("Christmas Cookies", 'christmascookies.gift')
         ]
-        
-    call screen list_generator(groceries_menu, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, mas_ui.SCROLLABLE_MENU_XALIGN, "make_gift", close=True) nopredict
+
+        items = [
+            ("Nevermind", 'plus_make_gift', 20)
+        ]
+    call screen extra_gen_list(groceries_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
     return
 
-label objects:
+label plus_objects:
     show monika idle at t21
     python:
         objects_menu = [
-            extra_gift("Promise Ring", 'promisering.gift', gift_append),
-            extra_gift("Roses", 'roses.gift', gift_append),
-            extra_gift("Quetzal Plushie", 'quetzalplushie.gift', gift_append),
-            extra_gift("Thermos Mug", 'justmonikathermos.gift', gift_append)
+            extra_gift("Promise Ring", 'promisering.gift'),
+            extra_gift("Roses", 'roses.gift'),
+            extra_gift("Quetzal Plushie", 'quetzalplushie.gift'),
+            extra_gift("Thermos Mug", 'justmonikathermos.gift')
         ]
 
-    call screen list_generator(objects_menu, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, mas_ui.SCROLLABLE_MENU_XALIGN, "make_gift", close=True) nopredict
+        items = [
+            ("Nevermind", 'plus_make_gift', 20)
+        ]
+    call screen extra_gen_list(objects_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
     return
             
-label ribbons:
+label plus_ribbons:
     show monika idle at t21
     python:
         ribbons_menu = [
-            extra_gift("Black Ribbon", 'blackribbon.gift', gift_append),
-            extra_gift("Blue Ribbon", 'blueribbon.gift', gift_append),
-            extra_gift("Dark Purple Ribbon", 'darkpurpleribbon.gift', gift_append),
-            extra_gift("Emerald Ribbon", 'emeraldribbon.gift', gift_append),
-            extra_gift("Gray Ribbon", 'grayribbon.gift', gift_append),
-            extra_gift("Green Ribbon", 'greenribbon.gift', gift_append),
-            extra_gift("Light Purple Ribbon", 'lightpurpleribbon.gift', gift_append),
-            extra_gift("Peach Ribbon", 'peachribbon.gift', gift_append),
-            extra_gift("Pink Ribbon", 'pinkribbon.gift', gift_append),
-            extra_gift("Platinum Ribbon", 'platinumribbon.gift', gift_append),
-            extra_gift("Red Ribbon", 'redribbon.gift', gift_append),
-            extra_gift("Ruby Ribbon", 'rubyribbon.gift', gift_append),
-            extra_gift("Sapphire Ribbon", 'sapphireribbon.gift', gift_append),
-            extra_gift("Silver Ribbon", 'silverribbon.gift', gift_append),
-            extra_gift("Teal Ribbon", 'tealribbon.gift', gift_append),
-            extra_gift("Yellow Ribbon", 'yellowribbon.gift', gift_append)
+            extra_gift("Black Ribbon", 'blackribbon.gift'),
+            extra_gift("Blue Ribbon", 'blueribbon.gift'),
+            extra_gift("Dark Purple Ribbon", 'darkpurpleribbon.gift'),
+            extra_gift("Emerald Ribbon", 'emeraldribbon.gift'),
+            extra_gift("Gray Ribbon", 'grayribbon.gift'),
+            extra_gift("Green Ribbon", 'greenribbon.gift'),
+            extra_gift("Light Purple Ribbon", 'lightpurpleribbon.gift'),
+            extra_gift("Peach Ribbon", 'peachribbon.gift'),
+            extra_gift("Pink Ribbon", 'pinkribbon.gift'),
+            extra_gift("Platinum Ribbon", 'platinumribbon.gift'),
+            extra_gift("Red Ribbon", 'redribbon.gift'),
+            extra_gift("Ruby Ribbon", 'rubyribbon.gift'),
+            extra_gift("Sapphire Ribbon", 'sapphireribbon.gift'),
+            extra_gift("Silver Ribbon", 'silverribbon.gift'),
+            extra_gift("Teal Ribbon", 'tealribbon.gift'),
+            extra_gift("Yellow Ribbon", 'yellowribbon.gift')
         ]
-        
-    call screen list_generator(ribbons_menu, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, mas_ui.SCROLLABLE_MENU_XALIGN, "make_gift", close=True) nopredict
+
+        items = [
+            ("Nevermind", 'plus_make_gift', 20)
+        ]
+    call screen extra_gen_list(ribbons_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
     return
