@@ -22,6 +22,15 @@ A submod that adds small additions to Monika After Story (MAS), something that s
 <p align="center">
   <img src="https://github.com/zer0fixer/resource-repository/blob/main/Images/MAS_screenshot.png"></p>
 
+## Does the submod not work?
+(1.0.5) If you get the message "The files are not available..." Simply reinstall the submod, as some files were not found.
+
+(1.0.5) If you get the message "Because there is a 'game' folder in the submod." Watch this video:
+
+(Before 1.0.5) Here is a short video:
+
+https://user-images.githubusercontent.com/94260040/229976606-26fdf6e3-0ffc-4b0c-876a-d9a333beb318.mp4
+
 
 ## MAS Repository
 Here you can see the official Monika After Story repository!
