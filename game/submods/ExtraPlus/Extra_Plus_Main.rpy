@@ -638,7 +638,7 @@ screen submod_interactions():
         ypos 210
         textbutton ("Close") action [Hide("submod_interactions"), Jump("close_extraplus")]
         textbutton ("Date") action [Hide("submod_interactions"), Jump("plus_walk")]
-        textbutton ("Minigame") action [Hide("submod_interactions"), Jump("plus_minigames")]
+        textbutton ("Minigame") action If(extra_current_affection >= 30, true=[Hide("submod_interactions"), Jump("plus_minigames")], false=None)
         textbutton ("Addition") action [Hide("submod_interactions"), Jump("plus_tools")]
         textbutton ("Boop") action If(extra_current_affection >= 30, true=[Hide("submod_interactions"), Jump("show_boop_screen")], false=None)
 
