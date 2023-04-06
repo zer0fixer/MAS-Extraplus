@@ -526,7 +526,7 @@ label plus_tools:
             ("[m_name], can you flip a coin?", 'coinflip')
             
         ]
-        if renpy.has_screen("chibika_chill"):
+        if renpy.has_screen("chibika_chill") and os.path.exists(renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/0/"):
             tools_menu.append(("Hi [player]!", 'extra_dev_mode'))
         store.disable_zoom_button = True
         items = [

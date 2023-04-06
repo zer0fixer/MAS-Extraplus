@@ -606,9 +606,6 @@ label github_submod:
 
 #====GAME
 label extra_dev_mode:
-    if not os.path.exists(renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/"):
-        jump close_extraplus
-
     $ mas_RaiseShield_dlg()
     call screen sticker_customization
     return

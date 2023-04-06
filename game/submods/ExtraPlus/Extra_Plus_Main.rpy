@@ -74,6 +74,8 @@ default boop_war_count = 0
 default persistent.extra_boop = [0, 0, 0] #Hands, Ears.
 
 #====Chibika
+define chibi_xpos = 0.05
+define chibi_ypos = 385
 default persistent.chibika_current_costume = blanket_chibi
 define -1 blanket_chibi = [
     "sticker_up",
@@ -90,14 +92,15 @@ define -1 casual_chibi = [
     "casual_sticker_blink",
     "casual_sticker_happy"
 ]
-define chibi_sprites_0 = []
-define chibi_sprites_1 = []
-define chibi_xpos = 0.05
-define chibi_ypos = 385
-default persistent.accessory_layer_1 = 0
-default persistent.accessory_layer_2 = 0
-default persistent.hichibika = False
-default persistent.drag_chibika = False
+define -1 chibi_sprites_0 = []
+define -1 chibi_sprites_1 = []
+
+# define -1 chibi_sprites_0 = [(os.path.splitext(i)[0]) for i in os.listdir(renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/0/")]
+# define -1 chibi_sprites_1 = [(os.path.splitext(j)[0]) for j in os.listdir(renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/1/")]
+default -1 persistent.chibi_accessory_layer_1 = 0
+default -1 persistent.chibi_accessory_layer_2 = 0
+default -1 persistent.hi_chibika = False
+default -1 persistent.enable_drag_chibika = False
 
 #====ExtraPlus Buttons
 define minigames_menu = []
@@ -188,7 +191,7 @@ define _plus_not_met = [
     "That wasn't the correct answer, [player]."
 ]
 
-init python:
+init 5 python:
     #====Monika idle v2
     monika_extraplus = MASMoniIdleDisp(
         (
@@ -223,7 +226,7 @@ init python:
 # FUNCTIONS
 #===========================================================================================
 
-init python:
+init 5 python:
     #====Return a string that represents the gender of the player.
     def plus_player_gender():
         temp_person = "partner"
@@ -275,7 +278,7 @@ init python:
     
     #====Chibika
     def show_chibika_chill():
-        if store.persistent.hichibika == True:
+        if store.persistent.hi_chibika == True:
             if not visible_chibika_chill():
                 config.overlay_screens.append("chibika_chill")
         elif renpy.random.randint(1,50) == 1:
@@ -300,23 +303,20 @@ init python:
     def chibika_relax_drag(drags, drop):
         if not drop and store.mas_submod_utils.isSubmodInstalled("Noises Submod"):
             drags[0].snap(chibi_xpos, 350, 0.7)
-        if store.persistent.drag_chibika == False:
+        if store.persistent.enable_drag_chibika == False:
             pass
         else:
             drags[0].snap(chibi_xpos, chibi_ypos, 0.7)
         return
 
-    def draw_sprite_one(st, at):
-        objects = LiveComposite(
-            (119, 188),
-            (0, 0), MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/accessories/0/{}.png".format(chibi_sprites_0[persistent.accessory_layer_1]))
-            )
-        return objects, 0.1
+    def draw_sprites(st, at):
+        chibi_sprites_0_max = chibi_sprites_0[min(persistent.chibi_accessory_layer_1, len(chibi_sprites_0) - 1)]
+        chibi_sprites_1_max = chibi_sprites_1[min(persistent.chibi_accessory_layer_2, len(chibi_sprites_1) - 1)]
 
-    def draw_sprite_two(st, at):
         objects = LiveComposite(
             (119, 188),
-            (0, 0), MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/accessories/1/{}.png".format(chibi_sprites_1[persistent.accessory_layer_2]))
+            (0, 0), MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/accessories/0/{0}.png".format(chibi_sprites_0_max)),
+            (0, 0), MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/accessories/1/{0}.png".format(chibi_sprites_1_max))
             )
         return objects, 0.1
 
@@ -333,18 +333,6 @@ init python:
         disable_chibika_chill()
         if not visible_chibika_chill():
             config.overlay_screens.append("chibika_chill")
-
-    def chibika_is_available():
-        try:
-            path = renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/0/"
-            path_1 = renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/1/"
-            chibi_sprites_0 = [(os.path.splitext(archivo)[0]) for archivo in os.listdir(path)]
-            chibi_sprites_1 = [(os.path.splitext(archivo)[0]) for archivo in os.listdir(path_1)]
-            show_chibika_chill()
-
-        except:
-            store.persistent.hichibika = False
-            disable_chibika_chill()
 
     #====Zoom edit
     def extra_visible_zoom():
@@ -394,7 +382,6 @@ init python:
     ExtraButton()
     rng_cup()
     save_title_windows()
-    chibika_is_available()
 
 #===========================================================================================
 # CLASSES
@@ -450,6 +437,17 @@ init python:
             with open(file_path, 'a') as f:
                 renpy.notify('The [extraplus_gift[0]] File has been successfully created.')
             renpy.jump('plus_make_gift')
+
+#====Misc
+init 10 python:
+    chibi_sprites_0_path = renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/0/"
+    chibi_sprites_1_path = renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/1/"
+    if os.path.exists(chibi_sprites_0_path) and os.path.exists(chibi_sprites_1_path):
+        chibi_sprites_0 = [(os.path.splitext(i)[0]) for i in os.listdir(chibi_sprites_0_path)]
+        chibi_sprites_1 = [(os.path.splitext(j)[0]) for j in os.listdir(chibi_sprites_1_path)]
+        show_chibika_chill()
+    else:
+        disable_chibika_chill()
 
 #===========================================================================================
 # IMAGES
@@ -579,8 +577,7 @@ image chibika_blink_effect:
 image chibika_base = LiveComposite(
     (119, 188),
     (0, 40), "chibika_blink_effect",
-    (0, 0), DynamicDisplayable(draw_sprite_one),
-    (0, 0), DynamicDisplayable(draw_sprite_two)
+    (0, 0), DynamicDisplayable(draw_sprites)
     )
 
 image hover_sticker = LiveComposite(
@@ -589,8 +586,7 @@ image hover_sticker = LiveComposite(
         "blanket_chibi == persistent.chibika_current_costume", MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/sticker_baka.png"),
         "android_chibi == persistent.chibika_current_costume", MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/android_sticker_cat.png"),
         "casual_chibi == persistent.chibika_current_costume", MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/casual_sticker_happy.png")),
-    (0, 0), DynamicDisplayable(draw_sprite_one),
-    (0, 0), DynamicDisplayable(draw_sprite_two)
+    (0, 0), DynamicDisplayable(draw_sprites)
     )
 
 #====Coin
@@ -663,10 +659,10 @@ screen sticker_customization():
         vbox:
             style_prefix "check"
             label _("Auto Position:")
-            textbutton _("[persistent.drag_chibika]") action ToggleField(persistent, "drag_chibika")
+            textbutton _("[persistent.enable_drag_chibika]") action ToggleField(persistent, "enable_drag_chibika")
 
             label _("Show permanently:")
-            textbutton _("[persistent.hichibika]") action ToggleField(persistent, "hichibika")
+            textbutton _("[persistent.hi_chibika]") action ToggleField(persistent, "hi_chibika")
             
             label _("Show/Hide:")
             textbutton _("Click here!") action Function(remove_show_chibika)
@@ -679,18 +675,18 @@ screen sticker_customization():
             hbox:
                 style_prefix "music_menu"
                 spacing 20
-                textbutton _(" <") action SetField(persistent, "accessory_layer_1", max(persistent.accessory_layer_1 - 1, 0))
-                text _(" [persistent.accessory_layer_1]")
-                textbutton _(" >") action SetField(persistent, "accessory_layer_1", min(persistent.accessory_layer_1 + 1, len(chibi_sprites_0) - 1))
-                
+                textbutton _(" <") action SetField(persistent, "chibi_accessory_layer_1", max(persistent.chibi_accessory_layer_1 - 1, 0))
+                text _(" [persistent.chibi_accessory_layer_1]")
+                textbutton _(" >") action SetField(persistent, "chibi_accessory_layer_1", min(persistent.chibi_accessory_layer_1 + 1, len(chibi_sprites_0) - 1))
+
             label _("Sprite two:")
             hbox:
                 style_prefix "music_menu"
                 spacing 20
-                textbutton _(" <") action SetField(persistent, "accessory_layer_2", max(persistent.accessory_layer_2 - 1, 0))
-                text _(" [persistent.accessory_layer_2]")
-                textbutton _(" >") action SetField(persistent, "accessory_layer_2", min(persistent.accessory_layer_2 + 1, len(chibi_sprites_1) - 1))
-   
+                textbutton _(" <") action SetField(persistent, "chibi_accessory_layer_2", max(persistent.chibi_accessory_layer_2 - 1, 0))
+                text _(" [persistent.chibi_accessory_layer_2]")
+                textbutton _(" >") action SetField(persistent, "chibi_accessory_layer_2", min(persistent.chibi_accessory_layer_2 + 1, len(chibi_sprites_1) - 1))
+
 #====Boop
 screen boop_revamped():
     zorder 50
@@ -861,7 +857,7 @@ screen extra_no_click():
 
 #====A small Easter egg
 screen chibika_chill():
-    zorder 49
+    zorder 60
     if renpy.get_screen("hkb_overlay"):
         drag:
             child "chibika_base"
