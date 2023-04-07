@@ -10,8 +10,8 @@ init -990 python:
     store.mas_submod_utils.Submod(
         author="ZeroFixer",
         name="Extra Plus",
-        description="A submod that adds an Extra+ button, as well as adding more content!\n",
-        version="1.0.6"
+        description="A submod that adds an Extra+ button, as well as adding more content!",
+        version="1.0.7"
     )
 
 #====Register the updater
@@ -94,9 +94,6 @@ define -1 casual_chibi = [
 ]
 define -1 chibi_sprites_0 = []
 define -1 chibi_sprites_1 = []
-
-# define -1 chibi_sprites_0 = [(os.path.splitext(i)[0]) for i in os.listdir(renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/0/")]
-# define -1 chibi_sprites_1 = [(os.path.splitext(j)[0]) for j in os.listdir(renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/1/")]
 default -1 persistent.chibi_accessory_layer_1 = 0
 default -1 persistent.chibi_accessory_layer_2 = 0
 default -1 persistent.hi_chibika = False
