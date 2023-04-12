@@ -547,7 +547,7 @@ image ball:
 #====Chibika
 image chibika_blink_effect:
     block:
-        MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{}.png".format(persistent.chibika_current_costume[0]))
+        MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{0}.png".format(persistent.chibika_current_costume[0]))
         block:
             choice:
                 3
@@ -555,7 +555,7 @@ image chibika_blink_effect:
                 5
             choice:
                 7
-        MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{}.png".format(persistent.chibika_current_costume[1]))
+        MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{0}.png".format(persistent.chibika_current_costume[1]))
         choice 0.02:
             block:
                 choice:
@@ -564,7 +564,7 @@ image chibika_blink_effect:
                     6
                 choice:
                     4
-                MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{}.png".format(persistent.chibika_current_costume[0]))
+                MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{0}.png".format(persistent.chibika_current_costume[0]))
         choice 0.098:
             pass
         0.06
