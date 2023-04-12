@@ -231,7 +231,7 @@ label rps_result:
     #Monika wins
     elif moni_wins > player_wins:
         m 3eub "This time I won, [player]~"
-        m 3hubs "You put up a good fight."
+        m 3hub "You put up a good fight."
         m 3eub "I've had some luck."
         m 3eubsa "But don't feel bad, what matters most to me is that we both have fun."
         m 1hub "Next time I know you will beat me, I trust you!"
