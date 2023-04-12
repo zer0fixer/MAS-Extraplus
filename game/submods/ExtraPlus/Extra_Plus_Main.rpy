@@ -617,9 +617,11 @@ screen extraplus_button():
         ypos 50
 
         if renpy.get_screen("hkb_overlay"):
-            if mas_hotkeys.talk_enabled and mas_submod_utils.current_label != "mas_piano_setupstart":
+            if mas_hotkeys.talk_enabled:
                 textbutton ("Extra+"):
                     action Jump("view_extraplus")
+            elif mas_submod_utils.current_label == "mas_piano_setupstart":
+                    text Null()
             else:
                 textbutton("Extra+")
 
