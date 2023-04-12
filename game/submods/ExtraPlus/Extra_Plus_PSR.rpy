@@ -235,7 +235,6 @@ label rps_result:
         m 3eub "I've had some luck."
         m 3eubsa "But don't feel bad, what matters most to me is that we both have fun."
         m 1hub "Next time I know you will beat me, I trust you!"
-        $ persistent.minigames_won[0] = False
 
     #Player wins
     elif moni_wins < player_wins:
