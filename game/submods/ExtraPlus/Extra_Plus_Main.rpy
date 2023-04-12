@@ -621,7 +621,7 @@ screen extraplus_button():
                 textbutton ("Extra+"):
                     action Jump("view_extraplus")
             elif mas_submod_utils.current_label == "mas_piano_setupstart":
-                    text Null()
+                text Null()
             else:
                 textbutton("Extra+")
 
