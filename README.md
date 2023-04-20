@@ -23,11 +23,11 @@ A submod that adds small additions to Monika After Story (MAS), something that s
   <img src="https://github.com/zer0fixer/resource-repository/blob/main/Images/MAS_screenshot.png"></p>
 
 ## Does the submod not work?
-(1.0.5) If you get the message "The files are not available..." Simply reinstall the submod, as some files were not found.
+(1.0.5 or higher) If you get the message "The files are not available..." Simply reinstall the submod, as some files were not found.
 
-(1.0.5) If you get the message "Because there is a 'game' folder in the submod." Watch this video:
+(1.0.5 or higher) If you get the message "Because there is a 'game' folder in the submod." Watch this video:
 
-(Before 1.0.5) Here is a short video:
+(Before 1.0.5) Here is a short video(I know, it's the same thing, but the game gives you the warning, not the submod):
 
 https://user-images.githubusercontent.com/94260040/229976606-26fdf6e3-0ffc-4b0c-876a-d9a333beb318.mp4
 
