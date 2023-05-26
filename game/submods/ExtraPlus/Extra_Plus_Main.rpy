@@ -6,8 +6,8 @@
 #Shoutout to u/my-otter-self at reddit, who proofread the whole mod.
 
 #====Register the submod
-init -990 python:
-    store.mas_submod_utils.Submod(
+init -990 python in mas_submod_utils:
+    Submod(
         author="ZeroFixer",
         name="Extra Plus",
         description="A submod that adds an Extra+ button, as well as adding more content!",
@@ -15,18 +15,17 @@ init -990 python:
     )
 
 #====Register the updater
-init -990 python:
+init -989 python:
     if store.mas_submod_utils.isSubmodInstalled("Submod Updater Plugin"):
         store.sup_utils.SubmodUpdater(
             submod="Extra Plus",
             user_name="zer0fixer",
             repository_name="MAS-Extraplus",
-            update_dir="",
             redirected_files=(
                 "README.md"
             )
         )
-
+        
 #===========================================================================================
 # VARIABLES
 #===========================================================================================
@@ -606,7 +605,6 @@ image monika staticpose = monika_extraplus
 #===========================================================================================
 # SCREEN
 #===========================================================================================
-
 #====Simply display the button in the loop
 screen extraplus_button():
     zorder 15
@@ -621,9 +619,9 @@ screen extraplus_button():
                 textbutton ("Extra+"):
                     action Jump("view_extraplus")
             elif mas_submod_utils.current_label == "mas_piano_setupstart":
-                text Null()
+                text ("")
             else:
-                textbutton("Extra+")
+                textbutton ("Extra+")
 
 #====Submod options
 screen submod_interactions():
@@ -633,6 +631,7 @@ screen submod_interactions():
         xpos 0.05
         yanchor 1.0
         ypos 210
+
         textbutton ("Close") action [Hide("submod_interactions"), Jump("close_extraplus")]
         textbutton ("Date") action [Hide("submod_interactions"), Jump("plus_walk")]
         textbutton ("Minigame") action If(extra_current_affection >= 30, true=[Hide("submod_interactions"), Jump("plus_minigames")], false=None)
@@ -788,7 +787,7 @@ screen extra_custom_zoom():
                     xalign 0.5
                 $ store.mas_sprites.adjust_zoom()
 
-#Will be displayed when the player selects a cup
+#====Will be displayed when the player selects a cup
 screen shell_game_minigame():
     zorder 50
     style_prefix "hkb"
