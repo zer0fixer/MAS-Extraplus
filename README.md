@@ -9,3 +9,6 @@
 ## 💚 Gratitude: 💚
 
 If you liked the cheat and want updates to come out more often, put a star ⭐
+
+Me cago en Microsoft!!
+Well, I have to fix this.
