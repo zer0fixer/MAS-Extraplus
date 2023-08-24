@@ -573,7 +573,7 @@ label extra_change_title:
     python:
         player_input = mas_input(
             prompt =("What title do you want to put on this window?"),
-            allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!?()~-_.0123456789",
+            allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!?()~-_.'0123456789",
             screen_kwargs={"use_return_button": True, "return_button_value": "cancel"})
 
         if not player_input:

@@ -114,7 +114,7 @@ default Minigame_TTT = [
 # define -1 pictograms_allow = "'0adikouzFW14578*^~"
 define -1 Pictograms_font = "submods/ExtraPlus/submod_assets/Pictograms.ttf"
 
-define 20 extra_current_affection = int(_mas_getAffection())
+define 20 extra_current_affection = int(mas_affection._get_aff())
 default moldable_variable = None
 define plus_file_list = []
 define extra_folder = None
