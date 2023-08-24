@@ -11,7 +11,7 @@ init -990 python in mas_submod_utils:
         author="ZeroFixer",
         name="Extra Plus",
         description="A submod that adds an Extra+ button, as well as adding more content!",
-        version="1.0.9"
+        version="1.1.0"
     )
 
 #====Register the updater
@@ -21,6 +21,7 @@ init -989 python:
             submod="Extra Plus",
             user_name="zer0fixer",
             repository_name="MAS-Extraplus",
+            update_dir="",
             redirected_files=(
                 "README.md"
             )
