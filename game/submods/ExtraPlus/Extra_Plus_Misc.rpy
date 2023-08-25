@@ -480,9 +480,9 @@ define coin_sprites = ["sprite_coin.png","sprite_coin-n.png","coin_heads.png","c
 label aff_log:
     show monika idle at t11
     if os.path.isfile(renpy.config.basedir + '/game/submods/ExtraPlus/submod_assets/Pictograms.ttf'):
-        "Your affection with [m_name] is [extra_current_affection] {size=+5}{color=#FFFFFF}{font=[Pictograms_font]}7{/font}{/color}{/size}"
+        "Your affection with [m_name] is [int(mas_affection._get_aff())] {size=+5}{color=#FFFFFF}{font=[Pictograms_font]}7{/font}{/color}{/size}"
     else:
-        "Your affection with [m_name] is [extra_current_affection]"
+        "Your affection with [m_name] is [int(mas_affection._get_aff())]"
     window hide
     jump close_extraplus
     return

@@ -114,7 +114,7 @@ default Minigame_TTT = [
 # define -1 pictograms_allow = "'0adikouzFW14578*^~"
 define -1 Pictograms_font = "submods/ExtraPlus/submod_assets/Pictograms.ttf"
 
-define 20 extra_current_affection = int(mas_affection._get_aff())
+# define 20 extra_current_affection = int(mas_affection._get_aff())
 default moldable_variable = None
 define plus_file_list = []
 define extra_folder = None
@@ -359,7 +359,7 @@ init 5 python:
             store.mas_current_background = store.extra_old_bg
 
     def extra_seen_background(sorry, extra_label, view_label):
-        if store.extra_current_affection < 399:
+        if store.mas_affection._get_aff() < 399:
             renpy.jump(sorry)
 
         if renpy.seen_label(view_label):
@@ -635,9 +635,9 @@ screen submod_interactions():
 
         textbutton ("Close") action [Hide("submod_interactions"), Jump("close_extraplus")]
         textbutton ("Date") action [Hide("submod_interactions"), Jump("plus_walk")]
-        textbutton ("Minigame") action If(extra_current_affection >= 30, true=[Hide("submod_interactions"), Jump("plus_minigames")], false=None)
+        textbutton ("Minigame") action If(mas_affection._get_aff() >= 30, true=[Hide("submod_interactions"), Jump("plus_minigames")], false=None)
         textbutton ("Addition") action [Hide("submod_interactions"), Jump("plus_tools")]
-        textbutton ("Boop") action If(extra_current_affection >= 30, true=[Hide("submod_interactions"), Jump("show_boop_screen")], false=None)
+        textbutton ("Boop") action If(mas_affection._get_aff() >= 30, true=[Hide("submod_interactions"), Jump("show_boop_screen")], false=None)
 
 #====GAME
 screen sticker_customization():
@@ -666,7 +666,7 @@ screen sticker_customization():
             label _("Show/Hide:")
             textbutton _("Click here!") action Function(remove_show_chibika)
             
-            if extra_current_affection >= 1000:
+            if mas_affection._get_aff() >= 1000:
                 label _("Alternative version:")
                 textbutton _("Click here!") action Function(chibi_costume_change)
 
