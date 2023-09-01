@@ -28,6 +28,34 @@ A submod that adds small additions to Monika After Story (MAS), something that s
 <p align="center">
 
   <img src="https://github.com/Zero-Fixer/MAS-Extraplus-EN/assets/142945683/f20ad5e8-19e1-4d99-8e66-bdc9b3a97d06"></p>
+  
+### Submod distribution
+```go
+DDLC↴
+  game↴
+      mod_assets↴
+            monika↴
+                  a↴
+                    13 png file
+                  t↴
+                    6 png files
+      submods↴
+            Extraplus↴
+                7 rpy files
+                submod_assets↴
+                        1 ttf file
+                    backgrounds↴
+                        12 png files
+                    sfx↴
+                        4 media files
+                    sprites↴
+                        30 files png
+                        accessories↴
+                                  0↴
+                                    10 png files
+                                  1↴
+                                    10 png files
+```
 
 ## Does the submod not work?
 - **If the submod does not work (1.0.5 or higher):** If you see the message "The files are not available...," simply reinstall the submod as some files may not have been found.
@@ -36,7 +64,10 @@ A submod that adds small additions to Monika After Story (MAS), something that s
 
 https://user-images.githubusercontent.com/94260040/229976606-26fdf6e3-0ffc-4b0c-876a-d9a333beb318.mp4
 
-
+## Accessories for Chibika.
+- To add accessories for Chibika, you need to place them in `DDLC/game/submods/ExtraPlus/submod_assets/sprites/accessories` folder. The 0 folder is for head accessories and the 1 folder is for general accessories or objects.
+- You just place the PNG in its respective folder and that's it, and you can place it on your Chibika.
+- The base has been uploaded to Drive and is compatible with the other variants: [Chibika base](https://drive.google.com/file/d/1iV6VZNsMpvjngYCkQ_yJf6YZbh1ypLAP/view?usp=sharing)
 ## MAS Repository
 Here you can see the official Monika After Story repository!
 
