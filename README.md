@@ -20,6 +20,13 @@ A submod that adds small additions to Monika After Story (MAS), something that s
 - Dating
 - Additions
 - Extra+ button for player convenience
+  
+## Conditions
+In this submod there are conditions depending on Monika's affection.
+- It takes `400 of affection` to go on a date with Monika.
+- To interact (Boop) with Monika it is necessary `30 of affection` with her.
+- Similarly with the minigames you need `30 of affection` with Monika.
+- `If you want Chibika to be present permanently`, it is necessary that at least once it has appeared on your screen, for that you just have to press the Extra+ button several times until it is displayed but don't do it quickly, it will automatically add a new option in Addition as Hey Player!
 
 ## Installation
 1. Unzip the submod zip file.
@@ -68,6 +75,7 @@ https://user-images.githubusercontent.com/94260040/229976606-26fdf6e3-0ffc-4b0c-
 - To add accessories for Chibika, you need to place them in `DDLC/game/submods/ExtraPlus/submod_assets/sprites/accessories` folder. The 0 folder is for head accessories and the 1 folder is for general accessories or objects.
 - You just place the PNG in its respective folder and that's it, and you can place it on your Chibika.
 - The base has been uploaded to Drive and is compatible with the other variants: [Chibika base](https://drive.google.com/file/d/1iV6VZNsMpvjngYCkQ_yJf6YZbh1ypLAP/view?usp=sharing)
+
 ## MAS Repository
 Here you can see the official Monika After Story repository!
 
