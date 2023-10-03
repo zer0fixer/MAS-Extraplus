@@ -484,7 +484,9 @@ label plus_walk:
     python:
         walk_menu = [
             ("Cafe", 'go_to_cafe'),
-            ("Restaurant", 'go_to_restaurant')
+            ("Restaurant", 'go_to_restaurant'),
+            ("????", "screen_extraplus"),
+            ("////", "screen_extraplus")
         ]
         store.disable_zoom_button = True
         m_talk = renpy.substitute(renpy.random.choice(date_talk))
