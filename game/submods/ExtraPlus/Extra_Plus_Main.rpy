@@ -695,7 +695,7 @@ screen boop_revamped():
         yanchor 1.0
         ypos 260
         label _("Interactions\navailable:")
-        text _("Cheeks\n Head\n Nose\n Hears\n Hands\n") outlines [(2, "#808080", 0, 0)]
+        text _("Cheeks\n Head\n Nose\n Ears\n Hands\n") outlines [(2, "#808080", 0, 0)]
 
     vbox:
         style_prefix "hkb"
