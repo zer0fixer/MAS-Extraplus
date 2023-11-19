@@ -11,7 +11,7 @@ init -990 python in mas_submod_utils:
         author="ZeroFixer",
         name="Extra Plus",
         description="A submod that adds an Extra+ button, as well as adding more content!",
-        version="1.1.0"
+        version="1.2.0"
     )
 
 #====Register the updater
@@ -92,6 +92,12 @@ define -1 casual_chibi = [
     "casual_sticker_blink",
     "casual_sticker_happy"
 ]
+define -1 bikini_chibi = [
+    "bikini_sticker",
+    "bikini_sticker_blink",
+    "bikini_sticker_happy"
+]
+
 define -1 chibi_sprites_0 = []
 define -1 chibi_sprites_1 = []
 default -1 persistent.chibi_accessory_layer_1 = 0
@@ -105,20 +111,24 @@ define tools_menu = []
 define walk_menu = []
 
 #====Misc
+# default persistent._gift_history = []
 default Minigame_TTT = [
     "'",
     "#0142a4",
     "0",
     "#a80000"
 ]
-# define -1 pictograms_allow = "'0adikouzFW14578*^~"
 define -1 Pictograms_font = "submods/ExtraPlus/submod_assets/Pictograms.ttf"
-
-# define 20 extra_current_affection = int(mas_affection._get_aff())
+default plus_snack_time = None
 default moldable_variable = None
-define plus_file_list = []
-define extra_folder = None
-
+default 5 extra_plus_files_approved = plus_files_exist()
+define -5 extra_plus_folders = [
+    renpy.config.basedir + "/game/submods/ExtraPlus/Extra_Plus_Main.rpy",
+    renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/Pictograms.ttf",
+    renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/backgrounds/cafe.png",
+    renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sfx/cup_shuffle.mp3",
+    renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/sticker_up.png"
+]
 #====BG
 define extra_old_bg = None
 define extra_chair = None
@@ -134,7 +144,17 @@ default persistent.save_window_title = None
 
 
 #====Minigames variables
-#====Cup coordinates
+# Who win?
+default persistent.win_minigame = {
+    "monika": {
+        "rps": False,
+        "ttt": False
+    },
+    "player": {
+        "rps": False,
+        "ttt": False
+    }
+}
 
 #====RPS
 define rps_your_choice = 0
@@ -224,6 +244,41 @@ init 5 python:
 #===========================================================================================
 
 init 5 python:
+    def get_monika_level():
+        global icon
+        icon = 0
+        affection = mas_affection._get_aff()
+        if affection >= 400:
+            icon = 8
+        elif affection >= 30:
+            icon = 7
+        elif affection <= -30:
+            icon = 1
+        elif affection <= -75:
+            icon = "!"
+        return "{size=+5}{color=#FFFFFF}{font=submods/ExtraPlus/submod_assets/Pictograms.ttf}" + str(icon) + "{/font}{/color}{/size}"
+
+    # def buscar_archivo():
+    #     nombre_archivo = "Extra_Plus_Main.rpy"
+    #     directorio = renpy.config.basedir + "/game/submods/"
+    #     """Busca un archivo en un directorio y sus subdirectorios."""
+    #     for root, dirs, files in os.walk(directorio):
+    #         if nombre_archivo in files:
+    #             return os.path.join(root, nombre_archivo)
+    #     return None
+
+    # def folder_exist(file):
+    #     return os.access(
+    #         os.path.normcase(renpy.config.basedir + file),
+    #         os.F_OK
+    #     )
+
+    def plus_files_exist():
+        for archivo in extra_plus_folders:
+            if not os.access(os.path.normcase(archivo), os.F_OK):
+                return False
+        return True
+
     #====Return a string that represents the gender of the player.
     def plus_player_gender():
         temp_person = "partner"
@@ -250,20 +305,20 @@ init 5 python:
             config.window_title = persistent.save_window_title
 
     #====It checks if the files of a sprite exist.
-    def check_file_status(plus_sprites, path):
-        try:
-            extra_folder = os.listdir(renpy.config.basedir + path)
-            plus_file_list = [a for a in plus_sprites if a in extra_folder]
-            if not set(plus_file_list) == set(plus_sprites):
-                renpy.show("monika idle", at_list=[t11])
-                renpy.call_screen("dialog", message="The files are not available...", ok_action=Jump("close_extraplus"))
-        except OSError as e:
-            renpy.show("monika idle", at_list=[t11])
-            renpy.call_screen("dialog", message="Because there is a 'game' folder in the submod.", ok_action=Jump("close_extraplus"))   
+    # I don't see any need to verify the files, it will be checked by hand if the submod is functional.
+    # def check_file_status(plus_sprites, path):
+    #     try:
+    #         extra_folder = os.listdir(renpy.config.basedir + path)
+    #         plus_file_list = [a for a in plus_sprites if a in extra_folder]
+    #         if not set(plus_file_list) == set(plus_sprites):
+    #             renpy.show("monika idle", at_list=[t11])
+    #             renpy.call_screen("dialog", message="The files are not available...", ok_action=Jump("close_extraplus"))
+    #     except OSError as e:
+    #         renpy.show("monika idle", at_list=[t11])
+    #         renpy.call_screen("dialog", message="Because there is a 'game' folder in the submod.", ok_action=Jump("close_extraplus"))   
 
     #====Functions for submod operation
     def Extraplus_show():
-        show_chibika_chill()
         renpy.call_screen("submod_interactions")
 
     def ExtraButton():
@@ -276,9 +331,6 @@ init 5 python:
     #====Chibika
     def show_chibika_chill():
         if store.persistent.hi_chibika == True:
-            if not visible_chibika_chill():
-                config.overlay_screens.append("chibika_chill")
-        elif renpy.random.randint(1,50) == 1:
             if not visible_chibika_chill():
                 config.overlay_screens.append("chibika_chill")
 
@@ -315,6 +367,7 @@ init 5 python:
             (0, 0), MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/accessories/0/{0}.png".format(chibi_sprites_0_max)),
             (0, 0), MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/accessories/1/{0}.png".format(chibi_sprites_1_max))
             )
+            
         return objects, 0.1
 
     def chibi_costume_change():
@@ -359,7 +412,7 @@ init 5 python:
             store.mas_current_background = store.extra_old_bg
 
     def extra_seen_background(sorry, extra_label, view_label):
-        if store.mas_affection._get_aff() < 399:
+        if store.mas_affection._get_aff() < 300:
             renpy.jump(sorry)
 
         if renpy.seen_label(view_label):
@@ -437,11 +490,11 @@ init 5 python:
 
 #====Misc
 init 10 python:
-    chibi_sprites_0_path = renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/0/"
-    chibi_sprites_1_path = renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/1/"
-    if os.path.exists(chibi_sprites_0_path) and os.path.exists(chibi_sprites_1_path):
-        chibi_sprites_0 = [(os.path.splitext(i)[0]) for i in os.listdir(chibi_sprites_0_path)]
-        chibi_sprites_1 = [(os.path.splitext(j)[0]) for j in os.listdir(chibi_sprites_1_path)]
+    chibi_path = renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/0/"
+    chibi_path_one = renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/1/"
+    if os.path.exists(chibi_path) and os.path.exists(chibi_path_one):
+        chibi_sprites_0 = [(os.path.splitext(i)[0]) for i in os.listdir(chibi_path)]
+        chibi_sprites_1 = [(os.path.splitext(j)[0]) for j in os.listdir(chibi_path_one)]
         show_chibika_chill()
     else:
         disable_chibika_chill()
@@ -521,7 +574,7 @@ image e_scissors = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/scis
 image card_back = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/card_back.png")
 
 #====SG
-image extra_cup = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/[cup_skin]")
+image extra_cup = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{0}".format(cup_skin))
 image extra_cup_hover = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/cup_hover.png")
 image extra_cup_idle = im.Scale("mod_assets/other/transparent.png", 200, 260)
 image extra_ball = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/ball.png")
@@ -579,10 +632,7 @@ image chibika_base = LiveComposite(
 
 image hover_sticker = LiveComposite(
     (119, 188),
-    (0, 40), ConditionSwitch(
-        "blanket_chibi == persistent.chibika_current_costume", MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/sticker_baka.png"),
-        "android_chibi == persistent.chibika_current_costume", MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/android_sticker_cat.png"),
-        "casual_chibi == persistent.chibika_current_costume", MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/casual_sticker_happy.png")),
+    (0, 40), MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{0}.png".format(persistent.chibika_current_costume[2])),
     (0, 0), DynamicDisplayable(draw_sprites)
     )
 
@@ -615,14 +665,20 @@ screen extraplus_button():
         yanchor 1.0
         ypos 50
 
-        if renpy.get_screen("hkb_overlay"):
-            if mas_hotkeys.talk_enabled:
-                textbutton ("Extra+"):
-                    action Jump("view_extraplus")
+        python:
+            screen_exists = renpy.get_screen("hkb_overlay")
+            talk_enabled = mas_hotkeys.talk_enabled
+            buttons = _("Extra+") if extra_plus_files_approved else _("Error!")
+            function = Jump("view_extraplus") if extra_plus_files_approved else Show("dialog", message="An error occurred, the submod is not installed correctly.\nPlease see the installation tutorial.", ok_action=Hide("dialog"))
+
+        if screen_exists:
+            if talk_enabled:
+                textbutton buttons:
+                    action function
             elif mas_submod_utils.current_label == "mas_piano_setupstart":
                 text ("")
             else:
-                textbutton ("Extra+")
+                textbutton buttons
 
 #====Submod options
 screen submod_interactions():
@@ -666,11 +722,11 @@ screen sticker_customization():
             label _("Show/Hide:")
             textbutton _("Click here!") action Function(remove_show_chibika)
             
-            if mas_affection._get_aff() >= 1000:
+            if mas_affection._get_aff() >= 300:
                 label _("Alternative version:")
                 textbutton _("Click here!") action Function(chibi_costume_change)
 
-            label _("Sprite One:")
+            label _("Primary Accessories:")
             hbox:
                 style_prefix "music_menu"
                 spacing 20
@@ -678,7 +734,7 @@ screen sticker_customization():
                 text _(" [persistent.chibi_accessory_layer_1]")
                 textbutton _(" >") action SetField(persistent, "chibi_accessory_layer_1", min(persistent.chibi_accessory_layer_1 + 1, len(chibi_sprites_0) - 1))
 
-            label _("Sprite two:")
+            label _("Secondary Accessories:")
             hbox:
                 style_prefix "music_menu"
                 spacing 20
@@ -691,9 +747,10 @@ screen boop_revamped():
     zorder 50
     vbox:
         style_prefix "check"
-        xpos 1000
-        yanchor 1.0
-        ypos 260
+        yanchor 0.5
+        xanchor 1.0
+        xpos 1.0
+        ypos 0.5
         label _("Interactions\navailable:")
         text _("Cheeks\n Head\n Nose\n Ears\n Hands\n") outlines [(2, "#808080", 0, 0)]
 
@@ -854,7 +911,7 @@ screen extra_no_click():
         idle "mod_assets/other/transparent.png"
         action NullAction()
 
-#====A small Easter egg
+#====Chibika
 screen chibika_chill():
     zorder 60
     if renpy.get_screen("hkb_overlay"):
@@ -905,18 +962,17 @@ screen extra_gen_list(extra_list, extra_area, others, close=None):
                 id "viewport"
                 yfill False
                 mousewheel True
-
                 vbox:
-                    if isinstance(extra_list[0], tuple):
-                        for i in extra_list:
-                            textbutton i[0]:
-                                xsize extra_area[2]
-                                action [Hide("extra_gen_list"), Jump(i[1])]
-                    else:
-                        for m in extra_list:
-                            textbutton m.name:
-                                xsize extra_area[2]
-                                action [Hide("extra_gen_list"), Function(m)]
+                    if len(extra_list) > 0:
+                        for item in extra_list:
+                            if isinstance(item, tuple):
+                                textbutton item[0]:
+                                    xsize extra_area[2]
+                                    action [Hide("extra_gen_list"), Jump(item[1])]
+                            else:
+                                textbutton item.name:
+                                    xsize extra_area[2]
+                                    action [Hide("extra_gen_list"), Function(item)]
 
             for items in others:
                 if items[2] > 0:
@@ -939,12 +995,7 @@ screen extra_gen_list(extra_list, extra_area, others, close=None):
             textbutton ("Close") style "hkb_button" action [Hide("extra_gen_list"), Jump("close_extraplus")]
 
 #====Background loop
-screen dating_loop(acs, acs_two, ask, finish, label_boop, boop_enable=None):
-    if monika_chr.is_wearing_acs(acs) or monika_chr.is_wearing_acs(acs_two):
-        pass
-    else:
-        timer 900.0 action [Hide("dating_loop"), Jump(finish)]
-
+screen dating_loop(ask, label_boop, boop_enable=None):
     zorder 50
     vbox:
         xpos 0.05 yanchor 1.0
@@ -960,6 +1011,22 @@ screen dating_loop(acs, acs_two, ask, finish, label_boop, boop_enable=None):
             idle "zoneone"
             xpos 620 ypos 235
             action [Hide("dating_loop"), Jump(label_boop)]
+
+screen _timer_monika(time, finish):
+    vbox:
+        text "[plus_snack_time]"
+    
+    # Cambia la asignación de la variable fine_moni de esta manera:
+    python:
+        fine_moni = False
+    
+    timer time action [SetVariable("fine_moni", True)]
+
+    # Verifica si la pantalla "dating_loop" existe antes de ocultarla y saltar a "finish".
+    if fine_moni and renpy.has_screen("dating_loop"):
+        action [Hide("timer_monika"), Hide("dating_loop"), Jump(finish)]
+
+
 
 #====Boop war?
 screen boop_event(timelock, endlabel, editlabel):
@@ -1304,6 +1371,136 @@ init -2 python in mas_background:
     def _restaurant_exit(_new, **kwargs):
         """
         Exit programming point for restaurant background
+        """
+        #O31
+        if store.persistent._mas_o31_in_o31_mode:
+            store.mas_o31ShowVisuals()
+
+        #D25
+        elif store.persistent._mas_d25_deco_active:
+            store.mas_d25ShowVisuals()
+
+        store.monika_chr.tablechair.table = "def"
+        store.monika_chr.tablechair.chair = "def"
+
+#====Pool====#
+
+#Day images
+image submod_background_pool_day = "submods/ExtraPlus/submod_assets/backgrounds/pool.png"
+image submod_background_pool_rain = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain.png"
+image submod_background_pool_overcast = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain.png"
+image submod_background_pool_snow = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain.png"
+
+#Night images
+image submod_background_pool_night = "submods/ExtraPlus/submod_assets/backgrounds/pool-n.png"
+image submod_background_pool_rain_night = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-n.png"
+image submod_background_pool_overcast_night = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-n.png"
+image submod_background_pool_snow_night = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-n.png"
+
+#Sunset images
+image submod_background_pool_ss = "submods/ExtraPlus/submod_assets/backgrounds/pool-ss.png"
+image submod_background_pool_rain_ss = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-ss.png"
+image submod_background_pool_overcast_ss = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-ss.png"
+image submod_background_pool_snow_ss = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-ss.png"
+
+init -1 python:
+    submod_background_pool = MASFilterableBackground(
+        "submod_background_pool",
+        "Pool (Extra+)",
+
+        MASFilterWeatherMap(
+            day=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_pool_day",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_pool_rain",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_pool_overcast",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_pool_snow",
+            }),
+            night=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_pool_night",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_pool_rain_night",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_pool_overcast_night",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_pool_snow_night",
+            }),
+            sunset=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_pool_ss",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_pool_rain_ss",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_pool_overcast_ss",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_pool_snow_ss",
+            }),
+        ),
+
+        MASBackgroundFilterManager(
+            MASBackgroundFilterChunk(
+                False,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_NIGHT,
+                    60
+                )
+            ),
+            MASBackgroundFilterChunk(
+                True,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_SUNSET,
+                    60,
+                    30*60,
+                    10,
+                ),
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_DAY,
+                    60
+                ),
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_SUNSET,
+                    60,
+                    30*60,
+                    10,
+                ),
+            ),
+            MASBackgroundFilterChunk(
+                False,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_NIGHT,
+                    60
+                )
+            )
+        ),
+
+        #FOR BACKGROUND PROPERTIES (DON'T TOUCH "ENTRY_PP:/EXIT_PP:)
+        disable_progressive=False,
+        hide_masks=False,
+        hide_calendar=True,
+        unlocked=False,
+        entry_pp=store.mas_background._pool_entry,
+        exit_pp=store.mas_background._pool_exit,
+        ex_props={"skip_outro": None}
+    )
+
+init -2 python in mas_background:
+    def _pool_entry(_old, **kwargs):
+        """
+        Entry programming point for pool background
+
+        NOTE: ANYTHING IN THE `_old is None` CHECK WILL BE RUN **ON LOAD ONLY**
+        IF IT IS IN THE CORRESPONDING 'else' BLOCK, IT WILL RUN WHEN THE BACKGROUND IS CHANGED DURING THE SESSION
+
+        IF YOU WANT IT TO RUN IN BOTH CASES, SIMPLY PUT IT AFTER THE ELSE BLOCK
+        """
+        if kwargs.get("startup"):
+            pass
+
+        else:
+            store.mas_o31HideVisuals()
+            store.mas_d25HideVisuals()
+
+        store.monika_chr.tablechair.table = "submod_pool"
+        store.monika_chr.tablechair.chair = "submod_pool"
+
+    def _pool_exit(_new, **kwargs):
+        """
+        Exit programming point for pool background
         """
         #O31
         if store.persistent._mas_o31_in_o31_mode:

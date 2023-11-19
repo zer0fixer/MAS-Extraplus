@@ -4,7 +4,7 @@
 
 #====Shell Game
 label minigame_sg:
-    $ check_file_status(cup_list, '/game/submods/ExtraPlus/submod_assets/sprites')
+    # $ check_file_status(cup_list, '/game/submods/ExtraPlus/submod_assets/sprites')
     show monika 1eub at t11
     m 1hua "Okay, what difficulty do you want?{nw}"
     menu:

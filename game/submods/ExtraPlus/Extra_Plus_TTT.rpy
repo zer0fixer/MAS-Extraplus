@@ -1,7 +1,7 @@
 #===========================================================================================
 # MINIGAME#2
 #===========================================================================================
-define ttt_sprite = ["line.png","line_moni.png","line_player.png","notebook.png"]
+# define ttt_sprite = ["line.png","line_moni.png","line_player.png","notebook.png"]
 
 #====Tic-Tac-Toe
 init 10 python:
@@ -67,15 +67,15 @@ init 10 python:
 
             def ttt_check_state():
                 if ttt.state != 0:
-                        if abs(ttt.state) < 9:
-                            renpy.call_in_new_context("minigame_ttt_m_comment", ttt.state < 0)
-                            ttt(restart = True, winner = ttt.state < 0)
-                        elif ttt.state == -9:
-                            renpy.call_in_new_context("minigame_ttt_m_comment", 3)
-                            ttt(restart = True, winner = 0)
-                        else:
-                            renpy.call_in_new_context("minigame_ttt_m_comment", 2)
-                            ttt(restart = True)
+                    if abs(ttt.state) < 9:
+                        renpy.call_in_new_context("minigame_ttt_m_comment", ttt.state < 0)
+                        ttt(restart = True, winner = ttt.state < 0)
+                    elif ttt.state == -9:
+                        renpy.call_in_new_context("minigame_ttt_m_comment", 3)
+                        ttt(restart = True, winner = 0)
+                    else:
+                        renpy.call_in_new_context("minigame_ttt_m_comment", 2)
+                        ttt(restart = True)
 
             def ttt_ai():
                 w_lines, l_lines, f_lines = [], [], []
@@ -195,10 +195,10 @@ screen minigame_ttt_scr():
 
 #====Label
 label minigame_ttt:
-    $ check_file_status(ttt_sprite, '/game/submods/ExtraPlus/submod_assets/sprites')
-    if not os.path.isfile(renpy.config.basedir + '/game/submods/ExtraPlus/submod_assets/Pictograms.ttf'):
-        show monika idle at t11
-        call screen dialog("A font is needed here, you know?",ok_action=Jump("close_extraplus"))
+    # $ check_file_status(ttt_sprite, '/game/submods/ExtraPlus/submod_assets/sprites')
+    # if not os.path.isfile(renpy.config.basedir + '/game/submods/ExtraPlus/submod_assets/Pictograms.ttf'):
+    #     show monika idle at t11
+    #     call screen dialog("A font is needed here, you know?",ok_action=Jump("close_extraplus"))
 
     show monika 1hua at t21
     show notebook zorder 12 at animated_book
@@ -223,6 +223,8 @@ label minigame_ttt_m_turn:
 label minigame_ttt_m_comment(id = 0):
     show monika 1hua at t21
     if id == 0:
+        # if persistent.win_minigame["monika"]["ttt"] == True:
+        #     ""
         #Monika Wins
         $ moldable_variable = renpy.random.randint(0, 2)
         if moldable_variable == 0:
@@ -234,6 +236,7 @@ label minigame_ttt_m_comment(id = 0):
         else:
             m 4nub "Don't worry!"
             m 4hua "I know that you'll win next time."
+        # $ persistent.win_minigame["monika"]["ttt"] = True
         #Player Wins
     elif id == 1:
         $ moldable_variable = renpy.random.randint(0, 1)
@@ -243,6 +246,7 @@ label minigame_ttt_m_comment(id = 0):
         else:
             m 1hub "Oh, you've won this one."
             m 1eub "But I'll try to beat you, [mas_get_player_nickname()]!"
+        # $ persistent.win_minigame["player"]["ttt"] = True
         #Tie
     elif id == 2:
         $ moldable_variable = renpy.random.randint(0, 1)
@@ -253,6 +257,9 @@ label minigame_ttt_m_comment(id = 0):
             m 3hua "Don't worry, [player]."
             m 3hua "The plan is for us to have fun as a couple~"
             m 3hub "I wish you luck, [mas_get_player_nickname()]!"
+        # $ persistent.win_minigame["monika"]["ttt"] = False
+        # $ persistent.win_minigame["player"]["ttt"] = False
+        
         #Reset
     else:
         $ moldable_variable = renpy.random.randint(0, 1)

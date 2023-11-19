@@ -95,7 +95,7 @@ label extra_restore_bg(label="ch30_visual_skip"):
 
 label go_to_cafe:
     python:
-        check_file_status(cafe_sprite, '/game/submods/ExtraPlus/submod_assets/backgrounds')
+        # check_file_status(cafe_sprite, '/game/submods/ExtraPlus/submod_assets/backgrounds')
         mas_extra_location(locate=True)
         extra_seen_background("cafe_sorry_player", "gtcafev2", "check_label_cafe")
 
@@ -164,10 +164,11 @@ label cafe_talk:
 label to_cafe_loop:
     show monika staticpose at t11
     $ store.disable_zoom_button = False
-    call screen dating_loop(extraplus_acs_emptyplate, extraplus_acs_emptycup, "cafe_talk", "monika_no_dessert", "monika_boopcafebeta", boop_enable=True)
+    call screen dating_loop("cafe_talk", "monika_boopcafebeta", boop_enable=True)
     return
 
 label cafe_leave:
+    hide screen _timer_monika
     show monika 1hua at t11
     m 1eta "Oh, you want us to go back?"
     m 1eub "Sounds good to me!"
@@ -188,7 +189,7 @@ label comment_cafe:
 
 label go_to_restaurant:
     python:
-        check_file_status(restaurant_sprite, '/game/submods/ExtraPlus/submod_assets/backgrounds')
+        # check_file_status(restaurant_sprite, '/game/submods/ExtraPlus/submod_assets/backgrounds')
         mas_extra_location(locate=True)
         extra_seen_background("restaurant_sorry_player", "gtrestaurantv2", "check_label_restaurant")
 
@@ -279,15 +280,101 @@ label restaurant_talk:
 label to_restaurant_loop:
     show monika staticpose at t11
     $ store.disable_zoom_button = False
-    call screen dating_loop(extraplus_acs_pudding, extraplus_acs_icecream, "restaurant_talk", "monika_no_food", "monika_booprestaurantbeta", boop_enable=True)
+    call screen dating_loop("restaurant_talk", "monika_booprestaurantbeta", boop_enable=True)
     return
 
 label restaurant_leave:
+    hide screen _timer_monika
     show monika 1hua at t11
     m 1eta "Oh,{w=0.3} you're ready for us to leave?"
     m 1eub "Sounds good to me!"
     m 3hua "But before we go..."
     jump restaurant_hide_acs
+
+#====Pool
+
+# label go_to_pool:
+#     python:
+#         # check_file_status(cafe_sprite, '/game/submods/ExtraPlus/submod_assets/backgrounds')
+#         mas_extra_location(locate=True)
+#         extra_seen_background("pool_sorry_player", "gtpoolv2", "check_label_pool")
+
+# label check_label_pool:
+#     pass
+
+# label gtpool:
+#     show monika 1eua at t11
+#     if mas_isDayNow():
+#         jump cafe_init
+
+#     elif mas_isNightNow():
+#         jump cafe_init
+#     else:
+#         m 1eub "Another time then, [mas_get_player_nickname()]."
+#         jump screen_extraplus
+#     return
+
+# label gtpoolv2:
+#     show monika 1eua at t11
+#     if mas_isDayNow():
+#         m 3wub "Do you want to go to the cafe again?"
+#         m 2hub "The previous time we went, I had a lot of fun!"
+#         m 2eubsa "So glad to hear it [player]!"
+#         m 1hubsb "Well, let's go [mas_get_player_nickname()]~"
+#         jump cafe_init
+#     elif mas_isNightNow():
+#         m 3wub "Oh, do you want to go out to the cafe again?"
+#         m 2hub "The previous time we went, it was very romantic~"
+#         m 2eubsa "So glad to go again [player]!"
+#         m 1hubsb "Let's go [mas_get_player_nickname()]~"
+#         jump cafe_init
+#     else:
+#         m 1eub "Next time then, [mas_get_player_nickname()]."
+#         jump screen_extraplus
+#     return
+
+# label pool_talk:
+#     show monika staticpose at t21
+#     python:
+#         store.disable_zoom_button = True
+#         cafe_menu = [
+#             ("How are you today?", 'extra_talk_feel'),
+#             ("What's your greatest ambition?", 'extra_talk_ambition'),
+#             ("Our communication is very limited, don't you think?", 'extra_talk_you'),
+#             ("How do you see us in 10 years?", 'extra_talk_teen'),
+#             ("What is your best memory that you currently have?", 'extra_talk_memory'),
+#             ("Do you have any phobia?", 'extra_talk_phobia')
+#         ]
+
+#         items = [
+#             ("Can we leave?", 'cafe_leave', 20),
+#             ("Nevermind", 'to_cafe_loop', 0)
+#         ]
+#     call screen extra_gen_list(cafe_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=False)
+#     return
+
+# label to_cafe_loop:
+#     show monika staticpose at t11
+#     $ store.disable_zoom_button = False
+#     call screen dating_loop(extraplus_acs_emptyplate, extraplus_acs_emptycup, "cafe_talk", "monika_no_dessert", "monika_boopcafebeta", boop_enable=True)
+#     return
+
+# label cafe_leave:
+#     show monika 1hua at t11
+#     m 1eta "Oh, you want us to go back?"
+#     m 1eub "Sounds good to me!"
+#     m 3hua "But before we go..."
+#     jump cafe_hide_acs
+
+# label comment_cafe:
+#     m 1hubsa "Thank you for asking me out."
+#     m 1eubsb "It is nice to have these moments as a couple!"
+#     m 1eubsa "I feel very fortunate to have met you and that you keep choosing me every day."
+#     m 1ekbsa "I love you, [mas_get_player_nickname()]!"
+#     $ mas_DropShield_dlg()
+#     $ mas_ILY()
+#     jump ch30_visual_skip
+#     return
 
 #===========================================================================================
 # Others
@@ -485,8 +572,7 @@ label plus_walk:
         walk_menu = [
             ("Cafe", 'go_to_cafe'),
             ("Restaurant", 'go_to_restaurant'),
-            ("????", "screen_extraplus"),
-            ("////", "screen_extraplus")
+            ("Pool", "screen_extraplus")
         ]
         store.disable_zoom_button = True
         m_talk = renpy.substitute(renpy.random.choice(date_talk))
@@ -525,11 +611,10 @@ label plus_tools:
             ("Create a gift for [m_name]", 'plus_make_gift'),
             ("Change the window's title", 'extra_window_title'),
             ("[m_name], I want to make a backup", 'mas_backup'),
-            ("[m_name], can you flip a coin?", 'coinflip')
+            ("[m_name], can you flip a coin?", 'coinflip'),
+            ("Hi [player]!", 'extra_dev_mode')
             
         ]
-        if renpy.has_screen("chibika_chill") and os.path.exists(renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/0/"):
-            tools_menu.append(("Hi [player]!", 'extra_dev_mode'))
         store.disable_zoom_button = True
         items = [
             ("Github Repository", 'github_submod', 20),

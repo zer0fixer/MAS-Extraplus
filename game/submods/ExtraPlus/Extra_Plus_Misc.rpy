@@ -475,21 +475,18 @@ label monika_earsbeta:
 #===========================================================================================
 # EXTRAS
 #===========================================================================================
-define coin_sprites = ["sprite_coin.png","sprite_coin-n.png","coin_heads.png","coin_tails.png"]
 
 label aff_log:
+    $ monika_level = get_monika_level()
     show monika idle at t11
-    if os.path.isfile(renpy.config.basedir + '/game/submods/ExtraPlus/submod_assets/Pictograms.ttf'):
-        "Your affection with [m_name] is [int(mas_affection._get_aff())] {size=+5}{color=#FFFFFF}{font=[Pictograms_font]}7{/font}{/color}{/size}"
-    else:
-        "Your affection with [m_name] is [int(mas_affection._get_aff())]"
+    "Your affection with [m_name] is [int(mas_affection._get_aff())] [monika_level]"
     window hide
     jump close_extraplus
     return
 
 label coinflip:
-    python:
-        check_file_status(coin_sprites, '/game/submods/ExtraPlus/submod_assets/sprites')
+    # python:
+    #     check_file_status(coin_sprites, '/game/submods/ExtraPlus/submod_assets/sprites')
 
     show monika 1hua at t11
     python:
@@ -536,13 +533,14 @@ label mas_backup:
     window hide
     python:
         import os, sys, subprocess
-        #Monika will open the mod data folder
+        # Monika will open the mod data folder
         try:
+            savedir = os.path.join(renpy.config.savedir, "")
             if sys.platform == "win32":
-                os.startfile(renpy.config.savedir)
+                os.startfile(savedir)
             else:
                 opener = "open" if sys.platform == "darwin" else "xdg-open"
-                subprocess.call([opener, renpy.config.savedir])
+                subprocess.call([opener, savedir])
         except:
             renpy.jump("mas_backup_fail")
     jump close_extraplus

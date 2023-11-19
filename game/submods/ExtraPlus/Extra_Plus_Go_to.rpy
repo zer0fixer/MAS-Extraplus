@@ -2,7 +2,7 @@
 # CAFE
 #===========================================================================================
 
-define cafe_sprite = ["cafe.png","cafe_rain.png","cafe_rain-n.png","cafe_rain-ss.png","cafe-n.png","cafe-ss.png"]
+# define cafe_sprite = ["cafe.png","cafe_rain.png","cafe_rain-n.png","cafe_rain-ss.png","cafe-n.png","cafe-ss.png"]
 default dessert_player = None
 
 label cafe_init:
@@ -52,6 +52,8 @@ label cafe_cakes:
             m 1ekb "I'd give you mine, but your screen limits me from doing so..."
             m 3hka "I hope you at least have a cup of coffee!"
     m 3hua "Ehehe~"
+    $ plus_snack_time = random.randint(60.00, 90.00)
+    show screen _timer_monika(plus_snack_time, "monika_no_dessert")
     jump to_cafe_loop
     return
 
@@ -267,7 +269,7 @@ label extra_talk_memory:
 #===========================================================================================
 
 default persistent._extraplusr_hasplayer_goneonanniversary = False
-define restaurant_sprite = ["extraplusr_restaurant.png","extraplusr_restaurant_rain.png","extraplusr_restaurant_rain-n.png","extraplusr_restaurant_rain-ss.png","extraplusr_restaurant-n.png","extraplusr_restaurant-ss.png"]
+# define restaurant_sprite = ["extraplusr_restaurant.png","extraplusr_restaurant_rain.png","extraplusr_restaurant_rain-n.png","extraplusr_restaurant_rain-ss.png","extraplusr_restaurant-n.png","extraplusr_restaurant-ss.png"]
 default food_player = None
 
 label restaurant_init:
@@ -319,6 +321,8 @@ label restaurant_cakes:
             m 1ekb "I'd share my food with you,{w=0.3} but your screen is in the way..."
             m 3hka "Hopefully you at least have a drink with you!"
             m 3hua "Ehehe~"
+    $ plus_snack_time = random.randint(800, 1100)
+    show screen _timer_monika(plus_snack_time, "monika_no_food")
     jump to_restaurant_loop
     return
     
@@ -726,3 +730,30 @@ label extra_talk_pop:
     m 6hubsb "I love you so much,{w=0.3} [mas_get_player_nickname()]~"
     jump to_restaurant_loop
     return
+
+#===========================================================================================
+# Pool
+#===========================================================================================
+
+# label pool_init:
+#     $ HKBHideButtons()
+#     hide monika
+#     scene black
+#     with dissolve
+#     pause 2.0
+#     call mas_background_change(submod_background_pool, skip_leadin=True, skip_outro=True)
+#     show monika 1eua at t11
+#     $ HKBShowButtons()
+#     jump cafe_cakes
+
+
+# label pool_sorry_player:
+#     show monika idle at t11
+#     m 1ekd "I'm so sorry [player]."
+#     m 1ekc "But I don't know how to use that place."
+#     m 3lka "I'm still learning how to code and I don't want something bad to happen because of me..."
+#     m 3hua "I know very well that you wanted to go out to the pool."
+#     m 1eua "But, someday I will know how to use it, [player]."
+#     m 1eub "Just be patient, okay~"
+#     jump close_extraplus
+#     return

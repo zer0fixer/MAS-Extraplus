@@ -1,12 +1,12 @@
 #===========================================================================================
 # MINIGAME#3
 #===========================================================================================
-define rps_sprites = ["card_back.png","paper.png","rock.png","scissors.png"]
+# define rps_sprites = ["card_back.png","paper.png","rock.png","scissors.png"]
 
 #====Rock Paper Scissors
 label minigame_rps:
     python:
-        check_file_status(rps_sprites, '/game/submods/ExtraPlus/submod_assets/sprites')
+        # check_file_status(rps_sprites, '/game/submods/ExtraPlus/submod_assets/sprites')
         mas_MUMURaiseShield()
     show monika 1hua at t21
     show card_back zorder 12:
