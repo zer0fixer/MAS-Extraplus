@@ -4,7 +4,7 @@
 
 #====Shell Game
 label minigame_sg:
-    $ validate_files(cup_list, type=True)
+    # $ check_file_status(cup_list, '/game/submods/ExtraPlus/submod_assets/sprites')
     show monika 1eub at t11
     m 1hua "Okay, what difficulty do you want?{nw}"
     menu:
@@ -113,7 +113,6 @@ label loop_game:
         elif original_cup[move_cup_2] == ball_position:
             ball_position = original_cup[move_cup_1]
 
-    #Pausa el tiempo necesario para mostra el movimiento de los vasos
     $ renpy.pause(cup_speed, hard='True')
 
     play sound "submods/ExtraPlus/submod_assets/sfx/cup_shuffle.mp3"
@@ -139,7 +138,7 @@ label loop_game:
 
 label check_label:
 
-    $ current_turn += 1
+    $ _current_turn += 1
 
     hide screen shell_game_minigame
 
@@ -157,40 +156,40 @@ label check_label:
         cup_coordinates_real[2] = 1155
 
     #Se muestra los vasos y debe de elegir un vaso
-    if your_choice == 0:
+    if cup_choice == 0:
 
         show cup as cup_1:
             linear 0.5 ypos 110
 
-        if your_choice == ball_position:
+        if cup_choice == ball_position:
             show ball zorder 12 behind cup_1:
                 xpos cup_coordinates[0] ypos 335
 
-    elif your_choice == 1:
+    elif cup_choice == 1:
 
         show cup as cup_2:
             linear 0.5 ypos 110
 
-        if your_choice == ball_position:
+        if cup_choice == ball_position:
             show ball zorder 12 behind cup_2:
                 xpos cup_coordinates[1] ypos 335
 
-    elif your_choice == 2:
+    elif cup_choice == 2:
 
         show cup as cup_3:
             linear 0.5 ypos 110
 
-        if your_choice == ball_position:
+        if cup_choice == ball_position:
             show ball zorder 12 behind cup_3:
                 xpos cup_coordinates[2] ypos 335
 
-    if comment is True:
-        m 1sub "[comments_good]"
+    if _plus_comment is True:
+        m 1sub "[renpy.substitute(renpy.random.choice(_plus_complies))]"
 
-    elif comment is False:
-        m 1hub "[comments_bad]"
+    elif _plus_comment is False:
+        m 1hub "[renpy.substitute(renpy.random.choice(_plus_not_met))]"
 
-    if your_choice != ball_position:
+    if cup_choice != ball_position:
 
         m 1lub "The correct cup was..."
 
@@ -244,7 +243,7 @@ label shell_game_result:
     hide screen score_minigame
     python:
         enable_esc()
-        mas_MUINDropShield()
+        mas_MUMUDropShield()
         renpy.game.preferences.afm_enable = afm_pref
     hide ball
     show cup as cup_1:
@@ -265,7 +264,7 @@ label shell_game_result:
     hide screen extra_no_click
     show monika at t11
 
-    if current_turn == 0:
+    if _current_turn == 0:
         m 3ekd "[player], we haven't even started playing."
         m 2gkp "I wanted to play with you for a while..."
         m 2etb "But, would you like to continue playing?{nw}"
@@ -276,21 +275,21 @@ label shell_game_result:
             "No":
                 m 1hua "Okay, we'll play another time, then."
 
-    elif current_turn <= 10 or current_turn >= 10:
-        if correct_answers == current_turn:
+    elif _current_turn <= 10 or _current_turn >= 10:
+        if _correct_answers == _current_turn:
             m 1hub "Even though we've only played a few rounds, you've already made a good impression on me!"
             m 1hub "You did great every round."
             m 1hua "I guess you don't have any more time today..."
             m 1eua "I hope we get to play more next time."
             m 1eub "I look forward to it!"
-        elif correct_answers < current_turn:
+        elif _correct_answers < _current_turn:
             m 1hua "Don't worry that you failed once."
             m 3hub "You did very well!"
             m 3hub "It's just a matter of practice and you'll see how everything will get easier!"
             m 3hua "Next time you'll do better~"
-        elif correct_answers == 0:
+        elif _correct_answers == 0:
             m 1eka "[player], I am worried..."
-            m 1ekb "We've been playing for [current_turn] rounds and you haven't gotten any of them right."
+            m 1ekb "We've been playing for [_current_turn] rounds and you haven't gotten any of them right."
             m 1etd "Are you too unmotivated or distracted?"
             if difficulty_sg == 1:
                 m 1eua "Well, since you are on easy difficulty..."
@@ -316,22 +315,22 @@ label shell_game_result:
                     m 2dka "I hope my presence is enough for you~"
         m 1dubla "And thanks for playing with me [mas_get_player_nickname()]."
 
-    elif current_turn >= 50:
-        if correct_answers == current_turn:
+    elif _current_turn >= 50:
+        if _correct_answers == _current_turn:
             m 2sub "Wow, you always give me a good impression in everything you do [mas_get_player_nickname()]."
             m 2sub "Congratulations!"
             m 3hub "You sure have some good reflexes!"
             m 3hua "I won't worry about you failing at a carnival game, ehehehe~"
             m 1tubsb "I can't wait for you to win a teddy bear for me when we have a date there!"
-        elif correct_answers < current_turn:
+        elif _correct_answers < _current_turn:
             m 3hua "You did what you could [mas_get_player_nickname()]."
             m 3hub "I'm so happy for you!"
-            m 3hub "We were already on the [current_turn] shift."
+            m 3hub "We were already on the [_current_turn] shift."
             m 1ekb "So I understand that you couldn't go on any longer and left it at this point."
             m 5hua "But someday you'll make it perfect, just be patient and practice a little."
-        elif correct_answers == 0:
+        elif _correct_answers == 0:
             m 1esb "I have a question [player]."
-            m 1eka "We've been [current_turn] turns and you haven't hit any."
+            m 1eka "We've been [_current_turn] turns and you haven't hit any."
             m 1etd "Is something wrong?"
             if difficulty_sg == 1:
                 m 1eka "Well, since you are on the easy difficulty..."
@@ -341,15 +340,15 @@ label shell_game_result:
             elif difficulty_sg == 2:
                 m 1eka "Being on normal difficulty..."
                 m 1eta "Are you trained to lose every round?"
-                m 1hua "I imagine you're going even further, since we're on [current_turn] turn."
+                m 1hua "I imagine you're going even further, since we're on [_current_turn] turn."
                 m 1rtd "Although I wonder where this idea of yours [player] came from..."
                 m 1gsu "I'd better keep my doubt to myself, I'm just going to see how far you can go!"
             elif difficulty_sg == 3:
                 m 1eka "Considering that you are in the hard difficulty..."
                 m 1hua "I feel you have given your best effort to achieve a challenge."
-                m 1etb "You wanted to get to more than [current_turn] turns with failures?"
+                m 1etb "You wanted to get to more than [_current_turn] turns with failures?"
                 m 1eub "Well I encourage you to make it!"
-                m 1lta "You might be wondering if I worry that you will fail until [current_turn] turn."
+                m 1lta "You might be wondering if I worry that you will fail until [_current_turn] turn."
                 m 1dua "Not really, at this point I feel like you're doing it with intention."
                 m 1hksdlb "I'm sorry that I encourage you to fail instead of getting every turn right, Ahahaha~"
                 m 1hksdlb "But you're already doing it so I have no choice but to support you!"
@@ -361,8 +360,8 @@ label shell_game_result:
         m 4hub "Well, nevertheless, I thank you for playing with me [mas_get_player_nickname()]!"
         m 4hub "We'll play some other time, if that's okay with you."
 
-    elif current_turn >= 100:
-        if correct_answers == current_turn:
+    elif _current_turn >= 100:
+        if _correct_answers == _current_turn:
             m 1hua "I must applaud you, [player]."
             m 1hub "You got it right every turn, it shows the concentration you had!"
             m 1hublb "I'm proud of you!"
@@ -371,15 +370,15 @@ label shell_game_result:
             m 1eub "I feel like you're good at rhythm video games."
             m 1eta "Or is it your self-defense system? "
             extend 1sua "If so, I'm glad to hear it."
-        elif correct_answers < current_turn:
+        elif _correct_answers < _current_turn:
             m 1hua "Not bad [player]."
-            m 1hub "You gave your best, considering you've made it to the [current_turn] turn!"
+            m 1hub "You gave your best, considering you've made it to the [_current_turn] turn!"
             m 1eka "It's normal for you to have a visual fatigue."
             m 1eka "So don't lose heart."
             m 3eub "Next time you'll do better, believe me~"
-        elif correct_answers == 0:
+        elif _correct_answers == 0:
             m 1hka "I don't know how to feel about that."
-            m "We've been on [current_turn] turns and you haven't gotten any of them right."
+            m "We've been on [_current_turn] turns and you haven't gotten any of them right."
             m 1etb "At this point I feel like it's kind of a challenge to yourself?"
             if difficulty_sg == 1:
                 m 1eua "Well, as you are on the easy difficulty..."
@@ -402,26 +401,7 @@ label shell_game_result:
     window hide
     python:
         cup_speed = 0.5
-        current_turn = 0
-        correct_answers = 0
-    jump close_extraplus
-    return
-
-label cheat_sg:
-    show monika 1hua at t11
-    if renpy.seen_label("check_cheat_sg"):
-        jump check_cheat_minigame
-    else:
-        jump check_cheat_sg
-
-label check_cheat_sg:
-    m 1hub "I'm surprised you modified this minigame, ahahaha~"
-    m 3esb "After all it is progressive, there is no winner."
-    m 3nub "You know you don't have to!"
-    m 1eua "The purpose of the mini-games is to have fun for a while."
-    m 1etb "Why don't we try again?"
-    m 1eud "Or if you want, we can play another time."
-    m 1hua "Whatever we do will always be unique with you by my side."
-    m 1hua "Ehehe~"
+        _current_turn = 0
+        _correct_answers = 0
     jump close_extraplus
     return

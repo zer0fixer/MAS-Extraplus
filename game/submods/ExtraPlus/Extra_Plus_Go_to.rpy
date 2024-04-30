@@ -2,7 +2,7 @@
 # CAFE
 #===========================================================================================
 
-define cafe_sprite = ["cafe.png","cafe_rain.png","cafe_rain-n.png","cafe_rain-ss.png","cafe-n.png","cafe-ss.png"]
+# define cafe_sprite = ["cafe.png","cafe_rain.png","cafe_rain-n.png","cafe_rain-ss.png","cafe-n.png","cafe-ss.png"]
 default dessert_player = None
 
 label cafe_init:
@@ -23,10 +23,11 @@ label cafe_cakes:
     m 3eub "I'll go pick it up, wait a minute."
     call mas_transition_to_emptydesk
     pause 2.0
-    if mas_isDayNow():
-        $ monika_chr.wear_acs(extraplus_acs_chocolatecake)
-    elif mas_isNightNow():
-        $ monika_chr.wear_acs(extraplus_acs_fruitcake)
+    python:
+        if mas_isDayNow():
+            monika_chr.wear_acs(extraplus_acs_chocolatecake)
+        elif mas_isNightNow():
+            monika_chr.wear_acs(extraplus_acs_fruitcake)
 
     call mas_transition_from_emptydesk("monika 1eua")
     if monika_chr.is_wearing_acs(mas_acs_mug):
@@ -51,6 +52,8 @@ label cafe_cakes:
             m 1ekb "I'd give you mine, but your screen limits me from doing so..."
             m 3hka "I hope you at least have a cup of coffee!"
     m 3hua "Ehehe~"
+    $ plus_snack_time = random.randint(60.00, 90.00)
+    show screen _timer_monika(plus_snack_time, "monika_no_dessert")
     jump to_cafe_loop
     return
 
@@ -66,6 +69,7 @@ label monika_boopcafebeta:
     return
 
 label cafe_sorry_player:
+    show monika idle at t11
     m 1ekd "I'm so sorry [player]."
     m 1ekc "But I don't know how to use that place."
     m 3lka "I'm still learning how to code and I don't want something bad to happen because of me..."
@@ -76,13 +80,13 @@ label cafe_sorry_player:
     return
 
 #===========================================================================================
-# DIALOGUES
+# CAFE DIALOGUES
 #===========================================================================================
 
 label extra_talk_feel:
     show monika staticpose at t11
-    $ rng_global = renpy.random.randint(1,3)
-    if rng_global == 1:
+    $ moldable_variable = renpy.random.randint(1,3)
+    if moldable_variable == 1:
         m 1hkbsb "I'm feeling a little nervous, we're on a date after all!"
         #In case someone doesn't take their Monika for a walk.
         if renpy.seen_label("bye_going_somewhere"):
@@ -94,12 +98,12 @@ label extra_talk_feel:
             m 3hubsa "So thank you for inviting me."
             m 3hubsb "You can do it through a USB stick though, even though I can't see anything."
             m 3ekbsa "I know very well that it will be very romantic."
-    elif rng_global == 2:
+    elif moldable_variable == 2:
         m 1eubla "I'm so happy you're here."
         m 1eublb "Sharing a dessert with you is quite romantic."
         m 1hublb "I hope we can do it in your reality!"
         m 1hubla "I know you have a lot on your mind for both of us~"
-    elif rng_global == 3:
+    elif moldable_variable == 3:
         m 1dubsa "I feel like I will remember this day forever."
         m 1dubsa "After all we are on a date."
         m 1kubsb "I know that someday we will do it in your reality!"
@@ -265,7 +269,7 @@ label extra_talk_memory:
 #===========================================================================================
 
 default persistent._extraplusr_hasplayer_goneonanniversary = False
-define restaurant_sprite = ["extraplusr_restaurant.png","extraplusr_restaurant_rain.png","extraplusr_restaurant_rain-n.png","extraplusr_restaurant_rain-ss.png","extraplusr_restaurant-n.png","extraplusr_restaurant-ss.png"]
+# define restaurant_sprite = ["extraplusr_restaurant.png","extraplusr_restaurant_rain.png","extraplusr_restaurant_rain-n.png","extraplusr_restaurant_rain-ss.png","extraplusr_restaurant-n.png","extraplusr_restaurant-ss.png"]
 default food_player = None
 
 label restaurant_init:
@@ -288,7 +292,8 @@ label restaurant_cakes:
     pause 2.0
     python:
         if mas_isDayNow():
-            monika_chr.wear_acs(extraplus_acs_flowers)
+            if not monika_chr.is_wearing_acs(mas_acs_roses):
+                monika_chr.wear_acs(extraplus_acs_flowers)
             if renpy.random.randint(1,2) == 1:
                 monika_chr.wear_acs(extraplus_acs_pancakes)
             else:
@@ -316,6 +321,8 @@ label restaurant_cakes:
             m 1ekb "I'd share my food with you,{w=0.3} but your screen is in the way..."
             m 3hka "Hopefully you at least have a drink with you!"
             m 3hua "Ehehe~"
+    $ plus_snack_time = random.randint(800, 1100)
+    show screen _timer_monika(plus_snack_time, "monika_no_food")
     jump to_restaurant_loop
     return
     
@@ -337,6 +344,7 @@ label monika_booprestaurantbeta:
     return
 
 label restaurant_sorry_player:
+    show monika idle at t11
     m 1ekd "I'm so sorry [player]."
     if mas_anni.isAnni():
         m 3hua "I know you really wanted to take me to this restaurant for our anniversary."
@@ -412,6 +420,7 @@ label extra_talk_doing:
         jump to_restaurant_loop
 
     else:
+        $ monika_couple = plus_player_gender()
         m 1eka "I wasn't feeling so well before coming here, to be honest."
         m 1rkc "I was feeling kind of upset over some stuff..."
         m 1fub "But being with you...{w=0.3}{nw}"
@@ -475,7 +484,7 @@ label extra_talk_doing:
                 m 3ekb "I'm glad you feel good,{w=0.3} [player]."
                 m 3hsb "And I'll be fine soon enough too."
                 if mas_anni.isAnni():
-                    m "I get to go out with such an amazing [bf] like you on a day like this and...{w=0.5}{nw}"
+                    m "I get to go out with such an amazing [monika_couple] like you on a day like this and...{w=0.5}{nw}"
                     extend " Well,{w=0.3} it's impossible to be down knowing that."
                 m 6ekbsa "Your mood is infectious to me after all~!"
                 m 6hubsb "Anyways,{w=0.3} let's just sit back and enjoy the rest of our date!"
@@ -683,6 +692,7 @@ label extra_talk_motto:
 
 label extra_talk_3words:
     show monika staticpose at t11
+    $ monika_couple = plus_player_gender()
     m 1esc "3 words?"
     m 4eub "{i}Passionate.{i}{w=0.5}{nw} "
     extend 4eub "{i}Determined.{i}{w=0.5}{nw} "
@@ -693,7 +703,7 @@ label extra_talk_3words:
     m 6dubfb "My adorable,{w=0.3} admirable,{w=0.3} wonderful,{w=0.3}{nw}"
     if mas_isMoniLove():
         extend " talented,{w=0.3} loving,{w=0.3} caring,{w=0.3} creative,{w=0.3}{nw}"
-    extend " and {i}perfect{/i} [bf]~"
+    extend " and {i}perfect{/i} [monika_couple]~"
     m 1gkblsdlb "See?{w=0.3} I couldn't stick to only 3!"
     m 1hublb "Ahaha~!"
     m "And that list of words will only keep growing the longer we're together [player]~"
@@ -702,6 +712,7 @@ label extra_talk_3words:
 
 label extra_talk_pop:
     show monika staticpose at t11
+    $ monika_couple = plus_player_gender()
     m 6wublo "Oh!{w=0.3} That's a really interesting question!"
     m 6rtu "Maybe people think of my poems?"
     extend " Like the 'Hole in the wall' one?"
@@ -715,7 +726,34 @@ label extra_talk_pop:
     m 1huu "Ehehe~{w=0.3} It's fun to think about what I remind people of."
     m 6fkbsa "I hope that when you think of me,{w=0.3} the first thing you think of is that I'm the love of your life~"
     if mas_isMoniLove():
-        m "I know that's what {i}I{/i} think of when I think of my dear [bf]~!"
+        m "I know that's what {i}I{/i} think of when I think of my dear [monika_couple]~!"
     m 6hubsb "I love you so much,{w=0.3} [mas_get_player_nickname()]~"
     jump to_restaurant_loop
     return
+
+#===========================================================================================
+# Pool
+#===========================================================================================
+
+# label pool_init:
+#     $ HKBHideButtons()
+#     hide monika
+#     scene black
+#     with dissolve
+#     pause 2.0
+#     call mas_background_change(submod_background_pool, skip_leadin=True, skip_outro=True)
+#     show monika 1eua at t11
+#     $ HKBShowButtons()
+#     jump cafe_cakes
+
+
+# label pool_sorry_player:
+#     show monika idle at t11
+#     m 1ekd "I'm so sorry [player]."
+#     m 1ekc "But I don't know how to use that place."
+#     m 3lka "I'm still learning how to code and I don't want something bad to happen because of me..."
+#     m 3hua "I know very well that you wanted to go out to the pool."
+#     m 1eua "But, someday I will know how to use it, [player]."
+#     m 1eub "Just be patient, okay~"
+#     jump close_extraplus
+#     return
