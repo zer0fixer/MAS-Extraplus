@@ -479,7 +479,7 @@ label monika_earsbeta:
 label aff_log:
     $ monika_level = get_monika_level()
     show monika idle at t11
-    _("Your affection with [m_name] is [int(mas_affection._get_aff())] [monika_level]")
+    "Your affection with [m_name] is [int(mas_affection._get_aff())] [monika_level]"
     window hide
     jump close_extraplus
     return

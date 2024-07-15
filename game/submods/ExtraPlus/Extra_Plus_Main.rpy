@@ -8,7 +8,7 @@
 #====Register the submod
 init -990 python in mas_submod_utils:
     Submod(
-        author="ZeroFixer, translated by MoyuTeam",
+        author="ZeroFixer translated by MoyuTeam",
         name="Extra Plus",
         description="A submod that adds an Extra+ button, as well as adding more content!",
         version="1.2.0"

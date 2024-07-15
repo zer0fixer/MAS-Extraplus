@@ -101,5 +101,5 @@ translate chinese strings:
 
     # game/Submods/ExtraPlus/Extra_Plus_Main.rpy:836
     old "Base"
-    new "库"
+    new "距离"
 
