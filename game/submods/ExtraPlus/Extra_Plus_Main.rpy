@@ -8,7 +8,7 @@
 #====Register the submod
 init -990 python in mas_submod_utils:
     Submod(
-        author="ZeroFixer",
+        author="ZeroFixer, translated by MoyuTeam",
         name="Extra Plus",
         description="A submod that adds an Extra+ button, as well as adding more content!",
         version="1.2.0"
@@ -33,39 +33,39 @@ init -989 python:
 
 #====Menus dialogues
 define minigames_talk = [
-    "Choose one, [player].",
-    "Want a new challenge?",
-    "I would love to play with you~",
-    "What will we play today?",
-    "Let's have some fun!",
-    "Time to show off your skills!",
-    "Ready to play?",
-    "Let's see how good you are!",
-    "Which game do you want to try?",
-    "Shall we play a game?",
-    "I'm feeling lucky today, [player].",
-    "Are you ready for some fun?",
-    "Let's see if you can beat me!",
-    "Time for some friendly competition!",
-    "I'm up for any game you want to play.",
+    _("Choose one, [player]."),
+    _("Want a new challenge?"),
+    _("I would love to play with you~"),
+    _("What will we play today?"),
+    _("Let's have some fun!"),
+    _("Time to show off your skills!"),
+    _("Ready to play?"),
+    _("Let's see how good you are!"),
+    _("Which game do you want to try?"),
+    _("Shall we play a game?"),
+    _("I'm feeling lucky today, [player]."),
+    _("Are you ready for some fun?"),
+    _("Let's see if you can beat me!"),
+    _("Time for some friendly competition!"),
+    _("I'm up for any game you want to play."),
 ]
 
 define date_talk = [
-    "I can't wait to see where you take me!",
-    "What adventures await us today?",
-    "I'm excited to spend time with you.",
-    "Let's make some great memories today.",
-    "I hope we have a wonderful time together.",
-    "Wherever we go, it will be perfect as long as we're together.",
-    "I'm open to any suggestion you have.",
-    "Let's do something fun and spontaneous!",
-    "I'm so lucky to have you as my date!",
-    "I can't wait to make more memories with you today.",
-    "I'm up for anything you want to do!",
-    "Let's make this a date to remember.",
-    "I feel like today is going to be amazing!",
-    "Wherever we end up, I'm happy as long as we're together.",
-    "Let's have an unforgettable time today!"
+    _("I can't wait to see where you take me!"),
+    _("What adventures await us today?"),
+    _("I'm excited to spend time with you."),
+    _("Let's make some great memories today."),
+    _("I hope we have a wonderful time together."),
+    _("Wherever we go, it will be perfect as long as we're together."),
+    _("I'm open to any suggestion you have."),
+    _("Let's do something fun and spontaneous!"),
+    _("I'm so lucky to have you as my date!"),
+    _("I can't wait to make more memories with you today."),
+    _("I'm up for anything you want to do!"),
+    _("Let's make this a date to remember."),
+    _("I feel like today is going to be amazing!"),
+    _("Wherever we end up, I'm happy as long as we're together."),
+    _("Let's have an unforgettable time today!")
 ]
 
 #====Boop count
@@ -179,34 +179,35 @@ default cup_skin = None
 #====Comments by moni on standard difficulties
 
 define _plus_complies = [
-    "Well done, [player]!",
-    "Impressive, keep it up!",
-    "You're doing great!",
-    "Fantastic, [player]!",
-    "Keep it up!",
-    "You're making progress!",
-    "Bravo, [player]!",
-    "Outstanding, [player]!",
-    "Way to go, [player]!",
-    "Keep up the good work, [player]!",
-    "You're doing fantastic!",
-    "You're doing amazing!",
+    _("Well done, [player]!"),
+    _("Impressive, keep it up!"),
+    _("You're doing great!"),
+    _("Fantastic, [player]!"),
+    _("Keep it up!"),
+    _("You're making progress!"),
+    _("Bravo, [player]!"),
+    _("Outstanding, [player]!"),
+    _("Way to go, [player]!"),
+    _("Keep up the good work, [player]!"),
+    _("You're doing fantastic!"),
+    _("You're doing amazing!"),
 ]
 
 define _plus_not_met = [
-    "Oh, too bad~",
-    "It's not that, [player].",
-    "Try again~",
-    "Don't get distracted, [player].",
-    "Keep practicing, [player].",
-    "You'll get it next time!",
-    "Better luck next try, [player].",
-    "Don't give up, [player]!",
-    "That's not quite it, [player].",
-    "That wasn't the right answer, [player].",
-    "Sorry, [player], that's not it.",
-    "That wasn't the correct answer, [player]."
+    _("Oh, too bad~"),
+    _("It's not that, [player]."),
+    _("Try again~"),
+    _("Don't get distracted, [player]."),
+    _("Keep practicing, [player]."),
+    _("You'll get it next time!"),
+    _("Better luck next try, [player]."),
+    _("Don't give up, [player]!"),
+    _("That's not quite it, [player]."),
+    _("That wasn't the right answer, [player]."),
+    _("Sorry, [player], that's not it."),
+    _("That wasn't the correct answer, [player].")
 ]
+
 
 init 5 python:
     #====Monika idle v2
@@ -485,7 +486,7 @@ init 5 python:
             extraplus_gift = (self.name, self.gift)
             file_path = os.path.join(renpy.config.basedir, 'characters', extraplus_gift[1])
             with open(file_path, 'a') as f:
-                renpy.notify('The [extraplus_gift[0]] File has been successfully created.')
+                renpy.notify(_('The [extraplus_gift[0]] File has been successfully created.'))
             renpy.jump('plus_make_gift')
 
 #====Misc
@@ -669,7 +670,7 @@ screen extraplus_button():
             screen_exists = renpy.get_screen("hkb_overlay")
             talk_enabled = mas_hotkeys.talk_enabled
             buttons = _("Extra+") if extra_plus_files_approved else _("Error!")
-            function = Jump("view_extraplus") if extra_plus_files_approved else Show("dialog", message="An error occurred, the submod is not installed correctly.\nPlease see the installation tutorial.", ok_action=Hide("dialog"))
+            function = Jump("view_extraplus") if extra_plus_files_approved else Show("dialog", message=_("An error occurred, the submod is not installed correctly.\nPlease see the installation tutorial."), ok_action=Hide("dialog"))
 
         if screen_exists:
             if talk_enabled:
@@ -689,11 +690,11 @@ screen submod_interactions():
         yanchor 1.0
         ypos 210
 
-        textbutton ("Close") action [Hide("submod_interactions"), Jump("close_extraplus")]
-        textbutton ("Date") action [Hide("submod_interactions"), Jump("plus_walk")]
-        textbutton ("Minigame") action If(mas_affection._get_aff() >= 30, true=[Hide("submod_interactions"), Jump("plus_minigames")], false=None)
-        textbutton ("Addition") action [Hide("submod_interactions"), Jump("plus_tools")]
-        textbutton ("Boop") action If(mas_affection._get_aff() >= 30, true=[Hide("submod_interactions"), Jump("show_boop_screen")], false=None)
+        textbutton (_("Close")) action [Hide("submod_interactions"), Jump("close_extraplus")]
+        textbutton (_("Date")) action [Hide("submod_interactions"), Jump("plus_walk")]
+        textbutton (_("Minigame")) action If(mas_affection._get_aff() >= 30, true=[Hide("submod_interactions"), Jump("plus_minigames")], false=None)
+        textbutton (_("Addition")) action [Hide("submod_interactions"), Jump("plus_tools")]
+        textbutton (_("Boop")) action If(mas_affection._get_aff() >= 30, true=[Hide("submod_interactions"), Jump("show_boop_screen")], false=None)
 
 #====GAME
 screen sticker_customization():
@@ -704,8 +705,8 @@ screen sticker_customization():
         yanchor 1.0
         ypos 90
 
-        textbutton ("Close") style "hkb_button" action [Hide("sticker_customization"), Jump("close_dev_extraplus")]
-        textbutton ("Return") style "hkb_button" action [Hide("sticker_customization"), Jump("plus_tools")]
+        textbutton (_("Close")) style "hkb_button" action [Hide("sticker_customization"), Jump("close_dev_extraplus")]
+        textbutton (_("Return")) style "hkb_button" action [Hide("sticker_customization"), Jump("plus_tools")]
     frame:
         padding (50, 10, 0, 20)
         xpos 800
@@ -809,7 +810,7 @@ screen button_custom_zoom():
             ypos 635
 
         if renpy.get_screen("hkb_overlay"):
-            textbutton ("Zoom") action If(store.disable_zoom_button, true = None, false = Show("extra_custom_zoom"))
+            textbutton (_("Zoom")) action If(store.disable_zoom_button, true = None, false = Show("extra_custom_zoom"))
 
 screen extra_custom_zoom():
     use extra_no_click()
@@ -865,7 +866,7 @@ screen shell_game_minigame():
         xpos 0.86
         yanchor 1.0
         ypos 0.950
-        textbutton ("Quit") action [Hide("shell_game_minigame"), Jump("shell_game_result")]
+        textbutton (_("Quit")) action [Hide("shell_game_minigame"), Jump("shell_game_result")]
 
 #====Loop RPS
 screen RPS_mg():
@@ -898,7 +899,7 @@ screen RPS_mg():
         xpos 0.86
         yanchor 1.0
         ypos 0.950
-        textbutton ("Quit") style "hkb_button" action [Hide("RPS_mg"), Jump("rps_quit")]
+        textbutton (_("Quit")) style "hkb_button" action [Hide("RPS_mg"), Jump("rps_quit")]
 
 #====Restrict the player from advancing in the conversation.
 screen extra_no_click():
@@ -992,7 +993,7 @@ screen extra_gen_list(extra_list, extra_area, others, close=None):
             xpos 0.097 ypos 50
             yanchor 1.0
 
-            textbutton ("Close") style "hkb_button" action [Hide("extra_gen_list"), Jump("close_extraplus")]
+            textbutton (_("Close")) style "hkb_button" action [Hide("extra_gen_list"), Jump("close_extraplus")]
 
 #====Background loop
 screen dating_loop(ask, label_boop, boop_enable=None):
@@ -1003,7 +1004,7 @@ screen dating_loop(ask, label_boop, boop_enable=None):
             ypos 555
         else:
             ypos 595
-        textbutton ("Talk") style "hkb_button" action [Hide("dating_loop"), Jump(ask)]
+        textbutton (_("Talk")) style "hkb_button" action [Hide("dating_loop"), Jump(ask)]
 
     #Noise
     if boop_enable == True:
@@ -1057,7 +1058,7 @@ screen boop_event(timelock, endlabel, editlabel):
         vbox:
             xpos 0.915
             ypos 0.040
-            text "Boops : [boop_war_count]"  size 30 style "monika_text"
+            text _("Boops : [boop_war_count]")  size 30 style "monika_text"
 
 screen force_mouse_move():
     on "show":

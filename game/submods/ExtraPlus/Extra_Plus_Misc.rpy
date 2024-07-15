@@ -479,7 +479,7 @@ label monika_earsbeta:
 label aff_log:
     $ monika_level = get_monika_level()
     show monika idle at t11
-    "Your affection with [m_name] is [int(mas_affection._get_aff())] [monika_level]"
+    _("Your affection with [m_name] is [int(mas_affection._get_aff())] [monika_level]")
     window hide
     jump close_extraplus
     return
@@ -556,8 +556,8 @@ label extra_window_title:
     show monika idle at t21
     python:
         window_menu = [
-            ("Change the window's title", 'extra_change_title'),
-            ("Restore the window title", 'extra_restore_title')
+            (_("Change the window's title"), 'extra_change_title'),
+            (_("Restore the window title"), 'extra_restore_title')
         ]
 
         items = [
@@ -570,7 +570,7 @@ label extra_change_title:
     show monika idle at t11
     python:
         player_input = mas_input(
-            prompt =("What title do you want to put on this window?"),
+            prompt =_("What title do you want to put on this window?"),
             allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!?()~-_.'0123456789",
             screen_kwargs={"use_return_button": True, "return_button_value": "cancel"})
 
@@ -583,7 +583,7 @@ label extra_change_title:
         else:
             persistent.save_window_title = player_input
             config.window_title = persistent.save_window_title 
-            renpy.notify("The change is done.")
+            renpy.notify(_("The change is done."))
             renpy.jump("close_extraplus")
     return
 
@@ -592,7 +592,7 @@ label extra_restore_title:
     python:
         persistent.save_window_title = backup_window_title
         config.window_title = persistent.save_window_title 
-        renpy.notify("It has been successfully restored.")
+        renpy.notify(_("It has been successfully restored."))
         renpy.jump("close_extraplus")
     return
 

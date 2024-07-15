@@ -570,9 +570,9 @@ label plus_walk:
     show monika idle at t21
     python:
         walk_menu = [
-            ("Cafe", 'go_to_cafe'),
-            ("Restaurant", 'go_to_restaurant'),
-            ("Pool", "screen_extraplus")
+            (_("Cafe"), 'go_to_cafe'),
+            (_("Restaurant"), 'go_to_restaurant'),
+            (_("Pool"), "screen_extraplus")
         ]
         store.disable_zoom_button = True
         m_talk = renpy.substitute(renpy.random.choice(date_talk))
@@ -607,17 +607,17 @@ label plus_tools:
     show monika idle at t21
     python:
         tools_menu = [
-            ("View [m_name]'s Affection", 'aff_log'),
-            ("Create a gift for [m_name]", 'plus_make_gift'),
-            ("Change the window's title", 'extra_window_title'),
-            ("[m_name], I want to make a backup", 'mas_backup'),
-            ("[m_name], can you flip a coin?", 'coinflip'),
-            ("Hi [player]!", 'extra_dev_mode')
+            (_("View [m_name]'s Affection"), 'aff_log'),
+            (_("Create a gift for [m_name]"), 'plus_make_gift'),
+            (_("Change the window's title"), 'extra_window_title'),
+            (_("[m_name], I want to make a backup"), 'mas_backup'),
+            (_("[m_name], can you flip a coin?"), 'coinflip'),
+            (_("Hi [player]!"), 'extra_dev_mode')
             
         ]
         store.disable_zoom_button = True
         items = [
-            ("Github Repository", 'github_submod', 20),
+            (_("Github Repository"), 'github_submod', 20),
             ("Nevermind", 'screen_extraplus', 0)
         ]
     call screen extra_gen_list(tools_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
@@ -631,10 +631,10 @@ label plus_make_gift:
     show monika idle at t21
     python:
         gift_menu = [
-            ("Customized gift", 'plus_make_file'),
-            ("Groceries", 'plus_groceries'),
-            ("Objects", 'plus_objects'),
-            ("Ribbons", 'plus_ribbons')
+            (_("Customized gift"), 'plus_make_file'),
+            (_("Groceries"), 'plus_groceries'),
+            (_("Objects"), 'plus_objects'),
+            (_("Ribbons"), 'plus_ribbons')
         ]
 
         items = [
@@ -648,7 +648,7 @@ label plus_make_file:
 
     python:
         makegift = mas_input(
-            prompt=("Enter the name of the gift."),
+            prompt=(_("Enter the name of the gift.")),
             allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789",
             screen_kwargs={"use_return_button": True, "return_button_value": "cancel"},
         )
@@ -661,7 +661,7 @@ label plus_make_file:
             filepath = os.path.join(renpy.config.basedir, 'characters', makegift + ".gift")
             with open(filepath, "a"):
                 pass  # just create an empty file
-            renpy.notify("Has been successfully created.")
+            renpy.notify(_("Has been successfully created."))
             renpy.jump("plus_make_gift")
             
     return
@@ -670,15 +670,15 @@ label plus_groceries:
     show monika idle at t21
     python:
         groceries_menu = [
-            extra_gift("Coffee", 'coffee.gift'),
-            extra_gift("Chocolates", 'chocolates.gift'),
-            extra_gift("Cupcake", 'cupcake.gift'),
-            extra_gift("Fudge", 'fudge.gift'),
-            extra_gift("Hot Chocolate", 'hotchocolate.gift'),
-            extra_gift("Candy", 'candy.gift'),
-            extra_gift("Candy Canes", 'candycane.gift'),
-            extra_gift("Candy Corn", 'candycorn.gift'),
-            extra_gift("Christmas Cookies", 'christmascookies.gift')
+            extra_gift(_("Coffee"), 'coffee.gift'),
+            extra_gift(_("Chocolates"), 'chocolates.gift'),
+            extra_gift(_("Cupcake"), 'cupcake.gift'),
+            extra_gift(_("Fudge"), 'fudge.gift'),
+            extra_gift(_("Hot Chocolate"), 'hotchocolate.gift'),
+            extra_gift(_("Candy"), 'candy.gift'),
+            extra_gift(_("Candy Canes"), 'candycane.gift'),
+            extra_gift(_("Candy Corn"), 'candycorn.gift'),
+            extra_gift(_("Christmas Cookies"), 'christmascookies.gift')
         ]
 
         items = [
@@ -691,10 +691,10 @@ label plus_objects:
     show monika idle at t21
     python:
         objects_menu = [
-            extra_gift("Promise Ring", 'promisering.gift'),
-            extra_gift("Roses", 'roses.gift'),
-            extra_gift("Quetzal Plushie", 'quetzalplushie.gift'),
-            extra_gift("Thermos Mug", 'justmonikathermos.gift')
+            extra_gift(_("Promise Ring"), 'promisering.gift'),
+            extra_gift(_("Roses"), 'roses.gift'),
+            extra_gift(_("Quetzal Plushie"), 'quetzalplushie.gift'),
+            extra_gift(_("Thermos Mug"), 'justmonikathermos.gift')
         ]
 
         items = [
@@ -707,22 +707,22 @@ label plus_ribbons:
     show monika idle at t21
     python:
         ribbons_menu = [
-            extra_gift("Black Ribbon", 'blackribbon.gift'),
-            extra_gift("Blue Ribbon", 'blueribbon.gift'),
-            extra_gift("Dark Purple Ribbon", 'darkpurpleribbon.gift'),
-            extra_gift("Emerald Ribbon", 'emeraldribbon.gift'),
-            extra_gift("Gray Ribbon", 'grayribbon.gift'),
-            extra_gift("Green Ribbon", 'greenribbon.gift'),
-            extra_gift("Light Purple Ribbon", 'lightpurpleribbon.gift'),
-            extra_gift("Peach Ribbon", 'peachribbon.gift'),
-            extra_gift("Pink Ribbon", 'pinkribbon.gift'),
-            extra_gift("Platinum Ribbon", 'platinumribbon.gift'),
-            extra_gift("Red Ribbon", 'redribbon.gift'),
-            extra_gift("Ruby Ribbon", 'rubyribbon.gift'),
-            extra_gift("Sapphire Ribbon", 'sapphireribbon.gift'),
-            extra_gift("Silver Ribbon", 'silverribbon.gift'),
-            extra_gift("Teal Ribbon", 'tealribbon.gift'),
-            extra_gift("Yellow Ribbon", 'yellowribbon.gift')
+            extra_gift(_("Black Ribbon"), 'blackribbon.gift'),
+            extra_gift(_("Blue Ribbon"), 'blueribbon.gift'),
+            extra_gift(_("Dark Purple Ribbon"), 'darkpurpleribbon.gift'),
+            extra_gift(_("Emerald Ribbon"), 'emeraldribbon.gift'),
+            extra_gift(_("Gray Ribbon"), 'grayribbon.gift'),
+            extra_gift(_("Green Ribbon"), 'greenribbon.gift'),
+            extra_gift(_("Light Purple Ribbon"), 'lightpurpleribbon.gift'),
+            extra_gift(_("Peach Ribbon"), 'peachribbon.gift'),
+            extra_gift(_("Pink Ribbon"), 'pinkribbon.gift'),
+            extra_gift(_("Platinum Ribbon"), 'platinumribbon.gift'),
+            extra_gift(_("Red Ribbon"), 'redribbon.gift'),
+            extra_gift(_("Ruby Ribbon"), 'rubyribbon.gift'),
+            extra_gift(_("Sapphire Ribbon"), 'sapphireribbon.gift'),
+            extra_gift(_("Silver Ribbon"), 'silverribbon.gift'),
+            extra_gift(_("Teal Ribbon"), 'tealribbon.gift'),
+            extra_gift(_("Yellow Ribbon"), 'yellowribbon.gift')
         ]
 
         items = [
