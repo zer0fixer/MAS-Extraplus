@@ -1206,3 +1206,437 @@ translate chinese strings:
     old "你有什么恐惧症吗?"
     new "你有什么恐惧症吗?"
 
+# TODO: Translation updated at 2024-04-30 16:37
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:115
+translate chinese gtcafe_76045283:
+
+    # m 3sub "Oh, you want to go out to the cafe?"
+    m 3sub "哦,你想和我去咖啡馆约会吗?"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:116
+translate chinese gtcafe_fd2dc78e:
+
+    # m 3hub "It's pretty sweet that you decided to go tonight."
+    m 3hub "你决定今晚去可真甜."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:121
+translate chinese gtcafe_31f7a4bf:
+
+    # m 1eub "Another time then, [mas_get_player_nickname()]."
+    m 1eub "那就改天吧, [mas_get_player_nickname()]."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:134
+translate chinese gtcafev2_1f7dd1af:
+
+    # m 3wub "Oh, do you want to go out to the cafe again?"
+    m 3wub "哦,你想和我再去咖啡馆约会吗?"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:140
+translate chinese gtcafev2_7ff26831:
+
+    # m 1eub "Next time then, [mas_get_player_nickname()]."
+    m 1eub "下次吧, [mas_get_player_nickname()]."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:175
+translate chinese cafe_leave_7434f01a:
+
+    # m 3hua "But before we go..."
+    m 3hua "但在我们走之前..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:179
+translate chinese comment_cafe_42a6cc88:
+
+    # m 1hubsa "Thank you for asking me out."
+    m 1hubsa "谢谢你跟我出去约会."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:180
+translate chinese comment_cafe_4cc8dff3:
+
+    # m 1eubsb "It is nice to have these moments as a couple!"
+    m 1eubsb "能有跟你在一起的时光真是太好了！"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:181
+translate chinese comment_cafe_a9dc7c04:
+
+    # m 1eubsa "I feel very fortunate to have met you and that you keep choosing me every day."
+    m 1eubsa "我觉得能遇到你我很幸运,而且你每天还这么关心我."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:182
+translate chinese comment_cafe_77a60400:
+
+    # m 1ekbsa "I love you, [mas_get_player_nickname()]!"
+    m 1ekbsa "我爱你, [mas_get_player_nickname()]!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:202
+translate chinese gtrestaurant_ee1c8257:
+
+    # m 3sub "Oh,{w=0.3} you want to go out to a restaurant?"
+    m 3sub "哦,{w=0.3}你想和我去餐厅约会吗?"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:203
+translate chinese gtrestaurant_5f3bf46d:
+
+    # m 3hub "I'm so happy to hear that,{w=0.3} [player]!"
+    m 3hub "这真不错,{w=0.3} [player]!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:204
+translate chinese gtrestaurant_d5422f3f:
+
+    # m "It's so sweet of you to treat me to a date."
+    m "你这样跟我去约会真甜."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:206
+translate chinese gtrestaurant_a881e353:
+
+    # m "And on our anniversary no less,{w=0.3} perfect timing [player]~!"
+    m "还正好在我们的周年纪念日上,{w=0.3}你真会挑时间[player]~!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:208
+translate chinese gtrestaurant_4a033771:
+
+    # m 1hubsa "I just know it'll be great!"
+    m 1hubsa "这一定棒极了!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:209
+translate chinese gtrestaurant_91603fed:
+
+    # m 1hubsb "Okay,{w=0.3} let's go [mas_get_player_nickname()]~"
+    m 1hubsb "好,{w=0.3}我们走吧[mas_get_player_nickname()]~"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:213
+translate chinese gtrestaurant_ee1c8257_1:
+
+    # m 3sub "Oh,{w=0.3} you want to go out to a restaurant?"
+    m 3sub "哦,{w=0.3}你想和我去餐厅约会吗?"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:214
+translate chinese gtrestaurant_5eb7ccf8:
+
+    # m "That's so sweet of you to treat me to a date."
+    m "你这样跟我去约会真甜."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:216
+translate chinese gtrestaurant_a881e353_1:
+
+    # m "And on our anniversary no less,{w=0.3} perfect timing [player]~!"
+    m "还正好在我们的周年纪念日上,{w=0.3}你真会挑时间[player]~!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:218
+translate chinese gtrestaurant_66ed43a0:
+
+    # m 1hubsb "Let's go [mas_get_player_nickname()]~"
+    m 1hubsb "我们走吧[mas_get_player_nickname()]~"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:221
+translate chinese gtrestaurant_1fc29543:
+
+    # m 1eub "Another time then,{w=0.3} [mas_get_player_nickname()]."
+    m 1eub "改天吧,{w=0.3} [mas_get_player_nickname()]."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:228
+translate chinese gtrestaurantv2_c9339ae1:
+
+    # m 3wub "Oh, you want to go out to the restaurant again?"
+    m 3wub "哦,你想再和我去餐厅约会吗?"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:230
+translate chinese gtrestaurantv2_a7042bc9:
+
+    # m "Hmm~ I'm still thinking about the time you took us there for our anniversary,"
+    m "Emm~ 我还在想我们上一次周年纪念日你带我去那里约会,"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:231
+translate chinese gtrestaurantv2_641f22fe:
+
+    # extend " I thought it was so romantic~"
+    extend "我觉得这真浪漫~"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:232
+translate chinese gtrestaurantv2_db0b55cf:
+
+    # m "So I'm glad we get to go again~!"
+    m "所以我很高兴我们能在这么做一次~!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:234
+translate chinese gtrestaurantv2_e05dbfc8:
+
+    # m 2hub "The last time we went, I had so much fun!"
+    m 2hub "上次我们去的时候,我玩得很开心!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:235
+translate chinese gtrestaurantv2_d2f45d15:
+
+    # m 2eubsa "So I'm glad to hear it [player]!"
+    m 2eubsa "所以我很高兴听到这个消息[player]!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:236
+translate chinese gtrestaurantv2_4efdec75:
+
+    # m 1hubsb "Well, let's go then [mas_get_player_nickname()]~"
+    m 1hubsb "好,那我们走吧[mas_get_player_nickname()]~"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:240
+translate chinese gtrestaurantv2_3679ded5:
+
+    # m 3wub "Oh, you want to go out out to the restaurant again?"
+    m 3wub "哦,你想再和我去餐厅约会吗?"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:242
+translate chinese gtrestaurantv2_74a7dc98:
+
+    # m "Hmm~{w=0.3} I'm still thinking about the time you took us there for our anniversary,"
+    m "Emm~{w=0.3} 我还在想我们上一次周年纪念日你带我去那里约会,"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:243
+translate chinese gtrestaurantv2_c9b5979f:
+
+    # extend "You really know how to make our night amazing!"
+    extend "你是真的懂如怎么创造一次精彩的夜晚!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:244
+translate chinese gtrestaurantv2_db0b55cf_1:
+
+    # m "So I'm glad we get to go again~!"
+    m "所以我很高兴我们能再去一次~!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:246
+translate chinese gtrestaurantv2_4e622951:
+
+    # m 2hub "The last time we went, it was so romantic~"
+    m 2hub "我们上次去的时候,真的很浪漫~"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:247
+translate chinese gtrestaurantv2_2b768179:
+
+    # m 2eubsa "So I'm glad to go again [player]!"
+    m 2eubsa "所以我很高兴我们能再去一次~!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:248
+translate chinese gtrestaurantv2_9a38a048:
+
+    # m 1hubsb "Let's go then [mas_get_player_nickname()]~"
+    m 1hubsb "我们走吧[mas_get_player_nickname()]~"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:251
+translate chinese gtrestaurantv2_7ff26831:
+
+    # m 1eub "Next time then, [mas_get_player_nickname()]."
+    m 1eub "下次吧, [mas_get_player_nickname()]."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:289
+translate chinese restaurant_leave_7783e4e7:
+
+    # m 1eta "Oh,{w=0.3} you're ready for us to leave?"
+    m 1eta "哦,{w=0.3}你想走了?"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:290
+translate chinese restaurant_leave_f42ffc57:
+
+    # m 1eub "Sounds good to me!"
+    m 1eub "听起来不错!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:291
+translate chinese restaurant_leave_7434f01a:
+
+    # m 3hua "But before we go..."
+    m 3hua "但在我们走之前..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:390
+translate chinese monika_no_dessert_d53f3448:
+
+    # m 1hua "Wow, I finished my fruitcake."
+    m 1hua "哇,我吃完了我的水果蛋糕."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:396
+translate chinese monika_no_dessert_a509daec:
+
+    # m 1hua "Wow, I finished my chocolate cake."
+    m 1hua "哇,我吃完了我的巧克力蛋糕."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:407
+translate chinese monika_no_dessert_e1c897e6:
+
+    # m "By the way, have you finished your dessert yet?{fast}" nointeract
+    m "另外,你吃完你的甜点了吗?{fast}" nointeract
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:426
+translate chinese cafe_hide_acs_9a90d529:
+
+    # m 3eub "Also, I'll put this cup away, I won't be long."
+    m 3eub "另外,我得把这个杯子拿走,我马上."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:438
+translate chinese cafe_hide_acs_31d98a22:
+
+    # m 3eua "Also, I'll put this cup away, it won't be long now."
+    m 3eua "另外,我得把这个杯子拿走,我马上."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:450
+translate chinese cafe_hide_acs_edb93052:
+
+    # m 3hua "Also, I'll put this cup away, I won't be long."
+    m 3hua "另外,我得把这个杯子拿走,我马上."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:462
+translate chinese cafe_hide_acs_1f4f1eea:
+
+    # m 1hua "Okay, let's go, [player]!"
+    m 1hua "好,我们走吧,[player]!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:474
+translate chinese monika_no_food_527a6090:
+
+    # m 1hua "Wow, I finished my pasta."
+    m 1hua "哇,我吃完了我的意大利面."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:475
+translate chinese monika_no_food_34524532:
+
+    # m 1eub "I really enjoyed it~"
+    m 1eub "这真的很好吃~"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:476
+translate chinese monika_no_food_b62eec9c:
+
+    # m "Now I'll grab some dessert. Be right back!"
+    m "我想再去拿点点心.我去去就回!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:487
+translate chinese monika_no_food_585caaba:
+
+    # m 1hua "Wow, I finished my pancakes."
+    m 1hua "哇,我吃完了我的烙饼."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:488
+translate chinese monika_no_food_5abb65f3:
+
+    # m 1sua "They were delicious~"
+    m 1sua "这真是一道美味~"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:489
+translate chinese monika_no_food_b62eec9c_1:
+
+    # m "Now I'll grab some dessert. Be right back!"
+    m "我想再去拿点点心.我去去就回!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:500
+translate chinese monika_no_food_cb3151d6:
+
+    # m 1hua "Wow, I finished my waffles."
+    m 1hua "哇,我吃完了我的华夫饼."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:501
+translate chinese monika_no_food_5abb65f3_1:
+
+    # m 1sua "They were delicious~"
+    m 1sua "好好吃~"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:502
+translate chinese monika_no_food_b62eec9c_2:
+
+    # m "Now I'll grab some dessert. Be right back!"
+    m "我想再去拿点点心.我去去就回!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:510
+translate chinese monika_no_food_83d11983:
+
+    # m 1etb "By the way, have you finished your food yet?{nw}"
+    m 1etb "顺带一提,你的吃的吃完了吗?{nw}"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:513
+translate chinese monika_no_food_71728465:
+
+    # m "By the way, have you finished your food yet?{fast}" nointeract
+    m "顺带一提,你的吃的吃完了吗?{fast}" nointeract
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:515
+translate chinese monika_no_food_d81c1322:
+
+    # m 1hubsa "Ehehe~"
+    m 1hubsa "哈哈哈~"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:516
+translate chinese monika_no_food_f11843d9:
+
+    # m 1hubsb "I hope you enjoyed it!"
+    m 1hubsb "希望你喜欢!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:518
+translate chinese monika_no_food_d43bf255:
+
+    # m 1eubsa "Don't worry, eat slowly."
+    m 1eubsa "别着急,又没人跟你抢."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:519
+translate chinese monika_no_food_7a5ecd30:
+
+    # m 1eubsb "I wait for you patiently~"
+    m 1eubsb "我会耐心的等你的~"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:521
+translate chinese monika_no_food_2c1f49f3:
+
+    # m 1ekc "You told me not to worry."
+    m 1ekc "你告诉我不要担心."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:522
+translate chinese monika_no_food_1090e300:
+
+    # m 1ekb "But, I guess you at least have a drink with you."
+    m 1ekb "不过,我猜你至少有杯饮料吧."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:523
+translate chinese monika_no_food_d66d70d6:
+
+    # m 1hua "Let me know if you want to come back again."
+    m 1hua "如果你想再来就告诉我吧."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:531
+translate chinese restaurant_hide_acs_15fcc425:
+
+    # m 3eub "I have to put these candles away."
+    m 3eub "让我把这些蜡烛放走."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:532
+translate chinese restaurant_hide_acs_cf93b20d:
+
+    # m "We can never be too careful with fire!"
+    m "我们对火再小心也不为过!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:533
+translate chinese restaurant_hide_acs_13fca5ea:
+
+    # m 3eub "Also, I'll put this plate away, I won't be long."
+    m 3eub "另外, 我要把这个盘子放走,我很快."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:540
+translate chinese restaurant_hide_acs_15fcc425_1:
+
+    # m 3eub "I have to put these candles away."
+    m 3eub "让我把这些蜡烛放走."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:541
+translate chinese restaurant_hide_acs_cf93b20d_1:
+
+    # m "We can never be too careful with fire!"
+    m "我们对火再小心也不为过!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:545
+translate chinese restaurant_hide_acs_8e25c6cc:
+
+    # m 3eua "I'll put these flowers away, I won't be long."
+    m 3eua "我要拿开这些花,我马上."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:551
+translate chinese restaurant_hide_acs_77a2b901:
+
+    # m 3eua "I must put this plate away."
+    m 3eua "我必须把这些盘子拿开."
+
+# game/Submods/ExtraPlus/Extra_Plus_Labels.rpy:560
+translate chinese restaurant_hide_acs_1f4f1eea:
+
+    # m 1hua "Okay, let's go, [player]!"
+    m 1hua "好了,我们走吧, [player]!"
+

@@ -742,3 +742,407 @@ translate chinese strings:
     old "But, would you like to continue playing?{fast}"
     new "但是，你想继续玩吗？{fast}"
 
+# TODO: Translation updated at 2024-04-30 16:37
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:13
+translate chinese minigame_sg_a4f38f8e:
+
+    # m 1eua "You want to play something simple, [player]? "
+    m 1eua "你想晚点简单的, [player]?"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:14
+translate chinese minigame_sg_14326a99:
+
+    # extend 1hua "Okay!"
+    extend 1hua "好!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:19
+translate chinese minigame_sg_7079393a:
+
+    # m 3eub "You want to start casual? "
+    m 3eub "你想随便玩玩?"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:20
+translate chinese minigame_sg_69079d40:
+
+    # extend 3hub "Okay!"
+    extend 3hub "好!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:25
+translate chinese minigame_sg_f8e01196:
+
+    # m 1eub "You want to play hard, huh?"
+    m 1eub "你想上点强度,是不?"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:26
+translate chinese minigame_sg_c993bdf4:
+
+    # m 1hub "Ahahaha, okay!"
+    m 1hub "哈哈哈哈,行!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:59
+translate chinese restart_sg_73e6bd45:
+
+    # m 1lub "There's the ball, don't lose sight of it, [player]!"
+    m 1lub "这个被子里面有球,别跟丢它了, [player]!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:64
+translate chinese restart_sg_01970ec2:
+
+    # m 3hub "Okay, let's test your reflexes!"
+    m 3hub "好,现在让我们看看你的反应能力怎麽样!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:187
+translate chinese check_label_78161592:
+
+    # m 1sub "[renpy.substitute(renpy.random.choice(_plus_complies))]"
+    m 1sub "[renpy.substitute(renpy.random.choice(_plus_complies))]"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:190
+translate chinese check_label_5fff56b8:
+
+    # m 1hub "[renpy.substitute(renpy.random.choice(_plus_not_met))]"
+    m 1hub "[renpy.substitute(renpy.random.choice(_plus_not_met))]"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:268
+translate chinese shell_game_result_4d75983d:
+
+    # m 3ekd "[player], we haven't even started playing."
+    m 3ekd "[player],我们都还没开始玩呢."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:269
+translate chinese shell_game_result_cceefcab:
+
+    # m 2gkp "I wanted to play with you for a while..."
+    m 2gkp "我想跟你玩一会..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:276
+translate chinese shell_game_result_02f0cc8b:
+
+    # m 1hua "Okay, we'll play another time, then."
+    m 1hua "好吧,我们别的时间再玩."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:280
+translate chinese shell_game_result_0d651d0c:
+
+    # m 1hub "Even though we've only played a few rounds, you've already made a good impression on me!"
+    m 1hub "哪怕你仅仅只玩了几个回合,你都已经给我留下相当深刻的印象了."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:281
+translate chinese shell_game_result_f5be365e:
+
+    # m 1hub "You did great every round."
+    m 1hub "你在每一回合里做的都很好."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:282
+translate chinese shell_game_result_1fbf9d60:
+
+    # m 1hua "I guess you don't have any more time today..."
+    m 1hua "我猜你今天应该是没有更多时间了."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:283
+translate chinese shell_game_result_6927c1ee:
+
+    # m 1eua "I hope we get to play more next time."
+    m 1eua "我希望我们下次能再多玩一会."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:288
+translate chinese shell_game_result_3841348d:
+
+    # m 3hub "It's just a matter of practice and you'll see how everything will get easier!"
+    m 3hub "这只是练习的问题,你最终会觉得这一切都会变得更容易！"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:291
+translate chinese shell_game_result_556d81d3:
+
+    # m 1eka "[player], I am worried..."
+    m 1eka "[player],我害怕..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:292
+translate chinese shell_game_result_0bfeb9ab:
+
+    # m 1ekb "We've been playing for [_current_turn] rounds and you haven't gotten any of them right."
+    m 1ekb "我们已经玩了有 [_current_turn] 回合,而你一次都没赢过."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:293
+translate chinese shell_game_result_6a165866:
+
+    # m 1etd "Are you too unmotivated or distracted?"
+    m 1etd "你会不会是太累了还是无法集中注意?"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:295
+translate chinese shell_game_result_3cb6bd20:
+
+    # m 1eua "Well, since you are on easy difficulty..."
+    m 1eua "好吧,毕竟这是简单难度..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:296
+translate chinese shell_game_result_b4a892b2:
+
+    # m 1rkb "I guess you got bored because of how slow the cups were going, you know that's how it is."
+    m 1rkb "我猜这是因为杯子太慢导致你犯困了,你也知道人是这样的."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:297
+translate chinese shell_game_result_734d6fb2:
+
+    # m 1rkb "You'd have to try the other difficulties if you want to challenge yourself."
+    m 1rkb "如果你想挑战自己,你得去试试更难的难度."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:298
+translate chinese shell_game_result_133df685:
+
+    # m 1hua "Anyway, let's leave all this for another day."
+    m 1hua "无论如何,我们改天再玩这个吧."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:300
+translate chinese shell_game_result_9de96746:
+
+    # m 1eua "On normal difficulty..."
+    m 1eua "在普通难度..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:303
+translate chinese shell_game_result_799a6e2b:
+
+    # m 3hua "Maybe it will motivate you to go further!"
+    m 3hua "也许这会激发你的潜能!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:304
+translate chinese shell_game_result_a236ed58:
+
+    # m 3hka "Or you can save it for another day! It's up to you."
+    m 3hka "或者你可以把它留着等有需要的那一天!这取决于你."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:306
+translate chinese shell_game_result_bb46a875:
+
+    # m 1eua "Considering you are on the hard difficulty..."
+    m 1eua "考虑到你选的是困难难度..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:309
+translate chinese shell_game_result_d8b42261:
+
+    # m 1rsb "But that wasn't the case."
+    m 1rsb "但事实并非如此."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:310
+translate chinese shell_game_result_2fd9f53b:
+
+    # m 3hua "If you're fine with doing something else, put aside the mini-games and let's do something that motivates you."
+    m 3hua "如果你也可以做点别的,把这些迷你游戏放到一边,然后咱去做些能让你振作起来的事."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:314
+translate chinese shell_game_result_17a28cce:
+
+    # m 2eka "But if you want to do absolutely nothing..."
+    m 2eka "但如果你真的是什么也不想做..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:321
+translate chinese shell_game_result_2db2ee71:
+
+    # m 2sub "Congratulations!"
+    m 2sub "恭喜!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:323
+translate chinese shell_game_result_ff5a40a0:
+
+    # m 3hua "I won't worry about you failing at a carnival game, ehehehe~"
+    m 3hua "我不担心你会沉迷于这麽一个游戏,哈哈哈~"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:324
+translate chinese shell_game_result_4d1c6c05:
+
+    # m 1tubsb "I can't wait for you to win a teddy bear for me when we have a date there!"
+    m 1tubsb "当我们在那约会时,我等不及你给我赢一个泰迪熊玩具了!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:328
+translate chinese shell_game_result_d7287f26:
+
+    # m 3hub "We were already on the [_current_turn] shift."
+    m 3hub "我们已经在第[_current_turn]次了."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:333
+translate chinese shell_game_result_58ad9a22:
+
+    # m 1eka "We've been [_current_turn] turns and you haven't hit any."
+    m 1eka "我们已经玩了有[_current_turn]次,但你一次都没中."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:336
+translate chinese shell_game_result_51b8e811:
+
+    # m 1eka "Well, since you are on the easy difficulty..."
+    m 1eka "好吧,毕竟这是简单难度..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:341
+translate chinese shell_game_result_ec6c9de9:
+
+    # m 1eka "Being on normal difficulty..."
+    m 1eka "在普通难度..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:343
+translate chinese shell_game_result_d4f705b0:
+
+    # m 1hua "I imagine you're going even further, since we're on [_current_turn] turn."
+    m 1hua "我觉得你可以做得更好,毕竟我们玩了 [_current_turn] 次."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:344
+translate chinese shell_game_result_48cb26f6:
+
+    # m 1rtd "Although I wonder where this idea of yours [player] came from..."
+    m 1rtd "虽然我在想你的[player]这个点子是从哪来的..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:345
+translate chinese shell_game_result_bc367773:
+
+    # m 1gsu "I'd better keep my doubt to myself, I'm just going to see how far you can go!"
+    m 1gsu "我最好不要怀疑自己，我只是想看看你玩的怎么样!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:347
+translate chinese shell_game_result_79b69c0f:
+
+    # m 1eka "Considering that you are in the hard difficulty..."
+    m 1eka "考虑到你选的是困难难度..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:349
+translate chinese shell_game_result_bc1cf79b:
+
+    # m 1etb "You wanted to get to more than [_current_turn] turns with failures?"
+    m 1etb "你想要在[_current_turn]回合中失败更上一层楼?"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:351
+translate chinese shell_game_result_5c474440:
+
+    # m 1lta "You might be wondering if I worry that you will fail until [_current_turn] turn."
+    m 1lta "你也许会想你失败了[_current_turn]次,我会担心你."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:353
+translate chinese shell_game_result_dfa6f547:
+
+    # m 1hksdlb "I'm sorry that I encourage you to fail instead of getting every turn right, Ahahaha~"
+    m 1hksdlb "我很抱歉我鼓励你输而不是鼓励你赢,啊哈哈哈~"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:354
+translate chinese shell_game_result_e99b7b91:
+
+    # m 1hksdlb "But you're already doing it so I have no choice but to support you!"
+    m 1hksdlb "但你已经在这么做了,所以我除了帮你别无选择."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:357
+translate chinese shell_game_result_1c36e694:
+
+    # m 3eub "It's not like chess, you need to use strategies..."
+    m 3eub "它不像象棋,你需要运用一些战术..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:358
+translate chinese shell_game_result_159f7abe:
+
+    # m 3eub "But it's good to play other games don't you think?"
+    m 3eub "但你难道不觉得玩玩别的游戏很好嘛?"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:360
+translate chinese shell_game_result_81d0ef83:
+
+    # m 4hub "Well, nevertheless, I thank you for playing with me [mas_get_player_nickname()]!"
+    m 4hub "好吧,不管怎样,我谢谢你跟我玩,[mas_get_player_nickname()]!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:361
+translate chinese shell_game_result_d1c0fd43:
+
+    # m 4hub "We'll play some other time, if that's okay with you."
+    m 4hub "我们再找时间玩吧,如果你有空的话."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:366
+translate chinese shell_game_result_8a191e02:
+
+    # m 1hub "You got it right every turn, it shows the concentration you had!"
+    m 1hub "你每一回合都赢了,这表明你有相当的专注力!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:368
+translate chinese shell_game_result_2811a8ac:
+
+    # m 1ekb "I would love to give you something as a prize but I can't do anything from here, ahahaha~..."
+    m 1ekb "我想给你点东西作为奖励,可我给不了你,哈哈哈~..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:369
+translate chinese shell_game_result_e4291a9b:
+
+    # m 3hua "Yes, you have really trained your reflexes a lot."
+    m 3hua "是的,你的确在提升反应力上下足了功夫."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:371
+translate chinese shell_game_result_f33d4deb:
+
+    # m 1eta "Or is it your self-defense system? "
+    m 1eta "或者这是一个有利于你自我保护的系统?"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:372
+translate chinese shell_game_result_b498078a:
+
+    # extend 1sua "If so, I'm glad to hear it."
+    extend 1sua "如果真是这样,我很高兴听到这个消息."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:375
+translate chinese shell_game_result_0e518ebf:
+
+    # m 1hub "You gave your best, considering you've made it to the [_current_turn] turn!"
+    m 1hub "你确实全力以赴了,考虑到你已经玩了[_current_turn]次了!"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:377
+translate chinese shell_game_result_ebb72af2:
+
+    # m 1eka "So don't lose heart."
+    m 1eka "所以不要灰心."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:381
+translate chinese shell_game_result_24ebdf10:
+
+    # m "We've been on [_current_turn] turns and you haven't gotten any of them right."
+    m "我们已经玩了有[_current_turn]次,但你一次都没中."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:384
+translate chinese shell_game_result_ed12b229:
+
+    # m 1eua "Well, as you are on the easy difficulty..."
+    m 1eua "好吧,考虑到你选的是简单难度..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:385
+translate chinese shell_game_result_ae51f852:
+
+    # m 3wud "It is easy to accomplish this! However it is a very time consuming thing to do."
+    m 3wud "要完成这个很简单!但也很耗时间."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:388
+translate chinese shell_game_result_6e2b4b13:
+
+    # m 1eua "Being on normal difficulty..."
+    m 1eua "在普通难度..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:390
+translate chinese shell_game_result_47823a2e:
+
+    # m 1hub "I'd like to see your face while doing this, ehehehe~"
+    m 1hub "我想看看你做这个的表情,哈哈哈~"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:392
+translate chinese shell_game_result_b54c9247:
+
+    # m 1eua "Considering that you are on hard difficulty..."
+    m 1eua "考虑到这是困难难度..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:394
+translate chinese shell_game_result_27737617:
+
+    # m 1hub "You really took this seriously in the sense of failing on purpose, ehehehe~"
+    m 1hub "从故意失败的目的上讲,你玩得真的很认真,哈哈哈~"
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:396
+translate chinese shell_game_result_8bfce8ad:
+
+    # m 3eka "And also, rest your eyes for a while, we played this mini-game for quite some time..."
+    m 3eka "另外,休息休息你的眼睛吧,我们玩这个小游戏有一段时间了..."
+
+# game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:398
+translate chinese shell_game_result_198cddc5:
+
+    # m 1dub "I always get concerned about your health, [mas_get_player_nickname()]."
+    m 1dub "我总是担心你的健康, [mas_get_player_nickname()]."
+

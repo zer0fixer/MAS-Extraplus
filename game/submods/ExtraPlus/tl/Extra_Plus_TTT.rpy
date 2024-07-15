@@ -300,3 +300,119 @@ translate chinese strings:
     old "I give up"
     new "我放弃"
 
+# TODO: Translation updated at 2024-04-30 16:37
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:231
+translate chinese minigame_ttt_m_comment_0d662eb2:
+
+    # m 3hua "Well, I won this game."
+    m 3hua "好,这把我赢了."
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:232
+translate chinese minigame_ttt_m_comment_d608efa0:
+
+    # m 3hub "You should think on a better strategy next time!"
+    m 3hub "你应该去考虑考虑下次换一个更好的打法了!"
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:238
+translate chinese minigame_ttt_m_comment_fdf0afdf:
+
+    # m 4hua "I know that you'll win next time."
+    m 4hua "你下次一定能赢的."
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:245
+translate chinese minigame_ttt_m_comment_e678a64c:
+
+    # m 1suo "Next time I will try my best to win, so be prepared."
+    m 1suo "下次我会全力以赴的,所以你要准备好."
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:247
+translate chinese minigame_ttt_m_comment_f61d1161:
+
+    # m 1hub "Oh, you've won this one."
+    m 1hub "哦,这把你赢了."
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:258
+translate chinese minigame_ttt_m_comment_49dd300b:
+
+    # m 3hua "The plan is for us to have fun as a couple~"
+    m 3hua "这个游戏感觉就是给像我们这样的情侣玩的~"
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:267
+translate chinese minigame_ttt_m_comment_89081114:
+
+    # m 1ekd "Are you giving up on this round?"
+    m 1ekd "你要放弃这一回合吗?"
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:268
+translate chinese minigame_ttt_m_comment_d6e40c1b:
+
+    # m 1eka "Well, I'm going to restart the game, but I'll take a point!"
+    m 1eka "好,那我去重开一把游戏,但这把就算我赢了!"
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:271
+translate chinese minigame_ttt_m_comment_ba56fa63:
+
+    # m 3ekd "Were you distracted?"
+    m 3ekd "你分心了吗?"
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:272
+translate chinese minigame_ttt_m_comment_1eb44c0e:
+
+    # m 1eka "Okay, I'm going to restart the game, but I will be the winner of this round!"
+    m 1eka "好,那我去重开一把游戏,但这一把我就算是赢家了!"
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:282
+translate chinese minigame_ttt_quit_fbbf87fe:
+
+    # m 3esa "Oh! You stopped playing?"
+    m 3esa "哦!你不玩了?"
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:284
+translate chinese minigame_ttt_quit_30c2322e:
+
+    # m 3lkb "But don't worry, I understand if you don't feel like playing."
+    m 3lkb "但别担心,我理解你也有玩腻的时候."
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:285
+translate chinese minigame_ttt_quit_003603a4:
+
+    # m 1hua "I just hope we can play some other time."
+    m 1hua "希望我们在别的时间能再玩一玩."
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:287
+translate chinese minigame_ttt_quit_5c1e1c39:
+
+    # m 1suo "Wow, it's a tie!"
+    m 1suo "哇,这把平局了!"
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:288
+translate chinese minigame_ttt_quit_f8c3e7fd:
+
+    # m 2huu "There must be a winner, though."
+    m 2huu "虽然这必须得有一个赢家."
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:294
+translate chinese minigame_ttt_quit_ca220ee0:
+
+    # m 1eub "Maybe you'll beat me next time!"
+    m 1eub "也许你下次就能打败我了!"
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:296
+translate chinese minigame_ttt_quit_3b7f1465:
+
+    # m 1hub "You have won [player], congratulations."
+    m 1hub "你赢了[player],祝贺你."
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:297
+translate chinese minigame_ttt_quit_e9f2d914:
+
+    # m 1hub "I am proud of you~"
+    m 1hub "为你骄傲哦~"
+
+# game/Submods/ExtraPlus/Extra_Plus_TTT.rpy:298
+translate chinese minigame_ttt_quit_fdd618cb:
+
+    # m 3hua "I'll do my best next time too!"
+    m 3hua "我下次也会全力以赴的!"
+
