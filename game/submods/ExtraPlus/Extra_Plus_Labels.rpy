@@ -146,17 +146,17 @@ label cafe_talk:
     python:
         store.disable_zoom_button = True
         cafe_menu = [
-            ("How are you today?", 'extra_talk_feel'),
-            ("What's your greatest ambition?", 'extra_talk_ambition'),
-            ("Our communication is very limited, don't you think?", 'extra_talk_you'),
-            ("How do you see us in 10 years?", 'extra_talk_teen'),
-            ("What is your best memory that you currently have?", 'extra_talk_memory'),
-            ("Do you have any phobia?", 'extra_talk_phobia')
+            (_("How are you today?"), 'extra_talk_feel'),
+            (_("What's your greatest ambition?"), 'extra_talk_ambition'),
+            (_("Our communication is very limited, don't you think?"), 'extra_talk_you'),
+            (_("How do you see us in 10 years?"), 'extra_talk_teen'),
+            (_("What is your best memory that you currently have?"), 'extra_talk_memory'),
+            (_("Do you have any phobia?"), 'extra_talk_phobia')
         ]
 
         items = [
-            ("Can we leave?", 'cafe_leave', 20),
-            ("Nevermind", 'to_cafe_loop', 0)
+            (_("Can we leave?"), 'cafe_leave', 20),
+            (_("Nevermind"), 'to_cafe_loop', 0)
         ]
     call screen extra_gen_list(cafe_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=False)
     return
@@ -257,21 +257,21 @@ label restaurant_talk:
     python:
         store.disable_zoom_button = True
         restaurant_menu = [
-            ("How are you doing, [m_name]?", 'extra_talk_doing'),
-            ("If you could live anywhere, where would it be?", 'extra_talk_live'),
-            ("What would you change about yourself if you could?", 'extra_talk_change'),
-            ("If you were a super-hero, what powers would you have?", 'extra_talk_superhero'),
-            ("Do you have a life motto?", 'extra_talk_motto'),
-            ("Aside from necessities, what's the one thing you couldn't go a day without?", 'extra_talk_without'),
-            ("Is your glass half full or half empty?", 'extra_talk_glass'),
-            ("What annoys you most?", 'extra_talk_annoy'),
-            ("Describe yourself in three words.", 'extra_talk_3words'),
-            ("What do you think is the first thing to pop into everyone's minds when they think about you?", 'extra_talk_pop'),
-            ("If you were an animal, what animal would you be?", 'extra_talk_animal'),
+            (_("How are you doing, [m_name]?"), 'extra_talk_doing'),
+            (_("If you could live anywhere, where would it be?"), 'extra_talk_live'),
+            (_("What would you change about yourself if you could?"), 'extra_talk_change'),
+            (_("If you were a super-hero, what powers would you have?"), 'extra_talk_superhero'),
+            (_("Do you have a life motto?"), 'extra_talk_motto'),
+            (_("Aside from necessities, what's the one thing you couldn't go a day without?"), 'extra_talk_without'),
+            (_("Is your glass half full or half empty?"), 'extra_talk_glass'),
+            (_("What annoys you most?"), 'extra_talk_annoy'),
+            (_("Describe yourself in three words."), 'extra_talk_3words'),
+            (_("What do you think is the first thing to pop into everyone's minds when they think about you?"), 'extra_talk_pop'),
+            (_("If you were an animal, what animal would you be?"), 'extra_talk_animal'),
         ]
 
         items = [
-            ("Can we leave?", 'restaurant_leave', 20),
+            (_("Can we leave?"), 'restaurant_leave', 20),
             ("Nevermind", 'to_restaurant_loop', 0)
         ]
     call screen extra_gen_list(restaurant_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=False)

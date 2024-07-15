@@ -22,6 +22,15 @@ translate chinese strings:
     old "Ask"
     new "问个问题"
 
+    old "Date"
+    new "约会"
+
+    old "Boop"
+    new "摸摸"
+
+    old "Zoom"
+    new "距离"
+
 # TODO: Translation updated at 2024-04-30 16:37
 
 translate chinese strings:
