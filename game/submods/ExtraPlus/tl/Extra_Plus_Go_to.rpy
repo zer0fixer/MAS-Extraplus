@@ -2101,7 +2101,8 @@ translate chinese extra_talk_doing_ac6f6b24:
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:414
 translate chinese extra_talk_doing_c9b11115:
 
-    # m "I know that spending them with you makes me feel better when I'm down."    m "我知道当我情绪低落时,和你在一起会让我感觉更好."
+    # m "I know that spending them with you makes me feel better when I'm down." 
+    m "我知道当我情绪低落时,和你在一起会让我感觉更好."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:416
 translate chinese extra_talk_doing_4fcad6ac:
