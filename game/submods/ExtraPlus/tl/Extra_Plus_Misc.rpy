@@ -1038,3 +1038,20 @@ translate chinese mas_backup_fail_c070eec4:
     # m 1eka "Please try again later."
     m 1eka "等会再试试吧."
 
+
+translate chinese strings:
+    # Submods\ExtraPlus\Extra_Plus_Misc.rpy:558
+    old "Restore the window title"
+    new "还原会话框抬头."
+
+    # Submods\ExtraPlus\Extra_Plus_Misc.rpy:572
+    old "What title do you want to put on this window?"
+    new "你想要会话框抬头上写什么?"
+
+    # Submods\ExtraPlus\Extra_Plus_Misc.rpy:586
+    old "The change is done."
+    new "设置成功."
+
+    # Submods\ExtraPlus\Extra_Plus_Misc.rpy:595
+    old "It has been successfully restored."
+    new "还原成功."

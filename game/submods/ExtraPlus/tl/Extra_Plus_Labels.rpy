@@ -1640,3 +1640,252 @@ translate chinese restaurant_hide_acs_1f4f1eea:
     # m 1hua "Okay, let's go, [player]!"
     m 1hua "好了,我们走吧, [player]!"
 
+
+translate chinese strings:
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:148
+    old "How are you today?"
+    new "你今天怎么样?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:148
+    old "What's your greatest ambition?"
+    new "你最大的愿望是什么?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:148
+    old "Our communication is very limited, don't you think?"
+    new "我们交流的方式很有限,你难道不觉得吗?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:148
+    old "How do you see us in 10 years?"
+    new "你觉得我们10年之后会怎么样?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:148
+    old "What is your best memory that you currently have?"
+    new "你现在拥有的最美好的记忆是哪一个?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:148
+    old "Do you have any phobia?"
+    new "你有害怕的事物吗?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:157
+    old "Can we leave?"
+    new "我想回去了."
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:259
+    old "How are you doing, [m_name]?"
+    new "你今天怎么样, [m_name]?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:259
+    old "If you could live anywhere, where would it be?"
+    new "如果你可以住在世界上的任何一个地方,你想住哪?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:259
+    old "What would you change about yourself if you could?"
+    new "如果可以的话,你会想把自己变成什么样子?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:259
+    old "If you were a super-hero, what powers would you have?"
+    new "如果你是一位超级英雄,你想要怎么样的超能力?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:259
+    old "Do you have a life motto?"
+    new "你有座右铭吗?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:259
+    old "Aside from necessities, what's the one thing you couldn't go a day without?"
+    new "在这么多生活必需品中,哪一件你是一天也离不开的?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:259
+    old "Is your glass half full or half empty?"
+    new "你认为是半空的水杯还是半满的水杯?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:259
+    old "What annoys you most?"
+    new "你觉得什么东西最烦人?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:259
+    old "Describe yourself in three words."
+    new "你拿三个词形容一下你自己."
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:259
+    old "What do you think is the first thing to pop into everyone's minds when they think about you?"
+    new "你觉得当人们聊到你时,他们对你的第一印象是什么?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:259
+    old "If you were an animal, what animal would you be?"
+    new "如果你必须要变成一种动物,你希望变成什么动物?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:572
+    old "Restaurant"
+    new "餐馆"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:572
+    old "Pool"
+    new "游泳池"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:609
+    old "View [m_name]'s Affection"
+    new "查看[m_name]对你的好感"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:609
+    old "Create a gift for [m_name]"
+    new "给[m_name]送一个礼物"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:609
+    old "Change the window's title"
+    new "改变会话框的抬头"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:609
+    old "[m_name], I want to make a backup"
+    new "[m_name],我想做个备份"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:609
+    old "[m_name], can you flip a coin?"
+    new "[m_name],你可以翻个硬币嘛?"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:609
+    old "Hi [player]!"
+    new "嗨[player]!"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:619
+    old "Github Repository"
+    new "Github网址"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:633
+    old "Customized gift"
+    new "自定义礼物"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:633
+    old "Groceries"
+    new "消耗品"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:633
+    old "Objects"
+    new "物品"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:633
+    old "Ribbons"
+    new "发带"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:650
+    old "Enter the name of the gift."
+    new "请输入礼物名称."
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:664
+    old "Has been successfully created."
+    new "已创建成功"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:672
+    old "Coffee"
+    new "咖啡"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:672
+    old "Chocolates"
+    new "巧克力"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:672
+    old "Cupcake"
+    new "纸杯蛋糕"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:672
+    old "Fudge"
+    new "软糖"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:672
+    old "Hot Chocolate"
+    new "热可可"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:672
+    old "Candy"
+    new "糖果"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:672
+    old "Candy Canes"
+    new "拐杖糖"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:672
+    old "Candy Corn"
+    new "玉米糖"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:672
+    old "Christmas Cookies"
+    new "圣诞节曲奇"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:693
+    old "Promise Ring"
+    new "誓言戒指"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:693
+    old "Roses"
+    new "玫瑰"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:693
+    old "Quetzal Plushie"
+    new "凤头绿咬鹃玩偶"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:693
+    old "Thermos Mug"
+    new "水杯"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:709
+    old "Black Ribbon"
+    new "黑色发带"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:709
+    old "Blue Ribbon"
+    new "蓝色发带"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:709
+    old "Dark Purple Ribbon"
+    new "深紫色发带"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:709
+    old "Emerald Ribbon"
+    new "翡翠绿发带"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:709
+    old "Gray Ribbon"
+    new "灰色发带"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:709
+    old "Green Ribbon"
+    new "绿色发带"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:709
+    old "Light Purple Ribbon"
+    new "浅紫色发带"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:709
+    old "Peach Ribbon"
+    new "桃红色发带"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:709
+    old "Pink Ribbon"
+    new "粉色发带"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:709
+    old "Platinum Ribbon"
+    new "白金色发带"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:709
+    old "Red Ribbon"
+    new "红色发带"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:709
+    old "Ruby Ribbon"
+    new "深红色发带"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:709
+    old "Sapphire Ribbon"
+    new "蔚蓝色发带"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:709
+    old "Silver Ribbon"
+    new "银色发带"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:709
+    old "Teal Ribbon"
+    new "蓝绿色发带"
+
+    # Submods\ExtraPlus\Extra_Plus_Labels.rpy:709
+    old "Yellow Ribbon"
+    new "黄色发带"
