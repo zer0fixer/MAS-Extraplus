@@ -40,7 +40,7 @@ translate chinese restart_sg_8113f371:
 translate chinese loop_game_c64c6b47:
 
     # "Select a cup:"
-    "选择一个杯子"
+    "你觉得球在哪?"
 
 # game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:182
 translate chinese check_label_5ceee795:
@@ -748,7 +748,7 @@ translate chinese strings:
 translate chinese minigame_sg_a4f38f8e:
 
     # m 1eua "You want to play something simple, [player]? "
-    m 1eua "你想晚点简单的, [player]?"
+    m 1eua "你想玩点简单的, [player]?"
 
 # game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:14
 translate chinese minigame_sg_14326a99:
@@ -784,7 +784,7 @@ translate chinese minigame_sg_c993bdf4:
 translate chinese restart_sg_73e6bd45:
 
     # m 1lub "There's the ball, don't lose sight of it, [player]!"
-    m 1lub "这个被子里面有球,别跟丢它了, [player]!"
+    m 1lub "这个杯子里面有球,别跟丢它了, [player]!"
 
 # game/Submods/ExtraPlus/Extra_Plus_Shell_Game.rpy:64
 translate chinese restart_sg_01970ec2:

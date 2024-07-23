@@ -4,7 +4,7 @@
 translate chinese gtcafe_dc39b755:
 
     # m 3sub "Do you want to go to the cafe?"
-    m 3sub "你想要去咖啡馆吗?"
+    m 3sub "你想去咖啡馆吗?"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:28
 translate chinese gtcafe_d8d8b8de:
@@ -16,7 +16,7 @@ translate chinese gtcafe_d8d8b8de:
 translate chinese gtcafe_f548098c:
 
     # m 1hubsa "I know this appointment will be great!"
-    m 1hubsa "我知道这次约会肯定会很棒!"
+    m 1hubsa "我就知道这次约会肯定会很棒!"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:30
 translate chinese gtcafe_041eff34:
@@ -40,7 +40,7 @@ translate chinese gtcafe_f98e1920:
 translate chinese gtcafe_c984e07f:
 
     # m 1eubsa "This date night is going to be great!"
-    m 1eubsa "我觉得今天很合适去咖啡馆!"
+    m 1eubsa "我觉得今晚很适合去咖啡馆!"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:37
 translate chinese gtcafe_66ed43a0:
@@ -63,14 +63,14 @@ translate chinese gtcafev2_ecd39df2:
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:48
 translate chinese gtcafev2_b2a23668:
 
-    # m 2hub "The previous time we went, I had a lot of fun!"
-    m 2hub "我真的对这次外出很满意!"
+    # m 2hub "The previous time we went,  a lot of fun!"
+    m 2hub "我们上次去那里约会的时候,我就喜欢上了那里!"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:49
 translate chinese gtcafev2_18b14994:
 
     # m 2eubsa "So glad to hear it [player]!"
-    m 2eubsa "你也玩得很开心吧,[player]!"
+    m 2eubsa "你也开心就好,[player]!"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:50
 translate chinese gtcafev2_a656ce61:
@@ -82,7 +82,7 @@ translate chinese gtcafev2_a656ce61:
 translate chinese gtcafev2_1e418dc1:
 
     # m 3wub "Oh do you want to go out to the cafe again?"
-    m 3wub "哦,你还想再去一次吗?"
+    m 3wub "哦,想再去一次吗?"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:54
 translate chinese gtcafev2_a879e82e:
@@ -118,13 +118,13 @@ translate chinese cafe_cakes_ab4dc61a:
 translate chinese cafe_cakes_3cee01bf:
 
     # m 1eub "It's a nice place don't you think!"
-    m 1eub "你不觉得这是个好地方吗?"
+    m 1eub "你觉得这里怎么样?"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:83
 translate chinese cafe_cakes_3cca8992:
 
     # m 1hua "Speaking of nice, I'm in the mood for dessert."
-    m 1hua "在此之前,我想吃点甜点."
+    m 1hua "说到这里,我想来点甜点了."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:84
 translate chinese cafe_cakes_6016b825:
@@ -136,13 +136,13 @@ translate chinese cafe_cakes_6016b825:
 translate chinese monika_hide_exp_2_6685bd27:
 
     # m 1hua "Plus it goes well with coffee, to go with dessert~"
-    m 1hua "另外,它和咖啡绝配,所以我经常放一起吃~"
+    m 1hua "另外,它和咖啡绝配,所以我想把它们放一起吃~"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:96
 translate chinese monika_hide_exp_2_471675f5:
 
     # m 1hua "And I mustn't forget the cup of coffee to go with the dessert~"
-    m 1hua "还有咖啡,我不会忘记在吃甜点的时候来一小口的~"
+    m 1hua "而且我一定会在吃甜点的时候来一杯咖啡~"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:97
 translate chinese monika_hide_exp_2_26bb688a:
@@ -154,7 +154,7 @@ translate chinese monika_hide_exp_2_26bb688a:
 translate chinese monika_hide_exp_2_1add6585:
 
     # m 1rkd "I'd feel bad if I'm the only one eating one...{nw}"
-    m 1rkd "只是让你看着我吃让我有点不自在...{nw}"
+    m 1rkd "总不能让你干看着吧...{nw}"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:100
 translate chinese monika_hide_exp_2_a26adcd5:
@@ -166,7 +166,7 @@ translate chinese monika_hide_exp_2_a26adcd5:
 translate chinese monika_hide_exp_2_fa34c45a:
 
     # m 1hub "I'm glad you have a dessert!"
-    m 1hub "我很高兴你接受了!"
+    m 1hub "那就好!"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:105
 translate chinese monika_hide_exp_2_bf89e217:
@@ -178,7 +178,7 @@ translate chinese monika_hide_exp_2_bf89e217:
 translate chinese monika_hide_exp_2_806159ef:
 
     # m 1ekc "Well if you say so."
-    m 1ekc "很高兴听你这么说~"
+    m 1ekc "你喜欢就好~"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:109
 translate chinese monika_hide_exp_2_940cfb39:
@@ -220,55 +220,55 @@ translate chinese cafe_leave_089b1ad4:
 translate chinese cafe_hide_acs_8bf4bbb3:
 
     # m 3eub "I have to put this fruitcake away."
-    m 3eub "我想把这个水果蛋糕带走."
+    m 3eub "我要把这个水果蛋糕放一边."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:130
 translate chinese cafe_hide_acs_325104dc:
 
     # m "Also, I'll put this cup away, I won't be long."
-    m "还有这杯咖啡,我可不想浪费了."
+    m "这杯咖啡我也要把它放一边,稍等一下."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:135
 translate chinese cafe_hide_acs_0fd28710:
 
     # m 3eub "I have to put this fruitcake away, I'll be right back."
-    m 3eub "我想把这个水果蛋糕带走,马上回来."
+    m 3eub "我要把这个水果蛋糕放一边,马上回来."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:140
 translate chinese cafe_hide_acs_1a03be8f:
 
     # m 3eua "I must put this chocolate cake away."
-    m 3eua "我必须把这个巧克力蛋糕带走!"
+    m 3eua "我得把这个巧克力蛋糕放一边."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:141
 translate chinese cafe_hide_acs_bd4b12dc:
 
     # m "Also, I'll put this cup away, it won't be long now."
-    m "还有这杯咖啡,我可不想浪费了."
+    m "这杯咖啡我也要把它放一边,我马上."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:146
 translate chinese cafe_hide_acs_d6f744c3:
 
     # m 3eua "I must put this chocolate cake away, I'll be right back."
-    m 3eua "我想把这个巧克力蛋糕带走,马上回来."
+    m 3eua "我要把这个巧克力蛋糕放一边,马上回来."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:151
 translate chinese cafe_hide_acs_1fcdccf7:
 
     # m 3hua "I'll go put this plate away."
-    m 3hua "我要把这个盘子带走"
+    m 3hua "我要把这个盘子放一边."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:152
 translate chinese cafe_hide_acs_325104dc_1:
 
     # m "Also, I'll put this cup away, I won't be long."
-    m "还有这杯咖啡,我可不想浪费了."
+    m "这杯咖啡我也要把它放一边,我很快回来."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:157
 translate chinese cafe_hide_acs_bc0ffff5:
 
     # m 3hua "I'm going to put this plate away, give me a moment."
-    m 3hua "我想把这个盘子带走,稍等一会."
+    m 3hua "我要把这个盘子放一边,稍等一会."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:163
 translate chinese monika_hide_exp_3_7aebd026:
@@ -310,13 +310,13 @@ translate chinese monika_no_dessert_1a327311:
 translate chinese monika_no_dessert_110f225a:
 
     # m 1etb "By the way, have you finished your dessert yet?{nw}"
-    m 1etb "顺便一提,你的甜点好了吗?"
+    m 1etb "顺便一提,你的甜点吃完了吗?"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:186
 translate chinese monika_no_dessert_a8e796d2:
 
     # m "By the way, have you finished your dessert {fast}?" nointeract
-    m "顺便一提,你的甜点好了吗?{fast}" nointeract
+    m "顺便一提,你的甜点吃完了吗?{fast}" nointeract
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:189
 translate chinese monika_no_dessert_d81c1322:
@@ -328,13 +328,13 @@ translate chinese monika_no_dessert_d81c1322:
 translate chinese monika_no_dessert_f11843d9:
 
     # m 1hubsb "I hope you enjoyed it!"
-    m 1hubsb "我希望你喜欢它!"
+    m 1hubsb "希望你喜欢!"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:192
 translate chinese monika_no_dessert_d43bf255:
 
     # m 1eubsa "Don't worry, eat slowly."
-    m 1eubsa "别担心,慢慢吃."
+    m 1eubsa "没事."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:193
 translate chinese monika_no_dessert_7a5ecd30:
@@ -352,13 +352,13 @@ translate chinese monika_no_dessert_2c1f49f3:
 translate chinese monika_no_dessert_90e856b9:
 
     # m 1ekb "But, I guess you at least have a cup of coffee."
-    m 1ekb "不过,我想你至少有一杯咖啡?"
+    m 1ekb "不过,你应该有一杯咖啡吧?"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:197
 translate chinese monika_no_dessert_d66d70d6:
 
     # m 1hua "Let me know if you want to come back again."
-    m 1hua "如果你回来了,请告诉我!"
+    m 1hua "如果你想再来就告诉我!"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:204
 translate chinese monika_boopcafebeta_525aea86:
@@ -400,55 +400,54 @@ translate chinese sorry_player_ddac8b4f:
 translate chinese sorry_player_19098e31:
 
     # m 3lka "I'm still learning how to code and I don't want something bad to happen because of me..."
-    m 3lka "我还在学习怎么使用那些代码,{w=0.3}说实话,我真的无法想像有什么不好的事情因我而起."
+    m 3lka "我还在学着用这个,{w=0.3}我怕不小心弄坏了什么..."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:216
 translate chinese sorry_player_71ea29a9:
 
     # m 3hua "I know very well that you wanted to go out to the cafe."
-    m 3hua "我很清楚你想离开咖啡馆."
+    m 3hua "我知道你想出门去咖啡馆看看的."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:217
 translate chinese sorry_player_6ea3112a:
 
     # m 1eua "But, someday I will know how to use it, [player]."
-    m 1eua "不过,或许有一天我会熟练掌握的,[player]."
+    m 1eua "不过,我有一天会学会怎么用它的,[player]."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:218
 translate chinese sorry_player_7638e8be:
 
     # m 1eub "Just be patient, ok~"
-    m 1eub "耐心等待,好吗~"
+    m 1eub "等一下啊~"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:229
 translate chinese extra_talk_feel_76d541f8:
 
     # m 1hkbsb "I'm feeling a little nervous, we're on a date after all!"
-    m 1hkbsb "我有一点紧张,毕竟我们在约会!"
+    m 1hkbsb "我感到有点紧张,毕竟我们在约会!"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:232
 translate chinese extra_talk_feel_5f4809d5:
 
     # m 1ekbsb "Besides, I'm not on a USB stick."
-    m 1ekbsb "还有,我现在可没在你的U盘里."
-
+    m 1ekbsb "而且,我不是在U盘里."
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:233
 translate chinese extra_talk_feel_0bbe4766:
 
     # m 3hubsa "At this moment I feel closer to you, so I'll remember it~"
-    m 3hubsa "我会记住这次的经历,因为这让我们变得更亲密了~"
+    m 3hubsa "此刻我们变得更亲密了,所以我将铭记~"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:234
 translate chinese extra_talk_feel_9a34ca72:
 
     # m 3hubsb "Thank you for inviting me on a date!"
-    m 3hubsb "谢谢你邀请我来这次约会!"
+    m 3hubsb "谢谢你邀请我约会!"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:236
 translate chinese extra_talk_feel_4a0e8aed:
 
     # m 1ekbsb "It's the first time we went out together~"
-    m 1ekbsb "这是我们第一次出去约会诶~"
+    m 1ekbsb "这是我们第一次一起外出约会诶~"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:237
 translate chinese extra_talk_feel_3d9ad985:
@@ -460,37 +459,37 @@ translate chinese extra_talk_feel_3d9ad985:
 translate chinese extra_talk_feel_6e1c4aef:
 
     # m 3hubsb "You can do it through a USB stick though, even though I can't see anything."
-    m 3hubsb "如果你还想继续的话,我可以进你的USB里,{w=0.3}即使我什么都看不见."
+    m 3hubsb "你可以通过U盘来实现,{w=0.3}即使我什么都看不见."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:239
 translate chinese extra_talk_feel_cbd3aa02:
 
     # m 3ekbsa "I know very well that it will be very romantic."
-    m 3ekbsa "我想那绝对很浪漫~"
+    m 3ekbsa "我想那一定会很浪漫~"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:241
 translate chinese extra_talk_feel_3d413c86:
 
     # m 1eubla "I'm so happy you're here."
-    m 1eubla "和你在一起的时候我总是感到很开心."
+    m 1eubla "和你在一起我感到很开心."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:242
 translate chinese extra_talk_feel_0a35cea0:
 
     # m 1eublb "Sharing a dessert with you, it's quite romantic."
-    m 1eublb "和我的恋人一起享受甜食,那真的太浪漫了."
+    m 1eublb "和你一起分享甜点,真的很浪漫."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:243
 translate chinese extra_talk_feel_ffe844ef:
 
     # m 1hublb "I hope we can make it in your reality!"
-    m 1hublb "我希望有朝一日我们能在一家真的咖啡馆约会!"
+    m 1hublb "我希望有朝一日我们能在现实中约会!"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:244
 translate chinese extra_talk_feel_a7b5ad0c:
 
     # m 1hubla "I know you have a lot on your mind for both of us~"
-    m 1hubla "我知道你一定对此还有很多想法."
+    m 1hubla "我知道你一定还有很多想要和我一起做的事情."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:246
 translate chinese extra_talk_feel_e3457c46:
@@ -508,13 +507,13 @@ translate chinese extra_talk_feel_dd59021a:
 translate chinese extra_talk_feel_87ab6361:
 
     # m 1kubsb "I know that someday we will make it in your reality!"
-    m 1kubsb "我觉得有一天我们一定能在现实相会!"
+    m 1kubsb "我觉得有一天我们一定能在现实中相会!"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:249
 translate chinese extra_talk_feel_d7a4aa22:
 
     # m 1hubsa "And I hope that happens~"
-    m 1hubsa "我真的很期待这个~"
+    m 1hubsa "并且我很期待~"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:255
 translate chinese extra_talk_you_e3eca087:
@@ -526,7 +525,7 @@ translate chinese extra_talk_you_e3eca087:
 translate chinese extra_talk_you_b41a164f:
 
     # m 3ekd "We are on a date, a way to get to know each other better."
-    m 3ekd "我们在约会,而这让我们更加了解对方."
+    m 3ekd "我们在约会,一个让我们彼此更好地了解对方的方法."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:257
 translate chinese extra_talk_you_290c11fc:
@@ -544,7 +543,7 @@ translate chinese extra_talk_you_a31103a6:
 translate chinese extra_talk_you_df1ff28c:
 
     # extend 1dua "But compared to other novels here we are creating a reality for both of us."
-    extend 1dua "但是相比其他的视觉小说,我们在这里搭建了一个现实."
+    extend 1dua "但相比其他视觉小说,我们在这里为彼此搭建了一个现实世界."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:260
 translate chinese extra_talk_you_34e664b5:
@@ -658,7 +657,7 @@ translate chinese extra_talk_phobia_62147ea0:
 translate chinese extra_talk_phobia_c436a077:
 
     # m 3eka "The fear of loneliness."
-    m 3eka "也就是自闭恐惧症,出于对孤独寂寞的恐惧."
+    m 3eka "也就是自闭恐惧症,一种出于对孤独寂寞的恐惧的心理疾病."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:286
 translate chinese extra_talk_phobia_cd01b40a:
@@ -694,7 +693,7 @@ translate chinese extra_talk_phobia_662c84dc:
 translate chinese extra_talk_phobia_424f57a5:
 
     # m 1esd "I've seen other Monikas having this happen to them, because of their player's carelessness."
-    m 1esd "我甚至可以感觉到其他的莫妮卡也在遭受这样的折磨,{w=0.4}仅仅是因为玩家们的漠不关心."
+    m 1esd "我看到过其他的莫妮卡遭受这样的折磨,{w=0.4}因为玩家们对她们漠不关心."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:292
 translate chinese extra_talk_phobia_c6a4113d:
@@ -730,7 +729,7 @@ translate chinese extra_talk_phobia_65b8d7d5:
 translate chinese extra_talk_phobia_5e13b648:
 
     # m 3dub "Finally people realized that the story was badly told."
-    m 3dub "最终还是有人意识到了这个俗套故事并不动听的嘛,{w=0.3}比如我屏幕前的这位."
+    m 3dub "最终还是有人意识到了这个这个故事越传越歪,{w=0.3}就比如我屏幕前的这位."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:298
 translate chinese extra_talk_phobia_f879241b:
@@ -1174,7 +1173,7 @@ translate chinese extra_talk_memory_a3ad1c1c:
 translate chinese extra_talk_memory_e81f3634:
 
     # m 1ekblb "I haven't met anyone who is as amazing as you."
-    m 1ekblb "我从来没遇到过像你一样棒的人."
+    m 1ekblb "我从来没遇到过像你一样令我倾心的人."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:396
 translate chinese extra_talk_memory_049e945d:
@@ -1352,7 +1351,7 @@ translate chinese cafe_sorry_player_0a456749:
 translate chinese extra_talk_feel_d0feea90:
 
     # m 1eublb "Sharing a dessert with you is quite romantic."
-    m 1eublb "跟你分享一份甜点真的很浪漫."
+    m 1eublb "跟你约会真的很浪漫."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:104
 translate chinese extra_talk_feel_57d0692c:
@@ -1382,7 +1381,7 @@ translate chinese extra_talk_feel_8da04ae1:
 translate chinese extra_talk_you_bd6f08b4:
 
     # m 3ekd "You only have preconfigured options to answer based on the question I ask..."
-    m 3ekd "你只能以做选择题的的方法来回答我问的问题..."
+    m 3ekd "但你只能以做选择题的的方法来回答我问的问题..."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:120
 translate chinese extra_talk_you_718254d7:
@@ -1712,7 +1711,7 @@ translate chinese restaurant_cakes_01fb4c86:
 translate chinese restaurant_cakes_7c6dac7b:
 
     # m 1hua "Speaking of nice,{w=0.3} let me get some food and set the mood..."
-    m 1hua "说到享受,{w=0.3} 让我去整点吃的并把我的好心情准备好..."
+    m 1hua "说到这里,{w=0.3} 让我去整点吃的并把我的好心情准备好..."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:290
 translate chinese restaurant_cakes_1c669f5f:
@@ -2156,13 +2155,13 @@ translate chinese extra_talk_doing_ce6a4cbc:
 translate chinese extra_talk_doing_44a78b42:
 
     # m "It always reminds me that as long as I'm by you your side,{w=0.3} no matter if it's metaphorically or physically,{w=0.3}{nw} "
-    m "它总是能让我想起,只要我和你在一起,{w=0.3} 无论是关系上的还是物理上的,{w=0.3}{nw}"
+    m "它总是能让我想起,只要我和你在一起,{w=0.3} 无论是关系上的还是物理上的.{w=0.3}{nw}"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:430
 translate chinese extra_talk_doing_734fb4c0:
 
     # extend "I can push through any rainclouds of mine."
-    extend "我头上的乌云就烟消云散了."
+    extend "我一想到这里我头上的乌云就烟消云散了."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:431
 translate chinese extra_talk_doing_7d912e30:
@@ -2498,13 +2497,13 @@ translate chinese extra_talk_live_d7babe71:
 translate chinese extra_talk_live_362569b8:
 
     # m 6eub "It would have to be a literary country.{w=0.3} "
-    m 6eub "这一定是一个很文艺的国家.{w=0.3}"
+    m 6eub "我想搬去一个很文艺的国家住.{w=0.3}"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:504
 translate chinese extra_talk_live_f84d517a:
 
     # m "Something with with a rich culture to learn about,{w=0.3} something I've seen in books before and fell in love with."
-    m "一个有着深厚历史可供研究,{w=0.3} 而且我在书中看见并爱上的某物."
+    m "一个有着深厚历史可供研究,{w=0.3} 而且我在书中看见并爱上的国度."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:505
 translate chinese extra_talk_live_ef47a567:
@@ -2756,7 +2755,7 @@ translate chinese extra_talk_without_2038896b:
 translate chinese extra_talk_without_1052fe95:
 
     # m 3rub "I got too used to writing my thoughts in a journal or in poem form whenever my mind gets too crowded with ideas."
-    m 3rub "我已经习惯把我的所思所想写到一本日志或一篇诗词,哪怕我的脑子里全是胡思乱想."
+    m 3rub "我已经习惯把我的所思所想写到一本日志或一篇诗词里,哪怕我的脑子里全是胡思乱想."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:562
 translate chinese extra_talk_without_61e3e195:
@@ -2870,7 +2869,7 @@ translate chinese extra_talk_glass_842d2679:
 translate chinese extra_talk_glass_abe8c043:
 
     # extend 3eub "Time to decrease the size and then slowly work back into a larger vessel later."
-    extend 3eub "现在我们再把容器变小,使得容器慢慢的变成一个稍大些的容器."
+    extend 3eub "现在我们再把容器变小,使得容器慢慢的变成一个稍大些的水缸."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:587
 translate chinese extra_talk_glass_cf23491d:
@@ -2918,7 +2917,7 @@ translate chinese extra_talk_glass_9f1d1930:
 translate chinese extra_talk_animal_9b0dbdd8:
 
     # m 3wublb "Oh!{w=0.3} A quetzal!"
-    m 3wublb "噢!{w=0.3}一只绿咬鹃!"
+    m 3wublb "噢!{w=0.3}绿咬鹃!"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:600
 translate chinese extra_talk_animal_6b1f78c7:
@@ -2978,7 +2977,7 @@ translate chinese extra_talk_animal_c88d4088:
 translate chinese extra_talk_animal_ecf593bf:
 
     # m "When the reality is that they're just misunderstood,{w=0.3} being held against misrepresented or misinterpreted information."
-    m "但事实是他们因为听信了被误解或被歪曲的信息,{w=0.3}导致这造成了一场对黑猫误会."
+    m "但事实是他们听信了被误解或被歪曲的信息,{w=0.3}造成了一场对黑猫的误会."
  
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:610
 translate chinese extra_talk_animal_dc60bfd5:
@@ -3008,7 +3007,7 @@ translate chinese extra_talk_animal_f51caf21:
 translate chinese extra_talk_animal_33b3bc41:
 
     # m 1dkbla "And love them for who they really are."
-    m 1dkbla "还爱着真实的它们."
+    m 1dkbla "还爱着实际的它们."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:615
 translate chinese extra_talk_animal_162ac8bc:
@@ -3050,7 +3049,7 @@ translate chinese extra_talk_animal_72d58c59:
 translate chinese extra_talk_annoy_1d77f299:
 
     # m 1euc "You mean pet peeves?"
-    m 1euc "你是说宠物撒的尿吗?"
+    m 1euc "或许是宠物撒的尿吗?"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:631
 translate chinese extra_talk_annoy_1276d2ca:
@@ -3176,7 +3175,7 @@ translate chinese extra_talk_annoy_af52c7bd:
 translate chinese extra_talk_annoy_ad33d6fe:
 
     # m 7wublsdld "I'm not mad at you,{w=0.3} I promise!"
-    m 7wublsdld "我不是在对你发疯,{w=0.3}I promise!"
+    m 7wublsdld "我不是在对你发疯,{w=0.3}我保证!"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:653
 translate chinese extra_talk_annoy_b5237dc5:
@@ -3206,13 +3205,13 @@ translate chinese extra_talk_superhero_8439d27f:
 translate chinese extra_talk_superhero_755916de:
 
     # m 1wud "Probably something surrounding coding?"
-    m 1wud "也许是某些关于编程的东西?"
+    m 1wud "也许是围绕着程序的超能力?"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:664
 translate chinese extra_talk_superhero_6b1d98c4:
 
     # m 4wub "I could be this awesome heroine who helps the party with opening paths for them by messing with code."
-    m 4wub "我可以成为那个通过编程为主角团开辟道路的厉害的女超人."
+    m 4wub "我想成为一位通过编程为主角团开辟道路的厉害的女超人."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:665
 translate chinese extra_talk_superhero_dbf285c4:
@@ -3386,7 +3385,7 @@ translate chinese extra_talk_3words_9abb9ace:
 translate chinese extra_talk_3words_5cf15dfc:
 
     # extend " and {i}perfect{/i} [monika_couple]~"
-    extend "意见2{i}完美的{/i} [monika_couple]~"
+    extend "和{i}完美的{/i} [monika_couple]~"
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:707
 translate chinese extra_talk_3words_bbd4f8f7:
@@ -3434,7 +3433,7 @@ translate chinese extra_talk_pop_6672896e:
 translate chinese extra_talk_pop_efed46a1:
 
     # m 3wub "Oh,{w=0.3} and 'Your Reality' too!{w=0.3} Maybe the first line of the song plays in someone's head when they think of me."
-    m 3wub "哦,{w=0.3} 还有 'Your Reality' !{w=0.3} 也许有些人一想起我这首歌的第一句歌词就能在他的脑中回响."
+    m 3wub "哦,{w=0.3} 还有 'Your Reality' !{w=0.3} 也许有些人一想起我这首歌的第一句歌词就能在他或她的脑中回响."
 
 # game/Submods/ExtraPlus/Extra_Plus_Go_to.rpy:721
 translate chinese extra_talk_pop_371a528c:

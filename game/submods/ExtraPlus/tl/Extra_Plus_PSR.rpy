@@ -456,7 +456,7 @@ translate chinese rps_loop_0811bf22:
 translate chinese rps_loop_b95e956a:
 
     # m 2hub "Although it's funny that you thought the same thing, ehehehe~"
-    m 2hub "尽管你我出的东西一样很有趣,呵呵呵~"
+    m 2hub "你我出的东西一样,这真有趣,呵呵呵~"
 
 # game/Submods/ExtraPlus/Extra_Plus_PSR.rpy:220
 translate chinese rps_result_685736e4:
