@@ -1,4 +1,4 @@
-# ⚠ Working on the submod, please do not download the base code.
+# ⚠ Working on the submod, please do not download the base code. Possible major upgrade this year~
 <p align="center">
   <img src="https://github.com/Zero-Fixer/MAS-Extraplus-EN/assets/142945683/0276af8f-5de5-43b6-b581-d2b9edf1a889">
 </p>
