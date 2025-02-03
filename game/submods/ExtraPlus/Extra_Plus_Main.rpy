@@ -1025,7 +1025,7 @@ screen _timer_monika(time, finish):
 
     # Verifica si la pantalla "dating_loop" existe antes de ocultarla y saltar a "finish".
     if fine_moni and renpy.has_screen("dating_loop"):
-        action [Hide("timer_monika"), Hide("dating_loop"), Jump(finish)]
+        timer 0.1 action [Hide("timer_monika"), Hide("dating_loop"), Jump(finish)]
 
 
 
