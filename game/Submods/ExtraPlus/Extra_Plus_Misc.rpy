@@ -499,7 +499,7 @@ label coinflip:
     show coin_moni zorder 12 at rotatecoin:
         xalign 0.5
         yalign 0.5
-    play sound "submods/ExtraPlus/submod_assets/sfx/coin_flip_sfx.ogg"
+    play sound "Submods/ExtraPlus/submod_assets/sfx/coin_flip_sfx.ogg"
     pause 1.0
     hide coin_moni
     show monika 1eua
