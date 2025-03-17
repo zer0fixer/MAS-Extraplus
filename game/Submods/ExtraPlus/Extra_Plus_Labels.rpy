@@ -647,6 +647,7 @@ label plus_make_file:
     show monika idle at t11
 
     python:
+        import os
         makegift = mas_input(
             prompt=(_("Enter the name of the gift.")),
             allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789",
@@ -658,7 +659,13 @@ label plus_make_file:
         elif makegift == "cancel":
             renpy.jump("plus_make_gift")
         else:
-            filepath = os.path.join(renpy.config.basedir, 'characters', makegift + ".gift")
+            if os.name == 'nt':
+            # 如果是 PC 系统（Windows、Linux 或 macOS），使用 renpy.config.basedir
+              filepath = os.path.join(renpy.config.basedir, 'characters', makegift + ".gift")
+            else:
+            # 如果是其他系统（例如 Android），使用指定路径
+              filepath = os.path.join("/storage/emulated/0/MAS/characters/", makegift + ".gift")
+            #filepath = os.path.join(renpy.config.basedir, 'characters', makegift + ".gift")
             with open(filepath, "a"):
                 pass  # just create an empty file
             renpy.notify(_("Has been successfully created."))
