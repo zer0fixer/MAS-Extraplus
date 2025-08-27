@@ -87,7 +87,7 @@ define -1 android_chibi = ["android_sticker", "android_sticker_blink", "android_
 define -1 casual_chibi = ["casual_sticker", "casual_sticker_blink", "casual_sticker_happy"]
 define -1 bikini_chibi = ["bikini_sticker", "bikini_sticker_blink", "bikini_sticker_happy"]
 
-default monika_costumes_ = [("Blanket", blanket_monika), ("Android", android_chibi), ("Casual", casual_chibi), ("Bikini", bikini_chibi)]
+default monika_costumes_ = [("Blanket", blanket_monika), ("Android", android_chibi), ("Casual", casual_chibi)]
 default natsuki_costumes_ = [("Blanket", blanket_nat)]
 default sayori_costumes_ = [("Blanket", blanket_sayo)]
 default yuri_costumes_ = [("Blanket", blanket_yuri)]
@@ -179,7 +179,7 @@ define _plus_not_met = [
     _("That's not quite it, [player]."),
     _("That wasn't the right answer, [player]."),
     _("Sorry, [player], that's not it."),
-    _("That wasn't the correct answer, [player].")
+    _("Not quite, try focusing a bit more!")
 ]
 
 init 5 python:

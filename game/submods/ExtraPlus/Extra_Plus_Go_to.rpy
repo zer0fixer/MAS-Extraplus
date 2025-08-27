@@ -395,7 +395,7 @@ label extra_talk_doing:
                     extend 1hubla " but it seems like you were already a step ahead of me,{w=0.3} ahaha~!"
                     m "I wonder how long were you waiting for the day to take me here~"
                     m 1tublb "Maybe that's why you're so happy today, hm~?"
-                m 1tubla "Gosh I can just amazing your expression right now, [player]~"
+                m 1tubla "Gosh I can just imagine your expression right now, [player]~"
                 m "A little sparkle in your eyes as you beam with a cute little smile~"
                 if mas_isMoniLove():
                     m 1dubsa "If I could reach out and cup your face... It'd probably feel warm from a little blush~"
