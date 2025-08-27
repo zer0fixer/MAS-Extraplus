@@ -1,8 +1,6 @@
 #===========================================================================================
 # MINIGAME#2
 #===========================================================================================
-# define ttt_sprite = ["line.png","line_moni.png","line_player.png","notebook.png"]
-
 #====Tic-Tac-Toe
 init 10 python:
     def ttt_prep(self, restart = False, *args, **kwargs):
@@ -58,7 +56,7 @@ init 10 python:
                     fig = "circle"
                     if ttt.playerTurn:
                         fig = "cross"
-                    renpy.play("submods/ExtraPlus/submod_assets/sfx/ttt_"+ fig + ".ogg", "sound")
+                    renpy.play("Submods/ExtraPlus/submod_assets/sfx/ttt_"+ fig + ".ogg", "sound")
 
                     ttt.state = ttt_new_state()
                     ttt_check_state()
@@ -114,36 +112,54 @@ init 10 python:
             w = kwargs['winner']
             self.score[w] += 1
 
-
-
 screen ttt_score():
-    vbox:
-        xpos 0.6
+    # Usamos un hbox para alinear los marcadores horizontalmente
+    hbox:
+        xalign 0.75 # Centramos el conjunto de marcadores
         ypos 0.900
+        spacing 100 # Espacio entre los dos marcadores
 
-        text "[m_name]: " + str(ttt.score[0])  style "monika_text":
+        # Marcador de Monika
+        text "[m_name]: " + str(ttt.score[0]) style "monika_text":
             if not ttt.playerTurn:
                 color "#a80000"
-    vbox:
-        xpos 0.9
-        ypos 0.900
 
-        text "[player]: " + str(ttt.score[1])  style "monika_text":
+        # Marcador del Jugador
+        text "[player]: " + str(ttt.score[1]) style "monika_text":
             if ttt.playerTurn:
                 color "#0142a4"
+    # Los botones de control se mantienen igual
     vbox:
         xpos 0.05
         yanchor 2.0
         ypos 300
-
-        # spacing 5
-        # xpos 280
-        # yanchor 2.0
-        # ypos 1.0
-
         textbutton _("I give up") style "hkb_button" action [Function(ttt.set_state, -9), Function(ttt.check_state)]
         null height 6
         textbutton _("Quit") style "hkb_button" action [Hide("minigame_ttt_scr"), Jump("minigame_ttt_quit")]
+
+# screen ttt_score():
+#     vbox:
+#         xpos 0.6
+#         ypos 0.900
+
+#         text "[m_name]: " + str(ttt.score[0])  style "monika_text":
+#             if not ttt.playerTurn:
+#                 color "#a80000"
+#     vbox:
+#         xpos 0.9
+#         ypos 0.900
+
+#         text "[player]: " + str(ttt.score[1])  style "monika_text":
+#             if ttt.playerTurn:
+#                 color "#0142a4"
+#     vbox:
+#         xpos 0.05
+#         yanchor 2.0
+#         ypos 300
+
+#         textbutton _("I give up") style "hkb_button" action [Function(ttt.set_state, -9), Function(ttt.check_state)]
+#         null height 6
+#         textbutton _("Quit") style "hkb_button" action [Hide("minigame_ttt_scr"), Jump("minigame_ttt_quit")]
 
 screen minigame_ttt_grid():
     for i in range(2):
@@ -151,6 +167,8 @@ screen minigame_ttt_grid():
         add "line_black" pos (600 + 192*i, 80) rotate 90 zoom 0.8
 
 screen minigame_ttt_scr():
+    key "h" action NullAction()
+    key "mouseup_3" action NullAction()
     use ttt_score()
     layer "master"
     zorder 50
@@ -195,11 +213,9 @@ screen minigame_ttt_scr():
 
 #====Label
 label minigame_ttt:
-    # $ check_file_status(ttt_sprite, '/game/submods/ExtraPlus/submod_assets/sprites')
-    # if not os.path.isfile(renpy.config.basedir + '/game/submods/ExtraPlus/submod_assets/Pictograms.ttf'):
-    #     show monika idle at t11
-    #     call screen dialog("A font is needed here, you know?",ok_action=Jump("close_extraplus"))
-
+    python:
+        ttt = minigames(_("Tic Tac Toe"), None, ttt_prep)
+        ttt()
     show monika 1hua at t21
     show notebook zorder 12 at animated_book
     pause 0.5
@@ -223,8 +239,6 @@ label minigame_ttt_m_turn:
 label minigame_ttt_m_comment(id = 0):
     show monika 1hua at t21
     if id == 0:
-        # if persistent.win_minigame["monika"]["ttt"] == True:
-        #     ""
         #Monika Wins
         $ moldable_variable = renpy.random.randint(0, 2)
         if moldable_variable == 0:
@@ -236,7 +250,6 @@ label minigame_ttt_m_comment(id = 0):
         else:
             m 4nub "Don't worry!"
             m 4hua "I know that you'll win next time."
-        # $ persistent.win_minigame["monika"]["ttt"] = True
         #Player Wins
     elif id == 1:
         $ moldable_variable = renpy.random.randint(0, 1)
@@ -246,7 +259,6 @@ label minigame_ttt_m_comment(id = 0):
         else:
             m 1hub "Oh, you've won this one."
             m 1eub "But I'll try to beat you, [mas_get_player_nickname()]!"
-        # $ persistent.win_minigame["player"]["ttt"] = True
         #Tie
     elif id == 2:
         $ moldable_variable = renpy.random.randint(0, 1)
@@ -257,8 +269,6 @@ label minigame_ttt_m_comment(id = 0):
             m 3hua "Don't worry, [player]."
             m 3hua "The plan is for us to have fun as a couple~"
             m 3hub "I wish you luck, [mas_get_player_nickname()]!"
-        # $ persistent.win_minigame["monika"]["ttt"] = False
-        # $ persistent.win_minigame["player"]["ttt"] = False
         
         #Reset
     else:

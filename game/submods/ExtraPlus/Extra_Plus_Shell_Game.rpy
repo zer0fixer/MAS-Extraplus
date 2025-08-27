@@ -4,7 +4,6 @@
 
 #====Shell Game
 label minigame_sg:
-    # $ check_file_status(cup_list, '/game/submods/ExtraPlus/submod_assets/sprites')
     show monika 1eub at t11
     m 1hua "Okay, what difficulty do you want?{nw}"
     menu:
@@ -93,29 +92,47 @@ label restart_sg:
 label loop_game:
     show monika 1eua
     show screen extra_no_click
+    # python:
+    #     move_cup_1 = renpy.random.randint(0,2)
+    #     move_cup_2 = renpy.random.randint(0,2)
+    #     while move_cup_2 == move_cup_1:
+    #         move_cup_2 = renpy.random.randint(0,2)
+
+    #     temp_cup_position = cup_coordinates_real[move_cup_2]
+    #     cup_coordinates_real[move_cup_2] = cup_coordinates_real[move_cup_1]
+    #     cup_coordinates_real[move_cup_1] = temp_cup_position
+
+    #     temp_original_cup = original_cup[move_cup_2]
+    #     original_cup[move_cup_2] = original_cup[move_cup_1]
+    #     original_cup[move_cup_1] = temp_original_cup
+
+    #     if original_cup[move_cup_1] == ball_position:
+    #         ball_position = original_cup[move_cup_2]
+
+    #     elif original_cup[move_cup_2] == ball_position:
+    #         ball_position = original_cup[move_cup_1]
+
     python:
+        # Elige dos tazas diferentes para mover
         move_cup_1 = renpy.random.randint(0,2)
         move_cup_2 = renpy.random.randint(0,2)
         while move_cup_2 == move_cup_1:
             move_cup_2 = renpy.random.randint(0,2)
 
+        # Intercambia las coordenadas de las tazas
         temp_cup_position = cup_coordinates_real[move_cup_2]
         cup_coordinates_real[move_cup_2] = cup_coordinates_real[move_cup_1]
         cup_coordinates_real[move_cup_1] = temp_cup_position
 
-        temp_original_cup = original_cup[move_cup_2]
-        original_cup[move_cup_2] = original_cup[move_cup_1]
-        original_cup[move_cup_1] = temp_original_cup
-
-        if original_cup[move_cup_1] == ball_position:
-            ball_position = original_cup[move_cup_2]
-
-        elif original_cup[move_cup_2] == ball_position:
-            ball_position = original_cup[move_cup_1]
+        # Actualiza correctamente la posición de la bola
+        if ball_position == move_cup_1:
+            ball_position = move_cup_2
+        elif ball_position == move_cup_2:
+            ball_position = move_cup_1
 
     $ renpy.pause(cup_speed, hard='True')
 
-    play sound "submods/ExtraPlus/submod_assets/sfx/cup_shuffle.mp3"
+    play sound "Submods/ExtraPlus/submod_assets/sfx/cup_shuffle.mp3"
 
     show cup as cup_1:
         ease cup_speed xpos cup_coordinates_real[0]
@@ -155,7 +172,7 @@ label check_label:
         cup_coordinates_real[1] = 925
         cup_coordinates_real[2] = 1155
 
-    #Se muestra los vasos y debe de elegir un vaso
+    #The cups are shown and you must choose a cup.
     if cup_choice == 0:
 
         show cup as cup_1:

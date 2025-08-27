@@ -11,7 +11,7 @@ init -990 python in mas_submod_utils:
         author="ZeroFixer",
         name="Extra Plus",
         description="A submod that adds an Extra+ button, as well as adding more content!",
-        version="1.2.0"
+        version="1.3.1"
     )
 
 #====Register the updater
@@ -33,39 +33,39 @@ init -989 python:
 
 #====Menus dialogues
 define minigames_talk = [
-    "Choose one, [player].",
-    "Want a new challenge?",
-    "I would love to play with you~",
-    "What will we play today?",
-    "Let's have some fun!",
-    "Time to show off your skills!",
-    "Ready to play?",
-    "Let's see how good you are!",
-    "Which game do you want to try?",
-    "Shall we play a game?",
-    "I'm feeling lucky today, [player].",
-    "Are you ready for some fun?",
-    "Let's see if you can beat me!",
-    "Time for some friendly competition!",
-    "I'm up for any game you want to play.",
+    _("Choose one, [player]."),
+    _("Want a new challenge?"),
+    _("I would love to play with you~"),
+    _("What will we play today?"),
+    _("Let's have some fun!"),
+    _("Time to show off your skills!"),
+    _("Ready to play?"),
+    _("Let's see how good you are!"),
+    _("Which game do you want to try?"),
+    _("Shall we play a game?"),
+    _("I'm feeling lucky today, [player]."),
+    _("Are you ready for some fun?"),
+    _("Let's see if you can beat me!"),
+    _("Time for some friendly competition!"),
+    _("I'm up for any game you want to play."),
 ]
 
 define date_talk = [
-    "I can't wait to see where you take me!",
-    "What adventures await us today?",
-    "I'm excited to spend time with you.",
-    "Let's make some great memories today.",
-    "I hope we have a wonderful time together.",
-    "Wherever we go, it will be perfect as long as we're together.",
-    "I'm open to any suggestion you have.",
-    "Let's do something fun and spontaneous!",
-    "I'm so lucky to have you as my date!",
-    "I can't wait to make more memories with you today.",
-    "I'm up for anything you want to do!",
-    "Let's make this a date to remember.",
-    "I feel like today is going to be amazing!",
-    "Wherever we end up, I'm happy as long as we're together.",
-    "Let's have an unforgettable time today!"
+    _("I can't wait to see where you take me!"),
+    _("What adventures await us today?"),
+    _("I'm excited to spend time with you."),
+    _("Let's make some great memories today."),
+    _("I hope we have a wonderful time together."),
+    _("Wherever we go, it will be perfect as long as we're together."),
+    _("I'm open to any suggestion you have."),
+    _("Let's do something fun and spontaneous!"),
+    _("I'm so lucky to have you as my date!"),
+    _("I can't wait to make more memories with you today."),
+    _("I'm up for anything you want to do!"),
+    _("Let's make this a date to remember."),
+    _("I feel like today is going to be amazing!"),
+    _("Wherever we end up, I'm happy as long as we're together."),
+    _("Let's have an unforgettable time today!")
 ]
 
 #====Boop count
@@ -73,35 +73,29 @@ default persistent.plus_boop = [0, 0, 0] #Nose, Cheeks, Headpat.
 default boop_war_count = 0
 default persistent.extra_boop = [0, 0, 0] #Hands, Ears.
 
-#====Chibika
+#====Chibika and friends?
 define chibi_xpos = 0.05
 define chibi_ypos = 385
-default persistent.chibika_current_costume = blanket_chibi
-define -1 blanket_chibi = [
-    "sticker_up",
-    "sticker_sleep",
-    "sticker_baka"
-]
-define -1 android_chibi = [
-    "android_sticker",
-    "android_sticker_blink",
-    "android_sticker_cat"
-]
-define -1 casual_chibi = [
-    "casual_sticker",
-    "casual_sticker_blink",
-    "casual_sticker_happy"
-]
-define -1 bikini_chibi = [
-    "bikini_sticker",
-    "bikini_sticker_blink",
-    "bikini_sticker_happy"
-]
+default persistent.chibika_current_costume = blanket_monika
+default persistent.current_sticker_dokis = blanket_monika
+
+define -1 blanket_monika = ["sticker_up", "sticker_sleep", "sticker_baka"]
+define -1 blanket_nat = ["nat_up", "nat_sleep", "nat_baka"]
+define -1 blanket_sayo = ["sayo_up", "sayo_sleep", "sayo_baka"]
+define -1 blanket_yuri = ["yuri_up", "yuri_sleep", "yuri_baka"]
+define -1 android_chibi = ["android_sticker", "android_sticker_blink", "android_sticker_cat"]
+define -1 casual_chibi = ["casual_sticker", "casual_sticker_blink", "casual_sticker_happy"]
+define -1 bikini_chibi = ["bikini_sticker", "bikini_sticker_blink", "bikini_sticker_happy"]
+
+default monika_costumes_ = [("Blanket", blanket_monika), ("Android", android_chibi), ("Casual", casual_chibi), ("Bikini", bikini_chibi)]
+default natsuki_costumes_ = [("Blanket", blanket_nat)]
+default sayori_costumes_ = [("Blanket", blanket_sayo)]
+default yuri_costumes_ = [("Blanket", blanket_yuri)]
 
 define -1 chibi_sprites_0 = []
 define -1 chibi_sprites_1 = []
-default -1 persistent.chibi_accessory_layer_1 = 0
-default -1 persistent.chibi_accessory_layer_2 = 0
+default -1 persistent.chibi_accessory_1_ = "0nothing"
+default -1 persistent.chibi_accessory_2_ = "0nothing"
 default -1 persistent.hi_chibika = False
 default -1 persistent.enable_drag_chibika = False
 
@@ -111,24 +105,18 @@ define tools_menu = []
 define walk_menu = []
 
 #====Misc
-# default persistent._gift_history = []
+default stop_snike_time = False
 default Minigame_TTT = [
     "'",
     "#0142a4",
     "0",
     "#a80000"
 ]
-define -1 Pictograms_font = "submods/ExtraPlus/submod_assets/Pictograms.ttf"
+define -1 Pictograms_font = "Submods/ExtraPlus/submod_assets/Pictograms.ttf"
 default plus_snack_time = None
 default moldable_variable = None
-default 5 extra_plus_files_approved = plus_files_exist()
-define -5 extra_plus_folders = [
-    renpy.config.basedir + "/game/submods/ExtraPlus/Extra_Plus_Main.rpy",
-    renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/Pictograms.ttf",
-    renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/backgrounds/cafe.png",
-    renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sfx/cup_shuffle.mp3",
-    renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/sticker_up.png"
-]
+define 3 extra_plus_file = os.path.join(renpy.config.basedir, "game", "Submods", "ExtraPlus", "Extra_Plus_Main.rpy")
+
 #====BG
 define extra_old_bg = None
 define extra_chair = None
@@ -140,21 +128,7 @@ default disable_zoom_button = None
 
 #====Windows Title
 define backup_window_title = "Monika After Story   "
-default persistent.save_window_title = None
-
-
-#====Minigames variables
-# Who win?
-default persistent.win_minigame = {
-    "monika": {
-        "rps": False,
-        "ttt": False
-    },
-    "player": {
-        "rps": False,
-        "ttt": False
-    }
-}
+default persistent._save_window_title = "Monika After Story   "
 
 #====RPS
 define rps_your_choice = 0
@@ -179,33 +153,33 @@ default cup_skin = None
 #====Comments by moni on standard difficulties
 
 define _plus_complies = [
-    "Well done, [player]!",
-    "Impressive, keep it up!",
-    "You're doing great!",
-    "Fantastic, [player]!",
-    "Keep it up!",
-    "You're making progress!",
-    "Bravo, [player]!",
-    "Outstanding, [player]!",
-    "Way to go, [player]!",
-    "Keep up the good work, [player]!",
-    "You're doing fantastic!",
-    "You're doing amazing!",
+    _("Well done, [player]!"),
+    _("Impressive, keep it up!"),
+    _("You're doing great!"),
+    _("Fantastic, [player]!"),
+    _("Keep it up!"),
+    _("You're making progress!"),
+    _("Bravo, [player]!"),
+    _("Outstanding, [player]!"),
+    _("Way to go, [player]!"),
+    _("Keep up the good work, [player]!"),
+    _("You're doing fantastic!"),
+    _("You're doing amazing!"),
 ]
 
 define _plus_not_met = [
-    "Oh, too bad~",
-    "It's not that, [player].",
-    "Try again~",
-    "Don't get distracted, [player].",
-    "Keep practicing, [player].",
-    "You'll get it next time!",
-    "Better luck next try, [player].",
-    "Don't give up, [player]!",
-    "That's not quite it, [player].",
-    "That wasn't the right answer, [player].",
-    "Sorry, [player], that's not it.",
-    "That wasn't the correct answer, [player]."
+    _("Oh, too bad~"),
+    _("It's not that, [player]."),
+    _("Try again~"),
+    _("Don't get distracted, [player]."),
+    _("Keep practicing, [player]."),
+    _("You'll get it next time!"),
+    _("Better luck next try, [player]."),
+    _("Don't give up, [player]!"),
+    _("That's not quite it, [player]."),
+    _("That wasn't the right answer, [player]."),
+    _("Sorry, [player], that's not it."),
+    _("That wasn't the correct answer, [player].")
 ]
 
 init 5 python:
@@ -242,53 +216,59 @@ init 5 python:
 #===========================================================================================
 # FUNCTIONS
 #===========================================================================================
-
 init 5 python:
+    import time
+    last_affection_notify_time = 0
+
+    def make_bday_oki_doki():
+        filepath = os.path.join(renpy.config.basedir, 'characters', 'oki doki')
+        with open(filepath, "a"):
+            pass  # just create an empty file
+        config.overlay_screens.remove("bday_oki_doki")
+        renpy.hide_screen("bday_oki_doki")
+
+    def show_bday_screen():
+        if mas_isMonikaBirthday():
+            config.overlay_screens.append("bday_oki_doki")
+
+    def notify_affection():
+        global last_affection_notify_time
+        current_time = time.time()
+        if current_time - last_affection_notify_time >= 10:
+            last_affection_notify_time = current_time
+            renpy.notify("{1} {0:,.2f} {1}".format(mas_affection._get_aff(), get_monika_level()))
+
+    def show_costume_menu(costumes, return_label):
+        dokis_items = [SelectDOKI(name, cost) for name, cost in costumes]
+        items = [(_("Nevermind"), return_label, 20)]
+        renpy.call_screen("extra_gen_list", dokis_items, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+
     def get_monika_level():
-        global icon
-        icon = 0
         affection = mas_affection._get_aff()
         if affection >= 400:
-            icon = 8
-        elif affection >= 30:
-            icon = 7
+            icon = "8"
+        elif affection >= 100:
+            icon = "7"
         elif affection <= -30:
-            icon = 1
-        elif affection <= -75:
             icon = "!"
-        return "{size=+5}{color=#FFFFFF}{font=submods/ExtraPlus/submod_assets/Pictograms.ttf}" + str(icon) + "{/font}{/color}{/size}"
-
-    # def buscar_archivo():
-    #     nombre_archivo = "Extra_Plus_Main.rpy"
-    #     directorio = renpy.config.basedir + "/game/submods/"
-    #     """Busca un archivo en un directorio y sus subdirectorios."""
-    #     for root, dirs, files in os.walk(directorio):
-    #         if nombre_archivo in files:
-    #             return os.path.join(root, nombre_archivo)
-    #     return None
-
-    # def folder_exist(file):
-    #     return os.access(
-    #         os.path.normcase(renpy.config.basedir + file),
-    #         os.F_OK
-    #     )
+        else:
+            icon = "&"
+        formatted_icon = (
+            "{size=+4}{color=#FFFFFF}{font=Submods/ExtraPlus/submod_assets/Pictograms.ttf}" + icon + "{/font}{/color}{/size}"
+        )
+        return formatted_icon
 
     def plus_files_exist():
-        for archivo in extra_plus_folders:
-            if not os.access(os.path.normcase(archivo), os.F_OK):
-                return False
-        return True
+        return os.path.isfile(os.path.normcase(extra_plus_file))
 
     #====Return a string that represents the gender of the player.
     def plus_player_gender():
-        temp_person = "partner"
         if persistent.gender == "M":
-            temp_person = "boyfriend"
+            return "boyfriend"
         elif persistent.gender == "F":
-            temp_person = "girlfriend"
-        elif persistent.gender == "X" or persistent.gender != "X":
-            temp_person = "beloved"
-        return temp_person
+            return "girlfriend"
+        else:
+            return "beloved"
 
     #====RNG
     def rng_cup():
@@ -299,27 +279,32 @@ init 5 python:
 
     #====Save the name
     def save_title_windows():
-        if not store.persistent.save_window_title:
-            config.window_title = store.backup_window_title
-        else:
-            config.window_title = persistent.save_window_title
+        special_days = {
+            mas_isplayer_bday: " Happy birthday, " + player + "!",
+            mas_isNYD: " Happy New Year, " + player + "!",
+            mas_isF14: " Happy Valentine's Day, " + player + "!",
+            mas_isA01: " I know what you do, " + player + "~",
+            mas_isMonikaBirthday: " Happy Birthday, " + persistent._mas_monika_nickname + "!",
+            mas_isO31: " Happy Halloween, " + player + "!",
+            mas_isD25Eve: " Merry Christmas Eve, " + player + "!",
+            mas_isD25: " Merry Christmas, " + player + "!",
+            mas_isNYE: " Happy New Year's Eve, " + player + "!",
+        }
 
-    #====It checks if the files of a sprite exist.
-    # I don't see any need to verify the files, it will be checked by hand if the submod is functional.
-    # def check_file_status(plus_sprites, path):
-    #     try:
-    #         extra_folder = os.listdir(renpy.config.basedir + path)
-    #         plus_file_list = [a for a in plus_sprites if a in extra_folder]
-    #         if not set(plus_file_list) == set(plus_sprites):
-    #             renpy.show("monika idle", at_list=[t11])
-    #             renpy.call_screen("dialog", message="The files are not available...", ok_action=Jump("close_extraplus"))
-    #     except OSError as e:
-    #         renpy.show("monika idle", at_list=[t11])
-    #         renpy.call_screen("dialog", message="Because there is a 'game' folder in the submod.", ok_action=Jump("close_extraplus"))   
+        for date_check, title in special_days.items():
+            if date_check():
+                config.window_title = title
+                return
+
+        config.window_title = persistent._save_window_title
 
     #====Functions for submod operation
     def Extraplus_show():
-        renpy.call_screen("submod_interactions")
+        store.player_zoom = store.mas_sprites.zoom_level
+        store.disable_zoom_button = False
+        mas_RaiseShield_dlg()
+        extra_button_zoom()
+        renpy.invoke_in_new_context(renpy.call_screen, "submod_interactions")
 
     def ExtraButton():
         if not ExtraVisible():
@@ -329,60 +314,59 @@ init 5 python:
         return "extraplus_button" in config.overlay_screens
     
     #====Chibika
-    def show_chibika_chill():
+    def init_chibi():
         if store.persistent.hi_chibika == True:
-            if not visible_chibika_chill():
-                config.overlay_screens.append("chibika_chill")
+            config.overlay_screens.append("doki_chibi_idle")
+    
+    def change_dokis(skin):
+        persistent.chibika_current_costume = skin
+        reset_chibi()
+        renpy.jump("extra_dev_mode")
 
-    def visible_chibika_chill():
-        return "chibika_chill" in config.overlay_screens
+    def visible_chibi():
+        return "doki_chibi_idle" in config.overlay_screens
         
-    def disable_chibika_chill():
-        if visible_chibika_chill():
-            config.overlay_screens.remove("chibika_chill")
-            renpy.hide_screen("chibika_chill")
+    def remove_chibi():
+        if visible_chibi():
+            config.overlay_screens.remove("doki_chibi_idle")
+            renpy.hide_screen("doki_chibi_idle")
 
-    def remove_show_chibika():
-        if not renpy.get_screen("chibika_chill"):
-            config.overlay_screens.append("chibika_chill")
-        elif renpy.get_screen("chibika_chill"):
-            config.overlay_screens.remove("chibika_chill")
-            renpy.hide_screen("chibika_chill")
+    def add_remv_chibi():
+        if not renpy.get_screen("doki_chibi_idle"):
+            config.overlay_screens.append("doki_chibi_idle")
+        elif renpy.get_screen("doki_chibi_idle"):
+            config.overlay_screens.remove("doki_chibi_idle")
+            renpy.hide_screen("doki_chibi_idle")
 
-    def chibika_relax_drag(drags, drop):
-        if not drop and store.mas_submod_utils.isSubmodInstalled("Noises Submod"):
-            drags[0].snap(chibi_xpos, 350, 0.7)
-        if store.persistent.enable_drag_chibika == False:
-            pass
-        else:
-            drags[0].snap(chibi_xpos, chibi_ypos, 0.7)
-        return
+    def chibi_drag(drags, drop):
+        if not drop and store.persistent.enable_drag_chibika:
+            ypos = 345 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else chibi_ypos
+            drags[0].snap(chibi_xpos, ypos, 0.7)
 
-    def draw_sprites(st, at):
-        chibi_sprites_0_max = chibi_sprites_0[min(persistent.chibi_accessory_layer_1, len(chibi_sprites_0) - 1)]
-        chibi_sprites_1_max = chibi_sprites_1[min(persistent.chibi_accessory_layer_2, len(chibi_sprites_1) - 1)]
+    def add_chibi():
+        if not visible_chibi():
+            config.overlay_screens.append("doki_chibi_idle")
 
+    def reset_chibi():
+        remove_chibi()
+        if not visible_chibi():
+            config.overlay_screens.append("doki_chibi_idle")
+
+    def chibi_draw_sprites(st, at):
         objects = LiveComposite(
             (119, 188),
-            (0, 0), MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/accessories/0/{0}.png".format(chibi_sprites_0_max)),
-            (0, 0), MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/accessories/1/{0}.png".format(chibi_sprites_1_max))
+            (0, 0), MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/accessories/0/{}.png".format(persistent.chibi_accessory_1_)),
+            (0, 0), MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/accessories/1/{}.png".format(persistent.chibi_accessory_2_))
             )
             
         return objects, 0.1
 
-    def chibi_costume_change():
-        if persistent.chibika_current_costume == blanket_chibi:
-            persistent.chibika_current_costume = android_chibi
-
-        elif persistent.chibika_current_costume == android_chibi:
-            persistent.chibika_current_costume = casual_chibi
-
-        elif persistent.chibika_current_costume == casual_chibi:
-            persistent.chibika_current_costume = blanket_chibi
-
-        disable_chibika_chill()
-        if not visible_chibika_chill():
-            config.overlay_screens.append("chibika_chill")
+    def plus_actual_doki(st, at):
+        objects = LiveComposite(
+            (119, 188),
+            (0, 0), MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{}.png".format(persistent.chibika_current_costume[2]))
+            )
+        return objects, 0.1
 
     #====Zoom edit
     def extra_visible_zoom():
@@ -421,17 +405,29 @@ init 5 python:
 
         else:
             store.mas_gainAffection(5,bypass=True)
-            pass
             
     def extra_seen_label(extra_label, view_label):
         if renpy.seen_label(view_label):
             renpy.jump(extra_label)
-        else:
-            pass
 
     ExtraButton()
     rng_cup()
     save_title_windows()
+    show_bday_screen()
+    
+init 999 python:
+    if plus_files_exist():
+        init_chibi()
+    else:
+        remove_chibi()
+
+init -1 python:
+    chibika_y_position = 345 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else chibi_ypos
+    dating_ypos_value = 555 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else 595
+    # if store.mas_submod_utils.isSubmodInstalled("Noises Submod"):
+    #     chibika_y_position = 345
+    # else:
+    #     chibika_y_position = chibi_ypos
 
 #===========================================================================================
 # CLASSES
@@ -481,29 +477,46 @@ init 5 python:
             self.gift = gift
 
         def __call__(self):
-            global extraplus_gift
-            extraplus_gift = (self.name, self.gift)
-            file_path = os.path.join(renpy.config.basedir, 'characters', extraplus_gift[1])
+            file_path = os.path.join(renpy.config.basedir, 'characters', self.gift)
             with open(file_path, 'a') as f:
-                renpy.notify('The [extraplus_gift[0]] File has been successfully created.')
+                messages = [
+                    _("Oh! You got me a {}! Thank you!").format(self.name),
+                    _("A {}? For me? You're so sweet!").format(self.name),
+                    _("Wow! Is this a {}? I love it!").format(self.name),
+                    _("You shouldn't have! But I'm so happy you gave me a {}!").format(self.name),
+                    _("Eee! A {}! You're the best!").format(self.name)
+                ]
+                renpy.notify(random.choice(messages))
             renpy.jump('plus_make_gift')
 
-#====Misc
-init 10 python:
-    chibi_path = renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/0/"
-    chibi_path_one = renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/1/"
-    if os.path.exists(chibi_path) and os.path.exists(chibi_path_one):
-        chibi_sprites_0 = [(os.path.splitext(i)[0]) for i in os.listdir(chibi_path)]
-        chibi_sprites_1 = [(os.path.splitext(j)[0]) for j in os.listdir(chibi_path_one)]
-        show_chibika_chill()
-    else:
-        disable_chibika_chill()
+    class DokiAccessory():
+        def __init__(self, name, acc, category):
+            self.name = name
+            self.acc = acc
+            self.category = category
+
+        def __call__(self):
+            if self.category == "primary":
+                persistent.chibi_accessory_1_ = self.acc
+                renpy.jump("sticker_primary")
+            else:
+                persistent.chibi_accessory_2_ = self.acc
+                renpy.jump("sticker_secondary")
+
+    class SelectDOKI():
+        def __init__(self, name, costume):
+            self.name = name
+            self.costume = costume
+
+        def __call__(self):
+            persistent.chibika_current_costume = self.costume
+            reset_chibi()
+            renpy.jump("extra_dev_mode")
 
 #===========================================================================================
 # IMAGES
 #===========================================================================================
 init python:
-
     plus_accessories = [
         ("extraplus_acs_chocolatecake", "chocolatecake", MASPoseMap(default="0", use_reg_for_l=True), True),
         ("extraplus_acs_fruitcake", "fruitcake", MASPoseMap(default="0", use_reg_for_l=True), True),
@@ -527,13 +540,13 @@ init python:
         store.mas_sprites.init_acs(acs)
 
 #====Minigames images
-image note_score = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/note_score.png")
+image note_score = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/note_score.png")
 
 #====TTT
-image notebook = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/notebook.png")
-image line_black = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/line.png")
-image line_player = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/line_player.png")
-image line_moni = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/line_moni.png")
+image notebook = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/notebook.png")
+image line_black = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/line.png")
+image line_player = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/line_player.png")
+image line_moni = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/line_moni.png")
 image ttt_cross:
     Text(
         Minigame_TTT[0],
@@ -568,16 +581,16 @@ image ttt_circle:
         linear 0.25 alpha 1.0
         
 #====RPS
-image e_paper = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/paper.png")
-image e_rock = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/rock.png")
-image e_scissors = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/scissors.png")
-image card_back = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/card_back.png")
+image e_paper = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/paper.png")
+image e_rock = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/rock.png")
+image e_scissors = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/scissors.png")
+image card_back = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/card_back.png")
 
 #====SG
-image extra_cup = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{0}".format(cup_skin))
-image extra_cup_hover = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/cup_hover.png")
+image extra_cup = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{}".format(cup_skin))
+image extra_cup_hover = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/cup_hover.png")
 image extra_cup_idle = im.Scale("mod_assets/other/transparent.png", 200, 260)
-image extra_ball = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/ball.png")
+image extra_ball = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/ball.png")
 image cup:
     xanchor 0.5 yanchor 0.5
     contains:
@@ -598,9 +611,9 @@ image ball:
         xalign 0.5 yalign 0.5
 
 #====Chibika
-image chibika_blink_effect:
+image chibi_blink_effect:
     block:
-        MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{0}.png".format(persistent.chibika_current_costume[0]))
+        MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{}.png".format(persistent.chibika_current_costume[0]))
         block:
             choice:
                 3
@@ -608,7 +621,7 @@ image chibika_blink_effect:
                 5
             choice:
                 7
-        MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{0}.png".format(persistent.chibika_current_costume[1]))
+        MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{}.png".format(persistent.chibika_current_costume[1]))
         choice 0.02:
             block:
                 choice:
@@ -617,32 +630,32 @@ image chibika_blink_effect:
                     6
                 choice:
                     4
-                MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{0}.png".format(persistent.chibika_current_costume[0]))
+                MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{}.png".format(persistent.chibika_current_costume[0]))
         choice 0.098:
             pass
         0.06
         repeat
 
-
 image chibika_base = LiveComposite(
     (119, 188),
-    (0, 40), "chibika_blink_effect",
-    (0, 0), DynamicDisplayable(draw_sprites)
+    (0, 40), "chibi_blink_effect",
+    (0, 0), DynamicDisplayable(chibi_draw_sprites)
     )
 
 image hover_sticker = LiveComposite(
-    (119, 188),
-    (0, 40), MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{0}.png".format(persistent.chibika_current_costume[2])),
-    (0, 0), DynamicDisplayable(draw_sprites)
+    (119, 188), 
+    (0, 40), DynamicDisplayable(plus_actual_doki),
+    (0, 0), DynamicDisplayable(chibi_draw_sprites)
     )
-
 #====Coin
-image coin_heads = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/coin_heads.png")
-image coin_tails = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/coin_tails.png")
+image coin_heads = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/coin_heads.png")
+image coin_tails = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/coin_tails.png")
+image sprite_coin = anim.Filmstrip("Submods/ExtraPlus/submod_assets/sprites/sprite_coin.png", (100, 100), (3, 2), .125, loop=True)
+image sprite_coin_n = anim.Filmstrip("Submods/ExtraPlus/submod_assets/sprites/sprite_coin-n.png", (100, 100), (3, 2), .125, loop=True)
 image coin_moni:
     ConditionSwitch(
-        "mas_isDayNow()", anim.Filmstrip("submods/ExtraPlus/submod_assets/sprites/sprite_coin.png", (100, 100), (3, 2), .125, loop=True),
-        "mas_isNightNow()", anim.Filmstrip("submods/ExtraPlus/submod_assets/sprites/sprite_coin-n.png", (100, 100), (3, 2), .125, loop=True))
+        "mas_isDayNow()", "sprite_coin",
+        "mas_isNightNow()", "sprite_coin_n")
 
 #====Boop
 image zoneone = im.Scale("mod_assets/other/transparent.png", 30, 30)
@@ -660,25 +673,22 @@ image monika staticpose = monika_extraplus
 screen extraplus_button():
     zorder 15
     style_prefix "hkb"
+
     vbox:
         xpos 0.05
         yanchor 1.0
         ypos 50
 
-        python:
-            screen_exists = renpy.get_screen("hkb_overlay")
-            talk_enabled = mas_hotkeys.talk_enabled
-            buttons = _("Extra+") if extra_plus_files_approved else _("Error!")
-            function = Jump("view_extraplus") if extra_plus_files_approved else Show("dialog", message="An error occurred, the submod is not installed correctly.\nPlease see the installation tutorial.", ok_action=Hide("dialog"))
-
-        if screen_exists:
-            if talk_enabled:
-                textbutton buttons:
-                    action function
+        $ buttons_text = _("Extra+")
+        if renpy.get_screen("hkb_overlay"):
+            if mas_hotkeys.talk_enabled:
+                key "a" action Function(notify_affection)
+                key "x" action Function(Extraplus_show)
+                textbutton buttons_text action Function(Extraplus_show)
             elif mas_submod_utils.current_label == "mas_piano_setupstart":
-                text ("")
+                text _("")
             else:
-                textbutton buttons
+                textbutton buttons_text
 
 #====Submod options
 screen submod_interactions():
@@ -689,11 +699,11 @@ screen submod_interactions():
         yanchor 1.0
         ypos 210
 
-        textbutton ("Close") action [Hide("submod_interactions"), Jump("close_extraplus")]
-        textbutton ("Date") action [Hide("submod_interactions"), Jump("plus_walk")]
-        textbutton ("Minigame") action If(mas_affection._get_aff() >= 30, true=[Hide("submod_interactions"), Jump("plus_minigames")], false=None)
-        textbutton ("Addition") action [Hide("submod_interactions"), Jump("plus_tools")]
-        textbutton ("Boop") action If(mas_affection._get_aff() >= 30, true=[Hide("submod_interactions"), Jump("show_boop_screen")], false=None)
+        textbutton _("Close") action [Hide("submod_interactions"), Jump("close_extraplus")]
+        textbutton _("Date") action [Hide("submod_interactions"), Jump("plus_walk")]
+        textbutton _("Minigame") action If(mas_affection._get_aff() >= 30, true=[Hide("submod_interactions"), Jump("plus_minigames")], false=None)
+        textbutton _("Addition") action [Hide("submod_interactions"), Jump("plus_tools")]
+        textbutton _("Boop") action If(mas_affection._get_aff() >= 30, true=[Hide("submod_interactions"), Jump("show_boop_screen")], false=None)
 
 #====GAME
 screen sticker_customization():
@@ -704,14 +714,15 @@ screen sticker_customization():
         yanchor 1.0
         ypos 90
 
-        textbutton ("Close") style "hkb_button" action [Hide("sticker_customization"), Jump("close_dev_extraplus")]
-        textbutton ("Return") style "hkb_button" action [Hide("sticker_customization"), Jump("plus_tools")]
+        textbutton _("Close") style "hkb_button" action [Hide("sticker_customization"), Jump("close_dev_extraplus")]
+        textbutton _("Return") style "hkb_button" action [Hide("sticker_customization"), Jump("plus_tools")]
     frame:
-        padding (50, 10, 0, 20)
+        padding (50, 10, 20, 20)
         xpos 800
         yanchor 1.0
         ypos 660
         vbox:
+            xalign 0.5 
             style_prefix "check"
             label _("Auto Position:")
             textbutton _("[persistent.enable_drag_chibika]") action ToggleField(persistent, "enable_drag_chibika")
@@ -719,32 +730,23 @@ screen sticker_customization():
             label _("Show permanently:")
             textbutton _("[persistent.hi_chibika]") action ToggleField(persistent, "hi_chibika")
             
-            label _("Show/Hide:")
-            textbutton _("Click here!") action Function(remove_show_chibika)
-            
-            if mas_affection._get_aff() >= 300:
-                label _("Alternative version:")
-                textbutton _("Click here!") action Function(chibi_costume_change)
+            label _("Show / Hide:")
+            textbutton _("Click here!") action Function(add_remv_chibi)
 
-            label _("Primary Accessories:")
-            hbox:
-                style_prefix "music_menu"
-                spacing 20
-                textbutton _(" <") action SetField(persistent, "chibi_accessory_layer_1", max(persistent.chibi_accessory_layer_1 - 1, 0))
-                text _(" [persistent.chibi_accessory_layer_1]")
-                textbutton _(" >") action SetField(persistent, "chibi_accessory_layer_1", min(persistent.chibi_accessory_layer_1 + 1, len(chibi_sprites_0) - 1))
+            label _("Clothing:")
+            textbutton _("Hey!") action [Hide("sticker_customization"), Jump("doki_change_appe")]
 
-            label _("Secondary Accessories:")
-            hbox:
-                style_prefix "music_menu"
-                spacing 20
-                textbutton _(" <") action SetField(persistent, "chibi_accessory_layer_2", max(persistent.chibi_accessory_layer_2 - 1, 0))
-                text _(" [persistent.chibi_accessory_layer_2]")
-                textbutton _(" >") action SetField(persistent, "chibi_accessory_layer_2", min(persistent.chibi_accessory_layer_2 + 1, len(chibi_sprites_1) - 1))
+            label _("Body Accessories:")
+            textbutton _("Choice!") action [Hide("sticker_customization"), Jump("sticker_primary")]
+
+            label _("Others Accessories:")
+            textbutton _("Choice again!") action [Hide("sticker_customization"), Jump("sticker_secondary")]
 
 #====Boop
 screen boop_revamped():
     zorder 50
+
+    # Sección de Interacciones Disponibles
     vbox:
         style_prefix "check"
         yanchor 0.5
@@ -754,48 +756,31 @@ screen boop_revamped():
         label _("Interactions\navailable:")
         text _("Cheeks\n Head\n Nose\n Ears\n Hands\n") outlines [(2, "#808080", 0, 0)]
 
+    # Botones de Cierre y Retorno
     vbox:
         style_prefix "hkb"
         xpos 0.05
         yanchor 1.0
         ypos 90
+        textbutton _("Close") action [Hide("extra_gen_list"), Jump("close_boop_screen")]
+        textbutton _("Return") action [Hide("extra_gen_list"), Jump("return_boop_screen")]
 
-        textbutton ("Close") style "hkb_button" action [Hide("extra_gen_list"), Jump("close_boop_screen")]
-        textbutton ("Return") style "hkb_button" action [Hide("extra_gen_list"), Jump("return_boop_screen")]
+    # Definición de zonas interactivas con coordenadas
+    default zones = [
+        ("zonetwo", 550, 10, "monika_headpatbeta", "monika_headpat_long"),  # Head
+        ("zoneone", 618, 235, "monika_boopbeta", "monika_boopbeta_war"),  # Nose
+        ("zonethree", 675, 256, "monika_cheeksbeta", None),  # Right Cheek
+        ("zonethree", 570, 256, "monika_cheeksbeta", None),  # Left Cheek
+        ("zonefour", 600, 327, "monika_handsbeta", None),  # Hands
+        ("zoneone", 754, 195, "monika_earsbeta", None),  # Right Ear
+        ("zoneone", 514, 220, "monika_earsbeta", None)   # Left Ear / Hair
+    ]
 
-    #Head
-    imagebutton idle "zonetwo":
-        xpos 550 ypos 10
-        action [Hide("submod_interactions"), Jump("monika_headpatbeta")] alternate [Hide("submod_interactions"), Jump("monika_headpat_long")]
-
-    #Nose
-    imagebutton idle "zoneone":
-        xpos 618 ypos 235
-        action [Hide("submod_interactions"), Jump("monika_boopbeta")] alternate [Hide("submod_interactions"), Jump("monika_boopbeta_war")]
-
-    #Cheeks
-    imagebutton idle "zonethree":
-        xpos 675 ypos 256
-        action [Hide("submod_interactions"), Jump("monika_cheeksbeta")]
-
-    imagebutton idle "zonethree":
-        xpos 570 ypos 256
-        action [Hide("submod_interactions"), Jump("monika_cheeksbeta")]
-
-    #Hands
-    imagebutton idle "zonefour":
-        xpos 600 ypos 327
-        action [Hide("submod_interactions"), Jump("monika_handsbeta")]
-
-    #Ears
-    imagebutton idle "zoneone":
-        xpos 754 ypos 195
-        action [Hide("submod_interactions"), Jump("monika_earsbeta")]
-    
-    #Ear or Hair?
-    imagebutton idle "zoneone":
-        xpos 514  ypos 220
-        action [Hide("submod_interactions"), Jump("monika_earsbeta")]
+    # Generar botones de imagen dinámicamente
+    for zone, xpos, ypos, primary_action, alt_action in zones:
+        imagebutton idle zone xpos xpos ypos ypos action [Hide("submod_interactions"), Jump(primary_action)]
+        if alt_action:
+            imagebutton idle zone xpos xpos ypos ypos alternate [Hide("submod_interactions"), Jump(alt_action)]
 
 screen button_custom_zoom():
     zorder 51
@@ -809,7 +794,7 @@ screen button_custom_zoom():
             ypos 635
 
         if renpy.get_screen("hkb_overlay"):
-            textbutton ("Zoom") action If(store.disable_zoom_button, true = None, false = Show("extra_custom_zoom"))
+            textbutton _("Zoom") action If(store.disable_zoom_button, true = None, false = Show("extra_custom_zoom"))
 
 screen extra_custom_zoom():
     use extra_no_click()
@@ -865,7 +850,7 @@ screen shell_game_minigame():
         xpos 0.86
         yanchor 1.0
         ypos 0.950
-        textbutton ("Quit") action [Hide("shell_game_minigame"), Jump("shell_game_result")]
+        textbutton _("Quit") action [Hide("shell_game_minigame"), Jump("shell_game_result")]
 
 #====Loop RPS
 screen RPS_mg():
@@ -898,7 +883,7 @@ screen RPS_mg():
         xpos 0.86
         yanchor 1.0
         ypos 0.950
-        textbutton ("Quit") style "hkb_button" action [Hide("RPS_mg"), Jump("rps_quit")]
+        textbutton _("Quit") style "hkb_button" action [Hide("RPS_mg"), Jump("rps_quit")]
 
 #====Restrict the player from advancing in the conversation.
 screen extra_no_click():
@@ -912,21 +897,21 @@ screen extra_no_click():
         action NullAction()
 
 #====Chibika
-screen chibika_chill():
-    zorder 60
+screen doki_chibi_idle():
+    zorder 50
     if renpy.get_screen("hkb_overlay"):
+        # $ ypos_value = 345 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else chibi_ypos
         drag:
             child "chibika_base"
             selected_hover_child "hover_sticker"
-            dragged chibika_relax_drag
-            if store.mas_submod_utils.isSubmodInstalled("Noises Submod"):
-                xpos chibi_xpos ypos 350
-            else:
-                xpos chibi_xpos ypos chibi_ypos
-
+            dragged chibi_drag
+            ypos chibika_y_position
+            xpos chibi_xpos
 
 #====Current minigame score
 screen score_minigame(game=None):
+    key "h" action NullAction()
+    key "mouseup_3" action NullAction()
     python:
         if game == "rps":
             first_text = "Monika"
@@ -963,24 +948,28 @@ screen extra_gen_list(extra_list, extra_area, others, close=None):
                 yfill False
                 mousewheel True
                 vbox:
-                    if len(extra_list) > 0:
-                        for item in extra_list:
-                            if isinstance(item, tuple):
-                                textbutton item[0]:
-                                    xsize extra_area[2]
-                                    action [Hide("extra_gen_list"), Jump(item[1])]
-                            else:
-                                textbutton item.name:
-                                    xsize extra_area[2]
-                                    action [Hide("extra_gen_list"), Function(item)]
+                    # Itera directamente sobre extra_list (si está vacía, no se ejecuta)
+                    for item in extra_list:
+                        # Calcula texto y acción según la estructura del elemento.
+                        $ btn_text = item[0] if isinstance(item, tuple) else item.name
+                        $ btn_action = Jump(item[1]) if isinstance(item, tuple) else Function(item)
+                        textbutton _(btn_text):
+                            xsize extra_area[2]
+                            action btn_action
 
-            for items in others:
-                if items[2] > 0:
-                    null height items[2]
+            # Procesa la lista "others"
+            for entry in others:
+                # Determinar el valor de espaciado según la estructura
+                $ spacing_val = entry[1] if len(entry) == 2 else entry[2]
+                if spacing_val > 0:
+                    null height spacing_val
 
-                textbutton _(items[0]):
+                # Define el texto y la acción basados en si el primer elemento tiene atributo "name"
+                $ btn_text = entry[0].name if hasattr(entry[0], "name") else entry[0]
+                $ btn_action = [Hide("extra_gen_list"), Function(entry[0])] if hasattr(entry[0], "name") else [Hide("extra_gen_list"), Jump(entry[1])]
+                textbutton _(btn_text):
                     xsize extra_area[2]
-                    action [Hide("extra_gen_list"), Jump(items[1])]
+                    action btn_action
 
         bar:
             style "classroom_vscrollbar"
@@ -991,19 +980,16 @@ screen extra_gen_list(extra_list, extra_area, others, close=None):
         vbox:
             xpos 0.097 ypos 50
             yanchor 1.0
-
-            textbutton ("Close") style "hkb_button" action [Hide("extra_gen_list"), Jump("close_extraplus")]
+            textbutton _("Close") style "hkb_button" action [Hide("extra_gen_list"), Jump("close_extraplus")]
 
 #====Background loop
 screen dating_loop(ask, label_boop, boop_enable=None):
     zorder 50
+    # $ dating_ypos_value = 555 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else 595
     vbox:
         xpos 0.05 yanchor 1.0
-        if store.mas_submod_utils.isSubmodInstalled("Noises Submod"):
-            ypos 555
-        else:
-            ypos 595
-        textbutton ("Talk") style "hkb_button" action [Hide("dating_loop"), Jump(ask)]
+        ypos dating_ypos_value
+        textbutton _("Talk") style "hkb_button" action [Hide("dating_loop"), Jump(ask)]
 
     #Noise
     if boop_enable == True:
@@ -1012,20 +998,8 @@ screen dating_loop(ask, label_boop, boop_enable=None):
             xpos 620 ypos 235
             action [Hide("dating_loop"), Jump(label_boop)]
 
-screen _timer_monika(time, finish):
-    vbox:
-        text "[plus_snack_time]"
-    
-    # Cambia la asignación de la variable fine_moni de esta manera:
-    python:
-        fine_moni = False
-    
-    timer time action [SetVariable("fine_moni", True)]
-
-    # Verifica si la pantalla "dating_loop" existe antes de ocultarla y saltar a "finish".
-    if fine_moni and renpy.has_screen("dating_loop"):
-        action [Hide("timer_monika"), Hide("dating_loop"), Jump(finish)]
-
+screen _timer_monika(time):
+    timer time action SetVariable("stop_snike_time", True)
 
 
 #====Boop war?
@@ -1057,12 +1031,21 @@ screen boop_event(timelock, endlabel, editlabel):
         vbox:
             xpos 0.915
             ypos 0.040
-            text "Boops : [boop_war_count]"  size 30 style "monika_text"
+            text _("Boops : [boop_war_count]") size 30 style "monika_text"
 
 screen force_mouse_move():
     on "show":
         action MouseMove(x=412, y=237, duration=.3)
     timer .6 repeat True action MouseMove(x=412, y=237, duration=.3)
+
+screen bday_oki_doki():
+    zorder 15
+    style_prefix "hkb"
+    vbox:
+        xpos 590
+        ypos 0.9
+        if mas_submod_utils.current_label == "mas_dockstat_empty_desk_from_empty":
+            textbutton _("Oki Doki") action Function(make_bday_oki_doki)
 
 #===========================================================================================
 # TRANSFORM
@@ -1118,6 +1101,35 @@ transform jumpingaround:
             easeout 1 ypos 600
         repeat
 
+transform pool_float(x=640, z=0.80, y=25, t=3.2):
+    on show:
+        xcenter x yoffset 0 yanchor 1.0 ypos 1.03 zoom z*1.00 alpha 1.00 subpixel True
+        ease t yoffset y
+        ease t yoffset 0
+        repeat
+    on replace:
+        ease t yoffset y
+        ease t yoffset 0
+        repeat
+
+transform init_card_slide:
+    zoom 0.6
+    ypos -1200
+    alpha 0.0
+    easein 0.5 ypos 0 alpha 1.0
+
+transform hit_card:
+    zoom 0.6
+    alpha 0.0
+    xoffset 100
+    easein 0.3 xoffset 0 alpha 1.0
+    delay 0.1
+
+transform score_rotate_left:
+    rotate -20
+    rotate_pad True
+    transform_anchor True
+    
 #===========================================================================================
 # BACKGROUNG
 #===========================================================================================
@@ -1125,22 +1137,22 @@ transform jumpingaround:
 #====Cafe====#
 
 #Day images
-image submod_background_cafe_day = "submods/ExtraPlus/submod_assets/backgrounds/cafe.png"
-image submod_background_cafe_rain = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
-image submod_background_cafe_overcast = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
-image submod_background_cafe_snow = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
+image submod_background_cafe_day = "Submods/ExtraPlus/submod_assets/backgrounds/cafe.png"
+image submod_background_cafe_rain = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
+image submod_background_cafe_overcast = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
+image submod_background_cafe_snow = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
 
 #Night images
-image submod_background_cafe_night = "submods/ExtraPlus/submod_assets/backgrounds/cafe-n.png"
-image submod_background_cafe_rain_night = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
-image submod_background_cafe_overcast_night = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
-image submod_background_cafe_snow_night = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
+image submod_background_cafe_night = "Submods/ExtraPlus/submod_assets/backgrounds/cafe-n.png"
+image submod_background_cafe_rain_night = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
+image submod_background_cafe_overcast_night = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
+image submod_background_cafe_snow_night = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
 
 #Sunset images
-image submod_background_cafe_ss = "submods/ExtraPlus/submod_assets/backgrounds/cafe-ss.png"
-image submod_background_cafe_rain_ss = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
-image submod_background_cafe_overcast_ss = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
-image submod_background_cafe_snow_ss = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
+image submod_background_cafe_ss = "Submods/ExtraPlus/submod_assets/backgrounds/cafe-ss.png"
+image submod_background_cafe_rain_ss = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
+image submod_background_cafe_overcast_ss = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
+image submod_background_cafe_snow_ss = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
 
 init -1 python:
     submod_background_cafe = MASFilterableBackground(
@@ -1386,22 +1398,22 @@ init -2 python in mas_background:
 #====Pool====#
 
 #Day images
-image submod_background_pool_day = "submods/ExtraPlus/submod_assets/backgrounds/pool.png"
-image submod_background_pool_rain = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain.png"
-image submod_background_pool_overcast = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain.png"
-image submod_background_pool_snow = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain.png"
+image submod_background_pool_day = "Submods/ExtraPlus/submod_assets/backgrounds/pool.png"
+image submod_background_pool_rain = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain.png"
+image submod_background_pool_overcast = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain.png"
+image submod_background_pool_snow = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain.png"
 
 #Night images
-image submod_background_pool_night = "submods/ExtraPlus/submod_assets/backgrounds/pool-n.png"
-image submod_background_pool_rain_night = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-n.png"
-image submod_background_pool_overcast_night = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-n.png"
-image submod_background_pool_snow_night = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-n.png"
+image submod_background_pool_night = "Submods/ExtraPlus/submod_assets/backgrounds/pool-n.png"
+image submod_background_pool_rain_night = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain-n.png"
+image submod_background_pool_overcast_night = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain-n.png"
+image submod_background_pool_snow_night = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain-n.png"
 
 #Sunset images
-image submod_background_pool_ss = "submods/ExtraPlus/submod_assets/backgrounds/pool-ss.png"
-image submod_background_pool_rain_ss = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-ss.png"
-image submod_background_pool_overcast_ss = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-ss.png"
-image submod_background_pool_snow_ss = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-ss.png"
+image submod_background_pool_ss = "Submods/ExtraPlus/submod_assets/backgrounds/pool-ss.png"
+image submod_background_pool_rain_ss = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain-ss.png"
+image submod_background_pool_overcast_ss = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain-ss.png"
+image submod_background_pool_snow_ss = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain-ss.png"
 
 init -1 python:
     submod_background_pool = MASFilterableBackground(

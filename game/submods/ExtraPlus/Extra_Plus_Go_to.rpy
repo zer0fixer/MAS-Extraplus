@@ -53,7 +53,7 @@ label cafe_cakes:
             m 3hka "I hope you at least have a cup of coffee!"
     m 3hua "Ehehe~"
     $ plus_snack_time = random.randint(60.00, 90.00)
-    show screen _timer_monika(plus_snack_time, "monika_no_dessert")
+    show screen _timer_monika(plus_snack_time)
     jump to_cafe_loop
     return
 
@@ -269,7 +269,6 @@ label extra_talk_memory:
 #===========================================================================================
 
 default persistent._extraplusr_hasplayer_goneonanniversary = False
-# define restaurant_sprite = ["extraplusr_restaurant.png","extraplusr_restaurant_rain.png","extraplusr_restaurant_rain-n.png","extraplusr_restaurant_rain-ss.png","extraplusr_restaurant-n.png","extraplusr_restaurant-ss.png"]
 default food_player = None
 
 label restaurant_init:
@@ -322,7 +321,7 @@ label restaurant_cakes:
             m 3hka "Hopefully you at least have a drink with you!"
             m 3hua "Ehehe~"
     $ plus_snack_time = random.randint(800, 1100)
-    show screen _timer_monika(plus_snack_time, "monika_no_food")
+    show screen _timer_monika(plus_snack_time)
     jump to_restaurant_loop
     return
     
@@ -575,21 +574,21 @@ label extra_talk_without:
 label extra_talk_glass:
     show monika staticpose at t11
     m 1euc "Glass half empty or full, huh?"
-    m 4rsb "How about I propose to you another question instead,{w=0.3} [player]?."
+    m 4rsb "How about I propose to you another question instead,{w=0.3} [player]?"  # Fixed: Removed redundant "." after "?"
     m 4esb "Instead of being half full or half empty,{w=0.3} what if all we need is a {i}different glass{/i}?"
-    m 3etc "Considering 'half full' people would be the epithome of optimism,{w=0.3} and 'half empty' ones the most pessimistic..."
+    m 3etc "Considering 'half full' people would be the epitome of optimism,{w=0.3} and 'half empty' ones the most pessimistic..."  # Fixed: epithome → epitome
     m 3eub "Okay,{w=0.3} hear me out here:"
-    m 1euc "Glass full to the brim and splashing goodness everywhere? " 
-    extend 1rub "Time to increase the size." 
+    m 1euc "Glass full to the brim and splashing goodness everywhere?"  # Fixed: Removed trailing space inside quotes
+    extend 1rub " Time to increase the size."  # Added space after pause for flow
     extend " Put what's in it into an even bigger thing!"
-    m 1euc "Glass so half empty that you can't help focusing on the empty space instead of the greatness swirling around inside? " 
-    extend 3eub "Time to decrease the size and then slowly work back into a larger vessel later."
-    m "It's size isn't anything to be ashamed about,{w=0.3} if it ends up filled then that's a win for the day!"
+    m 1euc "Glass so half empty that you can't help focusing on the empty space instead of the greatness swirling around inside?"  # Fixed: Removed trailing space
+    extend 3eub " Time to decrease the size and then slowly work back into a larger vessel later."  # Added space after pause
+    m "Its size isn't anything to be ashamed about,{w=0.3} if it ends up filled then that's a win for the day!"  # Fixed: It's → Its
     m 1eka "So maybe there's another answer to the question besides the manic and the depressive one."
     m 3rub "If we focus on the amazing things we have,{w=0.3} instead of chasing the things we don't have,{w=0.3} or need,{w=0.3} we can successfully choose sustainable happiness in all of our pursuits."
     m 3rtc "So,{w=0.3} when I stop to think about it..."
-    m 4eta "Glass half full or empty? "
-    extend 4hub "Give me a new glass instead,{w=0.3} please!"
+    m 4eta "Glass half full or empty?"  # Fixed: Removed trailing space
+    extend 4hub " Give me a new glass instead,{w=0.3} please!"  # Added space after pause
     m 6hublb "Ahaha~!"
     jump to_restaurant_loop
     return
@@ -620,7 +619,6 @@ label extra_talk_animal:
         extend " Nya~!"
     else:
         m 3hubsb "Because you've made this kitten right here very happy~!"
-    
     extend " Ehehe~!"
     jump to_restaurant_loop
     return
@@ -734,6 +732,11 @@ label extra_talk_pop:
 #===========================================================================================
 # Pool
 #===========================================================================================
+label pool_dev:
+    show monika idle at t11
+    call screen dialog("This event is in development!", ok_action=Return())
+    jump screen_extraplus
+    return
 
 # label pool_init:
 #     $ HKBHideButtons()

@@ -125,41 +125,73 @@ label check_boopwar:
 label check_boopwarv2:
     call screen boop_event(20, "boopbeta_war_lose", "boopwar_loop")
 
+# label boopwar_loop:
+#     $ boop_war_count += 1
+#     $ moldable_variable = renpy.random.randint(1,10)
+#     if moldable_variable == 1:
+#         m 1hublb "*Boop*"
+#     elif moldable_variable == 2:
+#         m 1tub "*Boop*"
+#     elif moldable_variable == 3:
+#         if boop_war_count >= 25:
+#             $ boop_war_count = 0
+#             jump boopbeta_war_win
+#         else:
+#             m 1fua "*Boop*"
+#     elif moldable_variable == 4:
+#         m 1eua "*Boop*"
+#     elif moldable_variable == 5:
+#         m 1hua "*Boop*"
+#     elif moldable_variable == 6:
+#         if boop_war_count >= 50:
+#             $ boop_war_count = 0
+#             jump boopbeta_war_win
+#         else:
+#             m 1sub "*Boop*"
+#     elif moldable_variable == 7:
+#         m 1gua "*Boop*"
+#     elif moldable_variable == 8:
+#         m 1kub "*Boop*"
+#     elif moldable_variable == 9:
+#         if boop_war_count >= 100:
+#             $ boop_war_count = 0
+#             jump boopbeta_war_win
+#         else:
+#             m 1dub "*Boop*"
+#     elif moldable_variable == 10:
+#         m 1wua "*Boop*"
+
+#     show monika 1eua
+#     jump check_boopwarv2
+#     return
+
 label boopwar_loop:
     $ boop_war_count += 1
-    $ moldable_variable = renpy.random.randint(1,10)
-    if moldable_variable == 1:
-        m 1hublb "*Boop*"
-    elif moldable_variable == 2:
-        m 1tub "*Boop*"
-    elif moldable_variable == 3:
-        if boop_war_count >= 25:
-            $ boop_war_count = 0
-            jump boopbeta_war_win
-        else:
-            m 1fua "*Boop*"
-    elif moldable_variable == 4:
-        m 1eua "*Boop*"
-    elif moldable_variable == 5:
-        m 1hua "*Boop*"
-    elif moldable_variable == 6:
-        if boop_war_count >= 50:
-            $ boop_war_count = 0
-            jump boopbeta_war_win
-        else:
-            m 1sub "*Boop*"
-    elif moldable_variable == 7:
-        m 1gua "*Boop*"
-    elif moldable_variable == 8:
-        m 1kub "*Boop*"
-    elif moldable_variable == 9:
-        if boop_war_count >= 100:
-            $ boop_war_count = 0
-            jump boopbeta_war_win
-        else:
-            m 1dub "*Boop*"
-    elif moldable_variable == 10:
-        m 1wua "*Boop*"
+    if boop_war_count >= 100:
+        $ boop_war_count = 0
+        jump boopbeta_war_win
+    elif boop_war_count >= 50:
+        $ boop_war_count = 0
+        jump boopbeta_war_win
+    elif boop_war_count >= 25:
+        $ boop_war_count = 0
+        jump boopbeta_war_win
+    python:
+        boop_choices = [
+            ("1hublb", "*Boop*"),
+            ("1tub", "*Boop*"),
+            ("1fua", "*Boop*"),
+            ("1eua", "*Boop*"),
+            ("1hua", "*Boop*"),
+            ("1sub", "*Boop*"),
+            ("1gua", "*Boop*"),
+            ("1kub", "*Boop*"),
+            ("1dub", "*Boop*"),
+            ("1wua", "*Boop*")
+        ]
+        expression, dialogue = renpy.random.choice(boop_choices)
+        renpy.show("monika " + expression)
+        renpy.say(m, dialogue)
 
     show monika 1eua
     jump check_boopwarv2
@@ -476,18 +508,18 @@ label monika_earsbeta:
 # EXTRAS
 #===========================================================================================
 
+
 label aff_log:
     $ monika_level = get_monika_level()
+    $ affection_value = "{:.2f}".format(mas_affection._get_aff())
+    
     show monika idle at t11
-    "Your affection with [m_name] is [int(mas_affection._get_aff())] [monika_level]"
+    "Your affection with [m_name] is [affection_value] [monika_level]{fast}"
     window hide
     jump close_extraplus
     return
 
 label coinflip:
-    # python:
-    #     check_file_status(coin_sprites, '/game/submods/ExtraPlus/submod_assets/sprites')
-
     show monika 1hua at t11
     python:
         store.disable_zoom_button = True
@@ -499,7 +531,7 @@ label coinflip:
     show coin_moni zorder 12 at rotatecoin:
         xalign 0.5
         yalign 0.5
-    play sound "submods/ExtraPlus/submod_assets/sfx/coin_flip_sfx.ogg"
+    play sound "Submods/ExtraPlus/submod_assets/sfx/coin_flip_sfx.ogg"
     pause 1.0
     hide coin_moni
     show monika 1eua
@@ -531,18 +563,27 @@ label mas_backup:
     m 3eub "I'll open the route for you."
     m 1dsa "Wait a moment.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
     window hide
+
     python:
-        import os, sys, subprocess
-        # Monika will open the mod data folder
+        import os
+        import sys
+        import subprocess
+        savedir = os.path.join(renpy.config.savedir, "")
+
         try:
-            savedir = os.path.join(renpy.config.savedir, "")
             if sys.platform == "win32":
+                # Windows
                 os.startfile(savedir)
+            elif sys.platform == "darwin":
+                # macOS
+                subprocess.call(["open", savedir])
             else:
-                opener = "open" if sys.platform == "darwin" else "xdg-open"
-                subprocess.call([opener, savedir])
-        except:
+                # Linux
+                subprocess.call(["xdg-open", savedir])
+        except Exception as e:
+            renpy.notify(_("Failed to open the backup folder: {}").format(str(e)))
             renpy.jump("mas_backup_fail")
+
     jump close_extraplus
     return
 
@@ -556,13 +597,11 @@ label extra_window_title:
     show monika idle at t21
     python:
         window_menu = [
-            ("Change the window's title", 'extra_change_title'),
-            ("Restore the window title", 'extra_restore_title')
+            (_("Change the window's title"), 'extra_change_title'),
+            (_("Restore the window title"), 'extra_restore_title')
         ]
 
-        items = [
-            ("Nevermind", 'plus_tools', 20)
-        ]
+        items = [(_("Nevermind"), 'plus_tools', 20)]
     call screen extra_gen_list(window_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
     return
     
@@ -570,7 +609,7 @@ label extra_change_title:
     show monika idle at t11
     python:
         player_input = mas_input(
-            prompt =("What title do you want to put on this window?"),
+            prompt =_("What title do you want to put on this window?"),
             allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!?()~-_.'0123456789",
             screen_kwargs={"use_return_button": True, "return_button_value": "cancel"})
 
@@ -581,18 +620,33 @@ label extra_change_title:
             renpy.jump("extra_window_title")
 
         else:
-            persistent.save_window_title = player_input
-            config.window_title = persistent.save_window_title 
-            renpy.notify("The change is done.")
+            persistent._save_window_title = player_input
+            config.window_title = persistent._save_window_title
+            #La base de datos ha sido actualizada!
+            change_messages = [
+                _("Title updated successfully!"),
+                _("All set! The new title is in place."),
+                _("Done! Your window has a fresh new title."),
+                _("Change complete! Enjoy your new title."),
+                _("The title has been updated!"),
+                _("Success! The title has been changed."),
+                _("Updated! Your window looks great with the new title.")
+            ]
+            random_message = random.choice(change_messages)
+            renpy.notify(random_message)
             renpy.jump("close_extraplus")
     return
 
 label extra_restore_title:
     show monika idle at t11
     python:
-        persistent.save_window_title = backup_window_title
-        config.window_title = persistent.save_window_title 
-        renpy.notify("It has been successfully restored.")
+        if backup_window_title == persistent._save_window_title:
+            renpy.notify(_("No need to do it again hehe~"))
+        else:
+            renpy.notify(_("It's nice to see the original name again."))
+
+        persistent._save_window_title = backup_window_title
+        config.window_title = persistent._save_window_title
         renpy.jump("close_extraplus")
     return
 
@@ -606,4 +660,78 @@ label github_submod:
 label extra_dev_mode:
     $ mas_RaiseShield_dlg()
     call screen sticker_customization
+    return
+
+label sticker_primary:
+    show monika idle at t21
+    python:
+        accessories = [
+            DokiAccessory(_("Christmas Hat"), 'christmas_hat', "primary"),
+            DokiAccessory(_("Demon Horns"), 'demon_horns', "primary"),
+            DokiAccessory(_("Flowers Crown"), 'flowers_crown', "primary"),
+            DokiAccessory(_("Halo"), 'halo', "primary"),
+            DokiAccessory(_("Heart Headband"), 'heart_headband', "primary"),
+            DokiAccessory(_("New Year's Headband"), 'hny', "primary"),
+            DokiAccessory(_("Neon Cat Ears"), 'neon_cat_ears', "primary"),
+            DokiAccessory(_("Cat Ears"), 'cat_ears', "primary"),
+            DokiAccessory(_("Party Hat"), 'party_hat', "primary"),
+            DokiAccessory(_("Rabbit Ears"), 'rabbit_ears', "primary")
+        ]
+        items = [(DokiAccessory(_("Remove"), '0nothing', "primary"), 20), (_("Nevermind"), 'extra_dev_mode', 0)]
+
+    call screen extra_gen_list(accessories, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=True)
+    return
+
+label sticker_secondary:
+    show monika idle at t21
+    python:
+        accessories_2 = [
+            DokiAccessory(_("Black Bow Tie"), 'black_bow_tie', "secondary"),
+            DokiAccessory(_("Coffee"), 'coffee', "secondary"),
+            DokiAccessory(_("Hearts"), 'hearts', "secondary"),
+            DokiAccessory(_("Monika's Cake"), 'm_slice_cake', "secondary"),
+            DokiAccessory(_("Moustache"), 'moustache', "secondary"),
+            DokiAccessory(_("Neon Blush"), 'neon_blush', "secondary"),
+            DokiAccessory(_("[player]'s Cake"), 'p_slice_cake', "secondary"),
+            DokiAccessory(_("Pirate Patch"), 'patch', "secondary"),
+            DokiAccessory(_("Christmas Tree"), 'christmas_tree', "secondary"),
+            DokiAccessory(_("Sunglasses"), 'sunglasses', "secondary"),
+            DokiAccessory(_("Halloween Pumpkin"), 'pumpkin', "secondary"),
+            DokiAccessory(_("Cloud"), 'cloud', "secondary")
+        ]
+        items = [(DokiAccessory(_("Remove"), '0nothing', "secondary"), 20), (_("Nevermind"), 'extra_dev_mode', 0)]
+
+
+    call screen extra_gen_list(accessories_2, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=True)
+    return
+
+label doki_change_appe:
+    show monika idle at t21
+    python:
+        doki_data = [("Monika", 'monika_sticker_costumes')]
+        if store.persistent._mas_pm_cares_about_dokis:
+            doki_data.extend([
+                (_("Natsuki"), 'natsuki_sticker_costumes'),
+                (_("Sayori"), 'sayori_sticker_costumes'),
+                (_("Yuri"), 'yuri_sticker_costumes')
+            ])
+        items = [(_("Nevermind"), 'extra_dev_mode', 20)]
+
+    call screen extra_gen_list(doki_data, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+    return
+
+label monika_sticker_costumes:
+    $ show_costume_menu(monika_costumes_, 'doki_change_appe')
+    return
+
+label natsuki_sticker_costumes:
+    $ show_costume_menu(natsuki_costumes_, 'doki_change_appe')
+    return
+
+label sayori_sticker_costumes:
+    $ show_costume_menu(sayori_costumes_, 'doki_change_appe')
+    return
+
+label yuri_sticker_costumes:
+    $ show_costume_menu(yuri_costumes_, 'doki_change_appe')
     return
