@@ -75,7 +75,8 @@ default persistent.extra_boop = [0, 0, 0] #Hands, Ears.
 
 #====Chibika and friends?
 define chibi_xpos = 0.05
-define chibi_ypos = 385
+default chibika_y_position = 345 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else 385
+default dating_ypos_value = 555 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else 595
 default persistent.chibika_current_costume = blanket_monika
 default persistent.current_sticker_dokis = blanket_monika
 
@@ -340,8 +341,7 @@ init 5 python:
 
     def chibi_drag(drags, drop):
         if not drop and store.persistent.enable_drag_chibika:
-            ypos = 345 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else chibi_ypos
-            drags[0].snap(chibi_xpos, ypos, 0.7)
+            drags[0].snap(chibi_xpos, chibika_y_position, 0.7)
 
     def add_chibi():
         if not visible_chibi():
@@ -421,9 +421,9 @@ init 999 python:
     else:
         remove_chibi()
 
-init -1 python:
-    chibika_y_position = 345 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else chibi_ypos
-    dating_ypos_value = 555 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else 595
+# init -1 python:
+#     chibika_y_position = 345 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else 385
+#     dating_ypos_value = 555 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else 595
     # if store.mas_submod_utils.isSubmodInstalled("Noises Submod"):
     #     chibika_y_position = 345
     # else:
@@ -898,9 +898,8 @@ screen extra_no_click():
 
 #====Chibika
 screen doki_chibi_idle():
-    zorder 50
+    zorder 75
     if renpy.get_screen("hkb_overlay"):
-        # $ ypos_value = 345 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else chibi_ypos
         drag:
             child "chibika_base"
             selected_hover_child "hover_sticker"
