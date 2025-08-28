@@ -1,4 +1,4 @@
-# ⚠ Hello again, you can download the base code of this submod, but you might encounter some errors since it is in beta!
+# 💚 There is already a pre-release available for you to download in the releases section.
 <p align="center">
   <img src="https://github.com/Zero-Fixer/MAS-Extraplus-EN/assets/142945683/0276af8f-5de5-43b6-b581-d2b9edf1a889">
 </p>
@@ -9,7 +9,7 @@
 </a>
 </p>
 
-A submod that adds small additions to Monika After Story (MAS), something that should be clarified is that I have not yet been reviewed by the developers so it is possible that bugs may occur. But it will take me enough time to make everything functional, there is no release date yet.
+Hello, it's good to see you again. To simplify, this submod adds a little bit of everything, hence the name Extra+ or ExtraPlus, whichever you prefer to call it, so you can enjoy it with your Monika even though it has little content. I have several ideas in mind to implement here or in another submod. Currently, it is in beta phase, so several things may change before the stable release.
 
 <p align="center">
   <img src="https://github.com/Zero-Fixer/MAS-Extraplus-EN/assets/142945683/6e019e08-b9f2-4ec4-8d3c-5de63118f84b">
