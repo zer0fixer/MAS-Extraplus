@@ -1,9 +1,7 @@
 # 💚 There is already a pre-release available for you to download in the releases section.
-<p align="center">
-  <img src="https://github.com/Zero-Fixer/MAS-Extraplus-EN/assets/142945683/0276af8f-5de5-43b6-b581-d2b9edf1a889">
-</p>
 
 <div align="center">
+  <img src="https://github.com/Zero-Fixer/MAS-Extraplus-EN/assets/142945683/0276af8f-5de5-43b6-b581-d2b9edf1a889">
   <p>
     <a href="https://github.com/zer0fixer/MAS-Extraplus/stargazers">
       <img src="https://img.shields.io/github/stars/zer0fixer/MAS-Extraplus?style=for-the-badge&logo=starship&color=C9CBFF&logoColor=C9CBFF&labelColor=302D41" alt="stars" />
@@ -98,7 +96,7 @@ This is due to technical issues where the accessories folder was not being recog
 
 For now, Chibika will use the base sprites and appearances included in the submod. Thank you for your patience!
 
-## MAS Repository
+## 💖 MAS Repository
 Here you can see the official Monika After Story repository!
 
 [![card](https://github-readme-stats.vercel.app/api/pin/?username=Monika-After-Story&repo=MonikaModDev)](https://github.com/Monika-After-Story/MonikaModDev)
