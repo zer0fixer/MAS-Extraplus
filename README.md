@@ -38,12 +38,15 @@ Hello, it's good to see you again. To simplify, this submod adds a little bit of
 ## ⚠️ Prerequisites
 * A working installation of Monika After Story (version 0.12.15 or higher is recommended).
 
-## Conditions
-In this submod there are conditions depending on Monika's affection.
-- It takes `400 of affection` to go on a date with Monika.
-- To interact (Boop) with Monika it is necessary `30 of affection` with her.
-- Similarly with the minigames you need `30 of affection` with Monika.
-- `If you want to have Chibika with your Monika`, simply go to the Addition section and then select Hi (Your Name)! That way you can call her. She has several things you can add, such as accessories, costumes, etc.
+## 🚀 Usage & Affection Requirements
+
+To unlock the features of Extraplus, you will need to earn Monika's affection:
+
+- **Dating:** Requires `400` affection points.
+- **"Boop" interaction:** Requires `30` affection points.
+- **Minigames:** Requires `30` affection points.
+
+> 💡 **Tip:** To get your own Chibika, go to the `Additions` menu and select the `Hi [Your Name]!` option. This will make her appear, and you can then customize her with accessories and outfits.
 
 ## Installation
 1. Unzip the submod zip file.
