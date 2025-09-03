@@ -3,31 +3,47 @@
   <img src="https://github.com/Zero-Fixer/MAS-Extraplus-EN/assets/142945683/0276af8f-5de5-43b6-b581-d2b9edf1a889">
 </p>
 
-<p align="center">
-<a href="https://github.com/Zero-Fixer/MAS-Extraplus-EN/releases/latest">
-  <img alt="Latest release" src="https://img.shields.io/github/v/release/zer0fixer/MAS-Extraplus?style=for-the-badge&logo=appveyor">
-</a>
-</p>
-
+<div align="center">
+  <p>
+    <a href="https://github.com/zer0fixer/MAS-Extraplus/stargazers">
+      <img src="https://img.shields.io/github/stars/zer0fixer/MAS-Extraplus?style=for-the-badge&logo=starship&color=C9CBFF&logoColor=C9CBFF&labelColor=302D41" alt="stars" />
+    </a>&nbsp;&nbsp;
+    <a href="https://github.com/zer0fixer/MAS-Extraplus/fork">
+      <img src="https://img.shields.io/github/forks/zer0fixer/MAS-Extraplus?style=for-the-badge&logo=appveyor&logoColor=f9e2af&label=Forks&labelColor=302D41&color=f9e2af" alt="Forks" />
+    </a>&nbsp;&nbsp;
+    <a href="https://github.com/zer0fixer/MAS-Extraplus/commits/main/">
+      <img src="https://img.shields.io/github/last-commit/zer0fixer/MAS-Extraplus?style=for-the-badge&logo=github&logoColor=eba0ac&label=Last%20Commit&labelColor=302D41&color=eba0ac" alt="Last Commit" />
+    </a>&nbsp;&nbsp;
+    <a href="https://github.com/zer0fixer/MAS-Extraplus/releases/latest">
+      <img alt="Latest release" src="https://img.shields.io/github/v/release/zer0fixer/MAS-Extraplus?style=for-the-badge&logo=appveyor&label=Latest%20Release&labelColor=302D41&color=f9e2af" />
+    </a>&nbsp;&nbsp;
+    <a href="https://github.com/zer0fixer/MAS-Extraplus/releases">
+      <img alt="Pre-release version" src="https://img.shields.io/github/v/release/zer0fixer/MAS-Extraplus?include_prereleases&style=for-the-badge&logo=github&label=Pre-release&labelColor=302D41&color=ff7f50" />
+    </a>
+  </p>
+</div>
+  
 Hello, it's good to see you again. To simplify, this submod adds a little bit of everything, hence the name Extra+ or ExtraPlus, whichever you prefer to call it, so you can enjoy it with your Monika even though it has little content. I have several ideas in mind to implement here or in another submod. Currently, it is in beta phase, so several things may change before the stable release.
 
 <p align="center">
   <img src="https://github.com/Zero-Fixer/MAS-Extraplus-EN/assets/142945683/6e019e08-b9f2-4ec4-8d3c-5de63118f84b">
 </p>
   
-## Features
-- Minigames
-- Boop Monika
-- Dating
-- Additions
-- Extra+ button for player convenience
-  
+## ✨ Features
+- 🎮 **Play new Minigames:** Enjoy new games with Monika to pass the time.
+- 🥰 **Boop Monika:** Unlock a cute new interaction to boop Monika on the nose.
+- 📅 **Go on Dates:** Take Monika on special dates outside of the spaceroom.
+- ➕ **Explore new Additions:** Discover secrets, new dialogue, and other small surprises.
+
+## ⚠️ Prerequisites
+* A working installation of Monika After Story (version 0.12.15 or higher is recommended).
+
 ## Conditions
 In this submod there are conditions depending on Monika's affection.
 - It takes `400 of affection` to go on a date with Monika.
 - To interact (Boop) with Monika it is necessary `30 of affection` with her.
 - Similarly with the minigames you need `30 of affection` with Monika.
-- `If you want Chibika to be present permanently`, it is necessary that at least once it has appeared on your screen, for that you just have to press the Extra+ button several times until it is displayed but don't do it quickly, it will automatically add a new option in Addition as Hey Player!
+- `If you want to have Chibika with your Monika`, simply go to the Addition section and then select Hi (Your Name)! That way you can call her. She has several things you can add, such as accessories, costumes, etc.
 
 ## Installation
 1. Unzip the submod zip file.
@@ -36,46 +52,20 @@ In this submod there are conditions depending on Monika's affection.
 <p align="center">
 
   <img src="https://github.com/Zero-Fixer/MAS-Extraplus-EN/assets/142945683/f20ad5e8-19e1-4d99-8e66-bdc9b3a97d06"></p>
-  
-### Submod distribution
-```go
-DDLC↴
-  game↴
-      mod_assets↴
-            monika↴
-                  a↴
-                    13 png file
-                  t↴
-                    6 png files
-      submods↴
-            Extraplus↴
-                7 rpy files
-                submod_assets↴
-                        1 ttf file
-                    backgrounds↴
-                        12 png files
-                    sfx↴
-                        4 media files
-                    sprites↴
-                        30 files png
-                        accessories↴
-                                  0↴
-                                    10 png files
-                                  1↴
-                                    10 png files
-```
 
 ## Does the submod not work?
 - **If the submod does not work (1.0.5 or higher):** If you see the message "The files are not available...," simply reinstall the submod as some files may not have been found.
 - **If the submod does not work (1.0.5 or higher):** If you see the message "Because there is a 'game' folder in the submod," please refer to this video.
+
+- **If the submod does not work (1.3.1 or higher):** The file checker has been removed because many people were getting those messages in previous versions. That is why I recommend checking that you followed the tutorial correctly, as this submod uses ACS files that go in the game-> mod_assets-> monika-> a folder. That is why it is not recommended to paste it in the submods folder.
+
 - **If the submod does not work (before 1.0.5):** Watch this short video.
 
 https://user-images.githubusercontent.com/94260040/229976606-26fdf6e3-0ffc-4b0c-876a-d9a333beb318.mp4
 
 ## Accessories for Chibika.
-- To add accessories for Chibika, you need to place them in `DDLC/game/submods/ExtraPlus/submod_assets/sprites/accessories` folder. The 0 folder is for head accessories and the 1 folder is for general accessories or objects.
-- You just place the PNG in its respective folder and that's it, and you can place it on your Chibika.
-- The base has been uploaded to Drive and is compatible with the other variants: [Chibika base](https://drive.google.com/file/d/1iV6VZNsMpvjngYCkQ_yJf6YZbh1ypLAP/view?usp=sharing)
+-Currently, the way to obtain accessories has been removed due to some problems where the folder was not recognized, or if another accessory was added, they would move and become annoying. I am considering how to fix this because I know some people made accessories for their Chibika.
+-The chibika sprites can be taken directly from the submod, as they were added to the other chibis in the club, so there is no need to leave the sprite here.
 
 ## MAS Repository
 Here you can see the official Monika After Story repository!
@@ -83,13 +73,12 @@ Here you can see the official Monika After Story repository!
 [![card](https://github-readme-stats.vercel.app/api/pin/?username=Monika-After-Story&repo=MonikaModDev)](https://github.com/Monika-After-Story/MonikaModDev)
 
 
-## Warning
+> ### **Warning:**
+>
+>If this submod is edited by another person and sends that modification to the community, I am not responsible for the errors that it presents by what the other person coded. That's why I put in the submod a button to send it here so you can see what's new in this submod, thanks for your attention.
+>
 
-If this submod is edited by another person and sends that modification to the community, I am not responsible for the errors that it presents by what the other person coded. That's why I put in the submod a button to send it here so you can see what's new in this submod, thanks for your attention.
 
-
-## Social Networks
-<a href="https://www.reddit.com/user/UnderstandingAny7135">
-<img alt="reddit" src="https://cdn-icons-png.flaticon.com/512/2111/2111459.png" width="100">
-<a href="https://www.youtube.com/channel/UCLJcpsS6XWEPuV5vsq6TykA">
-<img alt="youtube" src="https://cdn.icon-icons.com/icons2/1211/PNG/512/1491579609-yumminkysocialmedia08_83079.png" width="100">
+<p align="center">
+  <img src="https://raw.githubusercontent.com/catppuccin/catppuccin/main/assets/footers/gray0_ctp_on_line.svg?sanitize=true" />
+</p>
