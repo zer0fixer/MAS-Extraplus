@@ -8,9 +8,6 @@
     <a href="https://github.com/zer0fixer/MAS-Extraplus/stargazers">
       <img src="https://img.shields.io/github/stars/zer0fixer/MAS-Extraplus?style=for-the-badge&logo=starship&color=C9CBFF&logoColor=C9CBFF&labelColor=302D41" alt="stars" />
     </a>&nbsp;&nbsp;
-    <a href="https://github.com/zer0fixer/MAS-Extraplus/fork">
-      <img src="https://img.shields.io/github/forks/zer0fixer/MAS-Extraplus?style=for-the-badge&logo=appveyor&logoColor=f9e2af&label=Forks&labelColor=302D41&color=f9e2af" alt="Forks" />
-    </a>&nbsp;&nbsp;
     <a href="https://github.com/zer0fixer/MAS-Extraplus/commits/main/">
       <img src="https://img.shields.io/github/last-commit/zer0fixer/MAS-Extraplus?style=for-the-badge&logo=github&logoColor=eba0ac&label=Last%20Commit&labelColor=302D41&color=eba0ac" alt="Last Commit" />
     </a>&nbsp;&nbsp;
@@ -25,18 +22,15 @@
   
 Hello, it's good to see you again. To simplify, this submod adds a little bit of everything, hence the name Extra+ or ExtraPlus, whichever you prefer to call it, so you can enjoy it with your Monika even though it has little content. I have several ideas in mind to implement here or in another submod. Currently, it is in beta phase, so several things may change before the stable release.
 
-<p align="center">
+<!--<p align="center">
   <img src="https://github.com/Zero-Fixer/MAS-Extraplus-EN/assets/142945683/6e019e08-b9f2-4ec4-8d3c-5de63118f84b">
-</p>
+</p> -->
   
 ## ✨ Features
 - 🎮 **Play new Minigames:** Enjoy new games with Monika to pass the time.
 - 🥰 **Boop Monika:** Unlock a cute new interaction to boop Monika on the nose.
 - 📅 **Go on Dates:** Take Monika on special dates outside of the spaceroom.
 - ➕ **Explore new Additions:** Discover secrets, new dialogue, and other small surprises.
-
-## ⚠️ Prerequisites
-* A working installation of Monika After Story (version 0.12.15 or higher is recommended).
 
 ## 🚀 Usage & Affection Requirements
 
@@ -48,27 +42,61 @@ To unlock the features of Extraplus, you will need to earn Monika's affection:
 
 > 💡 **Tip:** To get your own Chibika, go to the `Additions` menu and select the `Hi [Your Name]!` option. This will make her appear, and you can then customize her with accessories and outfits.
 
-## Installation
-1. Unzip the submod zip file.
-2. Copy the "game/" folder and paste it into your Monika After Story folder.
+## 💾 Installation
 
-<p align="center">
+This guide will walk you through the installation process. Please follow the steps carefully.
 
-  <img src="https://github.com/Zero-Fixer/MAS-Extraplus-EN/assets/142945683/f20ad5e8-19e1-4d99-8e66-bdc9b3a97d06"></p>
+### ⚠️ Prerequisites
 
-## Does the submod not work?
-- **If the submod does not work (1.0.5 or higher):** If you see the message "The files are not available...," simply reinstall the submod as some files may not have been found.
-- **If the submod does not work (1.0.5 or higher):** If you see the message "Because there is a 'game' folder in the submod," please refer to this video.
+Before you begin, please ensure you have the following:
+* A stable and working installation of **Monika After Story**. It is highly recommended to be on the latest official version of MAS.
+* You have downloaded the latest release of **Extraplus** from the [Releases](https://github.com/Zero-Fixer/MAS-Extraplus-EN/releases) page.
 
-- **If the submod does not work (1.3.1 or higher):** The file checker has been removed because many people were getting those messages in previous versions. That is why I recommend checking that you followed the tutorial correctly, as this submod uses ACS files that go in the game-> mod_assets-> monika-> a folder. That is why it is not recommended to paste it in the submods folder.
+### 📓 Step-by-Step Guide
 
-- **If the submod does not work (before 1.0.5):** Watch this short video.
+1.  **Download and Unzip the File**
+    * Download the `.zip` file for the latest release from the link above.
+    * Once downloaded, unzip the file using a program like 7-Zip or WinRAR. You will see a `game/` folder inside.
+
+2.  **Locate Your DDLC Directory**
+    * Navigate to your main *Doki Doki Literature Club* directory. This is the root folder that contains `DDLC.exe`.
+
+3.  **Copy and Paste the 'game' Folder**
+    * Copy the `game/` folder from the unzipped submod files.
+    * Paste this folder directly into your *Doki Doki Literature Club* root directory.
+
+4.  **Merge and Replace Files**
+    * Your operating system (Windows, Linux, etc.) will detect that there is already a `game/` folder. It will ask if you want to merge the contents and/or replace files.
+    * **You must select "YES"** to merge the folders and overwrite any conflicting files. This will add the submod's files into your existing game directory without deleting your progress.
+
+### ✔️ Post-Installation Check
+
+To confirm the submod is working correctly, start *Monika After Story*. After Monika greets you and the main interface loads, you should see a new button labeled **"Extra+"** on the screen. If you see this button, the installation was successful! Enjoy!
+
+<!---<p align="center">
+
+  <img src="https://github.com/Zero-Fixer/MAS-Extraplus-EN/assets/142945683/f20ad5e8-19e1-4d99-8e66-bdc9b3a97d06"></p> --->
+
+## 🐛 Troubleshooting & FAQ
+
+**Q: I'm getting the message "The files are not available...". What should I do?**
+**A:** This error usually means that some files were not copied correctly. Please try reinstalling the submod, making sure to copy and replace all files as instructed.
+
+**Q: I'm getting the message "Because there is a 'game' folder in the submod...". What does this mean?**
+**A:** This is caused by an incorrect installation method. Please refer to the video below for the correct procedure.
+
+**Q: I'm on version 1.3.1 or higher and something isn't working.**
+**A:** The old file checker was removed in version 1.3.1. Please double-check that you have followed the installation instructions exactly, as this submod adds files to the `game/mod_assets/monika/a` folder, not just the `submods` folder.
 
 https://user-images.githubusercontent.com/94260040/229976606-26fdf6e3-0ffc-4b0c-876a-d9a333beb318.mp4
 
-## Accessories for Chibika.
--Currently, the way to obtain accessories has been removed due to some problems where the folder was not recognized, or if another accessory was added, they would move and become annoying. I am considering how to fix this because I know some people made accessories for their Chibika.
--The chibika sprites can be taken directly from the submod, as they were added to the other chibis in the club, so there is no need to leave the sprite here.
+## 🎨 Chibika Accessories - Feature Status
+
+**Important Note:** The feature to add custom accessories to Chibika has been **temporarily disabled** in recent versions.
+
+This is due to technical issues where the accessories folder was not being recognized correctly by the game. I am actively working on a solution to bring this feature back in a more stable way in the future.
+
+For now, Chibika will use the base sprites and appearances included in the submod. Thank you for your patience!
 
 ## MAS Repository
 Here you can see the official Monika After Story repository!
