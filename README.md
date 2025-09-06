@@ -90,6 +90,28 @@ To confirm the submod is working correctly, start *Monika After Story*. After Mo
 
 https://user-images.githubusercontent.com/94260040/229976606-26fdf6e3-0ffc-4b0c-876a-d9a333beb318.mp4
 
+**Q: My game is installed in OneDrive, and it's crashing or images are missing. Why?**
+**A:** This is a very common problem caused by how OneDrive manages files. To save space, OneDrive moves game files to the cloud, leaving shortcuts on your computer. The game can't access these cloud files, which causes it to crash.
+
+1. The solution is to move your game out of any OneDrive-synced folders.
+
+2. Create a new folder on a local drive, for example, C:\Games.
+
+3. Copy your entire DDLC folder into this new location.
+
+4. Run the game from the new folder. This should fix the issue permanently.
+
+**Q: I installed the game through Steam, and some features (like creating gifts) don't work.**
+**A:** Steam often installs games in protected system folders (like Program Files). These folders can have write-restrictions, preventing the submod from creating new files. Steam's cloud sync can also sometimes cause issues similar to OneDrive.
+
+1. For the best experience with mods, the community strongly recommends using a standalone copy of DDLC outside of Steam.
+
+2. Download a fresh copy of DDLC for free from the official website: ddlc.moe.
+
+3. Extract it to a simple folder, like on your Desktop or C:\Games\.
+
+4. Install MAS and your submods there. This will prevent almost all permission-related errors.
+
 ## 🎨 Chibika Accessories - Feature Status
 
 **Important Note:** The feature to add custom accessories to Chibika has been **temporarily disabled** in recent versions.
