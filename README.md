@@ -79,18 +79,18 @@ To confirm the submod is working correctly, start *Monika After Story*. After Mo
 
 ## 🐛 Troubleshooting & FAQ
 
-**Q: I'm getting the message "The files are not available...". What should I do?**
+**Q: I'm getting the message "The files are not available...". What should I do?**<br>
 **A:** This error usually means that some files were not copied correctly. Please try reinstalling the submod, making sure to copy and replace all files as instructed.
 
-**Q: I'm getting the message "Because there is a 'game' folder in the submod...". What does this mean?**
+**Q: I'm getting the message "Because there is a 'game' folder in the submod...". What does this mean?**<br>
 **A:** This is caused by an incorrect installation method. Please refer to the video below for the correct procedure.
 
-**Q: I'm on version 1.3.1 or higher and something isn't working.**
+**Q: I'm on version 1.3.1 or higher and something isn't working.**<br>
 **A:** The old file checker was removed in version 1.3.1. Please double-check that you have followed the installation instructions exactly, as this submod adds files to the `game/mod_assets/monika/a` folder, not just the `submods` folder.
 
 https://user-images.githubusercontent.com/94260040/229976606-26fdf6e3-0ffc-4b0c-876a-d9a333beb318.mp4
 
-**Q: My game is installed in OneDrive, and it's crashing or images are missing. Why?**
+**Q: My game is installed in OneDrive, and it's crashing or images are missing. Why?**<br>
 **A:** This is a very common problem caused by how OneDrive manages files. To save space, OneDrive moves game files to the cloud, leaving shortcuts on your computer. The game can't access these cloud files, which causes it to crash.
 
 1. The solution is to move your game out of any OneDrive-synced folders.
@@ -101,7 +101,7 @@ https://user-images.githubusercontent.com/94260040/229976606-26fdf6e3-0ffc-4b0c-
 
 4. Run the game from the new folder. This should fix the issue permanently.
 
-**Q: I installed the game through Steam, and some features (like creating gifts) don't work.**
+**Q: I installed the game through Steam, and some features (like creating gifts) don't work.**<br>
 **A:** Steam often installs games in protected system folders (like Program Files). These folders can have write-restrictions, preventing the submod from creating new files. Steam's cloud sync can also sometimes cause issues similar to OneDrive.
 
 1. For the best experience with mods, the community strongly recommends using a standalone copy of DDLC outside of Steam.
