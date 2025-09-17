@@ -50,7 +50,7 @@ This guide will walk you through the installation process. Please follow the ste
 
 Before you begin, please ensure you have the following:
 * A stable and working installation of **Monika After Story**. It is highly recommended to be on the latest official version of MAS.
-* You have downloaded the latest release of **Extraplus** from the [Releases](https://github.com/Zero-Fixer/MAS-Extraplus-EN/releases) page.
+* You have downloaded the latest release of **Extraplus** from the [Releases](https://github.com/zer0fixer/MAS-Extraplus/releases) page.
 
 ### 📓 Step-by-Step Guide
 
