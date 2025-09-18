@@ -31,20 +31,16 @@ label show_boop_screen:
     call screen boop_revamped
     return
 
-label return_boop_screen:
-    python:
-        store.disable_zoom_button = False
-        store.mas_sprites.zoom_level = store.player_zoom
-        store.mas_sprites.adjust_zoom()
-    jump screen_extraplus
-    return
+# label return_boop_screen:
+#     python:
+#         extra_fix_zoom_level()
+#     jump screen_extraplus
+#     return
 
 label close_boop_screen:
     show monika idle at t11
     python:
-        store.disable_zoom_button = False
-        store.mas_sprites.zoom_level = store.player_zoom
-        store.mas_sprites.adjust_zoom()
+        extra_fix_zoom_level()
         disable_button_zoom()
     jump ch30_visual_skip
     return
@@ -286,6 +282,89 @@ label restaurant_leave:
     jump restaurant_hide_acs
 
 #====Pool====#
+# label go_to_pool_dev:
+#     python:
+#         mas_extra_location(locate=True)
+#         extra_seen_background("pool_sorry_player", "gt_poolv2", "check_label_pool_dev")
+
+# label check_label_pool_dev:
+#     pass
+
+# label gt_pool:
+#     show monika 1eua at t11
+#     if mas_isDayNow():
+#         m 3sub "DAY"
+#         jump pool_init
+
+#     elif mas_isNightNow():
+#         m 3sub "NIGHT"
+#         jump pool_init
+#     else:
+#         m 1eub "Another time then, [mas_get_player_nickname()]."
+#         jump screen_extraplus
+#     return
+
+# label gt_poolv2:
+#     show monika 1eua at t11
+#     if mas_isDayNow():
+#         m 3sub "DAY"
+#         jump pool_init
+
+#     elif mas_isNightNow():
+#         m 3sub "NIGHT"
+#         jump pool_init
+#     else:
+#         m 1eub "Another time then, [mas_get_player_nickname()]."
+#         jump screen_extraplus
+#     return
+
+# label ep_pool_leave:
+#     show monika idle at float_animation, t11
+#     m 1hua "Okay, let's go, [player]!"
+#     call extra_restore_bg("comment_POOL")
+#     return
+
+# label comment_POOL:
+#     m 1ekbsa "I love you, [mas_get_player_nickname()]!"
+#     $ mas_DropShield_dlg()
+#     $ mas_ILY()
+#     jump ch30_visual_skip
+#     return
+
+# label to_pool_loop:
+#     show monika idle at float_animation, t11
+#     $ store.disable_zoom_button = False
+#     call screen dating_loop("ep_pool_talk","test_booping_pool", boop_enable=True)
+#     return
+
+# label ep_pool_talk:
+#     show monika idle at float_animation, t21
+#     python:
+#         store.disable_zoom_button = True
+#         pool_menu = [
+#             (_("*Solo Observar*"), 'test_dialog'),
+#             (_("Meterse al Agua"), 'test_dialog'),
+#             (_(""), 'test_dialog')
+#         ]
+
+#         items = [
+#             (_("Can we leave?"), 'ep_pool_leave', 20),
+#             (_("Nevermind"), 'to_pool_loop', 0)
+#         ]
+#     call screen extra_gen_list(pool_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=False)
+#     return
+
+# label test_dialog:
+#     show monika idle at float_animation, t11
+#     m 1eub "This is a test dialog."
+#     jump to_pool_loop
+#     return
+
+# label test_booping_pool:
+#     show monika idle at float_animation, t11
+#     m 1eub "You booped me while we were at the pool!"
+#     jump to_pool_loop
+#     return
 
 #===========================================================================================
 # Others
@@ -430,43 +509,6 @@ label monika_no_food:
     jump to_restaurant_loop
     return
 
-# label restaurant_hide_acs:
-#     #Code inspired by YandereDev
-#     if monika_chr.is_wearing_acs(extraplus_acs_candles):
-#         if monika_chr.is_wearing_acs(extraplus_acs_pasta) or monika_chr.is_wearing_acs(extraplus_acs_icecream):
-#             m 3eub "I have to put these candles away."
-#             m "We can never be too careful with fire!"
-#             m 3eub "Also, I'll put this plate away, I won't be long."
-#             python:
-#                 monika_chr.remove_acs(extraplus_acs_candles)
-#                 monika_chr.remove_acs(extraplus_acs_pasta)
-#                 monika_chr.remove_acs(extraplus_acs_icecream)
-
-#         else:
-#             m 3eub "I have to put these candles away."
-#             m "We can never be too careful with fire!"
-#             $ monika_chr.remove_acs(extraplus_acs_candles)
-
-#     elif monika_chr.is_wearing_acs(extraplus_acs_flowers):
-#         m 3eua "I'll put these flowers away, I won't be long."
-#         python:
-#             monika_chr.remove_acs(extraplus_acs_flowers)
-
-#     elif not monika_chr.is_wearing_acs(extraplus_acs_flowers):
-#         if monika_chr.is_wearing_acs(extraplus_acs_pancakes) or monika_chr.is_wearing_acs(extraplus_acs_pudding) or monika_chr.is_wearing_acs(extraplus_acs_waffles):
-#             m 3eua "I must put this plate away."
-#             python:
-#                 monika_chr.remove_acs(extraplus_acs_waffles)
-#                 monika_chr.remove_acs(extraplus_acs_pancakes)
-#                 monika_chr.remove_acs(extraplus_acs_pudding)
-
-#     call mas_transition_to_emptydesk
-#     pause 2.0
-#     call mas_transition_from_emptydesk("monika 1eua")
-#     m 1hua "Okay, let's go, [player]!"
-#     call extra_restore_bg
-#     return
-
 label restaurant_hide_acs:
     # Revisa y quita las velas si es de noche
     if monika_chr.is_wearing_acs(extraplus_acs_candles):
@@ -513,7 +555,9 @@ label plus_walk:
         walk_menu = [
             (_("Cafe"), 'go_to_cafe'),
             (_("Restaurant"), 'go_to_restaurant'),
-            (_("Pool"), "pool_dev")
+            (_("Pool"), "generic_date_dev"),
+            (_("Library"), "generic_date_dev"),
+            (_("Game Room"), "generic_date_dev")
         ]
         store.disable_zoom_button = True
         m_talk = renpy.substitute(renpy.random.choice(date_talk))
@@ -540,16 +584,18 @@ label plus_minigames:
     call screen extra_gen_list(minigames_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
     return
 
-label plus_tools:
+label extraplus_tools:
     show monika idle at t21
     python:
         tools_menu = [
-            (_("View [m_name]'s Affection"), 'aff_log'),
+            (_("View [m_name]'s Affection"), 'extra_aff_log'),
             (_("Create a gift for [m_name]"), 'plus_make_gift'),
             (_("Change the window's title"), 'extra_window_title'),
-            (_("[m_name], I want to make a backup"), 'mas_backup'),
-            (_("[m_name], can you flip a coin?"), 'coinflip'),
-            (_("Hi [player]!"), 'extra_dev_mode')
+            (_("[m_name], I want to make a backup"), 'extra_mas_backup'),
+            (_("[m_name], can you flip a coin?"), 'extra_coinflip'),
+            (_("Hi [player]!"), 'extra_dev_mode'),
+            (_("How long have we been together, [m_name]?"), 'extra_relation_monika'),
+            (_("Your MAS Journey"), 'extra_show_stats')
             
         ]
         store.disable_zoom_button = True
@@ -574,7 +620,7 @@ label plus_make_gift:
             (_("Ribbons"), 'plus_ribbons')
         ]
 
-        items = [(_("Nevermind"), 'plus_tools', 20)]
+        items = [(_("Nevermind"), 'extraplus_tools', 20)]
     call screen extra_gen_list(gift_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
     return
 
@@ -629,6 +675,8 @@ label plus_objects:
             extra_gift(_("Quetzal Plushie"), 'quetzalplushie.gift'),
             extra_gift(_("Thermos Mug"), 'justmonikathermos.gift')
         ]
+        if not mas_seenEvent("mas_reaction_gift_noudeck"):
+            objects_menu.extend = extra_gift(_("NOU"), 'noudeck.gift')
 
         items = [(_("Nevermind"), 'plus_make_gift', 20)]
     call screen extra_gen_list(objects_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)

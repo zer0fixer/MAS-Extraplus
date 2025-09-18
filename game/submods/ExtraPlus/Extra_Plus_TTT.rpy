@@ -214,7 +214,7 @@ screen minigame_ttt_scr():
 #====Label
 label minigame_ttt:
     python:
-        ttt = minigames(_("Tic Tac Toe"), None, ttt_prep)
+        ttt = extra_minigames(_("Tic Tac Toe"), None, ttt_prep)
         ttt()
     show monika 1hua at t21
     show notebook zorder 12 at animated_book

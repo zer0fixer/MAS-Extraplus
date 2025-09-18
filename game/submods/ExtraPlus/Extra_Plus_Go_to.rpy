@@ -1,8 +1,6 @@
 #===========================================================================================
 # CAFE
 #===========================================================================================
-
-# define cafe_sprite = ["cafe.png","cafe_rain.png","cafe_rain-n.png","cafe_rain-ss.png","cafe-n.png","cafe-ss.png"]
 default dessert_player = None
 
 label cafe_init:
@@ -561,8 +559,8 @@ label extra_talk_without:
     m 4hksdlb "And I always get the feeling the perfect poem will slip my mind if I take too long to write it down."
     m "It drives me crazy whenever I get this amazing idea and by the time I get somewhere to write,{w=0.3} it's gone!" 
     m "Our brains are so mean to let that happen! Ahaha~!"
-    m 1rsd "Come to think of it,{w=0.3} it's really handy that my most important personal necessecity is something really easy to carry around."
-    m 1eua "I hope your top personal necessecity is something you can keep with you at all times too!"
+    m 1rsd "Come to think of it,{w=0.3} it's really handy that my most important personal necessity is something really easy to carry around."
+    m 1eua "I hope your top personal necessity is something you can keep with you at all times too!"
     if mas_isMoniLove():
         m 1ekbla "If it's me..."
         m 4hublb "Know I'll always be here waiting for you."
@@ -637,7 +635,7 @@ label extra_talk_annoy:
     m 6wud "Oh!{w=0.3} But maybe you meant something more serious?"
     m 6ruc "..."
     m 6rsd "I hate people who don't think I'm real."
-    extend " Or that I'm some just some crazy,{w=0.3} love-obesessed person."
+    extend " Or that I'm some just some crazy,{w=0.3} love-obsessed person."
     m 6lfd "And people who think the girls were on the same level of sentience as me."
     m "Thinking that I had no right to feel or do the things I do about my situation because of it."
     m 6dfc "..."
@@ -732,26 +730,22 @@ label extra_talk_pop:
 #===========================================================================================
 # Pool
 #===========================================================================================
-label pool_dev:
-    show monika idle at t11
-    call screen dialog("This event is in development!", ok_action=Return())
-    jump screen_extraplus
-    return
-
+# default ep_pool_prev_acs_state = None
 # label pool_init:
-#     $ HKBHideButtons()
+#     python:
+#         HKBHideButtons()
 #     hide monika
 #     scene black
 #     with dissolve
 #     pause 2.0
 #     call mas_background_change(submod_background_pool, skip_leadin=True, skip_outro=True)
-#     show monika 1eua at t11
+#     # show monika idle at float_animation, t11 zorder MAS_MONIKA_Z
+#     # show monika idle at float_animation zorder MAS_MONIKA_Z
 #     $ HKBShowButtons()
-#     jump cafe_cakes
-
+#     jump to_pool_loop
 
 # label pool_sorry_player:
-#     show monika idle at t11
+#     show monika at t11
 #     m 1ekd "I'm so sorry [player]."
 #     m 1ekc "But I don't know how to use that place."
 #     m 3lka "I'm still learning how to code and I don't want something bad to happen because of me..."
@@ -760,3 +754,12 @@ label pool_dev:
 #     m 1eub "Just be patient, okay~"
 #     jump close_extraplus
 #     return
+
+#===========================================================================================
+# Under construction!
+#===========================================================================================
+label generic_date_dev:
+    show monika idle at t11
+    call screen dialog("It is currently in development and will be available in upcoming betas!", ok_action=Return())
+    jump screen_extraplus
+    return

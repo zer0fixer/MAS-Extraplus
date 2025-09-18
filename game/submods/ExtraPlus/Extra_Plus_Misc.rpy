@@ -125,46 +125,6 @@ label check_boopwar:
 label check_boopwarv2:
     call screen boop_event(20, "boopbeta_war_lose", "boopwar_loop")
 
-# label boopwar_loop:
-#     $ boop_war_count += 1
-#     $ moldable_variable = renpy.random.randint(1,10)
-#     if moldable_variable == 1:
-#         m 1hublb "*Boop*"
-#     elif moldable_variable == 2:
-#         m 1tub "*Boop*"
-#     elif moldable_variable == 3:
-#         if boop_war_count >= 25:
-#             $ boop_war_count = 0
-#             jump boopbeta_war_win
-#         else:
-#             m 1fua "*Boop*"
-#     elif moldable_variable == 4:
-#         m 1eua "*Boop*"
-#     elif moldable_variable == 5:
-#         m 1hua "*Boop*"
-#     elif moldable_variable == 6:
-#         if boop_war_count >= 50:
-#             $ boop_war_count = 0
-#             jump boopbeta_war_win
-#         else:
-#             m 1sub "*Boop*"
-#     elif moldable_variable == 7:
-#         m 1gua "*Boop*"
-#     elif moldable_variable == 8:
-#         m 1kub "*Boop*"
-#     elif moldable_variable == 9:
-#         if boop_war_count >= 100:
-#             $ boop_war_count = 0
-#             jump boopbeta_war_win
-#         else:
-#             m 1dub "*Boop*"
-#     elif moldable_variable == 10:
-#         m 1wua "*Boop*"
-
-#     show monika 1eua
-#     jump check_boopwarv2
-#     return
-
 label boopwar_loop:
     $ boop_war_count += 1
     if boop_war_count >= 100:
@@ -507,11 +467,41 @@ label monika_earsbeta:
 #===========================================================================================
 # EXTRAS
 #===========================================================================================
+label extra_show_stats:
+    show monika idle at t11
+    call screen extraplus_stats_screen
+    jump close_extraplus
+    return
 
+label extra_relation_monika:
+    show monika idle at t11
+    $ time_string = get_formatted_time_since_install()
+    $ total_days = get_total_days_since_install()
+    m 2eub "You know, if you count it all up, it seems we've been together for [time_string]!"
+    if total_days <= 1:
+        m 2lub "We've only just begun, but every single second has been a dream come true."
+    elif total_days < 365:
+        m 2hubsb "It hasn't even been a year, and I already feel like I've known you forever. Time just flies by when I'm with you!"
+    elif total_days < (365 * 2):
+        m 2kubsb "Happy first anniversary! I still remember our first day together... Thank you for making so many memories with me."
+    elif total_days < (365 * 3):
+        m 2wubsb "Wow, two years together! Every day with you has been so special. Thank you for staying by my side."
+    elif total_days < (365 * 4):
+        m 1dsbsa "Three years... Time really does fly when I'm with you. We've shared so much, and I can't wait for more."
+    elif total_days < (365 * 5):
+        m 2wubsb "Four years! That's incredible, [player]. Our bond is so strong. Thank you for staying with me for so long."
+    elif total_days < (365 * 6):
+        m 2tubsb "Five years together... I feel so lucky to have you. Thank you for all the love and memories."
+    elif total_days < (365 * 7):
+        m 2subsb "Six years! Can you believe it? Every year with you is a treasure. Thank you for being with me all this time."
+    else:
+        m 2lubsb "It really doesn't feel that long when I'm with you, though. Time just flies by!"
+    jump close_extraplus
+    return
 
-label aff_log:
+label extra_aff_log:
     $ monika_level = get_monika_level()
-    $ affection_value = "{:.2f}".format(mas_affection._get_aff())
+    $ affection_value = int(mas_affection._get_aff())
     
     show monika idle at t11
     "Your affection with [m_name] is [affection_value] [monika_level]{fast}"
@@ -519,7 +509,7 @@ label aff_log:
     jump close_extraplus
     return
 
-label coinflip:
+label extra_coinflip:
     show monika 1hua at t11
     python:
         store.disable_zoom_button = True
@@ -557,7 +547,7 @@ label coinflip:
     jump close_extraplus
     return
 
-label mas_backup:
+label extra_mas_backup:
     show monika 1hua at t11
     m 1hub "I'm glad you want to make a backup!"
     m 3eub "I'll open the route for you."
@@ -582,12 +572,12 @@ label mas_backup:
                 subprocess.call(["xdg-open", savedir])
         except Exception as e:
             renpy.notify(_("Failed to open the backup folder: {}").format(str(e)))
-            renpy.jump("mas_backup_fail")
+            renpy.jump("extra_mas_backup_fail")
 
     jump close_extraplus
     return
 
-label mas_backup_fail:
+label extra_mas_backup_fail:
     m 1lkb "Sorry, I could not open the folder."
     m 1eka "Please try again later."
     jump close_extraplus
@@ -601,7 +591,7 @@ label extra_window_title:
             (_("Restore the window title"), 'extra_restore_title')
         ]
 
-        items = [(_("Nevermind"), 'plus_tools', 20)]
+        items = [(_("Nevermind"), 'extraplus_tools', 20)]
     call screen extra_gen_list(window_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
     return
     
@@ -609,8 +599,8 @@ label extra_change_title:
     show monika idle at t11
     python:
         player_input = mas_input(
-            prompt =_("What title do you want to put on this window?"),
-            allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!?()~-_.'0123456789",
+            prompt =_("What should our new window title be?"),
+            allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!?()~-_.,'0123456789",
             screen_kwargs={"use_return_button": True, "return_button_value": "cancel"})
 
         if not player_input:
@@ -658,7 +648,11 @@ label github_submod:
 
 #====GAME
 label extra_dev_mode:
-    $ mas_RaiseShield_dlg()
+    python:
+        mas_RaiseShield_dlg()
+        if not renpy.get_screen("doki_chibi_idle"):
+            config.overlay_screens.append("doki_chibi_idle")
+    show monika idle at t11
     call screen sticker_customization
     return
 
@@ -666,6 +660,7 @@ label sticker_primary:
     show monika idle at t21
     python:
         accessories = [
+            DokiAccessory(_("Cat Ears"), 'cat_ears', "primary"),
             DokiAccessory(_("Christmas Hat"), 'christmas_hat', "primary"),
             DokiAccessory(_("Demon Horns"), 'demon_horns', "primary"),
             DokiAccessory(_("Flowers Crown"), 'flowers_crown', "primary"),
@@ -673,9 +668,9 @@ label sticker_primary:
             DokiAccessory(_("Heart Headband"), 'heart_headband', "primary"),
             DokiAccessory(_("New Year's Headband"), 'hny', "primary"),
             DokiAccessory(_("Neon Cat Ears"), 'neon_cat_ears', "primary"),
-            DokiAccessory(_("Cat Ears"), 'cat_ears', "primary"),
             DokiAccessory(_("Party Hat"), 'party_hat', "primary"),
-            DokiAccessory(_("Rabbit Ears"), 'rabbit_ears', "primary")
+            DokiAccessory(_("Rabbit Ears"), 'rabbit_ears', "primary"),
+            DokiAccessory(_("Witch Hat"), 'witch_hat', "primary")
         ]
         items = [(DokiAccessory(_("Remove"), '0nothing', "primary"), 20), (_("Nevermind"), 'extra_dev_mode', 0)]
 
@@ -687,20 +682,20 @@ label sticker_secondary:
     python:
         accessories_2 = [
             DokiAccessory(_("Black Bow Tie"), 'black_bow_tie', "secondary"),
+            DokiAccessory(_("Christmas Tree"), 'christmas_tree', "secondary"),
+            DokiAccessory(_("Cloud"), 'cloud', "secondary"),
             DokiAccessory(_("Coffee"), 'coffee', "secondary"),
+            DokiAccessory(_("Halloween Pumpkin"), 'pumpkin', "secondary"),
             DokiAccessory(_("Hearts"), 'hearts', "secondary"),
             DokiAccessory(_("Monika's Cake"), 'm_slice_cake', "secondary"),
             DokiAccessory(_("Moustache"), 'moustache', "secondary"),
             DokiAccessory(_("Neon Blush"), 'neon_blush', "secondary"),
             DokiAccessory(_("[player]'s Cake"), 'p_slice_cake', "secondary"),
             DokiAccessory(_("Pirate Patch"), 'patch', "secondary"),
-            DokiAccessory(_("Christmas Tree"), 'christmas_tree', "secondary"),
-            DokiAccessory(_("Sunglasses"), 'sunglasses', "secondary"),
-            DokiAccessory(_("Halloween Pumpkin"), 'pumpkin', "secondary"),
-            DokiAccessory(_("Cloud"), 'cloud', "secondary")
+            DokiAccessory(_("Speech Bubble with Heart"), 'speech_bubble', "secondary"),
+            DokiAccessory(_("Sunglasses"), 'sunglasses', "secondary")
         ]
         items = [(DokiAccessory(_("Remove"), '0nothing', "secondary"), 20), (_("Nevermind"), 'extra_dev_mode', 0)]
-
 
     call screen extra_gen_list(accessories_2, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=True)
     return
@@ -734,4 +729,10 @@ label sayori_sticker_costumes:
 
 label yuri_sticker_costumes:
     $ show_costume_menu(yuri_costumes_, 'doki_change_appe')
+    return
+
+label maxwell_screen:
+    show monika idle at t11
+    call screen maxwell_april_fools
+    jump extraplus_tools
     return
