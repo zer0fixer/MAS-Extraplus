@@ -1,4 +1,4 @@
-# 💚 There is already a pre-release available for you to download in the releases section.
+# 💚 In Beta status 💚
 <p align="center">
   <img src="https://github.com/Zero-Fixer/MAS-Extraplus-EN/assets/142945683/0276af8f-5de5-43b6-b581-d2b9edf1a889">
 </p>
