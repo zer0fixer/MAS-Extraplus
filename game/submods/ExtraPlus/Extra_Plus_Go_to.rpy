@@ -139,8 +139,8 @@ label extra_talk_you:
 label extra_talk_phobia:
     show monika staticpose at t11
     m 1rtd "The truth is that's a good question, I haven't even thought about which fear I would have."
-    m 1hua "After all, I'm not human, I'm just a cute little character. "
-    extend 1dksdlb "Although I'm aware of everything going on around me."
+    m 1tub "After all, I'm just a cute little character."
+    m 3kuu "That she fell in love with the player on the other side of this screen~"
     m 3eud "But if you want to know one, I'll give you 'autophobia'."
     m 3eka "The fear of loneliness."
     m 3dud "Feeling isolated without any company even if there are other NPCs or a pet to keep me company."

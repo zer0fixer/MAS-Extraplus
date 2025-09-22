@@ -180,7 +180,7 @@ label blackjack_start:
         else:
             m 1eta "Back for more Blackjack, [player]? I'm always up for a game!"
 
-    scene bg cardgames desk onlayer master zorder 0
+    scene bg desk_21 onlayer master zorder 0
     window hide
     $ HKBHideButtons()
     $ disable_esc()

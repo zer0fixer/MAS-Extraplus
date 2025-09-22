@@ -98,7 +98,7 @@ label boop_yep:
     jump show_boop_screen
     return
 
-label monika_boopbeta_war:
+label monika_boopbeta_war: # This label is called via alternate_action on the nose imagebutton
     $ extra_seen_label("check_boopwarv2","check_boopwar")
 
 label check_boopwar:
@@ -123,6 +123,7 @@ label check_boopwar:
     return
 
 label check_boopwarv2:
+    show screen boop_war_score_ui
     call screen boop_event(20, "boopbeta_war_lose", "boopwar_loop")
 
 label boopwar_loop:
@@ -159,6 +160,7 @@ label boopwar_loop:
 
 label boopbeta_war_lose:
     $ boop_war_count = 0
+    hide screen boop_war_score_ui
     m 1nua "Looks like I've won this boop war, [player]~"
     m "I hope I've been a good opponent."
     m 3hub "But I've also really enjoyed it!"
@@ -172,6 +174,7 @@ label boopbeta_war_lose:
 
 label boopbeta_war_win:
     $ boop_war_count = 0
+    hide screen boop_war_score_ui
     m 1hua "You've won this boop war, [player]!"
     m 1tub "I can tell you like touching my nose, ehehehe~"
     m 1eusdra "I couldn't keep up with you, but maybe next time we'll go further."
@@ -264,6 +267,7 @@ label cheeks_dis:
         m 3hksdrb "You've distracted me and I don't think it's worth continuing, ahahaha~"
         m 3hua "I really enjoyed doing this with you though!"
     $ boop_war_count = 0
+    hide screen boop_war_score_ui
     jump show_boop_screen
     return
 
@@ -345,6 +349,7 @@ label headpat_dis:
         m 1efa "But next time I probably won't give in, so don't bet on it!"
         m 1lubsa "Even though I enjoy the pat on the head. Ehehehe~"
     $ boop_war_count = 0
+    hide screen boop_war_score_ui
     jump show_boop_screen
     return
 

@@ -140,7 +140,6 @@ screen ttt_score():
         xpos 0.05
         yanchor 2.0
         ypos 300
-        # textbutton _("I give up") style "hkb_button" action [Function(ttt.set_state, -9), Function(ttt.check_state)]
         textbutton _("I give up") style "hkb_button" action [SetField(ttt, "state", -9), Function(ttt.check_state)]
         null height 6
         textbutton _("Quit") style "hkb_button" action [Hide("minigame_ttt_scr"), Jump("minigame_ttt_quit")]

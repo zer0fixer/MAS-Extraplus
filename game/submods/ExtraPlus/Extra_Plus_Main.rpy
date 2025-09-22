@@ -11,7 +11,7 @@ init -990 python in mas_submod_utils:
         author="ZeroFixer",
         name="Extra Plus",
         description="Expand your time with Monika with new minigames, dates, and interactions.",
-        version="1.3.2"
+        version="1.3.3"
     )
 
 #====Register the updater
@@ -219,7 +219,7 @@ init 5 python:
 
     def show_bday_screen():
         """Show birthday screen if it's Monika's birthday and files are missing."""
-        if mas_isMonikaBirthday() and not persistent._mas_bday_visuals:
+        if not persistent._mas_bday_in_bday_mode or not persistent._mas_bday_visuals:
             config.overlay_screens.append("bday_oki_doki")
 
     def notify_affection():
@@ -313,14 +313,8 @@ init 5 python:
     #====Chibika
     def extra_init_chibi():
         """Initialize Chibika if enabled in settings."""
-        if store.persistent.hi_chibika == True:
+        if not extra_visible_chibi():
             config.overlay_screens.append("doki_chibi_idle")
-    
-    # def change_dokis(skin):
-    #     """Change Chibika's costume and reset her."""
-    #     persistent.chibika_current_costume = skin
-    #     extra_reset_chibi()
-    #     renpy.jump("extra_dev_mode")
 
     def extra_visible_chibi():
         """Check if Chibika is currently visible."""
@@ -345,16 +339,8 @@ init 5 python:
 
     def chibi_drag(drags, drop):
         """Handle Chibika's drag and drop movement."""
-        if not drop and store.persistent.enable_drag_chibika:
-            drags[0].snap(chibi_xpos, chibika_y_position, 0.7)
-        else:
-            persistent.chibika_drag_x = drags[0].x
-            persistent.chibika_drag_y = drags[0].y
-
-    # def extra_add_chibi():
-    #     """Add Chibika to the overlay if not visible."""
-    #     if not extra_visible_chibi():
-    #         config.overlay_screens.append("doki_chibi_idle")
+        persistent.chibika_drag_x = drags[0].x
+        persistent.chibika_drag_y = drags[0].y
 
     def extra_reset_chibi():
         """Remove and re-add Chibika to reset her position."""
@@ -534,13 +520,15 @@ init 5 python:
     ExtraButton()
     extra_rng_cup()
     save_title_windows()
-    show_bday_screen()
     
 init 999 python:
-    if plus_files_exist():
+    if store.persistent.hi_chibika:
         extra_init_chibi()
     else:
         extra_remove_chibi()
+
+    if mas_isMonikaBirthday():
+        show_bday_screen()
 
 init -1 python:
     renpy.music.register_channel("maxwell", "sfx", True)
@@ -595,11 +583,11 @@ init -1 python:
             file_path = os.path.join(renpy.config.basedir, 'characters', self.gift)
             with open(file_path, 'a') as f:
                 messages = [
-                    _("Oh! You got me a {}! Thank you!").format(self.name),
-                    _("A {}? For me? You're so sweet!").format(self.name),
-                    _("Wow! Is this a {}? I love it!").format(self.name),
-                    _("You shouldn't have! But I'm so happy you gave me a {}!").format(self.name),
-                    _("Eee! A {}! You're the best!").format(self.name)
+                    _("All set! I've created the '{}' file for you to give to Monika.").format(self.name),
+                    _("Here you go! One fresh '{}'. I hope Monika loves it!").format(self.name),
+                    _("Job's done! The '{}' gift is ready in the 'characters' folder.").format(self.name),
+                    _("Perfect! You can find the '{}' file now. Monika's going to be so happy!").format(self.name),
+                    _("A '{}' for Monika! How thoughtful. It's all ready for you.").format(self.name)
                 ]
                 renpy.notify(random.choice(messages))
             renpy.jump('plus_make_gift')
@@ -917,9 +905,7 @@ screen boop_revamped():
     ]
 
     for zone, xpos, ypos, primary_action, alt_action in extra_boop_zones:
-        imagebutton idle zone xpos xpos ypos ypos action Jump(primary_action)
-        if alt_action:
-            imagebutton idle zone xpos xpos ypos ypos alternate Jump(alt_action)
+        imagebutton idle zone xpos xpos ypos ypos action Jump(primary_action) alternate (Jump(alt_action) if alt_action else None)
 
 screen button_custom_zoom():
     #Shows a button to open the custom zoom menu if the overlay is active.
@@ -1040,18 +1026,18 @@ screen extra_no_click():
 screen doki_chibi_idle():
     #Displays Chibika on the screen, allowing for dragging if enabled.
     zorder 50
-    if renpy.get_screen("hkb_overlay"):
+    if persistent.enable_drag_chibika:
         drag:
             child "chibika_base"
             selected_hover_child "hover_sticker"
             dragged chibi_drag
             drag_offscreen True
-            if persistent.enable_drag_chibika:
-                xpos chibi_xpos
-                ypos chibika_y_position
-            else:
-                xpos persistent.chibika_drag_x
-                ypos persistent.chibika_drag_y
+            xpos persistent.chibika_drag_x
+            ypos persistent.chibika_drag_y
+    else:
+        add "chibika_base":
+            xpos chibi_xpos
+            ypos chibika_y_position
 
 screen score_minigame(game=None):
     #Shows the current score for a minigame (RPS or Shell Game) with player and opponent stats.
@@ -1157,32 +1143,21 @@ screen boop_event(timelock, endlabel, editlabel):
         idle "zoneone"
         xpos 620 ypos 235
         action Jump(editlabel)
-    if boop_war_count >= 25:
-        #Head
-        imagebutton idle "zonetwo":
-            xpos 550 ypos 10
-            action Jump("headpat_dis")
-        #Cheeks
-        imagebutton idle "zoneone":
-            xpos 700 ypos 256
-            action Jump("cheeks_dis")
-        imagebutton idle "zoneone":
-            xpos 550
-            ypos 256
-            action Jump("cheeks_dis")
-
-    if boop_war_count >= 1:
-        add "note_score"
-        vbox:
-            xpos 0.915
-            ypos 0.040
-            text _("Boops : [boop_war_count]") size 30 style "monika_text"
 
 screen force_mouse_move():
     #Forces the mouse to move to a specific position, used for certain effects or minigames.
     on "show":
         action MouseMove(x=412, y=237, duration=.3)
     timer .6 repeat True action MouseMove(x=412, y=237, duration=.3)
+
+screen boop_war_score_ui():
+    #Displays the score counter for the boop war.
+    zorder 51
+    add "note_score"
+    vbox:
+        xpos 0.910
+        ypos 0.045
+        text _("Boops : [boop_war_count]") size 25 style "monika_text"
 
 screen bday_oki_doki():
     #Shows a special button for Monika’s birthday event.
