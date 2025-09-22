@@ -1,9 +1,11 @@
+#===========================================================================================
+# MINIGAME#4
+#===========================================================================================
 image bjcard back = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/cards/back.png")
 image bg desk_21 = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/cards/background.png")
 default blackjack_player_wins = 0
 default blackjack_monika_wins = 0
-default blackjack_draws = 0
-default persistent.blackjack_win_game = [False, False, False]
+default persistent.blackjack_win_game = [False, False, False] #Player, Monika and Tie. Quit [FFF]
 
 init python:
     import random
@@ -14,7 +16,6 @@ init python:
                 MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/cards/{}/{}.png".format(suit, value))
             )
     
-    # Clases mejoradas
     class BJ_Card(object):
         def __init__(self, suit, value):
             self.suit = suit
@@ -58,17 +59,19 @@ init python:
 
         def calculate_total(self):
             self.total = 0
-            aces = 0
-            
-            # Primera pasada: contar valores base y ases
+            num_aces = 0
+
+            # Sum non-ace cards first
             for card in self.hand:
-                if card.value == 1:
-                    aces += 1
-                    self.total += 11 if aces == 1 and self.total <= 11 else 1
-                elif card.value > 10:
+                if card.value > 10:
                     self.total += 10
-                else:
+                elif card.value > 1:
                     self.total += card.value
+                else: # It's an Ace
+                    num_aces += 1
+            # Add aces, treating them as 11 if possible, otherwise 1
+            for _ in range(num_aces):
+                self.total += 11 if self.total + 11 <= 21 else 1
 
     class BJ_Monika(BJ_Player):
         def should_hit(self):
@@ -78,7 +81,6 @@ init python:
                 return True
             return False
 
-# Interfaz mejorada
 screen blackjack_ui:
     key "h" action NullAction()
     key "mouseup_3" action NullAction()
@@ -87,11 +89,9 @@ screen blackjack_ui:
     add MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/bj_name.png") pos (548, 33) anchor (0, 0) zoom 0.7
     add MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/bj_name.png") pos (548, 375) anchor (0, 0) zoom 0.7
     fixed:
-        # Configuración base simplificada
         xalign 0.5 ypos 0.05
-        xysize (1400, 650)  # Tamaño fijo para mejor rendimiento
+        xysize (1400, 650)
 
-        # Contenedor principal
         vbox:
             style_prefix "check"
             align (0.5, 0.0)
@@ -112,9 +112,8 @@ screen blackjack_monika():
                 add If(minigame_monika.revealed[index],
                     At(card.image, init_card_slide if index < 2 else hit_card),
                     At("bjcard back", init_card_slide if index < 2 else hit_card))
-            # Frame con tamaño fijo para mostrar el total
             frame:
-                xysize (50, 50)      # Tamaño fijo: 120 píxeles de ancho y 50 de alto
+                xysize (50, 50)
                 xalign 0.5
                 yalign 0.5
                 text "[minigame_monika.total if all(minigame_monika.revealed) else '??']" xalign 0.5 yalign 0.5
@@ -123,13 +122,12 @@ screen blackjack_player():
     vbox:
         xalign 0.5
         spacing 15
-        label _("You") xalign 0.5
+        label _(player) xalign 0.5
         
         hbox:
             spacing 10
             for index, card in enumerate(minigame_player.hand):
                 add At(card.image, init_card_slide if index < 2 else hit_card)
-            # Frame con tamaño fijo para el puntaje del jugador
             frame:
                 xysize (50, 50)
                 xalign 0.5
@@ -156,6 +154,32 @@ default bj_player_stand = False
 default bj_monika_stand = False
 
 label blackjack_start:
+    show monika 1hub at t11
+    if not renpy.seen_label("bj_game_loop"):
+        m "Welcome to Blackjack, [player]! Ready to test your luck and skills?"
+        m 3eub "Remember, the goal is to get as close to 21 as possible without going over."
+        m 3tua "Don't worry, I'll explain everything as we play. Have fun and good luck!"
+    else:
+        # Previous game was a tie (both had at least one win and tied)
+        if persistent.blackjack_win_game[2]:
+            m 2sfa "We're tied so far! Let's see who comes out on top this time, [player]."
+            m 2stb "Are you ready to break the tie? Let's play!"
+        # Player won last session
+        elif persistent.blackjack_win_game[0]:
+            m 5tub "You're the reigning champion, [player]! Let's see if you can keep your winning streak."
+            m 5tua "I'm going to give it my all this round!"
+        # Monika won last session
+        elif persistent.blackjack_win_game[1]:
+            m 1tub "I'm on a winning streak, but I know you'll try your best to take the crown, [player]!"
+            m 1eub "Let's see if you can beat me this time!"
+        # Didn't play last time (both were 0-0)
+        elif persistent.blackjack_win_game == [False, False, False]:
+            m 1wub "We didn't get to play last time. Let's start a new game now!"
+            m 1hub "I'm excited to see how you do, [player]!"
+        # Default generic greeting
+        else:
+            m 1eta "Back for more Blackjack, [player]? I'm always up for a game!"
+
     scene bg cardgames desk onlayer master zorder 0
     window hide
     $ HKBHideButtons()
@@ -163,12 +187,6 @@ label blackjack_start:
     $ minigame_deck = BJ_Deck()
     $ minigame_player = BJ_Player(player)
     $ minigame_monika = BJ_Monika(m_name)
-
-    if not renpy.seen_label("bj_game_loop"):
-        m "Alright, [player]! Ready for a few rounds of Blackjack?"
-        m "The goal is to get as close to 21 as you can without going over."
-        m "Don't worry, I'll be gentle... for the first round, at least. Ehehe~"
-        m "Let's see what the cards have in store for us. Good luck!"
 
     label bj_game_loop:
         while True:
@@ -188,18 +206,16 @@ label blackjack_start:
             # Verificar blackjack inmediato
             if (minigame_player.total == 21 and len(minigame_player.hand) == 2) or (minigame_monika.total == 21 and len(minigame_monika.hand) == 2):
                 jump bj_game_loop
-                # jump blackjack_results
 
             show screen blackjack_ui
             
-            # Bucle de turnos alternos
             while not game_over:
                 if bj_current_turn == "player":
                     $ bj_result = ui.interact()
                     
                     if bj_result == "hit":
                         $ minigame_player.draw_card(minigame_deck)
-                        if minigame_player.total >= 21:
+                        if minigame_player.total >= 21 or len(minigame_player.hand) == 5:
                             $ game_over = True
                         
                     elif bj_result == "stand":
@@ -229,16 +245,13 @@ label blackjack_start:
                     pause 1
                     if minigame_monika.should_hit() and len(minigame_monika.hand) < 5:
                         $ minigame_monika.draw_card(minigame_deck)
-                        if minigame_monika.total >= 21:
+                        if minigame_monika.total >= 21 or len(minigame_monika.hand) == 5:
                             $ game_over = True
                     else:
                         $ bj_monika_stand = True
-                        $ bj_current_turn = "player"
 
-                # Forzamos la actualización de las screens
                 $ renpy.restart_interaction()
 
-                # Condición de término clara
                 if game_over or (bj_player_stand and bj_monika_stand):
                     $ game_over = True
             
@@ -246,34 +259,28 @@ label blackjack_start:
 
 label blackjack_results:
     $ bj_current_turn = "monika"
-    # Revela las cartas de Monika
     $ minigame_monika.revealed = [True] * len(minigame_monika.hand)
-    # Calcular totales y determinar ganador
     $ player_total = minigame_player.total
     $ monika_total = minigame_monika.total
 
-    if player_total == 21:
+    if player_total == 21 and len(minigame_player.hand) == 2:
         m "A perfect 21! You've got a real talent for this, [player]!"
         $ blackjack_player_wins += 1
 
-    elif monika_total == 21:
+    elif monika_total == 21 and len(minigame_monika.hand) == 2:
         m "Blackjack! Looks like I got lucky this time. Ehehe~"
         $ blackjack_monika_wins += 1
 
-    elif player_total > 21 and monika_total > 21:
-        "It's funny that this happened, I'll have to fix it in the future, haha~"
+    elif player_total > 21:
+        m "Oh, you went over. That's a tough break. Don't worry, it happens!"
+        $ blackjack_monika_wins += 1
 
     elif monika_total > 21 and player_total <= 21:
         m "Ah, I busted. Looks like this round goes to you. Well played!"
         $ blackjack_player_wins += 1
 
-    elif player_total > 21 and monika_total <= 21:
-        m "Oh, you went over. That's a tough break. Don't worry, it happens!"
-        $ blackjack_monika_wins += 1
-
     elif player_total == monika_total:
         m "It's a push! We have the exact same score. We really are in sync, aren't we?"
-        $ blackjack_draws += 1
 
     else:
         if player_total > monika_total:
@@ -282,15 +289,6 @@ label blackjack_results:
         else:
             m "Looks like my hand was just a little bit better. I win this one!"
             $ blackjack_monika_wins += 1
-    # else:
-    #     $ player_diff = 21 - player_total
-    #     $ monika_diff = 21 - monika_total
-    #     if player_diff < monika_diff:
-    #         m "You win this round! Nice job staying cool under pressure."
-    #         $ blackjack_player_wins += 1
-    #     else:
-    #         m "Looks like my hand was just a little bit better. I win this one!"
-    #         $ blackjack_monika_wins += 1
 
     window hide
     pause 1
@@ -305,7 +303,7 @@ label BJ_quit_game:
         $ persistent.blackjack_win_game[0] = True
     elif blackjack_player_wins < blackjack_monika_wins:
         m "I ended up with more wins, but you put up a great fight!"
-        m "I'm sure you'll beat me next time. Thanks for the games, [player]!"
+        m "I'm sure you'll beat me next time. Thanks for playing with me, [player]!"
         $ persistent.blackjack_win_game[1] = True
     elif blackjack_player_wins == blackjack_monika_wins and blackjack_player_wins > 0:
         m "Wow, we ended with a perfect tie. It seems we're evenly matched!"
@@ -322,7 +320,6 @@ label BJ_quit_game:
     hide screen blackjack_ui
     $ blackjack_monika_wins = 0
     $ blackjack_player_wins = 0
-    $ blackjack_draws = 0
     call spaceroom(scene_change=True)
     jump close_extraplus
     return

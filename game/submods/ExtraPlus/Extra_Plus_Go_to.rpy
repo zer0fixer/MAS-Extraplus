@@ -22,9 +22,9 @@ label cafe_cakes:
     call mas_transition_to_emptydesk
     pause 2.0
     python:
-        if mas_isDayNow():
+        if not mas_isNightNow(): # Covers both Day and Sunset
             monika_chr.wear_acs(extraplus_acs_chocolatecake)
-        elif mas_isNightNow():
+        else: # isNightNow
             monika_chr.wear_acs(extraplus_acs_fruitcake)
 
     call mas_transition_from_emptydesk("monika 1eua")
@@ -50,7 +50,7 @@ label cafe_cakes:
             m 1ekb "I'd give you mine, but your screen limits me from doing so..."
             m 3hka "I hope you at least have a cup of coffee!"
     m 3hua "Ehehe~"
-    $ plus_snack_time = random.randint(60.00, 90.00)
+    $ plus_snack_time = random.randint(60, 90)
     show screen _timer_monika(plus_snack_time)
     jump to_cafe_loop
     return
@@ -288,14 +288,14 @@ label restaurant_cakes:
     call mas_transition_to_emptydesk
     pause 2.0
     python:
-        if mas_isDayNow():
+        if not mas_isNightNow(): # Covers both Day and Sunset
             if not monika_chr.is_wearing_acs(mas_acs_roses):
                 monika_chr.wear_acs(extraplus_acs_flowers)
             if renpy.random.randint(1,2) == 1:
                 monika_chr.wear_acs(extraplus_acs_pancakes)
             else:
                 monika_chr.wear_acs(extraplus_acs_waffles)
-        elif mas_isNightNow():
+        else: # isNightNow
             monika_chr.wear_acs(extraplus_acs_candles)
             monika_chr.wear_acs(extraplus_acs_pasta)
 
@@ -360,10 +360,10 @@ label restaurant_sorry_player:
 
 label extra_talk_doing:
     show monika staticpose at t11
-    if renpy.random.randint(1,2) == 1:
+    if renpy.random.randint(1, 2) == 1:
         m 1ekbla "Aw [player]~! Thank you for asking!"
         m 1hublb "I'm feeling great right now!"
-        m 3fubla "Spending time with my favorite person in the world always cheers me up!"  
+        m 3fubla "Spending time with my favorite person in the world always cheers me up!"
         m "Thank you for treating me here today by the way{w=0.3}, [player]."
         m 6hubsb "It's great to see you always come up with new ways to spend time with me and seize our time together."
         m "It makes me feel that much more closer to you."
@@ -382,7 +382,7 @@ label extra_talk_doing:
                     extend 1hubla " but it seems like you were already a step ahead of me,{w=0.3} ahaha~!"
                 m 1hublu "And if you're happy,{w=0.3} I'm happy too!"
                 m 3fkbla "I love you,{w=0.3} never forget that,{w=0.3} [mas_get_player_nickname()]!"
-            
+
             "I feel great! Thanks for asking, [m_name].":
                 m "Really?"
                 extend 3sub " That's amazing to hear,{w=0.3} [mas_get_player_nickname()]!"
@@ -403,7 +403,7 @@ label extra_talk_doing:
                 extend 1wubsd "Ah!"
                 m "Let me stop that for now before I fluster myself too much!"
                 m 6hub "Ehehe!"
-                
+
             "Today wasn't a good day for me.":
                 m 1ekc "That's awful, [player]..."
                 m 1ekd "I'm so sorry for that!"
@@ -414,7 +414,6 @@ label extra_talk_doing:
                 m 1fublu "So I'll do my best to make this a wonderful date so we can cheer you up!"
                 m "Okay,{w=0.3} [mas_get_player_nickname()]?"
                 extend 1hublb "I love you...!"
-        jump to_restaurant_loop
 
     else:
         $ monika_couple = plus_player_gender()
@@ -474,7 +473,7 @@ label extra_talk_doing:
                 m 4fkblb "I love you,{w=0.3} more than anything in the world."
                 m 4hublb "And I can't wait to feel your warmth on my 'colder' days like these."
                 m 6eka "Now let's get on with our date,{w=0.3} I wouldn't want to waste a lovely day like today!"
-
+        
             "I feel great":
                 m 1hub "That's good to hear!{w=0.3} Wouldn't want us to both be down in the dumps, would we?"
                 m 1eka "Ehehe..."
@@ -486,8 +485,8 @@ label extra_talk_doing:
                 m 6ekbsa "Your mood is infectious to me after all~!"
                 m 6hubsb "Anyways,{w=0.3} let's just sit back and enjoy the rest of our date!"
                 m "After all,{w=0.3} a day with [player] is never a day wasted!"
-        jump to_restaurant_loop
-    return
+    
+    jump to_restaurant_loop
 
 label extra_talk_live:
     show monika staticpose at t11
@@ -574,18 +573,18 @@ label extra_talk_glass:
     m 1euc "Glass half empty or full, huh?"
     m 4rsb "How about I propose to you another question instead,{w=0.3} [player]?"  # Fixed: Removed redundant "." after "?"
     m 4esb "Instead of being half full or half empty,{w=0.3} what if all we need is a {i}different glass{/i}?"
-    m 3etc "Considering 'half full' people would be the epitome of optimism,{w=0.3} and 'half empty' ones the most pessimistic..."  # Fixed: epithome → epitome
+    m 3etc "Considering 'half full' people would be the epitome of optimism,{w=0.3} and 'half empty' ones the most pessimistic..."
     m 3eub "Okay,{w=0.3} hear me out here:"
-    m 1euc "Glass full to the brim and splashing goodness everywhere?"  # Fixed: Removed trailing space inside quotes
+    m 1euc "Glass full to the brim and splashing goodness everywhere?"
     extend 1rub " Time to increase the size."  # Added space after pause for flow
     extend " Put what's in it into an even bigger thing!"
-    m 1euc "Glass so half empty that you can't help focusing on the empty space instead of the greatness swirling around inside?"  # Fixed: Removed trailing space
+    m 1euc "Glass so half empty that you can't help focusing on the empty space instead of the greatness swirling around inside?"
     extend 3eub " Time to decrease the size and then slowly work back into a larger vessel later."  # Added space after pause
     m "Its size isn't anything to be ashamed about,{w=0.3} if it ends up filled then that's a win for the day!"  # Fixed: It's → Its
     m 1eka "So maybe there's another answer to the question besides the manic and the depressive one."
     m 3rub "If we focus on the amazing things we have,{w=0.3} instead of chasing the things we don't have,{w=0.3} or need,{w=0.3} we can successfully choose sustainable happiness in all of our pursuits."
     m 3rtc "So,{w=0.3} when I stop to think about it..."
-    m 4eta "Glass half full or empty?"  # Fixed: Removed trailing space
+    m 4eta "Glass half full or empty?"
     extend 4hub " Give me a new glass instead,{w=0.3} please!"  # Added space after pause
     m 6hublb "Ahaha~!"
     jump to_restaurant_loop

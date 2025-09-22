@@ -1,61 +1,101 @@
 #===========================================================================================
 # MINIGAME#1
 #===========================================================================================
-
 #====Shell Game
+default persistent.sg_max_score = 0
+default sg_target_shuffles = 4
+define sg_original_cup = [0, 1, 2]
+default sg_ball_position = 1
+default sg_current_turn = 1
+default sg_shuffle_cups = 0
+default sg_cup_speed = 0.9 
+define difficulty_sg = 1 #1-Easy, 2-Normal, 3-Hard, 4-Progressive
+default sg_correct_answers = 0
+default sg_plus_comment = False
+default sg_cup_choice = None
+define sg_cup_coordinates = [695, 925, 1155]
+default sg_cup_coordinates_real = [695, 925, 1155]
+define sg_cup_list = ["cup.png", "cup_monika.png", "cup_yuri.png", "cup_natsuki.png", "cup_sayori.png"]
+default sg_cup_skin = None
+
 label minigame_sg:
     show monika 1eub at t11
-    m 1hua "Okay, what difficulty do you want?{nw}"
-    menu:
-        "Okay, what difficulty do you want?{fast}"
-        "Easy":
-            m 1eua "You want to play something simple, [player]? "
-            extend 1hua "Okay!"
-            python:
-                cup_speed += 0.5
-                difficulty_sg = 1
-        "Normal":
-            m 3eub "You want to start casual? "
-            extend 3hub "Okay!"
-            python:
-                cup_speed = 0.5
-                difficulty_sg = 2
-        "Hard":
-            m 1eub "You want to play hard, huh?"
-            m 1hub "Ahahaha, okay!"
-            python:
-                cup_speed -= 0.3
-                difficulty_sg = 3
+    if renpy.seen_label("minigame_sg"):
+        m 1eta "You want to play the shell game again, [player]? "
+        if persistent.sg_max_score == 0:
+            m 1eka "By the way, I wanted to apologize..."
+            m 3lkb "I just realized there was a bug in my code that was preventing your high score from being saved correctly."
+            m 1hubsb "I've fixed it now, though! So from this point on, I'll be keeping track of your record."
+            m "Good luck setting a new high score!"
+        else:
+            m 1sua "Great! Let's see if you can beat your record of [persistent.sg_max_score] correct answers in a row!"
+    else:
+        m 1etb "You want to play the shell game with me, [player]? "
+        m 1sua "It's a game of skill and reflexes. I think you'll like it!"
+        m 1eua "The rules are simple: I'll hide a ball under one of these cups and shuffle them around."
+        m 1hub "You just have to guess which cup the ball is under."
+        m 1eub "If you guess right, you score a point!"
 
-label restart_sg:
+    m 1hua "Alright, what difficulty do you want to play on?{nw}"
+    menu:
+        "Alright, what difficulty do you want to play on?{fast}"
+        "Easy":
+            m 1eua "Feeling like taking it easy, [player]? "
+            extend 1hua "Alright!"
+            python:
+                sg_cup_speed = 0.85
+                difficulty_sg = 1
+                sg_target_shuffles = 4
+        "Normal":
+            m 3eub "Want to start with a casual game? "
+            extend 3hub "Sounds good!"
+            python:
+                sg_cup_speed = 0.5
+                difficulty_sg = 2
+                sg_target_shuffles = 6
+        "Hard":
+            m 3etb "Feeling confident, are we?"
+            m 1hub "Ahaha, I like that! Let's do it!"
+            python:
+                sg_cup_speed = 0.25
+                difficulty_sg = 3
+                sg_target_shuffles = 8
+        "Progressive":
+            m 1ttb "A challenge, huh? I like your spirit!"
+            m 1hub "Let's start easy and get harder as we go!"
+            python:
+                sg_cup_speed = 0.7
+                difficulty_sg = 4
+                sg_target_shuffles = 3
+
+    python:
+        # Reset stats for a new game session
+        sg_current_turn = 1
+        sg_correct_answers = 0
+
+label sg_init_game:
     $ config.allow_skipping = False
     show monika 1eua at t21
-
     pause 0.2
 
     show cup zorder 12 as cup_1:
-        xpos cup_coordinates[0] ypos -400
+        xpos sg_cup_coordinates[0] ypos -400
         easein_bounce 0.5 ypos 250
 
     show cup zorder 12 as cup_2:
-        xpos cup_coordinates[1] ypos -400
+        xpos sg_cup_coordinates[1] ypos -400
         pause 0.1
         easein_bounce 0.5 ypos 250
 
     show cup zorder 12 as cup_3:
-        xpos cup_coordinates[2] ypos -400
+        xpos sg_cup_coordinates[2] ypos -400
         pause 0.2
         easein_bounce 0.5 ypos 250
 
     pause 1.0
-    
-    if renpy.seen_label("minigame_sg"):
-        m 1eua "Ready for another round?"
-    else:
-        m 1eub "Alright, [player]. Let me explain how this works."
 
     show ball zorder 12 behind cup_2:
-        xpos cup_coordinates[1] ypos 335
+        xpos sg_cup_coordinates[1] ypos 335
 
     show cup as cup_2:
         linear 0.5 ypos 110
@@ -70,69 +110,61 @@ label restart_sg:
     hide ball
 
     show cup as cup_1:
-        xpos cup_coordinates[0] ypos 250
+        xpos sg_cup_coordinates[0] ypos 250
 
     show cup as cup_2:
-        xpos cup_coordinates[1] ypos 250
+        xpos sg_cup_coordinates[1] ypos 250
 
     show cup as cup_3:
-        xpos cup_coordinates[2] ypos 250
+        xpos sg_cup_coordinates[2] ypos 250
 
     python:
-        cup_coordinates_real[0] = 695
-        cup_coordinates_real[1] = 925
-        cup_coordinates_real[2] = 1155
+        sg_cup_coordinates_real[0] = 695
+        sg_cup_coordinates_real[1] = 925
+        sg_cup_coordinates_real[2] = 1155
 
-        original_cup[0] = 0
-        original_cup[1] = 1
-        original_cup[2] = 2
+        sg_original_cup[0] = 0
+        sg_original_cup[1] = 1
+        sg_original_cup[2] = 2
 
-        ball_position = 1
+        sg_ball_position = 1
         disable_esc()
         mas_MUMURaiseShield()
         afm_pref = renpy.game.preferences.afm_enable
         renpy.game.preferences.afm_enable = False
     show screen score_minigame(game="sg")
 
-label loop_game:
+label sg_loop_game:
     show monika 1eua
     show screen extra_no_click
     python:
-        move_cup_1 = renpy.random.randint(0,2)
-        move_cup_2 = renpy.random.randint(0,2)
-        while move_cup_2 == move_cup_1:
-            move_cup_2 = renpy.random.randint(0,2)
+        move_cup_1, move_cup_2 = renpy.random.sample(range(3), 2)
 
-        temp_cup_position = cup_coordinates_real[move_cup_2]
-        cup_coordinates_real[move_cup_2] = cup_coordinates_real[move_cup_1]
-        cup_coordinates_real[move_cup_1] = temp_cup_position
+        temp_cup_position = sg_cup_coordinates_real[move_cup_2]
+        sg_cup_coordinates_real[move_cup_2] = sg_cup_coordinates_real[move_cup_1]
+        sg_cup_coordinates_real[move_cup_1] = temp_cup_position
 
-        temp_original_cup = original_cup[move_cup_2]
-        original_cup[move_cup_2] = original_cup[move_cup_1]
-        original_cup[move_cup_1] = temp_original_cup
+        if sg_ball_position == move_cup_1:
+            sg_ball_position = move_cup_2
+        elif sg_ball_position == move_cup_2:
+            sg_ball_position = move_cup_1
 
-        if original_cup[move_cup_1] == ball_position:
-            ball_position = original_cup[move_cup_2]
+    $ renpy.pause(sg_cup_speed, hard='True')
 
-        elif original_cup[move_cup_2] == ball_position:
-            ball_position = original_cup[move_cup_1]
-
-    $ renpy.pause(cup_speed, hard='True')
-
-    play sound "submods/ExtraPlus/submod_assets/sfx/cup_shuffle.mp3"
+    play sound "Submods/ExtraPlus/submod_assets/sfx/cup_shuffle.mp3"
 
     show cup as cup_1:
-        ease cup_speed xpos cup_coordinates_real[0]
+        ease sg_cup_speed xpos sg_cup_coordinates_real[0]
 
     show cup as cup_2:
-        ease cup_speed xpos cup_coordinates_real[1]
+        ease sg_cup_speed xpos sg_cup_coordinates_real[1]
 
     show cup as cup_3:
-        ease cup_speed xpos cup_coordinates_real[2]
+        ease sg_cup_speed xpos sg_cup_coordinates_real[2]
 
-    if shuffle_cups != 3:
-        $ shuffle_cups += 1
-        jump loop_game
+    if sg_shuffle_cups != (sg_target_shuffles - 1):
+        $ sg_shuffle_cups += 1
+        jump sg_loop_game
 
     pause 1.0
 
@@ -140,100 +172,103 @@ label loop_game:
 
     "Select a cup:"
 
-label check_label:
-
-    $ sg_current_turn += 1
+label sg_check_label:
 
     hide screen shell_game_minigame
 
     show cup as cup_1:
-        xpos cup_coordinates[0] ypos 250
+        xpos sg_cup_coordinates[0] ypos 250
 
     show cup as cup_2:
-        xpos cup_coordinates[1] ypos 250
+        xpos sg_cup_coordinates[1] ypos 250
 
     show cup as cup_3:
-        xpos cup_coordinates[2] ypos 250
+        xpos sg_cup_coordinates[2] ypos 250
     python:
-        cup_coordinates_real[0] = 695
-        cup_coordinates_real[1] = 925
-        cup_coordinates_real[2] = 1155
+        sg_cup_coordinates_real[0] = 695
+        sg_cup_coordinates_real[1] = 925
+        sg_cup_coordinates_real[2] = 1155
 
-    if cup_choice == 0:
+    if sg_cup_choice == 0:
         m 1eub "You chose the left cup..."
         show cup as cup_1:
             linear 0.5 ypos 110
-        if cup_choice == ball_position:
+        if sg_cup_choice == sg_ball_position:
             show ball zorder 12 behind cup_1:
-                xpos cup_coordinates[0] ypos 335
+                xpos sg_cup_coordinates[0] ypos 335
             $ sg_correct_answers += 1
 
-    elif cup_choice == 1:
+    elif sg_cup_choice == 1:
         m 1eub "You chose the middle cup..."
         show cup as cup_2:
             linear 0.5 ypos 110
-        if cup_choice == ball_position:
+        if sg_cup_choice == sg_ball_position:
             show ball zorder 12 behind cup_2:
-                xpos cup_coordinates[1] ypos 335
+                xpos sg_cup_coordinates[1] ypos 335
             $ sg_correct_answers += 1
 
-    elif cup_choice == 2:
+    elif sg_cup_choice == 2:
         m 1eub "You chose the right cup..."
         show cup as cup_3:
             linear 0.5 ypos 110
-        if cup_choice == ball_position:
+        if sg_cup_choice == sg_ball_position:
             show ball zorder 12 behind cup_3:
-                xpos cup_coordinates[2] ypos 335
+                xpos sg_cup_coordinates[2] ypos 335
             $ sg_correct_answers += 1
 
-    if _plus_comment is True:
+    if sg_plus_comment is True:
         m 1sub "[renpy.substitute(renpy.random.choice(_plus_complies))]"
 
-    elif _plus_comment is False:
+    elif sg_plus_comment is False:
         m 1hub "[renpy.substitute(renpy.random.choice(_plus_not_met))]"
 
-    if cup_choice != ball_position:
+    if sg_cup_choice != sg_ball_position:
 
         m 1lub "The correct cup was..."
 
-        if ball_position == 0:
+        if sg_ball_position == 0:
             show cup as cup_1:
                 linear 0.5 ypos 110
 
             show ball zorder 12 behind cup_1:
-                xpos cup_coordinates[0] ypos 335
+                xpos sg_cup_coordinates[0] ypos 335
 
-        elif ball_position == 1:
+        elif sg_ball_position == 1:
             show cup as cup_2:
                 linear 0.5 ypos 110
 
             show ball zorder 12 behind cup_2:
-                xpos cup_coordinates[1] ypos 335
+                xpos sg_cup_coordinates[1] ypos 335
 
-        elif ball_position == 2:
+        elif sg_ball_position == 2:
             show cup as cup_3:
                 linear 0.5 ypos 110
 
             show ball zorder 12 behind cup_3:
-                xpos cup_coordinates[2] ypos 335
+                xpos sg_cup_coordinates[2] ypos 335
 
         m 1hua "This!"
 
     show cup as cup_1:
-        linear 0.5 xpos cup_coordinates[0] ypos 250
+        linear 0.5 xpos sg_cup_coordinates[0] ypos 250
 
     show cup as cup_2:
-        linear 0.5 xpos cup_coordinates[1] ypos 250
+        linear 0.5 xpos sg_cup_coordinates[1] ypos 250
 
     show cup as cup_3:
-        linear 0.5 xpos cup_coordinates[2] ypos 250
+        linear 0.5 xpos sg_cup_coordinates[2] ypos 250
 
     pause 1.0
 
     hide ball
-    $ shuffle_cups = 0
-    $ ball_position = 1
-    jump loop_game
+    python:
+        store.sg_current_turn += 1
+        store.sg_shuffle_cups = 0
+        store.sg_ball_position = 1
+        if difficulty_sg == 4 and sg_current_turn % 6 == 0:
+            store.sg_cup_speed = max(0.15, sg_cup_speed - 0.05)
+            store.sg_target_shuffles += 1
+    jump sg_loop_game
     return
 
 #===========================================================================================
@@ -243,21 +278,23 @@ label check_label:
 label shell_game_result:
     hide screen score_minigame
     python:
+        new_high_score = (sg_correct_answers > persistent.sg_max_score)
         enable_esc()
         mas_MUMUDropShield()
         renpy.game.preferences.afm_enable = afm_pref
     hide ball
     show cup as cup_1:
-        xpos cup_coordinates[0] ypos 250
+        xpos sg_cup_coordinates[0] ypos 250
         easeout_expo 0.5 ypos -400
     show cup as cup_2:
-        xpos cup_coordinates[1] ypos 250
+        xpos sg_cup_coordinates[1] ypos 250
         pause 0.1
         easeout_expo 0.5 ypos -400
     show cup as cup_3:
-        xpos cup_coordinates[2] ypos 250
+        xpos sg_cup_coordinates[2] ypos 250
         pause 0.2
         easeout_expo 0.5 ypos -400
+
     pause 0.8
     hide cup_1
     hide cup_2
@@ -265,144 +302,57 @@ label shell_game_result:
     hide screen extra_no_click
     show monika at t11
 
-    if sg_current_turn == 0:
-        m 3ekd "[player], we haven't even started playing."
-        m 2gkp "I wanted to play with you for a while..."
-        m 2etb "But, would you like to continue playing?{nw}"
-        menu:
-            "But, would you like to continue playing?{fast}"
-            "Yes":
-                jump restart_sg
-            "No":
-                m 1hua "Okay, we'll play another time, then."
+    #The player didn't play any rounds.
+    if sg_current_turn == 1 and sg_correct_answers == 0:
+        m 1hka "You didn't want to play after all?"
+        m 1eua "That's okay, maybe you'll be in the mood next time."
+        m 1dub "I'll be here waiting for you, [player]."
 
-    elif sg_current_turn <= 10 or sg_current_turn >= 10:
-        if sg_correct_answers == sg_current_turn:
-            m 1hub "Even though we've only played a few rounds, you've already made a good impression on me!"
-            m 1hub "You did great every round."
-            m 1hua "I guess you don't have any more time today..."
-            m 1eua "I hope we get to play more next time."
-            m 1eub "I look forward to it!"
-        elif sg_correct_answers < sg_current_turn:
-            m 1hua "Don't worry that you failed once."
-            m 3hub "You did very well!"
-            m 3hub "It's just a matter of practice and you'll see how everything will get easier!"
-            m 3hua "Next time you'll do better~"
-        elif sg_correct_answers == 0:
-            m 1eka "[player], I am worried..."
-            m 1ekb "We've been playing for [sg_current_turn] rounds and you haven't gotten any of them right."
-            m 1etd "Are you too unmotivated or distracted?"
-            if difficulty_sg == 1:
-                m 1eua "Well, since you are on easy difficulty..."
-                m 1rkb "I guess you got bored because of how slow the cups were going, you know that's how it is."
-                m 1rkb "You'd have to try the other difficulties if you want to challenge yourself."
-                m 1hua "Anyway, let's leave all this for another day."
-            elif difficulty_sg == 2:
-                m 1eua "On normal difficulty..."
-                m 1rkb "You saw it was no big deal and didn't pay attention to the game."
-                m 3hua "You know, you can try the hard difficulty if you want."
-                m 3hua "Maybe it will motivate you to go further!"
-                m 3hka "Or you can save it for another day! It's up to you."
-            elif difficulty_sg == 3:
-                m 1eua "Considering you are on the hard difficulty..."
-                m 1rkb "You didn't take the time to follow the ball."
-                m 1rsb "Although by reflex you should have been able to hit it sometime."
-                m 1rsb "But that wasn't the case."
-                m 3hua "If you're fine with doing something else, put aside the mini-games and let's do something that motivates you."
-                if renpy.seen_label("to_cafe_loop"):
-                    m 1eubsa "We can go out on a date again, like to the cafe we went to see."
-                    m 1eubsb "Maybe it will lift your spirits a little."
-                    m 2eka "But if you want to do absolutely nothing..."
-                    m 2dka "I hope my presence is enough for you~"
-        m 1dubla "And thanks for playing with me [mas_get_player_nickname()]."
+    #The player didn't get any correct.
+    elif sg_correct_answers == 0:
+        m 1eka "[player], are you feeling alright?"
+        m 1ekb "We played for [sg_current_turn] rounds and you didn't get any of them right."
+        m 1etd "Were you a little distracted, maybe?"
+        if difficulty_sg == 4: # Dialogue for Progressive
+            m 3eka "That progressive mode can be tricky at first. The speed really ramps up!"
+            m 3hua "Don't worry about it, I'm sure you'll get the hang of it."
+        else:
+            m 1hua "It's okay, everyone has off-days. Let's do something that cheers you up!"
 
-    elif sg_current_turn >= 50:
-        if sg_correct_answers == sg_current_turn:
-            m 2sub "Wow, you always give me a good impression in everything you do [mas_get_player_nickname()]."
-            m 2sub "Congratulations!"
-            m 3hub "You sure have some good reflexes!"
-            m 3hua "I won't worry about you failing at a carnival game, ehehehe~"
-            m 1tubsb "I can't wait for you to win a teddy bear for me when we have a date there!"
-        elif sg_correct_answers < sg_current_turn:
-            m 3hua "You did what you could [mas_get_player_nickname()]."
-            m 3hub "I'm so happy for you!"
-            m 3hub "We were already on the [sg_current_turn] shift."
-            m 1ekb "So I understand that you couldn't go on any longer and left it at this point."
-            m 5hua "But someday you'll make it perfect, just be patient and practice a little."
-        elif sg_correct_answers == 0:
-            m 1esb "I have a question [player]."
-            m 1eka "We've been [sg_current_turn] turns and you haven't hit any."
-            m 1etd "Is something wrong?"
-            if difficulty_sg == 1:
-                m 1eka "Well, since you are on the easy difficulty..."
-                m 1eta "You wanted to train your reflexes little by little?"
-                m 1hua "There's nothing wrong with doing everything in reverse."
-                m 3ekb "Although try not to forget that the game is about seeing where the ball is."
-            elif difficulty_sg == 2:
-                m 1eka "Being on normal difficulty..."
-                m 1eta "Are you trained to lose every round?"
-                m 1hua "I imagine you're going even further, since we're on [sg_current_turn] turn."
-                m 1rtd "Although I wonder where this idea of yours [player] came from..."
-                m 1gsu "I'd better keep my doubt to myself, I'm just going to see how far you can go!"
-            elif difficulty_sg == 3:
-                m 1eka "Considering that you are in the hard difficulty..."
-                m 1hua "I feel you have given your best effort to achieve a challenge."
-                m 1etb "You wanted to get to more than [sg_current_turn] turns with failures?"
-                m 1eub "Well I encourage you to make it!"
-                m 1lta "You might be wondering if I worry that you will fail until [sg_current_turn] turn."
-                m 1dua "Not really, at this point I feel like you're doing it with intention."
-                m 1hksdlb "I'm sorry that I encourage you to fail instead of getting every turn right, Ahahaha~"
-                m 1hksdlb "But you're already doing it so I have no choice but to support you!"
-        m 1eua "I'm glad you like this minigame, though."
-        if renpy.seen_label("game_chess"):
-            m 3eub "It's not like chess, you need to use strategies..."
-            m 3eub "But it's good to play other games don't you think?"
-        m 1eka "I didn't think you would like it because the gameplay is so simple."
-        m 4hub "Well, nevertheless, I thank you for playing with me [mas_get_player_nickname()]!"
-        m 4hub "We'll play some other time, if that's okay with you."
+    #Perfect score!
+    elif sg_correct_answers == sg_current_turn:
+        m 2sub "Wow, a perfect score! You got every single one right!"
+        if new_high_score:
+            m 1hubsa "And it's a new high score! Congratulations, [player]! I'm so proud of you."
+        else:
+            m 1hubsb "You matched your high score perfectly. Your focus is amazing!"
+        m 3eub "You have some really sharp eyes, ehehe~"
 
-    elif sg_current_turn >= 100:
-        if sg_correct_answers == sg_current_turn:
-            m 1hua "I must applaud you, [player]."
-            m 1hub "You got it right every turn, it shows the concentration you had!"
-            m 1hublb "I'm proud of you!"
-            m 1ekb "I would love to give you something as a prize but I can't do anything from here, ahahaha~..."
-            m 3hua "Yes, you have really trained your reflexes a lot."
-            m 1eub "I feel like you're good at rhythm video games."
-            m 1eta "Or is it your self-defense system? "
-            extend 1sua "If so, I'm glad to hear it."
-        elif sg_correct_answers < sg_current_turn:
-            m 1hua "Not bad [player]."
-            m 1hub "You gave your best, considering you've made it to the [sg_current_turn] turn!"
-            m 1eka "It's normal for you to have a visual fatigue."
-            m 1eka "So don't lose heart."
-            m 3eub "Next time you'll do better, believe me~"
-        elif sg_correct_answers == 0:
-            m 1hka "I don't know how to feel about that."
-            m "We've been on [sg_current_turn] turns and you haven't gotten any of them right."
-            m 1etb "At this point I feel like it's kind of a challenge to yourself?"
-            if difficulty_sg == 1:
-                m 1eua "Well, as you are on the easy difficulty..."
-                m 3wud "It is easy to accomplish this! However it is a very time consuming thing to do."
-                m 3hub "I'm surprised at how much time you've invested!"
-            elif difficulty_sg == 2:
-                m 1eua "Being on normal difficulty..."
-                m 3eub "You had a chance of hitting at least one."
-                m 1hub "I'd like to see your face while doing this, ehehehe~"
-            elif difficulty_sg == 3:
-                m 1eua "Considering that you are on hard difficulty..."
-                m 1sub "I'm amazed at the dedication you put into it."
-                m 1hub "You really took this seriously in the sense of failing on purpose, ehehehe~"
-        m 1hubsa "Well, I thank you for taking the time to play with me, I had a lot of fun!"
-        m 3eka "And also, rest your eyes for a while, we played this mini-game for quite some time..."
-        m 3hub "You've earned it!"
-        m 1dub "I always get concerned about your health, [mas_get_player_nickname()]."
-        m 1dua "And don't worry about me, I'll be waiting for you."
+    #Mixed result (some correct, some failed).
+    else:
+        m 1eua "That was a good run, [player]!"
+        if new_high_score:
+            m 1hubsb "You set a new record of [sg_correct_answers]! That's awesome!"
+            m 1eua "Even with a few slip-ups, you still managed to beat your best score. That's real progress!"
+        else:
+            m 1hua "You got [sg_correct_answers] correct. You did a great job!"
+            if difficulty_sg == 4: # Dialogue for Progressive
+                m 3hua "Keeping up with the progressive speed is tough, but you held on for a long time!"
+            else:
+                m 3hub "It's just a matter of practice. I know you'll beat your record of [persistent.sg_max_score] soon!"
+
+    m 1hubsa "Well, thank you for playing with me. I had a lot of fun!"
+    if sg_current_turn > 15:
+        m 3eka "And also, please rest your eyes for a bit. We played for quite a while..."
+        m 1dub "I always get concerned about your health, you know~"
 
     window hide
     python:
-        cup_speed = 0.5
+        if sg_correct_answers > persistent.sg_max_score:
+            persistent.sg_max_score = sg_correct_answers
         sg_current_turn = 0
-        sg_correct_answers = 0
+        sg_correct_answers = 0 # Reset for next session
+        sg_target_shuffles = 6
+        sg_shuffle_cups = 0
     jump close_extraplus
     return

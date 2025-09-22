@@ -2,6 +2,8 @@
 # MINIGAME#2
 #===========================================================================================
 #====Tic-Tac-Toe
+default persistent.ttt_result_game = [False, False, False] #Player, Monika and Tie. Quit [FFF]
+
 init 10 python:
     def ttt_prep(self, restart = False, *args, **kwargs):
         self.field = [None] * 9
@@ -13,9 +15,7 @@ init 10 python:
 
             def ttt_check_line(id):
                 t_ids = None
-                if id == 0:
-                    tiles = range(9)
-                elif id == 1:
+                if id == 1:
                     t_ids = [0, 4, 8]
                 elif id == 2:
                     t_ids = [2, 4, 6]
@@ -79,6 +79,16 @@ init 10 python:
                 w_lines, l_lines, f_lines = [], [], []
 
                 for i in range(1, 9):
+                    # --- AI Improvement: Strategic Opening Moves ---
+                    # If board is empty, take a corner
+                    if all(tile is None for tile in ttt.field):
+                        return ttt_turn(renpy.random.choice([0, 2, 6, 8]))
+
+                    # If player didn't take center on first move, take it
+                    if ttt.field.count(True) == 1 and ttt.field[4] is None:
+                        return ttt_turn(4)
+
+                    # --- Original AI Logic ---
                     clt, crt, line = ttt_check_line(i)
                     if clt == 2 and crt == 0:
                         w_lines.append(line)
@@ -99,27 +109,25 @@ init 10 python:
                             return ttt_turn(i)
                 if len(f_lines):
                     line = renpy.random.choice(f_lines)
-                    line = filter(lambda x: ttt.field[x] is None, line)
-                    return ttt_turn(renpy.random.choice(line))
+                    possible_moves = list(filter(lambda x: ttt.field[x] is None, line))
+                    return ttt_turn(renpy.random.choice(possible_moves))
                 else:
-                    line = filter(lambda x: ttt.field[x] is None, range(9))
-                    return ttt_turn(renpy.random.choice(line))
+                    possible_moves = list(filter(lambda x: ttt.field[x] is None, range(9)))
+                    return ttt_turn(renpy.random.choice(possible_moves))
 
             self.new_state, self.check_state = ttt_new_state, ttt_check_state
             self.check_line, self.turn, self.ai = ttt_check_line, ttt_turn, ttt_ai
 
         elif not kwargs.get("winner") is None:
             w = kwargs['winner']
-            self.score[w] += 1
+            self.score[int(w)] += 1
 
 screen ttt_score():
-    # Usamos un hbox para alinear los marcadores horizontalmente
     hbox:
-        xalign 0.75 # Centramos el conjunto de marcadores
+        xalign 0.75
         ypos 0.900
-        spacing 100 # Espacio entre los dos marcadores
+        spacing 100
 
-        # Marcador de Monika
         text "[m_name]: " + str(ttt.score[0]) style "monika_text":
             if not ttt.playerTurn:
                 color "#a80000"
@@ -128,38 +136,14 @@ screen ttt_score():
         text "[player]: " + str(ttt.score[1]) style "monika_text":
             if ttt.playerTurn:
                 color "#0142a4"
-    # Los botones de control se mantienen igual
     vbox:
         xpos 0.05
         yanchor 2.0
         ypos 300
-        textbutton _("I give up") style "hkb_button" action [Function(ttt.set_state, -9), Function(ttt.check_state)]
+        # textbutton _("I give up") style "hkb_button" action [Function(ttt.set_state, -9), Function(ttt.check_state)]
+        textbutton _("I give up") style "hkb_button" action [SetField(ttt, "state", -9), Function(ttt.check_state)]
         null height 6
         textbutton _("Quit") style "hkb_button" action [Hide("minigame_ttt_scr"), Jump("minigame_ttt_quit")]
-
-# screen ttt_score():
-#     vbox:
-#         xpos 0.6
-#         ypos 0.900
-
-#         text "[m_name]: " + str(ttt.score[0])  style "monika_text":
-#             if not ttt.playerTurn:
-#                 color "#a80000"
-#     vbox:
-#         xpos 0.9
-#         ypos 0.900
-
-#         text "[player]: " + str(ttt.score[1])  style "monika_text":
-#             if ttt.playerTurn:
-#                 color "#0142a4"
-#     vbox:
-#         xpos 0.05
-#         yanchor 2.0
-#         ypos 300
-
-#         textbutton _("I give up") style "hkb_button" action [Function(ttt.set_state, -9), Function(ttt.check_state)]
-#         null height 6
-#         textbutton _("Quit") style "hkb_button" action [Hide("minigame_ttt_scr"), Jump("minigame_ttt_quit")]
 
 screen minigame_ttt_grid():
     for i in range(2):
@@ -169,7 +153,7 @@ screen minigame_ttt_grid():
 screen minigame_ttt_scr():
     key "h" action NullAction()
     key "mouseup_3" action NullAction()
-    use ttt_score()
+    use ttt_score
     layer "master"
     zorder 50
 
@@ -216,19 +200,48 @@ label minigame_ttt:
     python:
         ttt = extra_minigames(_("Tic Tac Toe"), None, ttt_prep)
         ttt()
-    show monika 1hua at t21
     show notebook zorder 12 at animated_book
     pause 0.5
+    # Very first time playing
+    if not renpy.seen_label("minigame_ttt"):
+        m 1hua "Alright, [player]. Let's play some Tic-Tac-Toe!"
+        m 1eua "It's a classic for a reason. You can be X's, and I'll be O's."
+        m 1eub "It might seem simple, but it's all about thinking a few steps ahead. Good luck!"
+
+    # If the player won the last game
+    elif persistent.ttt_result_game[0]:
+        m 3eub "Ready for a rematch, [player]? I've been practicing my strategy. Ehehe~"
+        m 3hua "Don't think it'll be that easy to win again, though!"
+
+    # If Monika won the last game
+    elif persistent.ttt_result_game[1]:
+        m 1hub "So, are you ready to try and take the champion's title from me?"
+        m 1hua "I hope you're ready! I plan on defending my title."
+
+    # If the last game was a tie
+    elif persistent.ttt_result_game[2]:
+        m 1eua "Let's play again! We have to break that tie from last time."
+        m 1tua "It feels like we're perfectly matched. Let's see if that's still true!"
+
+    # Default greeting for subsequent plays
+    else:
+        m 1hua "Ready for another round of Tic-Tac-Toe, [player]?"
+        m 1eua "It's always nice to relax with a simple game."
+
+    show monika idle at t21
     call screen minigame_ttt_scr() nopredict
     return
-    
+
 label minigame_ttt_m_turn:
-    show monika 1lua at t21
+    python:
+        monika_faces = ["2lua", "1lta", "2ltp", "1mta", "2mtc", "1mtp", "2mtt", "1lub", "2luu"]
+        expression = renpy.random.choice(monika_faces)
+        renpy.show("monika " + expression)
+
     python:
         randTime = renpy.random.triangular(0.25, 2)
         renpy.pause(randTime)
         ttt.ai()
-    show monika 1lua at t21
     pause 0.25
     return
 
@@ -272,14 +285,13 @@ label minigame_ttt_m_comment(id = 0):
         
         #Reset
     else:
-        $ moldable_variable = renpy.random.randint(0, 1)
-        if moldable_variable == 0:
-            m 1ekd "Are you giving up on this round?"
-            m 1eka "Well, I'm going to restart the game, but I'll take a point!"
+        if ttt.score[0] == 0 and ttt.score[1] == 0:
+            m 1ekd "Giving up on the first round? Are you sure?"
+            m 1eka "Alright, if you say so. I'll take the point for this one, then."
         else:
-            m 1ekd "What's wrong, [player]?"
-            m 3ekd "Were you distracted?"
-            m 1eka "Okay, I'm going to restart the game, but I will be the winner of this round!"
+            m 1ekd "Oh, conceding this round, [player]?"
+            m 3ekd "Was it a tough spot?"
+            m 1eka "Okay, I'll mark this one as my win. Let's get ready for the next one!"
     return
 
 label minigame_ttt_quit:
@@ -287,24 +299,31 @@ label minigame_ttt_quit:
     hide notebook
     pause 0.3
     show monika 1hua at t11
+    # Tie
     if ttt.score[0] == ttt.score[1]:
         if ttt.score[0] == 0 and ttt.score[1] == 0:
-            m 3esa "Oh! You stopped playing?"
-            m 3lkb "I thought you wanted to play with me for a while..."
-            m 3lkb "But don't worry, I understand if you don't feel like playing."
-            m 1hua "I just hope we can play some other time."
+            m 3esa "Oh, changing your mind?"
+            m 3lkb "I was looking forward to playing with you... but I understand."
+            m 1hua "We can always play another time!"
+            $ persistent.ttt_result_game = [False, False, False]
         else:
-            m 1suo "Wow, it's a tie!"
-            m 2huu "There must be a winner, though."
-            m 2hub "Next time, we'll see who wins!"
-            m 1hub "Ehehe~"
+            m 1sua "Wow, we ended in a perfect tie!"
+            m 1tua "It's almost like our minds are in sync, ehehe~"
+            m 1hub "We'll have to play again sometime to find the true winner!"
+            $ persistent.ttt_result_game[2] = True
+
+    # Monika wins
     elif ttt.score[0] > ttt.score[1]:
-        m 3hua "I won this time, [player]~"
-        m 3eubsa "But don't feel bad, what matters most to me is that we both have fun."
-        m 1eub "Maybe you'll beat me next time!"
+        m 3hua "Looks like I get the win this time, [player]~"
+        m 3eubsa "You put up a great fight, though. The most important thing is that we had fun together."
+        m 1eub "I'm sure you'll get me next time!"
+        $ persistent.ttt_result_game[1] = True
+
+    # Player wins
     elif ttt.score[0] < ttt.score[1]:
-        m 1hub "You have won [player], congratulations."
-        m 1hub "I am proud of you~"
-        m 3hua "I'll do my best next time too!"
+        m 1hub "You won, [player]! Congratulations!"
+        m 1subsa "I knew you were a great strategist. I'm proud of you~"
+        m 3hua "I'll have to try even harder next time!"
+        $ persistent.ttt_result_game[0] = True
     jump close_extraplus
     return

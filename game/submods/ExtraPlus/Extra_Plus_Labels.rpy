@@ -18,6 +18,8 @@ label close_extraplus:
 label close_dev_extraplus:
     show monika idle at t11
     python:
+        store.mas_sprites.zoom_level = store.player_zoom
+        store.mas_sprites.adjust_zoom()
         mas_DropShield_dlg()
         disable_button_zoom()
     jump ch30_visual_skip
@@ -31,16 +33,18 @@ label show_boop_screen:
     call screen boop_revamped
     return
 
-# label return_boop_screen:
-#     python:
-#         extra_fix_zoom_level()
-#     jump screen_extraplus
-#     return
+label return_boop_screen:
+    python:
+        store.mas_sprites.zoom_level = store.player_zoom
+        store.mas_sprites.adjust_zoom()
+    jump screen_extraplus
+    return
 
 label close_boop_screen:
     show monika idle at t11
     python:
-        extra_fix_zoom_level()
+        store.mas_sprites.zoom_level = store.player_zoom
+        store.mas_sprites.adjust_zoom()
         disable_button_zoom()
     jump ch30_visual_skip
     return
@@ -93,16 +97,12 @@ label gtcafe:
         m 1hubsa "I know this appointment will be great!"
         m 1hubsb "Okay, let's go [mas_get_player_nickname()]~"
         jump cafe_init
-
-    elif mas_isNightNow():
+    else: # Handles night and sunset
         m 3sub "Oh, you want to go out to the cafe?"
         m 3hub "It's pretty sweet that you decided to go tonight."
         m 1eubsa "This date night is going to be great!"
         m 1hubsb "Let's go [mas_get_player_nickname()]~"
         jump cafe_init
-    else:
-        m 1eub "Another time then, [mas_get_player_nickname()]."
-        jump screen_extraplus
     return
 
 label gtcafev2:
@@ -113,15 +113,12 @@ label gtcafev2:
         m 2eubsa "So glad to hear it [player]!"
         m 1hubsb "Well, let's go [mas_get_player_nickname()]~"
         jump cafe_init
-    elif mas_isNightNow():
+    else: # Handles night and sunset
         m 3wub "Oh, do you want to go out to the cafe again?"
         m 2hub "The previous time we went, it was very romantic~"
         m 2eubsa "So glad to go again [player]!"
         m 1hubsb "Let's go [mas_get_player_nickname()]~"
         jump cafe_init
-    else:
-        m 1eub "Next time then, [mas_get_player_nickname()]."
-        jump screen_extraplus
     return
 
 label cafe_talk:
@@ -141,7 +138,7 @@ label cafe_talk:
             (_("Can we leave?"), 'cafe_leave', 20),
             (_("Nevermind"), 'to_cafe_loop', 0)
         ]
-    call screen extra_gen_list(cafe_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=False)
+    call screen extra_gen_list(cafe_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=False)
     return
 
 label to_cafe_loop:
@@ -162,7 +159,7 @@ label cafe_leave:
     $ stop_snike_time = False
     jump cafe_hide_acs
 
-label comment_cafe:
+label extra_comment_cafe:
     m 1hubsa "Thank you for asking me out."
     m 1eubsb "It is nice to have these moments as a couple!"
     m 1eubsa "I feel very fortunate to have met you and that you keep choosing me every day."
@@ -173,6 +170,16 @@ label comment_cafe:
     return
 
 #====Restaurant====#
+
+label extra_comment_restaurant:
+    m 1hubsa "Thank you for the wonderful dinner, [player]."
+    m 1eubsb "A romantic evening like this... it's something I'll treasure."
+    m 1eubsa "It makes me feel so special, knowing you wanted to treat me to a place like this."
+    m 1ekbsa "I love you so much, [mas_get_player_nickname()]!"
+    $ mas_DropShield_dlg()
+    $ mas_ILY()
+    jump ch30_visual_skip
+    return
 
 label go_to_restaurant:
     python:
@@ -194,8 +201,7 @@ label gtrestaurant:
         m 1hubsa "I just know it'll be great!"
         m 1hubsb "Okay,{w=0.3} let's go [mas_get_player_nickname()]~"
         jump restaurant_init
-
-    elif mas_isNightNow():
+    else: # Handles night and sunset
         m 3sub "Oh,{w=0.3} you want to go out to a restaurant?"
         m "That's so sweet of you to treat me to a date."
         if mas_anni.isAnni():
@@ -203,9 +209,6 @@ label gtrestaurant:
             $ persistent._extraplusr_hasplayergoneonanniversary = True
         m 1hubsb "Let's go [mas_get_player_nickname()]~"
         jump restaurant_init
-    else:
-        m 1eub "Another time then,{w=0.3} [mas_get_player_nickname()]."
-        jump screen_extraplus
     return
 
 label gtrestaurantv2:
@@ -221,8 +224,7 @@ label gtrestaurantv2:
             m 2eubsa "So I'm glad to hear it [player]!"
         m 1hubsb "Well, let's go then [mas_get_player_nickname()]~"
         jump restaurant_init
-
-    elif mas_isNightNow():
+    else: # Handles night and sunset
         m 3wub "Oh, you want to go out out to the restaurant again?"
         if persistent._extraplusr_hasplayergoneonanniversary == True:
             m "Hmm~{w=0.3} I'm still thinking about the time you took us there for our anniversary,"
@@ -233,9 +235,6 @@ label gtrestaurantv2:
             m 2eubsa "So I'm glad to go again [player]!"
         m 1hubsb "Let's go then [mas_get_player_nickname()]~"
         jump restaurant_init
-    else:
-        m 1eub "Next time then, [mas_get_player_nickname()]."
-        jump screen_extraplus
     return
 
 label restaurant_talk:
@@ -260,7 +259,7 @@ label restaurant_talk:
             (_("Can we leave?"), 'restaurant_leave', 20),
             (_("Nevermind"), 'to_restaurant_loop', 0)
         ]
-    call screen extra_gen_list(restaurant_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=False)
+    call screen extra_gen_list(restaurant_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=False)
     return
 
 label to_restaurant_loop:
@@ -410,48 +409,36 @@ label monika_no_dessert:
     return
 
 label cafe_hide_acs:
-    #Code inspired by YandereDev
-    if monika_chr.is_wearing_acs(extraplus_acs_fruitcake):
-        if monika_chr.is_wearing_acs(extraplus_acs_coffeecup) or monika_chr.is_wearing_acs(extraplus_acs_emptycup):
-            m 3eub "I have to put this fruitcake away."
-            m 3eub "Also, I'll put this cup away, I won't be long."
-            python:
-                monika_chr.remove_acs(extraplus_acs_fruitcake)
-                monika_chr.remove_acs(extraplus_acs_coffeecup)
-                monika_chr.remove_acs(extraplus_acs_emptycup)
-        else:
-            m 3eub "I have to put this fruitcake away, I'll be right back."
-            $ monika_chr.remove_acs(extraplus_acs_fruitcake)
+    python:
+        # Check for food and cup items to give a combined message
+        food_items = [extraplus_acs_fruitcake, extraplus_acs_chocolatecake, extraplus_acs_emptyplate]
+        cup_items = [extraplus_acs_coffeecup, extraplus_acs_emptycup]
 
-    elif monika_chr.is_wearing_acs(extraplus_acs_chocolatecake):
-        if monika_chr.is_wearing_acs(extraplus_acs_coffeecup) or monika_chr.is_wearing_acs(extraplus_acs_emptycup):
-            m 3eua "I must put this chocolate cake away."
-            m 3eua "Also, I'll put this cup away, it won't be long now."
-            python:
-                monika_chr.remove_acs(extraplus_acs_chocolatecake)
-                monika_chr.remove_acs(extraplus_acs_coffeecup)
-                monika_chr.remove_acs(extraplus_acs_emptycup)
-        else:
-            m 3eua "I must put this chocolate cake away, I'll be right back."
-            $ monika_chr.remove_acs(extraplus_acs_chocolatecake)
+        food_worn = any(monika_chr.is_wearing_acs(acs) for acs in food_items)
+        cup_worn = any(monika_chr.is_wearing_acs(acs) for acs in cup_items)
 
-    elif monika_chr.is_wearing_acs(extraplus_acs_emptyplate):
-        if monika_chr.is_wearing_acs(extraplus_acs_coffeecup) or monika_chr.is_wearing_acs(extraplus_acs_emptycup):
-            m 3hua "I'll go put this plate away."
-            m 3hua "Also, I'll put this cup away, I won't be long."
-            python:
-                monika_chr.remove_acs(extraplus_acs_emptyplate)
-                monika_chr.remove_acs(extraplus_acs_coffeecup)
-                monika_chr.remove_acs(extraplus_acs_emptycup)
-        else:
-            m 3hua "I'm going to put this plate away, give me a moment."
-            $ monika_chr.remove_acs(extraplus_acs_emptyplate)
+        if food_worn and cup_worn:
+            renpy.say(m, "I have to put this plate and cup away. I won't be long.")
+        elif food_worn:
+            renpy.say(m, "I have to put this plate away. I'll be right back.")
+        elif cup_worn:
+            renpy.say(m, "I'll just put this cup away, give me a moment.")
 
     call mas_transition_to_emptydesk
     pause 2.0
+
+    python:
+        # Remove all location-specific accessories
+        acs_to_remove = [
+            extraplus_acs_fruitcake, extraplus_acs_chocolatecake, extraplus_acs_emptyplate,
+            extraplus_acs_coffeecup, extraplus_acs_emptycup
+        ]
+        for acs in acs_to_remove:
+            monika_chr.remove_acs(acs)
+
     call mas_transition_from_emptydesk("monika 1eua")
     m 1hua "Okay, let's go, [player]!"
-    call extra_restore_bg("comment_cafe")
+    call extra_restore_bg("extra_comment_cafe")
     return
 
 #====Restaurant====#
@@ -480,7 +467,7 @@ label monika_no_food:
         m 1hua "Wow, I finished my waffles."
         m 1sua "They were delicious~"
 
-    m "Now I'll grab some dessert. Be right back!"
+    m 1eua "That was delicious! Now, how about some dessert? Be right back!"
     $ monika_chr.remove_acs(extraplus_acs_remptyplate)
     call mas_transition_to_emptydesk
     pause 2.0
@@ -510,39 +497,40 @@ label monika_no_food:
     return
 
 label restaurant_hide_acs:
-    # Revisa y quita las velas si es de noche
-    if monika_chr.is_wearing_acs(extraplus_acs_candles):
-        m 3eub "I have to put these candles away. We can never be too careful with fire!"
-        $ monika_chr.remove_acs(extraplus_acs_candles)
+    python:
+        # Check and remove candles if it's night
+        if monika_chr.is_wearing_acs(extraplus_acs_candles):
+            renpy.say(m, "I have to put these candles away. We can never be too careful with fire!")
 
-    # Revisa y quita las flores si es de día
-    if monika_chr.is_wearing_acs(extraplus_acs_flowers):
-        m 3eua "I'll put these flowers away, I won't be long."
-        $ monika_chr.remove_acs(extraplus_acs_flowers)
+        # Check and remove flowers if it's day
+        if monika_chr.is_wearing_acs(extraplus_acs_flowers):
+            renpy.say(m, "I'll put these flowers away, I won't be long.")
 
-    # Revisa y quita cualquier plato de comida (principal o postre)
-    if (monika_chr.is_wearing_acs(extraplus_acs_pasta) or
-        monika_chr.is_wearing_acs(extraplus_acs_pancakes) or
-        monika_chr.is_wearing_acs(extraplus_acs_waffles) or
-        monika_chr.is_wearing_acs(extraplus_acs_icecream) or
-        monika_chr.is_wearing_acs(extraplus_acs_pudding)):
-        
-        m 3eua "I must put this plate away, it won't be long now."
-        python:
-            # Quita todos los posibles accesorios de comida para asegurar que no quede ninguno
-            monika_chr.remove_acs(extraplus_acs_pasta)
-            monika_chr.remove_acs(extraplus_acs_waffles)
-            monika_chr.remove_acs(extraplus_acs_pancakes)
-            monika_chr.remove_acs(extraplus_acs_pudding)
-            monika_chr.remove_acs(extraplus_acs_icecream)
+        # Check and remove any food plate
+        food_acs_to_check = [
+            extraplus_acs_pasta, extraplus_acs_pancakes, extraplus_acs_waffles,
+            extraplus_acs_icecream, extraplus_acs_pudding
+        ]
+        if any(monika_chr.is_wearing_acs(acs) for acs in food_acs_to_check):
+            renpy.say(m, "I must put this plate away, it won't be long now.")
 
-    # Transición para que Monika "guarde" las cosas
     call mas_transition_to_emptydesk
     pause 2.0
+
+    python:
+        # Remove all location-specific accessories
+        acs_to_remove = [
+            extraplus_acs_candles, extraplus_acs_flowers, extraplus_acs_pasta,
+            extraplus_acs_pancakes, extraplus_acs_waffles, extraplus_acs_icecream,
+            extraplus_acs_pudding, extraplus_acs_remptyplate
+        ]
+        for acs in acs_to_remove:
+            monika_chr.remove_acs(acs)
+
     call mas_transition_from_emptydesk("monika 1eua")
     
     m 1hua "Okay, let's go, [player]!"
-    call extra_restore_bg
+    call extra_restore_bg("extra_comment_restaurant")
     return
 
 ################################################################################
@@ -557,7 +545,7 @@ label plus_walk:
             (_("Restaurant"), 'go_to_restaurant'),
             (_("Pool"), "generic_date_dev"),
             (_("Library"), "generic_date_dev"),
-            (_("Game Room"), "generic_date_dev")
+            (_("Arcade"), "generic_date_dev")
         ]
         store.disable_zoom_button = True
         m_talk = renpy.substitute(renpy.random.choice(date_talk))
@@ -603,7 +591,7 @@ label extraplus_tools:
             (_("Github Repository"), 'github_submod', 20),
             (_("Nevermind"), 'screen_extraplus', 0)
         ]
-    call screen extra_gen_list(tools_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+    call screen extra_gen_list(tools_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=True)
     return
 
 ################################################################################
@@ -663,7 +651,7 @@ label plus_groceries:
         ]
 
         items = [(_("Nevermind"), 'plus_make_gift', 20)]
-    call screen extra_gen_list(groceries_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+    call screen extra_gen_list(groceries_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=True)
     return
 
 label plus_objects:
@@ -676,7 +664,7 @@ label plus_objects:
             extra_gift(_("Thermos Mug"), 'justmonikathermos.gift')
         ]
         if not mas_seenEvent("mas_reaction_gift_noudeck"):
-            objects_menu.extend = extra_gift(_("NOU"), 'noudeck.gift')
+            objects_menu.append(extra_gift(_("NOU"), 'noudeck.gift'))
 
         items = [(_("Nevermind"), 'plus_make_gift', 20)]
     call screen extra_gen_list(objects_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)

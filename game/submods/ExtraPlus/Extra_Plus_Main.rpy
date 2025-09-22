@@ -10,7 +10,7 @@ init -990 python in mas_submod_utils:
     Submod(
         author="ZeroFixer",
         name="Extra Plus",
-        description="A submod that adds an Extra+ button, as well as adding more content!",
+        description="Expand your time with Monika with new minigames, dates, and interactions.",
         version="1.3.2"
     )
 
@@ -108,6 +108,7 @@ define tools_menu = []
 define walk_menu = []
 
 #====Misc
+default last_affection_notify_time = 0
 default stop_snike_time = False
 default Minigame_TTT = [
     "'",
@@ -120,38 +121,18 @@ default plus_snack_time = None
 default moldable_variable = None
 define 3 extra_plus_file = os.path.join(renpy.config.basedir, "game", "Submods", "ExtraPlus", "Extra_Plus_Main.rpy")
 
-#====BG
-define extra_old_bg = None
-define extra_chair = None
-define extra_table = None
+#====BG (Date locations)
+default extra_old_bg = None
+default extra_chair = None
+default extra_table = None
 
 #====ZOOM
-define player_zoom = None
+default player_zoom = None
 default disable_zoom_button = None
 
 #====Windows Title
 define backup_window_title = "Monika After Story   "
 default persistent._save_window_title = "Monika After Story   "
-
-#====RPS
-define rps_your_choice = 0
-default player_wins = 0
-default moni_wins = 0
-
-#====SG
-define original_cup = [0, 1, 2]
-default ball_position = 1
-default sg_current_turn = 0
-default shuffle_cups = 0
-default cup_speed = 0.5
-define difficulty_sg = None
-default sg_correct_answers = 0
-default _plus_comment = False
-default cup_choice = None
-define cup_coordinates = [695, 925, 1155]
-define cup_coordinates_real = [695, 925, 1155]
-define cup_list = ["cup.png", "cup_monika.png", "cup_yuri.png", "cup_natsuki.png", "cup_sayori.png"]
-default cup_skin = None
 
 #====Comments by moni on standard difficulties
 
@@ -222,7 +203,6 @@ init 5 python:
 init 5 python:
     import time
     import datetime
-    last_affection_notify_time = 0
 
     def make_bday_oki_doki():
         """Creates the 'oki doki' file for Monika's birthday surprise."""
@@ -244,10 +224,9 @@ init 5 python:
 
     def notify_affection():
         """Notify the player of their affection value every 10 seconds."""
-        global last_affection_notify_time
         current_time = time.time()
-        if current_time - last_affection_notify_time >= 10:
-            last_affection_notify_time = current_time
+        if current_time - store.last_affection_notify_time >= 10:
+            store.last_affection_notify_time = current_time
             affection_value = int(mas_affection._get_aff())
             renpy.notify("{1} {0} {1}".format(affection_value, get_monika_level()))
 
@@ -277,7 +256,6 @@ init 5 python:
         """Check if the main Extra Plus file exists."""
         return os.path.isfile(os.path.normcase(extra_plus_file))
 
-    #====Return a string that represents the gender of the player.
     def plus_player_gender():
         """Return a string for the player's gender."""
         if persistent.gender == "M":
@@ -287,37 +265,34 @@ init 5 python:
         else:
             return "beloved"
 
-    #====RNG
     def extra_rng_cup():
         """Randomly select a cup skin."""
         if store.persistent._mas_pm_cares_about_dokis:
-            store.cup_skin = renpy.random.choice(cup_list)
+            store.sg_cup_skin = renpy.random.choice(sg_cup_list)
         else:
-            store.cup_skin = renpy.random.choice(["cup.png", "cup_monika.png"])
+            store.sg_cup_skin = renpy.random.choice(["cup.png", "cup_monika.png"])
 
-    #====Save the name
     def save_title_windows():
         """Set the window title based on special days or default."""
-        special_days = {
-            mas_isplayer_bday: " Happy birthday, " + player + "!",
-            mas_isNYD: " Happy New Year, " + player + "!",
-            mas_isF14: " Happy Valentine's Day, " + player + "!",
-            mas_isA01: " I know what you do, " + player + "~",
-            mas_isMonikaBirthday: " Happy Birthday, " + persistent._mas_monika_nickname + "!",
-            mas_isO31: " Happy Halloween, " + player + "!",
-            mas_isD25Eve: " Merry Christmas Eve, " + player + "!",
-            mas_isD25: " Merry Christmas, " + player + "!",
-            mas_isNYE: " Happy New Year's Eve, " + player + "!",
-        }
+        if mas_isplayer_bday():
+            config.window_title = " Happy birthday, " + player + "!"
+        elif mas_isMonikaBirthday():
+            config.window_title = " Happy Birthday, " + persistent._mas_monika_nickname + "!"
+        elif mas_isF14():
+            config.window_title = " Happy Valentine's Day, " + player + "!"
+        elif mas_isO31():
+            config.window_title = " Happy Halloween, " + player + "!"
+        elif mas_isD25():
+            config.window_title = " Merry Christmas, " + player + "!"
+        elif mas_isD25Eve():
+            config.window_title = " Merry Christmas Eve, " + player + "!"
+        elif mas_isNYE():
+            config.window_title = " Happy New Year's Eve, " + player + "!"
+        elif mas_isNYD():
+            config.window_title = " Happy New Year, " + player + "!"
+        else:
+            config.window_title = persistent._save_window_title
 
-        for date_check, title in special_days.items():
-            if date_check():
-                config.window_title = title
-                return
-
-        config.window_title = persistent._save_window_title
-
-    #====Functions for submod operation
     def Extraplus_show():
         """Show the Extra Plus interactions screen."""
         store.player_zoom = store.mas_sprites.zoom_level
@@ -556,11 +531,6 @@ init 5 python:
 
         return stats
 
-    def extra_fix_zoom_level():
-        store.disable_zoom_button = False
-        store.mas_sprites.zoom_level = store.player_zoom
-        store.mas_sprites.adjust_zoom()
-
     ExtraButton()
     extra_rng_cup()
     save_title_windows()
@@ -589,14 +559,13 @@ init -1 python:
             renpy.hide_screen("extra_no_click")
             renpy.hide_screen("shell_game_minigame")
 
-            if self.final_label == "check_label":
-                store.cup_choice = self.index
+            if self.final_label == "sg_check_label":
+                store.sg_cup_choice = self.index
 
             if self.index == self.check_index:
-                # store.sg_correct_answers += 1
-                store._plus_comment = True
+                store.sg_plus_comment = True
             else:
-                store._plus_comment = False
+                store.sg_plus_comment = False
 
             renpy.jump(self.final_label)
 
@@ -735,7 +704,7 @@ image e_scissors = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/scis
 image card_back = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/card_back.png")
 
 #====SG
-image extra_cup = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{}".format(cup_skin))
+image extra_cup = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{}".format(sg_cup_skin))
 image extra_cup_hover = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/cup_hover.png")
 image extra_cup_idle = im.Scale("mod_assets/other/transparent.png", 200, 260)
 image extra_ball = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/ball.png")
@@ -853,8 +822,8 @@ screen extraplus_interactions():
 
         textbutton _("Close") action Jump("close_extraplus")
         textbutton _("Date") action Jump("plus_walk")
-        textbutton _("Minigame") action If(mas_affection._get_aff() >= 30, true=Jump("plus_minigames"), false=None)
-        textbutton _("Addition") action Jump("extraplus_tools")
+        textbutton _("Games") action If(mas_affection._get_aff() >= 30, true=Jump("plus_minigames"), false=None)
+        textbutton _("Tools") action Jump("extraplus_tools")
         textbutton _("Boop") action If(mas_affection._get_aff() >= 30, true=Jump("show_boop_screen"), false=None)
 
 #====GAME
@@ -935,7 +904,7 @@ screen boop_revamped():
         yanchor 1.0
         ypos 90
         textbutton _("Close") action Jump("close_boop_screen")
-        textbutton _("Return") action [Function(extra_fix_zoom_level), Jump("screen_extraplus")]
+        textbutton _("Return") action Jump("return_boop_screen")
 
     default extra_boop_zones = [
         ("zonetwo", 550, 10, "monika_headpatbeta", "monika_headpat_long"),  # Head
@@ -1011,12 +980,12 @@ screen shell_game_minigame():
     for i in range(3):
         imagebutton:
             xanchor 0.5 yanchor 0.5
-            xpos cup_coordinates[i]
+            xpos sg_cup_coordinates[i]
             ypos 250
             idle "cup_idle"
             hover "cup_hover"
             focus_mask "cup_hover"
-            action SGVerification(i, ball_position, "check_label")
+            action SGVerification(i, sg_ball_position, "sg_check_label")
     
     vbox:
         xpos 0.86
@@ -1035,19 +1004,19 @@ screen RPS_mg():
     #Rock
     imagebutton idle "e_rock":
         hover "e_rock" at hover_card
-        action [SetVariable("rps_your_choice", 1), Jump("rps_loop")]
+        action [SetVariable("rps_your_choice", 1), Hide("RPS_mg"), Jump("rps_loop")]
         xalign 0.5
         yalign 0.7
     #Paper
     imagebutton idle "e_paper":
         hover "e_paper" at hover_card
-        action [SetVariable("rps_your_choice", 2), Jump("rps_loop")]
+        action [SetVariable("rps_your_choice", 2), Hide("RPS_mg"), Jump("rps_loop")]
         xalign 0.7
         yalign 0.7
     #Scissors
     imagebutton idle "e_scissors":
         hover "e_scissors" at hover_card
-        action [SetVariable("rps_your_choice", 3), Jump("rps_loop")]
+        action [SetVariable("rps_your_choice", 3), Hide("RPS_mg"), Jump("rps_loop")]
         xalign 0.9
         yalign 0.7
 
@@ -1107,6 +1076,7 @@ screen score_minigame(game=None):
         ypos 0.025
         text "[first_text] : [first_score]"  size 25 style "monika_text"
         text "[second_text] : [second_score]"  size 25 style "monika_text"
+
 
 screen extra_gen_list(extra_list, extra_area, others, close=None):
     #Generates a scrollable menu from a list, used for dynamic option lists in the submod.

@@ -674,7 +674,7 @@ label sticker_primary:
         ]
         items = [(DokiAccessory(_("Remove"), '0nothing', "primary"), 20), (_("Nevermind"), 'extra_dev_mode', 0)]
 
-    call screen extra_gen_list(accessories, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=True)
+    call screen extra_gen_list(accessories, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, items, close=True)
     return
 
 label sticker_secondary:
@@ -697,7 +697,7 @@ label sticker_secondary:
         ]
         items = [(DokiAccessory(_("Remove"), '0nothing', "secondary"), 20), (_("Nevermind"), 'extra_dev_mode', 0)]
 
-    call screen extra_gen_list(accessories_2, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=True)
+    call screen extra_gen_list(accessories_2, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, items, close=True)
     return
 
 label doki_change_appe:
