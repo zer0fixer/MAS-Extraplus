@@ -11,7 +11,7 @@ init -990 python in mas_submod_utils:
         author="ZeroFixer translated by MoyuTeam",
         name="Extra Plus",
         description="A submod that adds an Extra+ button, as well as adding more content!",
-        version="1.2.0"
+        version="1.2.1"
     )
 
 #====Register the updater
