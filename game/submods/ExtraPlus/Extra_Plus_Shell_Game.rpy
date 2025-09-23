@@ -2,6 +2,10 @@
 # MINIGAME#1
 #===========================================================================================
 
+#修复pe0-13不显示动画问题
+transform cup_move(new_x):
+    ease cup_speed xpos new_x
+
 #====Shell Game
 label minigame_sg:
     # $ check_file_status(cup_list, '/game/submods/ExtraPlus/submod_assets/sprites')
@@ -117,14 +121,9 @@ label loop_game:
 
     play sound "submods/ExtraPlus/submod_assets/sfx/cup_shuffle.mp3"
 
-    show cup as cup_1:
-        ease cup_speed xpos cup_coordinates_real[0]
-
-    show cup as cup_2:
-        ease cup_speed xpos cup_coordinates_real[1]
-
-    show cup as cup_3:
-        ease cup_speed xpos cup_coordinates_real[2]
+    show cup as cup_1 at cup_move(cup_coordinates_real[0])
+    show cup as cup_2 at cup_move(cup_coordinates_real[1])
+    show cup as cup_3 at cup_move(cup_coordinates_real[2])
 
     if shuffle_cups != 3:
         $ shuffle_cups += 1

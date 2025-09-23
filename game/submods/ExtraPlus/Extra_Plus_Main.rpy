@@ -118,16 +118,16 @@ default Minigame_TTT = [
     "0",
     "#a80000"
 ]
-define -1 Pictograms_font = "Submods/ExtraPlus/submod_assets/Pictograms.ttf"
+define -1 Pictograms_font = "submods/ExtraPlus/submod_assets/Pictograms.ttf"
 default plus_snack_time = None
 default moldable_variable = None
 default 5 extra_plus_files_approved = plus_files_exist()
 define -5 extra_plus_folders = [
-    renpy.config.basedir + "/game/Submods/ExtraPlus/Extra_Plus_Main.rpy",
-    renpy.config.basedir + "/game/Submods/ExtraPlus/submod_assets/Pictograms.ttf",
-    renpy.config.basedir + "/game/Submods/ExtraPlus/submod_assets/backgrounds/cafe.png",
-    renpy.config.basedir + "/game/Submods/ExtraPlus/submod_assets/sfx/cup_shuffle.mp3",
-    renpy.config.basedir + "/game/Submods/ExtraPlus/submod_assets/sprites/sticker_up.png"
+    renpy.config.basedir + "/game/submods/ExtraPlus/Extra_Plus_Main.rpy",
+    renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/Pictograms.ttf",
+    renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/backgrounds/cafe.png",
+    renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sfx/cup_shuffle.mp3",
+    renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/sticker_up.png"
 ]
 #====BG
 define extra_old_bg = None
@@ -257,11 +257,11 @@ init 5 python:
             icon = 1
         elif affection <= -75:
             icon = "!"
-        return "{size=+5}{color=#FFFFFF}{font=Submods/ExtraPlus/submod_assets/Pictograms.ttf}" + str(icon) + "{/font}{/color}{/size}"
+        return "{size=+5}{color=#FFFFFF}{font=submods/ExtraPlus/submod_assets/Pictograms.ttf}" + str(icon) + "{/font}{/color}{/size}"
 
     # def buscar_archivo():
     #     nombre_archivo = "Extra_Plus_Main.rpy"
-    #     directorio = renpy.config.basedir + "/game/Submods/"
+    #     directorio = renpy.config.basedir + "/game/submods/"
     #     """Busca un archivo en un directorio y sus subdirectorios."""
     #     for root, dirs, files in os.walk(directorio):
     #         if nombre_archivo in files:
@@ -365,8 +365,8 @@ init 5 python:
 
         objects = LiveComposite(
             (119, 188),
-            (0, 0), MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/accessories/0/{0}.png".format(chibi_sprites_0_max)),
-            (0, 0), MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/accessories/1/{0}.png".format(chibi_sprites_1_max))
+            (0, 0), MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/accessories/0/{0}.png".format(chibi_sprites_0_max)),
+            (0, 0), MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/accessories/1/{0}.png".format(chibi_sprites_1_max))
             )
             
         return objects, 0.1
@@ -497,8 +497,8 @@ init 5 python:
 
 #====Misc
 init 10 python:
-    chibi_path = renpy.config.basedir + "/game/Submods/ExtraPlus/submod_assets/sprites/accessories/0/"
-    chibi_path_one = renpy.config.basedir + "/game/Submods/ExtraPlus/submod_assets/sprites/accessories/1/"
+    chibi_path = renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/0/"
+    chibi_path_one = renpy.config.basedir + "/game/submods/ExtraPlus/submod_assets/sprites/accessories/1/"
     if os.path.exists(chibi_path) and os.path.exists(chibi_path_one):
         chibi_sprites_0 = [(os.path.splitext(i)[0]) for i in os.listdir(chibi_path)]
         chibi_sprites_1 = [(os.path.splitext(j)[0]) for j in os.listdir(chibi_path_one)]
@@ -529,18 +529,24 @@ init python:
 
     for info in plus_accessories:
         name = info[0]
-        acs = MASAccessory(*info)
+        acs = MASAccessory(
+            name,
+            info[1],
+            info[2],
+            stay_on_start=info[3],
+            use_folders=False
+        )
         vars()[name] = acs
         store.mas_sprites.init_acs(acs)
 
 #====Minigames images
-image note_score = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/note_score.png")
+image note_score = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/note_score.png")
 
 #====TTT
-image notebook = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/notebook.png")
-image line_black = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/line.png")
-image line_player = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/line_player.png")
-image line_moni = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/line_moni.png")
+image notebook = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/notebook.png")
+image line_black = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/line.png")
+image line_player = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/line_player.png")
+image line_moni = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/line_moni.png")
 image ttt_cross:
     Text(
         Minigame_TTT[0],
@@ -575,16 +581,16 @@ image ttt_circle:
         linear 0.25 alpha 1.0
         
 #====RPS
-image e_paper = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/paper.png")
-image e_rock = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/rock.png")
-image e_scissors = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/scissors.png")
-image card_back = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/card_back.png")
+image e_paper = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/paper.png")
+image e_rock = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/rock.png")
+image e_scissors = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/scissors.png")
+image card_back = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/card_back.png")
 
 #====SG
-image extra_cup = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{0}".format(cup_skin))
-image extra_cup_hover = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/cup_hover.png")
+image extra_cup = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{0}".format(cup_skin))
+image extra_cup_hover = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/cup_hover.png")
 image extra_cup_idle = im.Scale("mod_assets/other/transparent.png", 200, 260)
-image extra_ball = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/ball.png")
+image extra_ball = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/ball.png")
 image cup:
     xanchor 0.5 yanchor 0.5
     contains:
@@ -607,7 +613,7 @@ image ball:
 #====Chibika
 image chibika_blink_effect:
     block:
-        MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{0}.png".format(persistent.chibika_current_costume[0]))
+        MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{0}.png".format(persistent.chibika_current_costume[0]))
         block:
             choice:
                 3
@@ -615,7 +621,7 @@ image chibika_blink_effect:
                 5
             choice:
                 7
-        MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{0}.png".format(persistent.chibika_current_costume[1]))
+        MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{0}.png".format(persistent.chibika_current_costume[1]))
         choice 0.02:
             block:
                 choice:
@@ -624,7 +630,7 @@ image chibika_blink_effect:
                     6
                 choice:
                     4
-                MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{0}.png".format(persistent.chibika_current_costume[0]))
+                MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{0}.png".format(persistent.chibika_current_costume[0]))
         choice 0.098:
             pass
         0.06
@@ -639,17 +645,17 @@ image chibika_base = LiveComposite(
 
 image hover_sticker = LiveComposite(
     (119, 188),
-    (0, 40), MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{0}.png".format(persistent.chibika_current_costume[2])),
+    (0, 40), MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/{0}.png".format(persistent.chibika_current_costume[2])),
     (0, 0), DynamicDisplayable(draw_sprites)
     )
 
 #====Coin
-image coin_heads = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/coin_heads.png")
-image coin_tails = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/coin_tails.png")
+image coin_heads = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/coin_heads.png")
+image coin_tails = MASFilterSwitch("submods/ExtraPlus/submod_assets/sprites/coin_tails.png")
 image coin_moni:
     ConditionSwitch(
-        "mas_isDayNow()", anim.Filmstrip("Submods/ExtraPlus/submod_assets/sprites/sprite_coin.png", (100, 100), (3, 2), .125, loop=True),
-        "mas_isNightNow()", anim.Filmstrip("Submods/ExtraPlus/submod_assets/sprites/sprite_coin-n.png", (100, 100), (3, 2), .125, loop=True))
+        "mas_isDayNow()", anim.Filmstrip("submods/ExtraPlus/submod_assets/sprites/sprite_coin.png", (100, 100), (3, 2), .125, loop=True),
+        "mas_isNightNow()", anim.Filmstrip("submods/ExtraPlus/submod_assets/sprites/sprite_coin-n.png", (100, 100), (3, 2), .125, loop=True))
 
 #====Boop
 image zoneone = im.Scale("mod_assets/other/transparent.png", 30, 30)
@@ -1132,22 +1138,22 @@ transform jumpingaround:
 #====Cafe====#
 
 #Day images
-image submod_background_cafe_day = "Submods/ExtraPlus/submod_assets/backgrounds/cafe.png"
-image submod_background_cafe_rain = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
-image submod_background_cafe_overcast = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
-image submod_background_cafe_snow = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
+image submod_background_cafe_day = "submods/ExtraPlus/submod_assets/backgrounds/cafe.png"
+image submod_background_cafe_rain = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
+image submod_background_cafe_overcast = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
+image submod_background_cafe_snow = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
 
 #Night images
-image submod_background_cafe_night = "Submods/ExtraPlus/submod_assets/backgrounds/cafe-n.png"
-image submod_background_cafe_rain_night = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
-image submod_background_cafe_overcast_night = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
-image submod_background_cafe_snow_night = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
+image submod_background_cafe_night = "submods/ExtraPlus/submod_assets/backgrounds/cafe-n.png"
+image submod_background_cafe_rain_night = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
+image submod_background_cafe_overcast_night = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
+image submod_background_cafe_snow_night = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
 
 #Sunset images
-image submod_background_cafe_ss = "Submods/ExtraPlus/submod_assets/backgrounds/cafe-ss.png"
-image submod_background_cafe_rain_ss = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
-image submod_background_cafe_overcast_ss = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
-image submod_background_cafe_snow_ss = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
+image submod_background_cafe_ss = "submods/ExtraPlus/submod_assets/backgrounds/cafe-ss.png"
+image submod_background_cafe_rain_ss = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
+image submod_background_cafe_overcast_ss = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
+image submod_background_cafe_snow_ss = "submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
 
 init -1 python:
     submod_background_cafe = MASFilterableBackground(
@@ -1262,22 +1268,22 @@ init -2 python in mas_background:
 #====Restaurant====#
 
 #Day images
-image submod_background_extraplusr_restaurant_day = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant.png"
-image submod_background_extraplusr_restaurant_rain = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain.png"
-image submod_background_extraplusr_restaurant_overcast = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain.png"
-image submod_background_extraplusr_restaurant_snow = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain.png"
+image submod_background_extraplusr_restaurant_day = "submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant.png"
+image submod_background_extraplusr_restaurant_rain = "submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain.png"
+image submod_background_extraplusr_restaurant_overcast = "submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain.png"
+image submod_background_extraplusr_restaurant_snow = "submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain.png"
 
 #Night images
-image submod_background_extraplusr_restaurant_night = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant-n.png"
-image submod_background_extraplusr_restaurant_rain_night = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-n.png"
-image submod_background_extraplusr_restaurant_overcast_night = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-n.png"
-image submod_background_extraplusr_restaurant_snow_night = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-n.png"
+image submod_background_extraplusr_restaurant_night = "submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant-n.png"
+image submod_background_extraplusr_restaurant_rain_night = "submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-n.png"
+image submod_background_extraplusr_restaurant_overcast_night = "submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-n.png"
+image submod_background_extraplusr_restaurant_snow_night = "submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-n.png"
 
 #Sunset images
-image submod_background_extraplusr_restaurant_ss = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant-ss.png"
-image submod_background_extraplusr_restaurant_rain_ss = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-ss.png"
-image submod_background_extraplusr_restaurant_overcast_ss = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-ss.png"
-image submod_background_extraplusr_restaurant_snow_ss = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-ss.png"
+image submod_background_extraplusr_restaurant_ss = "submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant-ss.png"
+image submod_background_extraplusr_restaurant_rain_ss = "submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-ss.png"
+image submod_background_extraplusr_restaurant_overcast_ss = "submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-ss.png"
+image submod_background_extraplusr_restaurant_snow_ss = "submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-ss.png"
 
 init -1 python:
     submod_background_restaurant = MASFilterableBackground(
@@ -1393,22 +1399,22 @@ init -2 python in mas_background:
 #====Pool====#
 
 #Day images
-image submod_background_pool_day = "Submods/ExtraPlus/submod_assets/backgrounds/pool.png"
-image submod_background_pool_rain = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain.png"
-image submod_background_pool_overcast = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain.png"
-image submod_background_pool_snow = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain.png"
+image submod_background_pool_day = "submods/ExtraPlus/submod_assets/backgrounds/pool.png"
+image submod_background_pool_rain = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain.png"
+image submod_background_pool_overcast = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain.png"
+image submod_background_pool_snow = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain.png"
 
 #Night images
-image submod_background_pool_night = "Submods/ExtraPlus/submod_assets/backgrounds/pool-n.png"
-image submod_background_pool_rain_night = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain-n.png"
-image submod_background_pool_overcast_night = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain-n.png"
-image submod_background_pool_snow_night = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain-n.png"
+image submod_background_pool_night = "submods/ExtraPlus/submod_assets/backgrounds/pool-n.png"
+image submod_background_pool_rain_night = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-n.png"
+image submod_background_pool_overcast_night = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-n.png"
+image submod_background_pool_snow_night = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-n.png"
 
 #Sunset images
-image submod_background_pool_ss = "Submods/ExtraPlus/submod_assets/backgrounds/pool-ss.png"
-image submod_background_pool_rain_ss = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain-ss.png"
-image submod_background_pool_overcast_ss = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain-ss.png"
-image submod_background_pool_snow_ss = "Submods/ExtraPlus/submod_assets/backgrounds/pool_rain-ss.png"
+image submod_background_pool_ss = "submods/ExtraPlus/submod_assets/backgrounds/pool-ss.png"
+image submod_background_pool_rain_ss = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-ss.png"
+image submod_background_pool_overcast_ss = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-ss.png"
+image submod_background_pool_snow_ss = "submods/ExtraPlus/submod_assets/backgrounds/pool_rain-ss.png"
 
 init -1 python:
     submod_background_pool = MASFilterableBackground(
