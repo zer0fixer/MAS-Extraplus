@@ -988,7 +988,8 @@ translate chinese monika_earsbeta_b967e794:
 translate chinese aff_log_935c08c2:
 
     # "Your affection with [m_name] is [int(mas_affection._get_aff())] [monika_level]"
-    "[m_name]对你的好感有[mas_affection._get_aff()] [monika_level]"
+    $ aff_value = int(mas_affection._get_aff())
+    "[m_name]对你的好感有 [aff_value] [monika_level]"
 
 # game/Submods/ExtraPlus/Extra_Plus_Misc.rpy:512
 translate chinese coinflip_9c32d1bb:

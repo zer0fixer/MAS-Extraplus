@@ -101,10 +101,10 @@ init 10 python:
                             return ttt_turn(i)
                 if len(f_lines):
                     line = renpy.random.choice(f_lines)
-                    line = filter(lambda x: ttt.field[x] is None, line)
+                    line = list(filter(lambda x: ttt.field[x] is None, line))
                     return ttt_turn(renpy.random.choice(line))
                 else:
-                    line = filter(lambda x: ttt.field[x] is None, range(9))
+                    line = list(filter(lambda x: ttt.field[x] is None, range(9)))
                     return ttt_turn(renpy.random.choice(line))
 
             self.new_state, self.check_state = ttt_new_state, ttt_check_state
