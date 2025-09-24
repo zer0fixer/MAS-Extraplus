@@ -15,10 +15,24 @@ label cafe_init:
     jump cafe_cakes
 
 label cafe_cakes:
-    m 1hua "We have arrived [mas_get_player_nickname()]~"
-    m 1eub "It's a nice place, don't you think!"
-    m 1hua "Speaking of nice, I'm in the mood for dessert."
-    m 3eub "I'll go pick it up, wait a minute."
+    python:
+        arrival_lines_with_expr = [
+            ("1hua", "We have arrived, [mas_get_player_nickname()]~ It's a nice place, don't you think!"),
+            ("1eub", "Here we are! This cafe is so cozy. I'm glad we came."),
+            ("1hubsa", "Alright, we're here! The smell of coffee is already making me happy.")
+        ]
+        dessert_lines_with_expr = [
+            ("1hua", "Speaking of nice, I'm in the mood for dessert. I'll go pick it up, wait a minute."),
+            ("3eub", "You know what would make this perfect? Some cake. I'll be right back!"),
+            ("3hub", "I'm going to grab us a little treat. Don't miss me too much~")
+        ]
+        arrival_expression, arrival_dialogue = renpy.random.choice(arrival_lines_with_expr)
+        renpy.show("monika " + arrival_expression)
+        renpy.say(m, arrival_dialogue)
+
+        dessert_expression, dessert_dialogue = renpy.random.choice(dessert_lines_with_expr)
+        renpy.show("monika " + dessert_expression)
+        renpy.say(m, dessert_dialogue)
     call mas_transition_to_emptydesk
     pause 2.0
     python:
@@ -57,12 +71,22 @@ label cafe_cakes:
 
 label monika_boopcafebeta:
     show monika staticpose at t11
-    if monika_chr.is_wearing_acs(extraplus_acs_chocolatecake) or monika_chr.is_wearing_acs(extraplus_acs_fruitcake):
-        m 1ttp "...?"
-        m 1eka "Hey, I'm enjoying my dessert."
-        m 3hua "Do it when I finish my dessert, okay?"
-    else:
-        m 1hub "*Boop*"
+    python:
+        is_eating = monika_chr.is_wearing_acs(extraplus_acs_chocolatecake) or monika_chr.is_wearing_acs(extraplus_acs_fruitcake)
+        if is_eating:
+            boop_eating_lines_with_expr = [
+                ("1eka", "Hey, I'm enjoying my dessert. Do it when I finish, okay?"),
+                ("1ttp", "Ah! You surprised me. Let me finish this bite first, ehehe~"),
+                ("3hua", "My mouth is full! But I appreciate the thought. *Boop* back at you later~")
+            ]
+            expression, dialogue = renpy.random.choice(boop_eating_lines_with_expr)
+        else:
+            boop_lines_with_expr = [
+                ("1hub", "*Boop*"), ("1eub", "Ehehe, you got me!"), ("1tub", "Right back at you, [player]! *Boop*")
+            ]
+            expression, dialogue = renpy.random.choice(boop_lines_with_expr)
+        renpy.show("monika " + expression)
+        renpy.say(m, dialogue)
     jump to_cafe_loop
     return
 
@@ -281,10 +305,24 @@ label restaurant_init:
     jump restaurant_cakes
 
 label restaurant_cakes:
-    m 1hua "We've arrived [mas_get_player_nickname()]~"
-    m 1eub "It's a nice place,{w=0.3} don't you think?"
-    m 1hua "Speaking of nice,{w=0.3} let me get some food and set the mood..."
-    m 3eub "I'll be right back."
+    python:
+        arrival_lines_with_expr = [
+            ("1hua", "We've arrived, [mas_get_player_nickname()]~ It's a nice place, don't you think?"),
+            ("1eub", "Here we are! This restaurant looks so romantic."),
+            ("1hubsa", "We made it! I'm already excited to see the menu.")
+        ]
+        food_lines_with_expr = [
+            ("1hua", "Speaking of nice, let me get some food and set the mood... I'll be right back."),
+            ("3eub", "I'm starving! Let me go order for us. I'll be quick!"),
+            ("3hub", "Time for the best part! I'll go get our food, you just relax and enjoy the view.")
+        ]
+        arrival_expression, arrival_dialogue = renpy.random.choice(arrival_lines_with_expr)
+        renpy.show("monika " + arrival_expression)
+        renpy.say(m, arrival_dialogue)
+
+        food_expression, food_dialogue = renpy.random.choice(food_lines_with_expr)
+        renpy.show("monika " + food_expression)
+        renpy.say(m, food_dialogue)
     call mas_transition_to_emptydesk
     pause 2.0
     python:
@@ -325,18 +363,27 @@ label restaurant_cakes:
     
 label monika_booprestaurantbeta:
     show monika staticpose at t11
-    if monika_chr.is_wearing_acs(extraplus_acs_pasta) or monika_chr.is_wearing_acs(extraplus_acs_pancakes) or monika_chr.is_wearing_acs(extraplus_acs_waffles) or monika_chr.is_wearing_acs(extraplus_acs_icecream) or monika_chr.is_wearing_acs(extraplus_acs_pudding):
-        if mas_isMoniLove():
-            m "...!"
-            m "[player]!"
-            extend "I'm trying to eat here!"
-            m 3hua "You can boop me all you want when I'm done, okay [mas_get_player_nickname()]~?"
+    python:
+        is_eating = ( monika_chr.is_wearing_acs(extraplus_acs_pasta) or
+            monika_chr.is_wearing_acs(extraplus_acs_pancakes) or
+            monika_chr.is_wearing_acs(extraplus_acs_waffles) or
+            monika_chr.is_wearing_acs(extraplus_acs_icecream) or
+            monika_chr.is_wearing_acs(extraplus_acs_pudding)
+        )
+        if is_eating:
+            boop_eating_lines_with_expr = [
+                ("1eka", "Hey, I'm trying to enjoy my food here. Do that when I'm done with it, please?"),
+                ("1ttp", "Ah! You surprised me. Let me finish this bite first, ehehe~"),
+                ("3hua", "My mouth is full! But you can boop me all you want when I'm done, okay [mas_get_player_nickname()]~?")
+            ]
+            expression, dialogue = renpy.random.choice(boop_eating_lines_with_expr)
         else:
-            m 1ttp "...?"
-            m 1eka "Hey,{w=0.3} I'm trying to enjoy my food here."
-            m 3hua "Do that when I'm done with it, please?"
-    else:
-        m 1hub "*Boop*"
+            boop_lines_with_expr = [
+                ("1hub", "*Boop*"), ("1eub", "Ehehe, you got me!"), ("1tub", "Right back at you, [player]! *Boop*")
+            ]
+            expression, dialogue = renpy.random.choice(boop_lines_with_expr)
+        renpy.show("monika " + expression)
+        renpy.say(m, dialogue)
     jump to_restaurant_loop
     return
 
@@ -571,21 +618,19 @@ label extra_talk_without:
 label extra_talk_glass:
     show monika staticpose at t11
     m 1euc "Glass half empty or full, huh?"
-    m 4rsb "How about I propose to you another question instead,{w=0.3} [player]?"  # Fixed: Removed redundant "." after "?"
+    m 4rsb "How about I propose another question instead,{w=0.3} [player]?"
     m 4esb "Instead of being half full or half empty,{w=0.3} what if all we need is a {i}different glass{/i}?"
     m 3etc "Considering 'half full' people would be the epitome of optimism,{w=0.3} and 'half empty' ones the most pessimistic..."
     m 3eub "Okay,{w=0.3} hear me out here:"
     m 1euc "Glass full to the brim and splashing goodness everywhere?"
-    extend 1rub " Time to increase the size."  # Added space after pause for flow
-    extend " Put what's in it into an even bigger thing!"
+    extend 1rub " Time to increase the size. Put what's in it into an even bigger thing!"
     m 1euc "Glass so half empty that you can't help focusing on the empty space instead of the greatness swirling around inside?"
-    extend 3eub " Time to decrease the size and then slowly work back into a larger vessel later."  # Added space after pause
-    m "Its size isn't anything to be ashamed about,{w=0.3} if it ends up filled then that's a win for the day!"  # Fixed: It's → Its
-    m 1eka "So maybe there's another answer to the question besides the manic and the depressive one."
+    extend 3eub " Time to decrease the size and then slowly work back into a larger vessel later."
+    m "Its size isn't anything to be ashamed about,{w=0.3} if it ends up filled then that's a win for the day!"
     m 3rub "If we focus on the amazing things we have,{w=0.3} instead of chasing the things we don't have,{w=0.3} or need,{w=0.3} we can successfully choose sustainable happiness in all of our pursuits."
     m 3rtc "So,{w=0.3} when I stop to think about it..."
     m 4eta "Glass half full or empty?"
-    extend 4hub " Give me a new glass instead,{w=0.3} please!"  # Added space after pause
+    extend 4hub " Give me a new glass instead,{w=0.3} please!"
     m 6hublb "Ahaha~!"
     jump to_restaurant_loop
     return

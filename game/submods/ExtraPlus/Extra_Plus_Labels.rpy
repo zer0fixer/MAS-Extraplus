@@ -281,89 +281,7 @@ label restaurant_leave:
     jump restaurant_hide_acs
 
 #====Pool====#
-# label go_to_pool_dev:
-#     python:
-#         mas_extra_location(locate=True)
-#         extra_seen_background("pool_sorry_player", "gt_poolv2", "check_label_pool_dev")
-
-# label check_label_pool_dev:
-#     pass
-
-# label gt_pool:
-#     show monika 1eua at t11
-#     if mas_isDayNow():
-#         m 3sub "DAY"
-#         jump pool_init
-
-#     elif mas_isNightNow():
-#         m 3sub "NIGHT"
-#         jump pool_init
-#     else:
-#         m 1eub "Another time then, [mas_get_player_nickname()]."
-#         jump screen_extraplus
-#     return
-
-# label gt_poolv2:
-#     show monika 1eua at t11
-#     if mas_isDayNow():
-#         m 3sub "DAY"
-#         jump pool_init
-
-#     elif mas_isNightNow():
-#         m 3sub "NIGHT"
-#         jump pool_init
-#     else:
-#         m 1eub "Another time then, [mas_get_player_nickname()]."
-#         jump screen_extraplus
-#     return
-
-# label ep_pool_leave:
-#     show monika idle at float_animation, t11
-#     m 1hua "Okay, let's go, [player]!"
-#     call extra_restore_bg("comment_POOL")
-#     return
-
-# label comment_POOL:
-#     m 1ekbsa "I love you, [mas_get_player_nickname()]!"
-#     $ mas_DropShield_dlg()
-#     $ mas_ILY()
-#     jump ch30_visual_skip
-#     return
-
-# label to_pool_loop:
-#     show monika idle at float_animation, t11
-#     $ store.disable_zoom_button = False
-#     call screen dating_loop("ep_pool_talk","test_booping_pool", boop_enable=True)
-#     return
-
-# label ep_pool_talk:
-#     show monika idle at float_animation, t21
-#     python:
-#         store.disable_zoom_button = True
-#         pool_menu = [
-#             (_("*Solo Observar*"), 'test_dialog'),
-#             (_("Meterse al Agua"), 'test_dialog'),
-#             (_(""), 'test_dialog')
-#         ]
-
-#         items = [
-#             (_("Can we leave?"), 'ep_pool_leave', 20),
-#             (_("Nevermind"), 'to_pool_loop', 0)
-#         ]
-#     call screen extra_gen_list(pool_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=False)
-#     return
-
-# label test_dialog:
-#     show monika idle at float_animation, t11
-#     m 1eub "This is a test dialog."
-#     jump to_pool_loop
-#     return
-
-# label test_booping_pool:
-#     show monika idle at float_animation, t11
-#     m 1eub "You booped me while we were at the pool!"
-#     jump to_pool_loop
-#     return
+#?????????????
 
 #===========================================================================================
 # Others
@@ -417,12 +335,12 @@ label cafe_hide_acs:
         food_worn = any(monika_chr.is_wearing_acs(acs) for acs in food_items)
         cup_worn = any(monika_chr.is_wearing_acs(acs) for acs in cup_items)
 
-        if food_worn and cup_worn:
-            renpy.say(m, "I have to put this plate and cup away. I won't be long.")
-        elif food_worn:
-            renpy.say(m, "I have to put this plate away. I'll be right back.")
-        elif cup_worn:
-            renpy.say(m, "I'll just put this cup away, give me a moment.")
+    if food_worn and cup_worn:
+        m 3eub "I have to put this plate and cup away. I won't be long."
+    elif food_worn:
+        m 3eub "I have to put this plate away. I'll be right back."
+    elif cup_worn:
+        m 1eua "I'll just put this cup away, give me a moment."
 
     call mas_transition_to_emptydesk
     pause 2.0
@@ -497,22 +415,22 @@ label monika_no_food:
     return
 
 label restaurant_hide_acs:
+    # Check and remove candles if it's night
+    if monika_chr.is_wearing_acs(extraplus_acs_candles):
+        m 1eka "I have to put these candles away. We can never be too careful with fire!"
+
+    # Check and remove flowers if it's day
+    if monika_chr.is_wearing_acs(extraplus_acs_flowers):
+        m 1eua "I'll put these flowers away, I won't be long."
+
     python:
-        # Check and remove candles if it's night
-        if monika_chr.is_wearing_acs(extraplus_acs_candles):
-            renpy.say(m, "I have to put these candles away. We can never be too careful with fire!")
-
-        # Check and remove flowers if it's day
-        if monika_chr.is_wearing_acs(extraplus_acs_flowers):
-            renpy.say(m, "I'll put these flowers away, I won't be long.")
-
         # Check and remove any food plate
         food_acs_to_check = [
             extraplus_acs_pasta, extraplus_acs_pancakes, extraplus_acs_waffles,
             extraplus_acs_icecream, extraplus_acs_pudding
         ]
-        if any(monika_chr.is_wearing_acs(acs) for acs in food_acs_to_check):
-            renpy.say(m, "I must put this plate away, it won't be long now.")
+    if any(monika_chr.is_wearing_acs(acs) for acs in food_acs_to_check):
+        m 3eub "I must put this plate away, it won't be long now."
 
     call mas_transition_to_emptydesk
     pause 2.0

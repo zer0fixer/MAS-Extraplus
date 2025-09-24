@@ -1026,18 +1026,19 @@ screen extra_no_click():
 screen doki_chibi_idle():
     #Displays Chibika on the screen, allowing for dragging if enabled.
     zorder 50
-    if persistent.enable_drag_chibika:
-        drag:
-            child "chibika_base"
-            selected_hover_child "hover_sticker"
-            dragged chibi_drag
-            drag_offscreen True
-            xpos persistent.chibika_drag_x
-            ypos persistent.chibika_drag_y
-    else:
-        add "chibika_base":
-            xpos chibi_xpos
-            ypos chibika_y_position
+    if renpy.get_screen("hkb_overlay"):
+        if persistent.enable_drag_chibika:
+            drag:
+                child "chibika_base"
+                selected_hover_child "hover_sticker"
+                dragged chibi_drag
+                drag_offscreen True
+                xpos persistent.chibika_drag_x
+                ypos persistent.chibika_drag_y
+        else:
+            add "chibika_base":
+                xpos chibi_xpos
+                ypos chibika_y_position
 
 screen score_minigame(game=None):
     #Shows the current score for a minigame (RPS or Shell Game) with player and opponent stats.

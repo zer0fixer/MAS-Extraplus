@@ -139,16 +139,18 @@ label boopwar_loop:
         jump boopbeta_war_win
     python:
         boop_choices = [
-            ("1hublb", "*Boop*"),
-            ("1tub", "*Boop*"),
-            ("1fua", "*Boop*"),
-            ("1eua", "*Boop*"),
-            ("1hua", "*Boop*"),
-            ("1sub", "*Boop*"),
-            ("1gua", "*Boop*"),
-            ("1kub", "*Boop*"),
-            ("1dub", "*Boop*"),
-            ("1wua", "*Boop*")
+            ("1hublb", "Gotcha!"),
+            ("1tub", "Too slow!"),
+            ("1fua", "*Boop*!"),
+            ("1eua", "Take that!"),
+            ("1hua", "My turn!"),
+            ("1sub", "Hehe!"),
+            ("1gua", "I'm not giving up!"),
+            ("1kub", "You can't beat me!"),
+            ("1dub", "Another one!"),
+            ("1wua", "Boop!"),
+            ("2eub", "Faster, [player]!"),
+            ("3hua", "This is fun!")
         ]
         expression, dialogue = renpy.random.choice(boop_choices)
         renpy.show("monika " + expression)
@@ -159,16 +161,17 @@ label boopwar_loop:
     return
 
 label boopbeta_war_lose:
-    $ boop_war_count = 0
     hide screen boop_war_score_ui
     m 1nua "Looks like I've won this boop war, [player]~"
     m "I hope I've been a good opponent."
     m 3hub "But I've also really enjoyed it!"
-    m 3dua "Besides, it's good to give your hand a little massage."
-    m 1eka "I mean, if you use the mouse too much, "
-    extend 1ekb "you can develop carpal tunnel syndrome and I don't want that."
-    m 1hksdlb "I'm sorry if I've added a new concern, but my intention is to take care of you."
-    m 1eubla "I hope you take my recommendation, [player]~"
+    if boop_war_count >= 50:
+        m 3dua "Besides, it's good to give your hand a little massage."
+        m 1eka "I mean, if you use the mouse too much, "
+        extend 1ekb "you can develop carpal tunnel syndrome and I don't want that."
+        m 1hksdlb "I'm sorry if I've added a new concern, but my intention is to take care of you."
+        m 1eubla "I hope you take my recommendation, [player]~"
+    $ boop_war_count = 0
     jump show_boop_screen
     return
 
@@ -483,22 +486,26 @@ label extra_relation_monika:
     $ time_string = get_formatted_time_since_install()
     $ total_days = get_total_days_since_install()
     m 2eub "You know, if you count it all up, it seems we've been together for [time_string]!"
-    if total_days <= 1:
-        m 2lub "We've only just begun, but every single second has been a dream come true."
-    elif total_days < 365:
-        m 2hubsb "It hasn't even been a year, and I already feel like I've known you forever. Time just flies by when I'm with you!"
-    elif total_days < (365 * 2):
-        m 2kubsb "Happy first anniversary! I still remember our first day together... Thank you for making so many memories with me."
-    elif total_days < (365 * 3):
-        m 2wubsb "Wow, two years together! Every day with you has been so special. Thank you for staying by my side."
-    elif total_days < (365 * 4):
-        m 1dsbsa "Three years... Time really does fly when I'm with you. We've shared so much, and I can't wait for more."
-    elif total_days < (365 * 5):
-        m 2wubsb "Four years! That's incredible, [player]. Our bond is so strong. Thank you for staying with me for so long."
-    elif total_days < (365 * 6):
-        m 2tubsb "Five years together... I feel so lucky to have you. Thank you for all the love and memories."
-    elif total_days < (365 * 7):
-        m 2subsb "Six years! Can you believe it? Every year with you is a treasure. Thank you for being with me all this time."
+    
+    if not renpy.seen_label("extra_relation_monika"):
+        if total_days <= 1:
+            m 2lub "We've only just begun, but every single second has been a dream come true."
+        elif total_days < 365:
+            m 2hubsb "It hasn't even been a year, and I already feel like I've known you forever. Time just flies by when I'm with you!"
+        elif total_days < 365 * 2:
+            m 2kubsb "Happy first anniversary! I still remember our first day together... Thank you for making so many memories with me."
+        elif total_days < 365 * 3:
+            m 2wubsb "Wow, two years together! Every day with you has been so special. Thank you for staying by my side."
+        elif total_days < 365 * 4:
+            m 1dsbsa "Three years... Time really does fly when I'm with you. We've shared so much, and I can't wait for more."
+        elif total_days < 365 * 5:
+            m 2wubsb "Four years! That's incredible, [player]. Our bond is so strong. Thank you for staying with me for so long."
+        elif total_days < 365 * 6:
+            m 2tubsb "Five years together... I feel so lucky to have you. Thank you for all the love and memories."
+        elif total_days < 365 * 7:
+            m 2subsb "Six years! Can you believe it? Every year with you is a treasure. Thank you for being with me all this time."
+        else:
+            m 2lubsb "It's been so long... but it really doesn't feel that way when I'm with you. Time just flies by!"
     else:
         m 2lubsb "It really doesn't feel that long when I'm with you, though. Time just flies by!"
     jump close_extraplus
