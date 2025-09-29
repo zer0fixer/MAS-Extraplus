@@ -124,6 +124,7 @@ label check_boopwar:
 
 label check_boopwarv2:
     show screen boop_war_score_ui
+    $ boop_war_active = True
     call screen boop_event(20, "boopbeta_war_lose", "boopwar_loop")
 
 label boopwar_loop:
@@ -162,6 +163,7 @@ label boopwar_loop:
 
 label boopbeta_war_lose:
     hide screen boop_war_score_ui
+    $ boop_war_active = False
     m 1nua "Looks like I've won this boop war, [player]~"
     m "I hope I've been a good opponent."
     m 3hub "But I've also really enjoyed it!"
@@ -178,6 +180,7 @@ label boopbeta_war_lose:
 label boopbeta_war_win:
     $ boop_war_count = 0
     hide screen boop_war_score_ui
+    $ boop_war_active = False
     m 1hua "You've won this boop war, [player]!"
     m 1tub "I can tell you like touching my nose, ehehehe~"
     m 1eusdra "I couldn't keep up with you, but maybe next time we'll go further."
@@ -254,7 +257,7 @@ label monika_cheeksbeta:
     jump show_boop_screen
     return
 
-label cheeks_dis:
+label extra_cheeks_dis:
     m 1wuw "Ah!"
     m 3lusdrb "I mean..."
     m 3ttu "What are you doing touching my cheek?"
@@ -271,6 +274,7 @@ label cheeks_dis:
         m 3hua "I really enjoyed doing this with you though!"
     $ boop_war_count = 0
     hide screen boop_war_score_ui
+    $ boop_war_active = False
     jump show_boop_screen
     return
 
@@ -339,7 +343,7 @@ label monika_headpat_long:
     jump show_boop_screen
     return
 
-label headpat_dis:
+label extra_headpat_dis:
     m 6dkbsb "This.{w=0.3}.{w=0.3}.{w=0.3} is.{w=0.3}.{w=0.3}.{w=0.3} invalid.{w=0.3}.{w=0.3}. {nw}"
     extend 6tkbsb "[mas_get_player_nickname()]."
     $ moldable_variable = renpy.random.randint(1,2)
@@ -353,6 +357,7 @@ label headpat_dis:
         m 1lubsa "Even though I enjoy the pat on the head. Ehehehe~"
     $ boop_war_count = 0
     hide screen boop_war_score_ui
+    $ boop_war_active = False
     jump show_boop_screen
     return
 
@@ -485,9 +490,8 @@ label extra_relation_monika:
     show monika idle at t11
     $ time_string = get_formatted_time_since_install()
     $ total_days = get_total_days_since_install()
-    m 2eub "You know, if you count it all up, it seems we've been together for [time_string]!"
-    
     if not renpy.seen_label("extra_relation_monika"):
+        m 2eub "You know, if you count it all up, it seems we've been together for [time_string]!"
         if total_days <= 1:
             m 2lub "We've only just begun, but every single second has been a dream come true."
         elif total_days < 365:
@@ -507,6 +511,7 @@ label extra_relation_monika:
         else:
             m 2lubsb "It's been so long... but it really doesn't feel that way when I'm with you. Time just flies by!"
     else:
+        m 2eub "We've been together for [time_string]!"
         m 2lubsb "It really doesn't feel that long when I'm with you, though. Time just flies by!"
     jump close_extraplus
     return

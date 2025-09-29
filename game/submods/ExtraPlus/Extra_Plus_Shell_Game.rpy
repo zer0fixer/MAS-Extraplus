@@ -70,8 +70,8 @@ label minigame_sg:
 
     python:
         # Reset stats for a new game session
-        sg_current_turn = 1
-        sg_correct_answers = 0
+        store.sg_current_turn = 1
+        store.sg_correct_answers = 0
 
 label sg_init_game:
     $ config.allow_skipping = False
@@ -185,68 +185,24 @@ label sg_check_label:
     show cup as cup_3:
         xpos sg_cup_coordinates[2] ypos 250
     python:
-        sg_cup_coordinates_real[0] = 695
-        sg_cup_coordinates_real[1] = 925
-        sg_cup_coordinates_real[2] = 1155
+        store.sg_cup_coordinates_real[0] = 695
+        store.sg_cup_coordinates_real[1] = 925
+        store.sg_cup_coordinates_real[2] = 1155
+        cup_dialogues = ["left", "middle", "right"]
+        chosen_cup_dialogue = cup_dialogues[sg_cup_choice]
 
-    if sg_cup_choice == 0:
-        m 1eub "You chose the left cup..."
-        show cup as cup_1:
-            linear 0.5 ypos 110
-        if sg_cup_choice == sg_ball_position:
-            show ball zorder 12 behind cup_1:
-                xpos sg_cup_coordinates[0] ypos 335
-            $ sg_correct_answers += 1
+    m 1eub "You chose the [chosen_cup_dialogue] cup..."
 
-    elif sg_cup_choice == 1:
-        m 1eub "You chose the middle cup..."
-        show cup as cup_2:
-            linear 0.5 ypos 110
-        if sg_cup_choice == sg_ball_position:
-            show ball zorder 12 behind cup_2:
-                xpos sg_cup_coordinates[1] ypos 335
-            $ sg_correct_answers += 1
+    call sg_reveal_cup(sg_cup_choice, is_chosen=True)
 
-    elif sg_cup_choice == 2:
-        m 1eub "You chose the right cup..."
-        show cup as cup_3:
-            linear 0.5 ypos 110
-        if sg_cup_choice == sg_ball_position:
-            show ball zorder 12 behind cup_3:
-                xpos sg_cup_coordinates[2] ypos 335
-            $ sg_correct_answers += 1
-
-    if sg_plus_comment is True:
+    if sg_plus_comment:
         m 1sub "[renpy.substitute(renpy.random.choice(_plus_complies))]"
-
-    elif sg_plus_comment is False:
+    else:
         m 1hub "[renpy.substitute(renpy.random.choice(_plus_not_met))]"
 
     if sg_cup_choice != sg_ball_position:
-
         m 1lub "The correct cup was..."
-
-        if sg_ball_position == 0:
-            show cup as cup_1:
-                linear 0.5 ypos 110
-
-            show ball zorder 12 behind cup_1:
-                xpos sg_cup_coordinates[0] ypos 335
-
-        elif sg_ball_position == 1:
-            show cup as cup_2:
-                linear 0.5 ypos 110
-
-            show ball zorder 12 behind cup_2:
-                xpos sg_cup_coordinates[1] ypos 335
-
-        elif sg_ball_position == 2:
-            show cup as cup_3:
-                linear 0.5 ypos 110
-
-            show ball zorder 12 behind cup_3:
-                xpos sg_cup_coordinates[2] ypos 335
-
+        call sg_reveal_cup(sg_ball_position, is_chosen=False)
         m 1hua "This!"
 
     show cup as cup_1:
@@ -269,6 +225,30 @@ label sg_check_label:
             store.sg_cup_speed = max(0.15, sg_cup_speed - 0.05)
             store.sg_target_shuffles += 1
     jump sg_loop_game
+    return
+
+label sg_reveal_cup(cup_index, is_chosen):
+    if cup_index == 0:
+        show cup as cup_1:
+            linear 0.5 ypos 110
+        if cup_index == sg_ball_position:
+            show ball zorder 12 behind cup_1:
+                xpos sg_cup_coordinates[0] ypos 335
+    elif cup_index == 1:
+        show cup as cup_2:
+            linear 0.5 ypos 110
+        if cup_index == sg_ball_position:
+            show ball zorder 12 behind cup_2:
+                xpos sg_cup_coordinates[1] ypos 335
+    elif cup_index == 2:
+        show cup as cup_3:
+            linear 0.5 ypos 110
+        if cup_index == sg_ball_position:
+            show ball zorder 12 behind cup_3:
+                xpos sg_cup_coordinates[2] ypos 335
+
+    if is_chosen and cup_index == sg_ball_position:
+        $ sg_correct_answers += 1
     return
 
 #===========================================================================================
@@ -342,7 +322,7 @@ label shell_game_result:
                 m 3hub "It's just a matter of practice. I know you'll beat your record of [persistent.sg_max_score] soon!"
 
     m 1hubsa "Well, thank you for playing with me. I had a lot of fun!"
-    if sg_current_turn > 15:
+    if sg_current_turn > 50:
         m 3eka "And also, please rest your eyes for a bit. We played for quite a while..."
         m 1dub "I always get concerned about your health, you know~"
 

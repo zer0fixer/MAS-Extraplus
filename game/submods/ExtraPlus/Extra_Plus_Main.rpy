@@ -102,6 +102,10 @@ default -1 persistent.chibi_accessory_2_ = "0nothing"
 default -1 persistent.hi_chibika = False
 default -1 persistent.enable_drag_chibika = False
 
+define chibi_sprite_path = "Submods/ExtraPlus/submod_assets/sprites/{}.png"
+define chibi_accessory_path_0 = "Submods/ExtraPlus/submod_assets/sprites/accessories/0/{}.png"
+define chibi_accessory_path_1 = "Submods/ExtraPlus/submod_assets/sprites/accessories/1/{}.png"
+
 #====ExtraPlus Buttons
 define minigames_menu = []
 define tools_menu = []
@@ -198,6 +202,116 @@ init 5 python:
     )
 
 #===========================================================================================
+# BOOP ZONES
+#===========================================================================================
+init -1 python:
+    import pygame
+
+    # Create a new clickzone map for Extra+ boops
+    # NOTE: These are rectangular for simplicity, but can be complex polygons.
+    # Using more accurate polygons based on original imagebutton areas.
+    extra_plus_cz_map = {
+        # Coords from original imagebuttons: (x, y, w, h) -> polygon
+        # Head: ("zonetwo", 550, 10, ...) -> zonetwo is 180x120
+        "extra_head": [(550, 10), (730, 10), (730, 130), (550, 130)],
+        # Nose: ("zoneone", 618, 235, ...) -> zoneone is 30x30
+        "extra_nose": [(618, 235), (648, 235), (648, 265), (618, 265)],
+        # Right Cheek: ("zonethree", 675, 256, ...) -> zonethree is 40x40
+        "extra_cheek_r": [(675, 256), (715, 256), (715, 296), (675, 296)],
+        # Left Cheek: ("zonethree", 570, 256, ...)
+        "extra_cheek_l": [(570, 256), (610, 256), (610, 296), (570, 296)],
+        # Hands: ("zonefour", 600, 327, ...) -> zonefour is 90x60
+        "extra_hands": [(600, 327), (690, 327), (690, 387), (600, 387)],
+        # Right Ear: ("zoneone", 754, 195, ...)
+        "extra_ear_r": [(754, 195), (784, 195), (784, 225), (754, 225)],
+        # Left Ear: ("zoneone", 514, 220, ...)
+        "extra_ear_l": [(514, 220), (544, 220), (544, 250), (514, 250)],
+    }
+
+    # Create a clickzone manager
+    extra_plus_boop_cz_manager = mas_interactions.MASClickZoneManager()
+
+    # Add zones to the manager
+    for zone_key, vx_list in extra_plus_cz_map.items():
+        extra_plus_boop_cz_manager.add(zone_key, MASClickZone(vx_list))
+
+    # Define actions for each zone (primary and alternate)
+    # The action can be a label name (string) or a more complex object if needed.
+    extra_plus_boop_zone_actions = {
+        "extra_head": ("monika_headpatbeta", "monika_headpat_long"),
+        "extra_nose": ("monika_boopbeta", "monika_boopbeta_war"),
+        "extra_cheek_l": "monika_cheeksbeta",
+        "extra_cheek_r": "monika_cheeksbeta",
+        "extra_hands": "monika_handsbeta",
+        "extra_ear_l": "monika_earsbeta",
+        "extra_ear_r": "monika_earsbeta",
+    }
+
+    # Create the zoomable interactable
+    # The MASZoomableInteractable from zz_interactions.rpy doesn't support alternate actions out of the box.
+    # We will use a custom interactable that inherits from it to add this functionality.
+    # For now, let's just handle primary actions. The screen will be updated.
+    # Instantiate the base MASZoomableInteractable. We only need it for check_over.
+    extra_plus_boop_interactable = MASZoomableInteractable(
+        extra_plus_boop_cz_manager,
+        zone_actions={k: (v[0] if isinstance(v, tuple) else v) for k, v in extra_plus_boop_zone_actions.items()}
+    )
+
+init -9 python in mas_interactions:
+    # Define zone keys
+    ZONE_EXTRA_HEAD = "extra_head"
+    ZONE_EXTRA_NOSE = "extra_nose"
+    ZONE_EXTRA_CHEEK_L = "extra_cheek_l"
+    ZONE_EXTRA_CHEEK_R = "extra_cheek_r"
+    ZONE_EXTRA_HANDS = "extra_hands"
+    ZONE_EXTRA_EAR_L = "extra_ear_l"
+    ZONE_EXTRA_EAR_R = "extra_ear_r"
+
+    def handle_primary_boop_action():
+        """
+        Handles the primary (left-click) action on a boop zone and jumps if valid.
+        """
+        x, y = renpy.get_mouse_pos()
+        hovered_zone_key = store.extra_plus_boop_interactable.check_over(x, y)
+
+        if hovered_zone_key:
+            # During boop war, only the nose is a valid target.
+            if store.boop_war_active:
+                if hovered_zone_key == ZONE_EXTRA_NOSE:
+                    renpy.jump("boopwar_loop")
+                # Handle clicks on other zones during boop war
+                elif hovered_zone_key == ZONE_EXTRA_HEAD:
+                    renpy.jump("extra_headpat_dis")
+                elif hovered_zone_key in [ZONE_EXTRA_CHEEK_L, ZONE_EXTRA_CHEEK_R]:
+                    renpy.jump("extra_cheeks_dis")
+                return # Ignore other zones like hands/ears during war
+
+            # Normal interaction
+            action = store.extra_plus_boop_zone_actions.get(hovered_zone_key)
+            primary_action = action[0] if isinstance(action, tuple) else action
+
+            if primary_action and renpy.has_label(primary_action):
+                renpy.jump(primary_action)
+
+    def handle_alternate_boop_action():
+        """
+        Checks for an alternate action on the hovered boop zone and jumps if valid.
+        This prevents jumping to a 'None' label.
+        """
+        x, y = renpy.get_mouse_pos()
+        hovered_zone_key = store.extra_plus_boop_interactable.check_over(x, y)
+
+        if hovered_zone_key and not store.boop_war_active:
+            action = store.extra_plus_boop_zone_actions.get(hovered_zone_key)
+            # Check if the action is a tuple and has an alternate action (at index 1)
+            if isinstance(action, tuple) and len(action) > 1 and action[1]:
+                if action[1] == "monika_boopbeta_war":
+                    store.boop_war_active = True
+                renpy.jump(action[1])
+        # If no valid zone or alternate action, do nothing.
+        return
+
+#===========================================================================================
 # FUNCTIONS
 #===========================================================================================
 init 5 python:
@@ -247,8 +361,9 @@ init 5 python:
             icon = "!"
         else:
             icon = "&"
+
         formatted_icon = (
-            "{size=+4}{color=#FFFFFF}{font=Submods/ExtraPlus/submod_assets/Pictograms.ttf}" + icon + "{/font}{/color}{/size}"
+            "{size=+4}{color=#FFFFFF}{font=" + Pictograms_font + "}" + icon + "{/font}{/color}{/size}"
         )
         return formatted_icon
 
@@ -258,12 +373,8 @@ init 5 python:
 
     def plus_player_gender():
         """Return a string for the player's gender."""
-        if persistent.gender == "M":
-            return "boyfriend"
-        elif persistent.gender == "F":
-            return "girlfriend"
-        else:
-            return "beloved"
+        # Refactored to use a dictionary for a more concise and Pythonic approach.
+        return {"M": "boyfriend", "F": "girlfriend"}.get(persistent.gender, "beloved")
 
     def extra_rng_cup():
         """Randomly select a cup skin."""
@@ -274,28 +385,28 @@ init 5 python:
 
     def save_title_windows():
         """Set the window title based on special days or default."""
-        if mas_isplayer_bday():
-            config.window_title = " Happy birthday, " + player + "!"
-        elif mas_isMonikaBirthday():
-            config.window_title = " Happy Birthday, " + persistent._mas_monika_nickname + "!"
-        elif mas_isF14():
-            config.window_title = " Happy Valentine's Day, " + player + "!"
-        elif mas_isO31():
-            config.window_title = " Happy Halloween, " + player + "!"
-        elif mas_isD25():
-            config.window_title = " Merry Christmas, " + player + "!"
-        elif mas_isD25Eve():
-            config.window_title = " Merry Christmas Eve, " + player + "!"
-        elif mas_isNYE():
-            config.window_title = " Happy New Year's Eve, " + player + "!"
-        elif mas_isNYD():
-            config.window_title = " Happy New Year, " + player + "!"
-        else:
-            config.window_title = persistent._save_window_title
+        # Refactored to use a data-driven approach for better readability and maintenance.
+        special_days = [
+            (mas_isplayer_bday, " Happy birthday, {}!".format(player)),
+            (mas_isMonikaBirthday, " Happy Birthday, {}!".format(persistent._mas_monika_nickname)),
+            (mas_isF14, " Happy Valentine's Day, {}!".format(player)),
+            (mas_isO31, " Happy Halloween, {}!".format(player)),
+            (mas_isD25, " Merry Christmas, {}!".format(player)),
+            (mas_isD25Eve, " Merry Christmas Eve, {}!".format(player)),
+            (mas_isNYE, " Happy New Year's Eve, {}!".format(player)),
+            (mas_isNYD, " Happy New Year, {}!".format(player))
+        ]
+
+        for condition, title in special_days:
+            if condition():
+                config.window_title = title
+                return
+
+        config.window_title = persistent._save_window_title
 
     def Extraplus_show():
         """Show the Extra Plus interactions screen."""
-        store.player_zoom = store.mas_sprites.zoom_level
+        # store.player_zoom = store.mas_sprites.zoom_level
         store.disable_zoom_button = False
         mas_RaiseShield_dlg()
         extra_button_zoom()
@@ -328,14 +439,11 @@ init 5 python:
 
     def add_remv_chibi():
         """Toggle Chibika's visibility."""
-        screen_exists = renpy.get_screen("doki_chibi_idle")
-
-        if not screen_exists:
-            config.overlay_screens.append("doki_chibi_idle")
+        # Refactored to be a proper toggle function.
+        if extra_visible_chibi():
+            extra_remove_chibi()
         else:
-            if "doki_chibi_idle" in config.overlay_screens:
-                config.overlay_screens.remove("doki_chibi_idle")
-            renpy.hide_screen("doki_chibi_idle")
+            extra_init_chibi()
 
     def chibi_drag(drags, drop):
         """Handle Chibika's drag and drop movement."""
@@ -352,17 +460,16 @@ init 5 python:
         """Draw Chibika's accessories as a LiveComposite."""
         objects = LiveComposite(
             (119, 188),
-            (0, 0), MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/accessories/0/{}.png".format(persistent.chibi_accessory_1_)),
-            (0, 0), MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/accessories/1/{}.png".format(persistent.chibi_accessory_2_))
+            (0, 0), MASFilterSwitch(chibi_accessory_path_0.format(persistent.chibi_accessory_1_)),
+            (0, 0), MASFilterSwitch(chibi_accessory_path_1.format(persistent.chibi_accessory_2_))
             )
-            
         return objects, 0.1
 
     def plus_actual_doki(st, at):
         """Draw Chibika's current costume as a LiveComposite."""
         objects = LiveComposite(
             (119, 188),
-            (0, 0), MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{}.png".format(persistent.chibika_current_costume[2]))
+            (0, 0), MASFilterSwitch(chibi_sprite_path.format(persistent.chibika_current_costume[2]))
             )
         return objects, 0.1
 
@@ -644,6 +751,14 @@ init python:
         vars()[name] = acs
         store.mas_sprites.init_acs(acs)
 
+init -1 python:
+    class RPSChoice:
+        def __init__(self, name, value, image, beats):
+            self.name = name
+            self.value = value
+            self.image = image
+            self.beats = beats
+
 #====Minigames images
 image note_score = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/note_score.png")
 
@@ -686,10 +801,10 @@ image ttt_circle:
         linear 0.25 alpha 1.0
         
 #====RPS
-image e_paper = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/paper.png")
-image e_rock = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/rock.png")
-image e_scissors = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/scissors.png")
-image card_back = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/card_back.png")
+image extra_paper = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/paper.png")
+image extra_rock = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/rock.png")
+image extra_scissors = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/scissors.png")
+image extra_card_back = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/card_back.png")
 
 #====SG
 image extra_cup = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{}".format(sg_cup_skin))
@@ -875,7 +990,13 @@ screen sticker_customization():
 
 screen boop_revamped():
     #Displays the boop interaction menu, showing available zones (cheeks, head, nose, ears, hands) and related actions.
-    zorder 50
+    zorder 49
+
+    # This transparent button catches all mouse events.
+    imagebutton idle "mod_assets/other/transparent.png" action NullAction()
+
+    key "mouseup_1" action Function(mas_interactions.handle_primary_boop_action)
+    key "mouseup_3" action Function(mas_interactions.handle_alternate_boop_action)
 
     vbox:
         style_prefix "check"
@@ -883,8 +1004,9 @@ screen boop_revamped():
         xanchor 1.0
         xpos 1.0
         ypos 0.5
-        label _("Interactions\navailable:")
-        text _("Cheeks\n Head\n Nose\n Ears\n Hands\n") outlines [(2, "#808080", 0, 0)]
+        if not boop_war_active:
+            label _("Interactions\navailable:")
+            text _("Cheeks\n Head\n Nose\n Ears\n Hands\n") outlines [(2, "#808080", 0, 0)]
 
     vbox:
         style_prefix "hkb"
@@ -893,19 +1015,6 @@ screen boop_revamped():
         ypos 90
         textbutton _("Close") action Jump("close_boop_screen")
         textbutton _("Return") action Jump("return_boop_screen")
-
-    default extra_boop_zones = [
-        ("zonetwo", 550, 10, "monika_headpatbeta", "monika_headpat_long"),  # Head
-        ("zoneone", 618, 235, "monika_boopbeta", "monika_boopbeta_war"),  # Nose
-        ("zonethree", 675, 256, "monika_cheeksbeta", None),  # Right Cheek
-        ("zonethree", 570, 256, "monika_cheeksbeta", None),  # Left Cheek
-        ("zonefour", 600, 327, "monika_handsbeta", None),  # Hands
-        ("zoneone", 754, 195, "monika_earsbeta", None),  # Right Ear
-        ("zoneone", 514, 220, "monika_earsbeta", None)   # Left Ear / Hair
-    ]
-
-    for zone, xpos, ypos, primary_action, alt_action in extra_boop_zones:
-        imagebutton idle zone xpos xpos ypos ypos action Jump(primary_action) alternate (Jump(alt_action) if alt_action else None)
 
 screen button_custom_zoom():
     #Shows a button to open the custom zoom menu if the overlay is active.
@@ -982,30 +1091,24 @@ screen shell_game_minigame():
 screen RPS_mg():
     #Shows the Rock-Paper-Scissors minigame interface, with buttons for each choice and a quit button.
     zorder 50
-    #Letter from Monika
-    imagebutton idle "card_back":
+
+    # Monika's card back
+    imagebutton idle "extra_card_back":
         action NullAction()
         xalign 0.7
         yalign 0.1
-    #Rock
-    imagebutton idle "e_rock":
-        hover "e_rock" at hover_card
-        action [SetVariable("rps_your_choice", 1), Hide("RPS_mg"), Jump("rps_loop")]
-        xalign 0.5
-        yalign 0.7
-    #Paper
-    imagebutton idle "e_paper":
-        hover "e_paper" at hover_card
-        action [SetVariable("rps_your_choice", 2), Hide("RPS_mg"), Jump("rps_loop")]
-        xalign 0.7
-        yalign 0.7
-    #Scissors
-    imagebutton idle "e_scissors":
-        hover "e_scissors" at hover_card
-        action [SetVariable("rps_your_choice", 3), Hide("RPS_mg"), Jump("rps_loop")]
-        xalign 0.9
-        yalign 0.7
 
+    # Player's choices
+    $ x_positions = [0.5, 0.7, 0.9]
+    for i, choice in enumerate(extra_rps_choices):
+        imagebutton:
+            idle choice.image
+            hover choice.image at hover_card
+            action [SetVariable("rps_your_choice", choice.value), Hide("RPS_mg"), Jump("rps_loop")]
+            xalign x_positions[i]
+            yalign 0.7
+
+    # Quit button
     vbox:
         xpos 0.86
         yanchor 1.0
@@ -1048,8 +1151,8 @@ screen score_minigame(game=None):
         if game == "rps":
             first_text = "Monika"
             second_text = player
-            first_score = store.moni_wins
-            second_score = store.player_wins
+            first_score = store.extra_moni_wins
+            second_score = store.extra_player_wins
             
         elif game == "sg":
             first_text = "Turns"
@@ -1102,7 +1205,7 @@ screen extra_gen_list(extra_list, extra_area, others, close=None):
                 $ btn_action = Function(entry[0]) if hasattr(entry[0], "name") else Jump(entry[1])
                 textbutton _(btn_text):
                     xsize extra_area[2]
-                    action btn_action
+                    action btn_action 
 
         bar:
             style "classroom_vscrollbar"
@@ -1115,7 +1218,7 @@ screen extra_gen_list(extra_list, extra_area, others, close=None):
             yanchor 1.0
             textbutton _("Close") style "hkb_button" action Jump("close_extraplus")
 
-screen dating_loop(ask, label_boop, boop_enable=None):
+screen dating_loop(ask, label_boop, boop_enable=False):
     #Displays a simple menu for dating events, with a talk button and optional boop interaction.
     zorder 50
     vbox:
@@ -1130,7 +1233,7 @@ screen dating_loop(ask, label_boop, boop_enable=None):
             xpos 620 ypos 235
             action Jump(label_boop)
 
-screen _timer_monika(time):
+screen extra_timer_monika(time):
     #Runs a timer that sets a variable when finished, used for timed events.
     timer time action SetVariable("stop_snike_time", True)
 
@@ -1138,12 +1241,13 @@ screen boop_event(timelock, endlabel, editlabel):
     #Handles the boop war event, showing interactive zones and a score counter.
     timer timelock action Jump(endlabel)
     zorder 50
-    style_prefix "hkb"
-    #Noise
-    imagebutton:
-        idle "zoneone"
-        xpos 620 ypos 235
-        action Jump(editlabel)
+
+    # This transparent button ensures the screen can receive key events.
+    imagebutton idle "mod_assets/other/transparent.png" action NullAction()
+
+    # Use the same logic as the main boop screen to handle clicks.
+    # The handle_primary_boop_action function already knows what to do when boop_war_active is True.
+    key "mouseup_1" action Function(mas_interactions.handle_primary_boop_action)
 
 screen force_mouse_move():
     #Forces the mouse to move to a specific position, used for certain effects or minigames.

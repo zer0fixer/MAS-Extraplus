@@ -65,28 +65,7 @@ label cafe_cakes:
             m 3hka "I hope you at least have a cup of coffee!"
     m 3hua "Ehehe~"
     $ plus_snack_time = random.randint(60, 90)
-    show screen _timer_monika(plus_snack_time)
-    jump to_cafe_loop
-    return
-
-label monika_boopcafebeta:
-    show monika staticpose at t11
-    python:
-        is_eating = monika_chr.is_wearing_acs(extraplus_acs_chocolatecake) or monika_chr.is_wearing_acs(extraplus_acs_fruitcake)
-        if is_eating:
-            boop_eating_lines_with_expr = [
-                ("1eka", "Hey, I'm enjoying my dessert. Do it when I finish, okay?"),
-                ("1ttp", "Ah! You surprised me. Let me finish this bite first, ehehe~"),
-                ("3hua", "My mouth is full! But I appreciate the thought. *Boop* back at you later~")
-            ]
-            expression, dialogue = renpy.random.choice(boop_eating_lines_with_expr)
-        else:
-            boop_lines_with_expr = [
-                ("1hub", "*Boop*"), ("1eub", "Ehehe, you got me!"), ("1tub", "Right back at you, [player]! *Boop*")
-            ]
-            expression, dialogue = renpy.random.choice(boop_lines_with_expr)
-        renpy.show("monika " + expression)
-        renpy.say(m, dialogue)
+    show screen extra_timer_monika(plus_snack_time)
     jump to_cafe_loop
     return
 
@@ -357,33 +336,7 @@ label restaurant_cakes:
             m 3hka "Hopefully you at least have a drink with you!"
             m 3hua "Ehehe~"
     $ plus_snack_time = random.randint(800, 1100)
-    show screen _timer_monika(plus_snack_time)
-    jump to_restaurant_loop
-    return
-    
-label monika_booprestaurantbeta:
-    show monika staticpose at t11
-    python:
-        is_eating = ( monika_chr.is_wearing_acs(extraplus_acs_pasta) or
-            monika_chr.is_wearing_acs(extraplus_acs_pancakes) or
-            monika_chr.is_wearing_acs(extraplus_acs_waffles) or
-            monika_chr.is_wearing_acs(extraplus_acs_icecream) or
-            monika_chr.is_wearing_acs(extraplus_acs_pudding)
-        )
-        if is_eating:
-            boop_eating_lines_with_expr = [
-                ("1eka", "Hey, I'm trying to enjoy my food here. Do that when I'm done with it, please?"),
-                ("1ttp", "Ah! You surprised me. Let me finish this bite first, ehehe~"),
-                ("3hua", "My mouth is full! But you can boop me all you want when I'm done, okay [mas_get_player_nickname()]~?")
-            ]
-            expression, dialogue = renpy.random.choice(boop_eating_lines_with_expr)
-        else:
-            boop_lines_with_expr = [
-                ("1hub", "*Boop*"), ("1eub", "Ehehe, you got me!"), ("1tub", "Right back at you, [player]! *Boop*")
-            ]
-            expression, dialogue = renpy.random.choice(boop_lines_with_expr)
-        renpy.show("monika " + expression)
-        renpy.say(m, dialogue)
+    show screen extra_timer_monika(plus_snack_time)
     jump to_restaurant_loop
     return
 
@@ -534,7 +487,7 @@ label extra_talk_doing:
                 m "After all,{w=0.3} a day with [player] is never a day wasted!"
     
     jump to_restaurant_loop
-
+    
 label extra_talk_live:
     show monika staticpose at t11
     m 1eub "It depends,{w=0.3} [player]!"

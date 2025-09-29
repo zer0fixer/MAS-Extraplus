@@ -1,5 +1,5 @@
 #===========================================================================================
-# RETURN_LABELS
+# RETURN LABELS
 #===========================================================================================
 label screen_extraplus:
     show monika idle at t11
@@ -9,7 +9,7 @@ label screen_extraplus:
 label close_extraplus:
     show monika idle at t11
     python:
-        store.mas_sprites.zoom_level = store.player_zoom
+        # store.mas_sprites.zoom_level = store.player_zoom
         mas_DropShield_dlg()
         disable_button_zoom()
     jump ch30_visual_skip
@@ -18,8 +18,8 @@ label close_extraplus:
 label close_dev_extraplus:
     show monika idle at t11
     python:
-        store.mas_sprites.zoom_level = store.player_zoom
-        store.mas_sprites.adjust_zoom()
+        # store.mas_sprites.zoom_level = store.player_zoom
+        # store.mas_sprites.adjust_zoom()
         mas_DropShield_dlg()
         disable_button_zoom()
     jump ch30_visual_skip
@@ -27,36 +27,37 @@ label close_dev_extraplus:
 
 label show_boop_screen:
     show monika staticpose at t11
-    python:
-        store.disable_zoom_button = True
-        store.mas_sprites.reset_zoom()
+    $ store.boop_war_active = False
+    # Call the screen and wait for it to return a value (the label to jump to)
     call screen boop_revamped
+    # _return will contain the label name from the interactable
+    $ result = _return
+    if result:
+        jump expression result
+    else:
+        jump close_boop_screen
     return
 
 label return_boop_screen:
-    python:
-        store.mas_sprites.zoom_level = store.player_zoom
-        store.mas_sprites.adjust_zoom()
     jump screen_extraplus
     return
 
 label close_boop_screen:
     show monika idle at t11
-    python:
-        store.mas_sprites.zoom_level = store.player_zoom
-        store.mas_sprites.adjust_zoom()
-        disable_button_zoom()
+    # python:
+    #     store.mas_sprites.zoom_level = store.player_zoom
+    #     store.mas_sprites.adjust_zoom()
+    #     disable_button_zoom()
     jump ch30_visual_skip
     return
 
 label hide_images_rps:
-    hide e_rock
-    hide e_paper
-    hide e_scissors
-    hide e_rock_1
-    hide e_paper_1
-    hide e_scissors_1
-    $ rps_your_choice = 0
+    hide extra_rock
+    hide extra_paper
+    hide extra_scissors
+    hide extra_rock_1
+    hide extra_paper_1
+    hide extra_scissors_1
     call screen RPS_mg
     return
 
@@ -143,15 +144,17 @@ label cafe_talk:
 
 label to_cafe_loop:
     show monika staticpose at t11
-    if stop_snike_time and renpy.get_screen("_timer_monika"):
-        hide screen _timer_monika
+    if stop_snike_time and renpy.get_screen("extra_timer_monika"):
+        hide screen extra_timer_monika
         jump monika_no_dessert
+
     $ store.disable_zoom_button = False
-    call screen dating_loop("cafe_talk", "monika_boopcafebeta", boop_enable=True)
+    # NOTE: Boop during dates is disabled for now.
+    call screen dating_loop("cafe_talk", "monika_boopcafe", boop_enable=False)
     return
 
 label cafe_leave:
-    hide screen _timer_monika
+    hide screen extra_timer_monika
     show monika 1hua at t11
     m 1eta "Oh, you want us to go back?"
     m 1eub "Sounds good to me!"
@@ -264,15 +267,17 @@ label restaurant_talk:
 
 label to_restaurant_loop:
     show monika staticpose at t11
-    if stop_snike_time and renpy.get_screen("_timer_monika"):
-        hide screen _timer_monika
+    if stop_snike_time and renpy.get_screen("extra_timer_monika"):
+        hide screen extra_timer_monika
         jump monika_no_food
+
     $ store.disable_zoom_button = False
-    call screen dating_loop("restaurant_talk", "monika_booprestaurantbeta", boop_enable=True)
+    # NOTE: Boop during dates is disabled for now.
+    call screen dating_loop("restaurant_talk", "monika_booprestaurant", boop_enable=False)
     return
 
 label restaurant_leave:
-    hide screen _timer_monika
+    hide screen extra_timer_monika
     show monika 1hua at t11
     m 1eta "Oh,{w=0.3} you're ready for us to leave?"
     m 1eub "Sounds good to me!"
@@ -289,7 +294,7 @@ label restaurant_leave:
 #====Cafe====#
 
 label monika_no_dessert:
-    hide screen _timer_monika
+    hide screen extra_timer_monika
     show monika staticpose at t11
     if monika_chr.is_wearing_acs(extraplus_acs_fruitcake):
         python:
@@ -362,7 +367,7 @@ label cafe_hide_acs:
 #====Restaurant====#
 
 label monika_no_food:
-    hide screen _timer_monika
+    hide screen extra_timer_monika
     show monika staticpose at t11
     if monika_chr.is_wearing_acs(extraplus_acs_pasta):
         python:
@@ -493,6 +498,7 @@ label plus_minigames:
 label extraplus_tools:
     show monika idle at t21
     python:
+        store.player_zoom = store.mas_sprites.zoom_level
         tools_menu = [
             (_("View [m_name]'s Affection"), 'extra_aff_log'),
             (_("Create a gift for [m_name]"), 'plus_make_gift'),
