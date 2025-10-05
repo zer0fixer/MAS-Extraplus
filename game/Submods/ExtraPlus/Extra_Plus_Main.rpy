@@ -11,7 +11,7 @@ init -990 python in mas_submod_utils:
         author="ZeroFixer translated by MoyuTeam",
         name="Extra Plus",
         description=_("Expand your time with Monika with new minigames, dates, and interactions."),
-        version="1.3.2"
+        version="1.3.2.1"
     )
 
 #====Register the updater
@@ -854,7 +854,7 @@ screen sticker_customization():
 
         textbutton _("Close") action Jump("close_dev_extraplus")
         textbutton _("Return") action Jump("extraplus_tools")
-
+    
     frame:
         #xalign 0.5
         #yalign 0.5
@@ -866,7 +866,11 @@ screen sticker_customization():
             padding (10, 10, 10, 10)
             xpos 900
             yanchor 1.0
-            ypos 660
+            if not renpy.android:
+               ypos 660
+            else:
+               ypos 690
+            
 
             #label _("Chibi Settings"):
             #    xalign 0.5
@@ -881,20 +885,23 @@ screen sticker_customization():
                     #null height 30
                     textbutton _("[persistent.enable_drag_chibika]") action ToggleField(persistent, "enable_drag_chibika"):
                         xalign 0.5
-                    null height 5
+                    if not renpy.android:
+                        null height 5
                 #vbox:
                     label _("Always Show Chibi:"):
                         xalign 0.5
                     textbutton _("[persistent.hi_chibika]") action ToggleField(persistent, "hi_chibika"):
                         xalign 0.5
-                    null height 5
+                    if not renpy.android:
+                        null height 5
                 #vbox:
                     label _("Toggle Chibi Visibility:"):
                         xalign 0.5
                     #null height 10
                     textbutton _("Click to Show/Hide") action Function(add_remv_chibi):
                         xalign 0.3
-                    null height 5
+                    if not renpy.android:
+                        null height 5
 
             #null height 10
 
@@ -909,19 +916,22 @@ screen sticker_customization():
                     #null height 30
                     textbutton _("Choose Clothing!") action Jump("doki_change_appe"):
                         xalign 0.35
-                    null height 5
+                    if not renpy.android:
+                        null height 5
                 #vbox:
                     label _("Change Body Accessory:"):
                         xalign 0.5
                     textbutton _("Choose!") action Jump("sticker_primary"):
                         xalign 0.35
-                    null height 5
+                    if not renpy.android:
+                        null height 5
                 #vbox:
                     label _("Change Other Accessory:"):
                         xalign 0.5
                     textbutton _("Choice again!") action Jump("sticker_secondary"):
                         xalign 0.35
-                    null height 5
+                    if not renpy.android:
+                        null height 5
 
             #null height 10
 
@@ -945,10 +955,22 @@ screen boop_revamped():
         ypos 90
         textbutton _("Close") action Jump("close_boop_screen")
         textbutton _("Return") action Jump("return_boop_screen")
+    imagebutton:
+        idle "zonetwo"
+        xpos 550
+        ypos 10
+        action [Hide("submod_interactions"), Jump("monika_headpatbeta")]
+        alternate [Hide("submod_interactions"), Jump("monika_headpat_long")]
+    imagebutton:
+        idle "zoneone"
+        xpos 618
+        ypos 235
+        action [Hide("submod_interactions"), Jump("monika_boopbeta")]
+        alternate [Hide("submod_interactions"), Jump("monika_boopbeta_war")]
 
     default extra_boop_zones = [
-        ("zonetwo", 550, 10, "monika_headpatbeta", "monika_headpat_long"),  # Head
-        ("zoneone", 618, 235, "monika_boopbeta", "monika_boopbeta_war"),  # Nose
+        #("zonetwo", 550, 10, "monika_headpatbeta", "monika_headpat_long"),  # Head
+        #("zoneone", 618, 235, "monika_boopbeta", "monika_boopbeta_war"),  # Nose
         ("zonethree", 675, 256, "monika_cheeksbeta", None),  # Right Cheek
         ("zonethree", 570, 256, "monika_cheeksbeta", None),  # Left Cheek
         ("zonefour", 600, 327, "monika_handsbeta", None),  # Hands
