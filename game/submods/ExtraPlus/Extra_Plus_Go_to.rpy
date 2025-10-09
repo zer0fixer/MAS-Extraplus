@@ -64,7 +64,7 @@ label cafe_cakes:
             m 1ekb "I'd give you mine, but your screen limits me from doing so..."
             m 3hka "I hope you at least have a cup of coffee!"
     m 3hua "Ehehe~"
-    $ plus_snack_time = random.randint(60, 90)
+    $ plus_snack_time = random.randint(800, 1100)
     show screen extra_timer_monika(plus_snack_time)
     jump to_cafe_loop
     return
@@ -760,3 +760,13 @@ label generic_date_dev:
     call screen dialog("It is currently in development and will be available in upcoming betas!", ok_action=Return())
     jump screen_extraplus
     return
+
+label extra_labrary_date:
+    show monika idle at t11
+    python:
+        HKBHideButtons()
+    hide monika
+    scene black
+    with dissolve
+    pause 2.0
+    call mas_background_change(submod_background_extralibrary, skip_leadin=True, skip_outro=True)

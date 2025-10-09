@@ -2,6 +2,29 @@
 # MINIGAME#1
 #===========================================================================================
 #====Shell Game
+image note_score = MASFilterSwitch("Submods/ExtraPlus/minigames/shellgame/note_score.png")
+image extra_cup = MASFilterSwitch("Submods/ExtraPlus/minigames/shellgame/{}".format(sg_cup_skin))
+image extra_cup_hover = MASFilterSwitch("Submods/ExtraPlus/minigames/shellgame/cup_hover.png")
+image extra_cup_idle = im.Scale("mod_assets/other/transparent.png", 200, 260)
+image extra_ball = MASFilterSwitch("Submods/ExtraPlus/minigames/shellgame/ball.png")
+image extra_sg_cup:
+    xanchor 0.5 yanchor 0.5
+    contains:
+        "extra_cup"
+        xalign 0.5 yalign 0.5
+image extra_sg_cup_hover:
+    contains:
+        "extra_cup_hover"
+        xalign 0.5 yalign 0.5
+image extra_sg_cup_idle:
+    contains:
+        "extra_cup_idle"
+        xalign 0.5 yalign 0.
+image extra_sg_ball:
+    xanchor 0.5 yanchor 0.5
+    contains:
+        "extra_ball"
+        xalign 0.5 yalign 0.5
 default persistent.sg_max_score = 0
 default sg_target_shuffles = 4
 define sg_original_cup = [0, 1, 2]
@@ -15,7 +38,7 @@ default sg_plus_comment = False
 default sg_cup_choice = None
 define sg_cup_coordinates = [695, 925, 1155]
 default sg_cup_coordinates_real = [695, 925, 1155]
-define sg_cup_list = ["cup.png", "cup_monika.png", "cup_yuri.png", "cup_natsuki.png", "cup_sayori.png"]
+define sg_cup_list = ["cup.png", "monika.png", "yuri.png", "natsuki.png", "sayori.png"]
 default sg_cup_skin = None
 
 label minigame_sg:
@@ -78,44 +101,44 @@ label sg_init_game:
     show monika 1eua at t21
     pause 0.2
 
-    show cup zorder 12 as cup_1:
+    show extra_sg_cup zorder 12 as cup_1:
         xpos sg_cup_coordinates[0] ypos -400
         easein_bounce 0.5 ypos 250
 
-    show cup zorder 12 as cup_2:
+    show extra_sg_cup zorder 12 as cup_2:
         xpos sg_cup_coordinates[1] ypos -400
         pause 0.1
         easein_bounce 0.5 ypos 250
 
-    show cup zorder 12 as cup_3:
+    show extra_sg_cup zorder 12 as cup_3:
         xpos sg_cup_coordinates[2] ypos -400
         pause 0.2
         easein_bounce 0.5 ypos 250
 
     pause 1.0
 
-    show ball zorder 12 behind cup_2:
+    show extra_sg_ball zorder 12 behind cup_2:
         xpos sg_cup_coordinates[1] ypos 335
 
-    show cup as cup_2:
+    show extra_sg_cup as cup_2:
         linear 0.5 ypos 110
 
     m 1lub "The ball always starts under the center cup."
 
-    show cup as cup_2:
+    show extra_sg_cup as cup_2:
         linear 0.5 ypos 250
 
     m 1hub "Watch carefully where it is!"
 
-    hide ball
+    hide extra_sg_ball
 
-    show cup as cup_1:
+    show extra_sg_cup as cup_1:
         xpos sg_cup_coordinates[0] ypos 250
 
-    show cup as cup_2:
+    show extra_sg_cup as cup_2:
         xpos sg_cup_coordinates[1] ypos 250
 
-    show cup as cup_3:
+    show extra_sg_cup as cup_3:
         xpos sg_cup_coordinates[2] ypos 250
 
     python:
@@ -151,15 +174,15 @@ label sg_loop_game:
 
     $ renpy.pause(sg_cup_speed, hard='True')
 
-    play sound "Submods/ExtraPlus/submod_assets/sfx/cup_shuffle.mp3"
+    play sound "Submods/ExtraPlus/sfx/cup_shuffle.mp3"
 
-    show cup as cup_1:
+    show extra_sg_cup as cup_1:
         ease sg_cup_speed xpos sg_cup_coordinates_real[0]
 
-    show cup as cup_2:
+    show extra_sg_cup as cup_2:
         ease sg_cup_speed xpos sg_cup_coordinates_real[1]
 
-    show cup as cup_3:
+    show extra_sg_cup as cup_3:
         ease sg_cup_speed xpos sg_cup_coordinates_real[2]
 
     if sg_shuffle_cups != (sg_target_shuffles - 1):
@@ -176,13 +199,13 @@ label sg_check_label:
 
     hide screen shell_game_minigame
 
-    show cup as cup_1:
+    show extra_sg_cup as cup_1:
         xpos sg_cup_coordinates[0] ypos 250
 
-    show cup as cup_2:
+    show extra_sg_cup as cup_2:
         xpos sg_cup_coordinates[1] ypos 250
 
-    show cup as cup_3:
+    show extra_sg_cup as cup_3:
         xpos sg_cup_coordinates[2] ypos 250
     python:
         store.sg_cup_coordinates_real[0] = 695
@@ -205,18 +228,18 @@ label sg_check_label:
         call sg_reveal_cup(sg_ball_position, is_chosen=False)
         m 1hua "This!"
 
-    show cup as cup_1:
+    show extra_sg_cup as cup_1:
         linear 0.5 xpos sg_cup_coordinates[0] ypos 250
 
-    show cup as cup_2:
+    show extra_sg_cup as cup_2:
         linear 0.5 xpos sg_cup_coordinates[1] ypos 250
 
-    show cup as cup_3:
+    show extra_sg_cup as cup_3:
         linear 0.5 xpos sg_cup_coordinates[2] ypos 250
 
     pause 1.0
 
-    hide ball
+    hide extra_sg_ball
     python:
         store.sg_current_turn += 1
         store.sg_shuffle_cups = 0
@@ -229,22 +252,22 @@ label sg_check_label:
 
 label sg_reveal_cup(cup_index, is_chosen):
     if cup_index == 0:
-        show cup as cup_1:
+        show extra_sg_cup as cup_1:
             linear 0.5 ypos 110
         if cup_index == sg_ball_position:
-            show ball zorder 12 behind cup_1:
+            show extra_sg_ball zorder 12 behind cup_1:
                 xpos sg_cup_coordinates[0] ypos 335
     elif cup_index == 1:
-        show cup as cup_2:
+        show extra_sg_cup as cup_2:
             linear 0.5 ypos 110
         if cup_index == sg_ball_position:
-            show ball zorder 12 behind cup_2:
+            show extra_sg_ball zorder 12 behind cup_2:
                 xpos sg_cup_coordinates[1] ypos 335
     elif cup_index == 2:
-        show cup as cup_3:
+        show extra_sg_cup as cup_3:
             linear 0.5 ypos 110
         if cup_index == sg_ball_position:
-            show ball zorder 12 behind cup_3:
+            show extra_sg_ball zorder 12 behind cup_3:
                 xpos sg_cup_coordinates[2] ypos 335
 
     if is_chosen and cup_index == sg_ball_position:
@@ -262,15 +285,15 @@ label shell_game_result:
         enable_esc()
         mas_MUMUDropShield()
         renpy.game.preferences.afm_enable = afm_pref
-    hide ball
-    show cup as cup_1:
+    hide extra_sg_ball
+    show extra_sg_cup as cup_1:
         xpos sg_cup_coordinates[0] ypos 250
         easeout_expo 0.5 ypos -400
-    show cup as cup_2:
+    show extra_sg_cup as cup_2:
         xpos sg_cup_coordinates[1] ypos 250
         pause 0.1
         easeout_expo 0.5 ypos -400
-    show cup as cup_3:
+    show extra_sg_cup as cup_3:
         xpos sg_cup_coordinates[2] ypos 250
         pause 0.2
         easeout_expo 0.5 ypos -400

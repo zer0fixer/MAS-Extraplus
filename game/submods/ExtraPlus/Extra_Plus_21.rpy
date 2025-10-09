@@ -1,8 +1,9 @@
 #===========================================================================================
 # MINIGAME#4
 #===========================================================================================
-image bjcard back = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/cards/back.png")
-image bg desk_21 = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/cards/background.png")
+image bjcard back = MASFilterSwitch("Submods/ExtraPlus/minigames/blackjack/back.png")
+image bg desk_21 = MASFilterSwitch("Submods/ExtraPlus/minigames/blackjack/background.png")
+image bj_name_plate = MASFilterSwitch("Submods/ExtraPlus/minigames/blackjack/name.png")
 default blackjack_player_wins = 0
 default blackjack_monika_wins = 0
 default persistent.blackjack_win_game = [False, False, False] #Player, Monika and Tie. Quit [FFF]
@@ -13,7 +14,7 @@ init python:
         for value in range(1, 14):
             renpy.image(
                 "card {} {}".format(suit, value),
-                MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/cards/{}/{}.png".format(suit, value))
+                MASFilterSwitch("Submods/ExtraPlus/minigames/blackjack/{}/{}.png".format(suit, value))
             )
     
     class BJ_Card(object):
@@ -86,8 +87,8 @@ screen blackjack_ui:
     key "mouseup_3" action NullAction()
     zorder 25
     use blackjack_stats()
-    add MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/bj_name.png") pos (548, 33) anchor (0, 0) zoom 0.7
-    add MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/bj_name.png") pos (548, 375) anchor (0, 0) zoom 0.7
+    add "bj_name_plate" pos (548, 33) anchor (0, 0) zoom 0.7
+    add "bj_name_plate" pos (548, 375) anchor (0, 0) zoom 0.7
     fixed:
         xalign 0.5 ypos 0.05
         xysize (1400, 650)
@@ -136,7 +137,7 @@ screen blackjack_player():
 
 screen blackjack_stats():
     style_prefix "hkb"
-    add MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/bj_score.png") pos (5, 350) anchor (0, 0) zoom 0.6 at score_rotate_left
+    add MASFilterSwitch("Submods/ExtraPlus/minigames/blackjack/score.png") pos (5, 350) anchor (0, 0) zoom 0.6 at score_rotate_left
     text _("Monika: [blackjack_monika_wins]") style "monika_text" size 25 pos (80, 380) anchor (0, 0.5) at score_rotate_left
     text _("You: [blackjack_player_wins]") style "monika_text" size 25 pos (100, 420) anchor (0, 0.5) at score_rotate_left
     vbox:

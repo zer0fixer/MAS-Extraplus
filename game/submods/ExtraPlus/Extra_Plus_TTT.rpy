@@ -2,7 +2,46 @@
 # MINIGAME#2
 #===========================================================================================
 #====Tic-Tac-Toe
+image notebook = MASFilterSwitch("Submods/ExtraPlus/minigames/tictactoe/notebook.png")
+image line_black = MASFilterSwitch("Submods/ExtraPlus/minigames/tictactoe/line.png")
+image line_player = MASFilterSwitch("Submods/ExtraPlus/minigames/tictactoe/player.png")
+image line_moni = MASFilterSwitch("Submods/ExtraPlus/minigames/tictactoe/monika.png")
+image ttt_cross:
+    Text(Minigame_TTT[0],
+        font = Pictograms_font,
+        size = 180,
+        color = Minigame_TTT[1],
+        outlines = []
+    )
+    on show:
+        alpha 0.5
+        linear 0.25 alpha 1.0
+image ttt_cross_cursor:
+    Text(Minigame_TTT[0],
+        font = Pictograms_font,
+        size = 180,
+        color = Minigame_TTT[1],
+        outlines = []
+    )
+    alpha 0.25
+    truecenter
+image ttt_circle:
+    Text(Minigame_TTT[2],
+        font = Pictograms_font,
+        size = 180,
+        color = Minigame_TTT[3],
+        outlines = []
+    )
+    on show:
+        alpha 0.0
+        linear 0.25 alpha 1.0
 default persistent.ttt_result_game = [False, False, False] #Player, Monika and Tie. Quit [FFF]
+default Minigame_TTT = [
+    "'",
+    "#0142a4",
+    "0",
+    "#a80000"
+]
 
 init 10 python:
     def ttt_prep(self, restart = False, *args, **kwargs):
@@ -56,7 +95,7 @@ init 10 python:
                     fig = "circle"
                     if ttt.playerTurn:
                         fig = "cross"
-                    renpy.play("Submods/ExtraPlus/submod_assets/sfx/ttt_"+ fig + ".ogg", "sound")
+                    renpy.play("Submods/ExtraPlus/sfx/ttt_"+ fig + ".ogg", "sound")
 
                     ttt.state = ttt_new_state()
                     ttt_check_state()

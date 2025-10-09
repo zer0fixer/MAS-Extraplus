@@ -538,7 +538,7 @@ label extra_coinflip:
     show coin_moni zorder 12 at rotatecoin:
         xalign 0.5
         yalign 0.5
-    play sound "Submods/ExtraPlus/submod_assets/sfx/coin_flip_sfx.ogg"
+    play sound "Submods/ExtraPlus/sfx/coin_flip_sfx.ogg"
     pause 1.0
     hide coin_moni
     show monika 1eua
@@ -603,46 +603,51 @@ label extra_mas_backup_fail:
 label extra_window_title:
     show monika idle at t21
     python:
+        # Updated menu with three distinct options
         window_menu = [
-            (_("Change the window's title"), 'extra_change_title'),
+            (_("Type a new title"), 'extra_change_title_manual'),
+            (_("Paste title from clipboard"), 'extra_change_title_paste'),
             (_("Restore the window title"), 'extra_restore_title')
         ]
 
         items = [(_("Nevermind"), 'extraplus_tools', 20)]
     call screen extra_gen_list(window_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
     return
-    
-label extra_change_title:
+
+label extra_change_title_manual:
     show monika idle at t11
     python:
         player_input = mas_input(
-            prompt =_("What should our new window title be?"),
+            prompt=_("What should our new window title be?"),
             allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!?()~-_.,'0123456789",
-            screen_kwargs={"use_return_button": True, "return_button_value": "cancel"})
-
-        if not player_input:
-            renpy.jump("extra_change_title")
-
-        elif player_input == "cancel":
-            renpy.jump("extra_window_title")
-
-        else:
-            persistent._save_window_title = player_input
-            config.window_title = persistent._save_window_title
-            #La base de datos ha sido actualizada!
-            change_messages = [
-                _("Title updated successfully!"),
-                _("All set! The new title is in place."),
-                _("Done! Your window has a fresh new title."),
-                _("Change complete! Enjoy your new title."),
-                _("The title has been updated!"),
-                _("Success! The title has been changed."),
-                _("Updated! Your window looks great with the new title.")
-            ]
-            random_message = random.choice(change_messages)
-            renpy.notify(random_message)
-            renpy.jump("close_extraplus")
+            screen_kwargs={"use_return_button": True, "return_button_value": "cancel"}
+        )
+    if player_input and player_input != "cancel":
+        jump process_new_title
+    else:
+        jump extra_window_title
     return
+
+label extra_change_title_paste:
+    show monika idle at t11
+    python:
+        allowed_chars = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!?()~-_.,'0123456789"
+        player_input = filtered_clipboard_text(allowed_chars)
+    if player_input and player_input != "cancel":
+        jump process_new_title
+    else:
+        jump extra_window_title
+    return
+
+label process_new_title:
+    $ persistent._save_window_title = player_input.strip()
+    $ config.window_title = persistent._save_window_title
+    $ renpy.notify(random.choice([
+        _("Title updated successfully!"),
+        _("All set! The new title is in place."),
+        _("Done! Your window has a fresh new title.")
+    ]))
+    jump close_extraplus
 
 label extra_restore_title:
     show monika idle at t11

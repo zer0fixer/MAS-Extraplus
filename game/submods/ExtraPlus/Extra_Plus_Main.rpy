@@ -11,7 +11,8 @@ init -990 python in mas_submod_utils:
         author="ZeroFixer",
         name="Extra Plus",
         description="Expand your time with Monika with new minigames, dates, and interactions.",
-        version="1.3.3"
+        version="1.3.3",
+        settings_pane="_extra_plus_submod_settings"
     )
 
 #====Register the updater
@@ -77,34 +78,36 @@ default persistent.extra_boop = [0, 0, 0] #Hands, Ears.
 define chibi_xpos = 0.05
 default chibika_y_position = 345 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else 385
 default dating_ypos_value = 555 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else 595
-default persistent.chibika_current_costume = blanket_monika
-default persistent.current_sticker_dokis = blanket_monika
 default persistent.chibika_drag_x = chibi_xpos
 default persistent.chibika_drag_y = 385
 
-define -1 blanket_monika = ["sticker_up", "sticker_sleep", "sticker_baka"]
-define -1 blanket_nat = ["nat_up", "nat_sleep", "nat_baka"]
-define -1 blanket_sayo = ["sayo_up", "sayo_sleep", "sayo_baka"]
-define -1 blanket_yuri = ["yuri_up", "yuri_sleep", "yuri_baka"]
-define -1 android_chibi = ["android_sticker", "android_sticker_blink", "android_sticker_cat"]
-define -1 casual_chibi = ["casual_sticker", "casual_sticker_blink", "casual_sticker_happy"]
-define -1 bikini_chibi = ["bikini_sticker", "bikini_sticker_blink", "bikini_sticker_happy"]
+# Data structure for chibi outfits
+# (Doki Name, Base Sprite Name, Blink State, Hover State)
+define -1 blanket_monika = ("darling", "idle", "blink", "hover")
+define -1 blanket_nat = ("cupcake", "idle", "blink", "hover")
+define -1 blanket_sayo = ("cinnamon", "idle", "blink", "hover")
+define -1 blanket_yuri = ("teacup", "idle", "blink", "hover")
+define -1 android_monika = ("darling", "android_idle", "android_blink", "android_hover")
+define -1 casual_monika = ("darling", "casual_idle", "casual_blink", "casual_hover")
+define -1 bikini_monika = ("darling", "bikini_idle", "bikini_blink", "bikini_hover")
 
-default monika_costumes_ = [("Blanket", blanket_monika), ("Android", android_chibi), ("Casual", casual_chibi)]
-default natsuki_costumes_ = [("Blanket", blanket_nat)]
-default sayori_costumes_ = [("Blanket", blanket_sayo)]
-default yuri_costumes_ = [("Blanket", blanket_yuri)]
+default persistent.chibika_current_costume = blanket_monika
 
-define -1 chibi_sprites_0 = []
-define -1 chibi_sprites_1 = []
+define monika_costumes_ = [
+    ("Blanket", blanket_monika), ("Android", android_monika), ("Casual", casual_monika)
+]
+define natsuki_costumes_ = [("Blanket", blanket_nat)]
+define sayori_costumes_ = [("Blanket", blanket_sayo)]
+define yuri_costumes_ = [("Blanket", blanket_yuri)]
+
 default -1 persistent.chibi_accessory_1_ = "0nothing"
 default -1 persistent.chibi_accessory_2_ = "0nothing"
 default -1 persistent.hi_chibika = False
 default -1 persistent.enable_drag_chibika = False
 
-define chibi_sprite_path = "Submods/ExtraPlus/submod_assets/sprites/{}.png"
-define chibi_accessory_path_0 = "Submods/ExtraPlus/submod_assets/sprites/accessories/0/{}.png"
-define chibi_accessory_path_1 = "Submods/ExtraPlus/submod_assets/sprites/accessories/1/{}.png"
+define chibi_sprite_path = "Submods/ExtraPlus/chibis/{}.png"
+define chibi_accessory_path_0 = "Submods/ExtraPlus/chibis/accessories_0/{}.png"
+define chibi_accessory_path_1 = "Submods/ExtraPlus/chibis/accessories_1/{}.png" 
 
 #====ExtraPlus Buttons
 define minigames_menu = []
@@ -114,13 +117,7 @@ define walk_menu = []
 #====Misc
 default last_affection_notify_time = 0
 default stop_snike_time = False
-default Minigame_TTT = [
-    "'",
-    "#0142a4",
-    "0",
-    "#a80000"
-]
-define -1 Pictograms_font = "Submods/ExtraPlus/submod_assets/Pictograms.ttf"
+define -1 Pictograms_font = "Submods/ExtraPlus/others/pictograms_icons.ttf"
 default plus_snack_time = None
 default moldable_variable = None
 define 3 extra_plus_file = os.path.join(renpy.config.basedir, "game", "Submods", "ExtraPlus", "Extra_Plus_Main.rpy")
@@ -318,6 +315,15 @@ init 5 python:
     import time
     import datetime
 
+    def migrate_chibi_costume_data():
+        """
+        Converts the data structure of `persistent.chibika_current_costume` from the
+        old version (list of strings) to the new one (tuple with doki name).
+        """
+        if isinstance(persistent.chibika_current_costume, list):
+            # If it's a list, it's the old format. We assume it's Monika with a blanket.
+            persistent.chibika_current_costume = blanket_monika
+
     def make_bday_oki_doki():
         """Creates the 'oki doki' file for Monika's birthday surprise."""
         config.overlay_screens.remove("bday_oki_doki")
@@ -381,7 +387,7 @@ init 5 python:
         if store.persistent._mas_pm_cares_about_dokis:
             store.sg_cup_skin = renpy.random.choice(sg_cup_list)
         else:
-            store.sg_cup_skin = renpy.random.choice(["cup.png", "cup_monika.png"])
+            store.sg_cup_skin = renpy.random.choice(["cup.png", "monika.png"])
 
     def save_title_windows():
         """Set the window title based on special days or default."""
@@ -467,11 +473,38 @@ init 5 python:
 
     def plus_actual_doki(st, at):
         """Draw Chibika's current costume as a LiveComposite."""
+        # The new structure is (doki_folder, base_sprite, blink_sprite, hover_sprite)
+        doki_folder, _, _, hover_sprite = persistent.chibika_current_costume
+        
+        # Builds the full path to the hover image
+        image_path = "Submods/ExtraPlus/chibis/{0}/{1}.png".format(doki_folder, hover_sprite)
+
         objects = LiveComposite(
             (119, 188),
-            (0, 0), MASFilterSwitch(chibi_sprite_path.format(persistent.chibika_current_costume[2]))
+            (0, 0), MASFilterSwitch(image_path)
             )
         return objects, 0.1
+
+    def chibi_blink_effect(st, at):
+        """
+        Dynamically creates the chibi's blink effect.
+        This function is necessary for compatibility with Ren'Py 6.99.
+        """
+        doki_folder = persistent.chibika_current_costume[0]
+        base_sprite = persistent.chibika_current_costume[1]
+        blink_sprite = persistent.chibika_current_costume[2]
+
+        base_path = "Submods/ExtraPlus/chibis/{0}/{1}.png".format(doki_folder, base_sprite)
+        blink_path = "Submods/ExtraPlus/chibis/{0}/{1}.png".format(doki_folder, blink_sprite)
+
+        # We recreate the ATL block as a Ren'Py object compatible with 6.99
+        # The correct syntax for this version is to pass the arguments separately: image, pause, image, pause...
+        blink_animation = renpy.display.anim.Animation(
+            MASFilterSwitch(base_path), 3.0 + renpy.random.random() * 4, # Random pause between 3 and 7 seconds
+            MASFilterSwitch(blink_path), 0.06,
+            MASFilterSwitch(base_path), 0.02 + renpy.random.random() * 2 # Short random pause
+        )
+        return blink_animation, 0.1
 
     #====Zoom edit
     def extra_visible_zoom():
@@ -624,6 +657,29 @@ init 5 python:
 
         return stats
 
+    def filtered_clipboard_text(allowed_chars):
+        """
+        Gets text from the clipboard, filters it based on allowed_chars, and returns the result.
+        Compatible with Ren'Py 6.99 using pygame.
+        Returns the filtered text, or "cancel" if the clipboard is empty or an error occurs.
+        """
+        import pygame
+        try:
+            pygame.scrap.init()
+            clipboard_bytes = pygame.scrap.get(pygame.scrap.SCRAP_TEXT)
+
+            if clipboard_bytes:
+                clipboard_text = clipboard_bytes.decode('utf-8', 'ignore')
+                return "".join(char for char in clipboard_text if char in allowed_chars)
+            else:
+                renpy.notify(_("Your clipboard is empty."))
+                return "cancel"
+        except Exception as e:
+            # Failsafe in case clipboard access is blocked or fails
+            renpy.notify(_("Could not access clipboard."))
+            return "cancel"
+
+    migrate_chibi_costume_data()
     ExtraButton()
     extra_rng_cup()
     save_title_windows()
@@ -690,11 +746,12 @@ init -1 python:
             file_path = os.path.join(renpy.config.basedir, 'characters', self.gift)
             with open(file_path, 'a') as f:
                 messages = [
-                    _("All set! I've created the '{}' file for you to give to Monika.").format(self.name),
-                    _("Here you go! One fresh '{}'. I hope Monika loves it!").format(self.name),
-                    _("Job's done! The '{}' gift is ready in the 'characters' folder.").format(self.name),
-                    _("Perfect! You can find the '{}' file now. Monika's going to be so happy!").format(self.name),
-                    _("A '{}' for Monika! How thoughtful. It's all ready for you.").format(self.name)
+                    _("All set! The '{}' gift is ready for you.").format(self.name),
+                    _("Here's a '{}' for Monika! I hope she loves it.").format(self.name),
+                    _("Perfect! Your '{}' is ready for Monika.").format(self.name),
+                    _("A '{}' for Monika! It's all set.").format(self.name),
+                    _("Your '{}' gift has been created!").format(self.name),
+                    _("One '{}' gift, coming right up! It's ready.").format(self.name)
                 ]
                 renpy.notify(random.choice(messages))
             renpy.jump('plus_make_gift')
@@ -729,7 +786,7 @@ init -1 python:
 # IMAGES
 #===========================================================================================
 init python:
-    plus_accessories = [
+    extraplus_accessories = [
         ("extraplus_acs_chocolatecake", "chocolatecake", MASPoseMap(default="0", use_reg_for_l=True), True),
         ("extraplus_acs_fruitcake", "fruitcake", MASPoseMap(default="0", use_reg_for_l=True), True),
         ("extraplus_acs_emptyplate", "emptyplate", MASPoseMap(default="0", use_reg_for_l=True), True),
@@ -745,13 +802,12 @@ init python:
         ("extraplus_acs_remptyplate", "extraplus_remptyplate", MASPoseMap(default="0", use_reg_for_l=True), True)
     ]
 
-    for info in plus_accessories:
+    for info in extraplus_accessories:
         name = info[0]
         acs = MASAccessory(*info)
         vars()[name] = acs
         store.mas_sprites.init_acs(acs)
 
-init -1 python:
     class RPSChoice:
         def __init__(self, name, value, image, beats):
             self.name = name
@@ -759,120 +815,26 @@ init -1 python:
             self.image = image
             self.beats = beats
 
-#====Minigames images
-image note_score = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/note_score.png")
-
-#====TTT
-image notebook = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/notebook.png")
-image line_black = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/line.png")
-image line_player = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/line_player.png")
-image line_moni = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/line_moni.png")
-image ttt_cross:
-    Text(
-        Minigame_TTT[0],
-        font = Pictograms_font,
-        size = 180,
-        color = Minigame_TTT[1],
-        outlines = []
-    )
-    on show:
-        alpha 0.5
-        linear 0.25 alpha 1.0
-image ttt_cross_cursor:
-    Text(
-        Minigame_TTT[0],
-        font = Pictograms_font,
-        size = 180,
-        color = Minigame_TTT[1],
-        outlines = []
-    )
-    alpha 0.25
-    truecenter
-image ttt_circle:
-    Text(
-        Minigame_TTT[2],
-        font = Pictograms_font,
-        size = 180,
-        color = Minigame_TTT[3],
-        outlines = []
-    )
-    on show:
-        alpha 0.0
-        linear 0.25 alpha 1.0
-        
-#====RPS
-image extra_paper = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/paper.png")
-image extra_rock = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/rock.png")
-image extra_scissors = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/scissors.png")
-image extra_card_back = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/card_back.png")
-
-#====SG
-image extra_cup = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{}".format(sg_cup_skin))
-image extra_cup_hover = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/cup_hover.png")
-image extra_cup_idle = im.Scale("mod_assets/other/transparent.png", 200, 260)
-image extra_ball = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/ball.png")
-image cup:
-    xanchor 0.5 yanchor 0.5
-    contains:
-        "extra_cup"
-        xalign 0.5 yalign 0.5
-image cup_hover:
-    contains:
-        "extra_cup_hover"
-        xalign 0.5 yalign 0.5
-image cup_idle:
-    contains:
-        "extra_cup_idle"
-        xalign 0.5 yalign 0.
-image ball:
-    xanchor 0.5 yanchor 0.5
-    contains:
-        "extra_ball"
-        xalign 0.5 yalign 0.5
-
-#====Chibika
-image chibi_blink_effect:
-    block:
-        MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{}.png".format(persistent.chibika_current_costume[0]))
-        block:
-            choice:
-                3
-            choice:
-                5
-            choice:
-                7
-        MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{}.png".format(persistent.chibika_current_costume[1]))
-        choice 0.02:
-            block:
-                choice:
-                    8
-                choice:
-                    6
-                choice:
-                    4
-                MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/{}.png".format(persistent.chibika_current_costume[0]))
-        choice 0.098:
-            pass
-        0.06
-        repeat
-
-image chibika_base = LiveComposite(
+#====Chibi
+# An image is not defined directly; a dynamic function will be used instead
+image extra_chibi_base = LiveComposite(
     (119, 188),
-    (0, 40), "chibi_blink_effect",
+    # We use a DynamicDisplayable to build the animation in Python
+    (0, 40), DynamicDisplayable(chibi_blink_effect),
     (0, 0), DynamicDisplayable(chibi_draw_sprites)
     )
 
-image hover_sticker = LiveComposite(
+image extra_chibi_hover = LiveComposite(
     (119, 188), 
     (0, 40), DynamicDisplayable(plus_actual_doki),
     (0, 0), DynamicDisplayable(chibi_draw_sprites)
     )
 
 #====Coin
-image coin_heads = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/coin_heads.png")
-image coin_tails = MASFilterSwitch("Submods/ExtraPlus/submod_assets/sprites/coin_tails.png")
-image sprite_coin = anim.Filmstrip("Submods/ExtraPlus/submod_assets/sprites/sprite_coin.png", (100, 100), (3, 2), .125, loop=True)
-image sprite_coin_n = anim.Filmstrip("Submods/ExtraPlus/submod_assets/sprites/sprite_coin-n.png", (100, 100), (3, 2), .125, loop=True)
+image coin_heads = MASFilterSwitch("Submods/ExtraPlus/others/coin_heads.png")
+image coin_tails = MASFilterSwitch("Submods/ExtraPlus/others/coin_tails.png")
+image sprite_coin = anim.Filmstrip("Submods/ExtraPlus/others/sprite_coin.png", (100, 100), (3, 2), .125, loop=True)
+image sprite_coin_n = anim.Filmstrip("Submods/ExtraPlus/others/sprite_coin-n.png", (100, 100), (3, 2), .125, loop=True)
 image coin_moni:
     ConditionSwitch(
         "mas_isDayNow()", "sprite_coin",
@@ -888,7 +850,7 @@ image zonefour = im.Scale("mod_assets/other/transparent.png", 90, 60)
 image monika staticpose = monika_extraplus
 
 #====Misc
-image maxwell_animation = anim.Filmstrip("Submods/ExtraPlus/submod_assets/sprites/others/MaxwellCat.png", (297, 300), (10, 15), 0.0900, loop=False)
+image maxwell_animation = anim.Filmstrip("Submods/ExtraPlus/others/maxwell_cat.png", (297, 300), (10, 15), 0.0900, loop=False)
 
 #===========================================================================================
 # SCREEN
@@ -925,9 +887,9 @@ screen extraplus_interactions():
 
         textbutton _("Close") action Jump("close_extraplus")
         textbutton _("Date") action Jump("plus_walk")
-        textbutton _("Games") action If(mas_affection._get_aff() >= 30, true=Jump("plus_minigames"), false=None)
+        textbutton _("Games") action If(mas_affection._get_aff() >= 30, true=Jump("plus_minigames"), false=NullAction())
         textbutton _("Tools") action Jump("extraplus_tools")
-        textbutton _("Boop") action If(mas_affection._get_aff() >= 30, true=Jump("show_boop_screen"), false=None)
+        textbutton _("Boop") action If(mas_affection._get_aff() >= 30, true=Jump("show_boop_screen"), false=NullAction())
 
 #====GAME
 screen sticker_customization():
@@ -1006,7 +968,7 @@ screen boop_revamped():
         ypos 0.5
         if not boop_war_active:
             label _("Interactions\navailable:")
-            text _("Cheeks\n Head\n Nose\n Ears\n Hands\n") outlines [(2, "#808080", 0, 0)]
+            text _(" Cheeks\n Head\n Nose\n Ears\n Hands\n") outlines [(2, "#808080", 0, 0)]
 
     vbox:
         style_prefix "hkb"
@@ -1077,9 +1039,9 @@ screen shell_game_minigame():
             xanchor 0.5 yanchor 0.5
             xpos sg_cup_coordinates[i]
             ypos 250
-            idle "cup_idle"
-            hover "cup_hover"
-            focus_mask "cup_hover"
+            idle "extra_sg_cup_idle"
+            hover "extra_sg_cup_hover"
+            focus_mask "extra_sg_cup_hover"
             action SGVerification(i, sg_ball_position, "sg_check_label")
     
     vbox:
@@ -1132,14 +1094,14 @@ screen doki_chibi_idle():
     if renpy.get_screen("hkb_overlay"):
         if persistent.enable_drag_chibika:
             drag:
-                child "chibika_base"
-                selected_hover_child "hover_sticker"
+                child "extra_chibi_base"
+                selected_hover_child "extra_chibi_hover"
                 dragged chibi_drag
                 drag_offscreen True
                 xpos persistent.chibika_drag_x
                 ypos persistent.chibika_drag_y
         else:
-            add "chibika_base":
+            add "extra_chibi_base":
                 xpos chibi_xpos
                 ypos chibika_y_position
 
@@ -1237,6 +1199,7 @@ screen extra_timer_monika(time):
     #Runs a timer that sets a variable when finished, used for timed events.
     timer time action SetVariable("stop_snike_time", True)
 
+
 screen boop_event(timelock, endlabel, editlabel):
     #Handles the boop war event, showing interactive zones and a score counter.
     timer timelock action Jump(endlabel)
@@ -1277,7 +1240,7 @@ screen bday_oki_doki():
 screen maxwell_april_fools():
     #Displays the Maxwell cat animation and plays music for the April Fools event.
     zorder 200
-    on "show" action Play("maxwell", "Submods/ExtraPlus/submod_assets/sfx/maxwell_theme.ogg")
+    on "show" action Play("maxwell", "Submods/ExtraPlus/sfx/maxwell_theme.ogg")
     add "maxwell_animation":
         xpos 0.05
         zoom 0.4
@@ -1320,6 +1283,20 @@ screen extraplus_stats_screen():
                         xfill True
                         text stat_name
                         text str(stat_value)
+
+screen _extra_plus_submod_settings():
+    # Displays the settings pane for the Extra+ submod in the MAS settings menu.
+    $ tooltip = renpy.get_screen("submods", "screens").scope["tooltip"]
+
+    vbox:
+        style_prefix "check"
+        box_wrap False
+        xfill True
+        xmaximum 1000
+
+        textbutton _("{b}Check for missing files{/b}"):
+            action Function(extra_plus_asset_linter)
+            hovered tooltip.Action("This will check if all submod files are installed correctly and create a log file in the 'characters' folder.")
 
 #===========================================================================================
 # TRANSFORM
@@ -1403,25 +1380,19 @@ transform score_rotate_left:
 # BACKGROUNG
 #===========================================================================================
 
-#====Cafe====#
+#====Cafe
 
 #Day images
-image submod_background_cafe_day = "Submods/ExtraPlus/submod_assets/backgrounds/cafe.png"
-image submod_background_cafe_rain = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
-image submod_background_cafe_overcast = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
-image submod_background_cafe_snow = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain.png"
+image submod_background_cafe_day = "Submods/ExtraPlus/dates/cafe/cafe_day.png"
+image submod_background_cafe_rain = "Submods/ExtraPlus/dates/cafe/cafe_rain.png"
 
 #Night images
-image submod_background_cafe_night = "Submods/ExtraPlus/submod_assets/backgrounds/cafe-n.png"
-image submod_background_cafe_rain_night = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
-image submod_background_cafe_overcast_night = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
-image submod_background_cafe_snow_night = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-n.png"
+image submod_background_cafe_night = "Submods/ExtraPlus/dates/cafe/cafe-n.png"
+image submod_background_cafe_rain_night = "Submods/ExtraPlus/dates/cafe/cafe_rain-n.png"
 
 #Sunset images
-image submod_background_cafe_ss = "Submods/ExtraPlus/submod_assets/backgrounds/cafe-ss.png"
-image submod_background_cafe_rain_ss = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
-image submod_background_cafe_overcast_ss = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
-image submod_background_cafe_snow_ss = "Submods/ExtraPlus/submod_assets/backgrounds/cafe_rain-ss.png"
+image submod_background_cafe_ss = "Submods/ExtraPlus/dates/cafe/cafe-ss.png"
+image submod_background_cafe_rain_ss = "Submods/ExtraPlus/dates/cafe/cafe_rain-ss.png"
 
 init -1 python:
     submod_background_cafe = MASFilterableBackground(
@@ -1432,20 +1403,20 @@ init -1 python:
             day=MASWeatherMap({
                 store.mas_weather.PRECIP_TYPE_DEF: "submod_background_cafe_day",
                 store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_cafe_rain",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_cafe_overcast",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_cafe_snow",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_cafe_rain",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_cafe_rain",
             }),
             night=MASWeatherMap({
                 store.mas_weather.PRECIP_TYPE_DEF: "submod_background_cafe_night",
                 store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_cafe_rain_night",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_cafe_overcast_night",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_cafe_snow_night",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_cafe_rain_night",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_cafe_rain_night",
             }),
             sunset=MASWeatherMap({
                 store.mas_weather.PRECIP_TYPE_DEF: "submod_background_cafe_ss",
                 store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_cafe_rain_ss",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_cafe_overcast_ss",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_cafe_snow_ss",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_cafe_rain_ss",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_cafe_rain_ss",
             }),
         ),
 
@@ -1493,13 +1464,13 @@ init -1 python:
         hide_masks=False,
         hide_calendar=True,
         unlocked=False,
-        entry_pp=store.mas_background._cafe_entry,
-        exit_pp=store.mas_background._cafe_exit,
+        entry_pp=store.mas_background._extra_cafe_entry,
+        exit_pp=store.mas_background._extra_cafe_exit,
         ex_props={"skip_outro": None}
     )
 
 init -2 python in mas_background:
-    def _cafe_entry(_old, **kwargs):
+    def _extra_cafe_entry(_old, **kwargs):
         """
         Entry programming point for cafe background
 
@@ -1515,10 +1486,10 @@ init -2 python in mas_background:
             store.mas_o31HideVisuals()
             store.mas_d25HideVisuals()
 
-        store.monika_chr.tablechair.table = "submod_cafe"
-        store.monika_chr.tablechair.chair = "submod_cafe"
+        store.monika_chr.tablechair.table = "extraplus_cafe"
+        store.monika_chr.tablechair.chair = "extraplus_cafe"
 
-    def _cafe_exit(_new, **kwargs):
+    def _extra_cafe_exit(_new, **kwargs):
         """
         Exit programming point for cafe background
         """
@@ -1533,25 +1504,19 @@ init -2 python in mas_background:
         store.monika_chr.tablechair.table = "def"
         store.monika_chr.tablechair.chair = "def"
 
-#====Restaurant====#
+#====Restaurant (Rutas actualizadas)
 
 #Day images
-image submod_background_extraplusr_restaurant_day = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant.png"
-image submod_background_extraplusr_restaurant_rain = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain.png"
-image submod_background_extraplusr_restaurant_overcast = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain.png"
-image submod_background_extraplusr_restaurant_snow = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain.png"
+image submod_background_extraplus_restaurant_day = "Submods/ExtraPlus/dates/restaurant/restaurant_day.png"
+image submod_background_extraplus_restaurant_rain = "Submods/ExtraPlus/dates/restaurant/restaurant_rain.png"
 
 #Night images
-image submod_background_extraplusr_restaurant_night = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant-n.png"
-image submod_background_extraplusr_restaurant_rain_night = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-n.png"
-image submod_background_extraplusr_restaurant_overcast_night = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-n.png"
-image submod_background_extraplusr_restaurant_snow_night = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-n.png"
+image submod_background_extraplus_restaurant_night = "Submods/ExtraPlus/dates/restaurant/restaurant-n.png"
+image submod_background_extraplus_restaurant_rain_night = "Submods/ExtraPlus/dates/restaurant/restaurant_rain-n.png"
 
 #Sunset images
-image submod_background_extraplusr_restaurant_ss = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant-ss.png"
-image submod_background_extraplusr_restaurant_rain_ss = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-ss.png"
-image submod_background_extraplusr_restaurant_overcast_ss = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-ss.png"
-image submod_background_extraplusr_restaurant_snow_ss = "Submods/ExtraPlus/submod_assets/backgrounds/extraplusr_restaurant_rain-ss.png"
+image submod_background_extraplus_restaurant_ss = "Submods/ExtraPlus/dates/restaurant/restaurant-ss.png"
+image submod_background_extraplus_restaurant_rain_ss = "Submods/ExtraPlus/dates/restaurant/restaurant_rain-ss.png"
 
 init -1 python:
     submod_background_restaurant = MASFilterableBackground(
@@ -1560,22 +1525,22 @@ init -1 python:
 
         MASFilterWeatherMap(
             day=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extraplusr_restaurant_day",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extraplusr_restaurant_rain",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extraplusr_restaurant_overcast",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extraplusr_restaurant_snow",
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extraplus_restaurant_day",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extraplus_restaurant_rain",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extraplus_restaurant_rain",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extraplus_restaurant_rain",
             }),
             night=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extraplusr_restaurant_night",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extraplusr_restaurant_rain_night",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extraplusr_restaurant_overcast_night",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extraplusr_restaurant_snow_night",
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extraplus_restaurant_night",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extraplus_restaurant_rain_night",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extraplus_restaurant_rain_night",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extraplus_restaurant_rain_night",
             }),
             sunset=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extraplusr_restaurant_ss",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extraplusr_restaurant_rain_ss",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extraplusr_restaurant_overcast_ss",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extraplusr_restaurant_snow_ss",
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extraplus_restaurant_ss",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extraplus_restaurant_rain_ss",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extraplus_restaurant_rain_ss",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extraplus_restaurant_rain_ss",
             }),
         ),
 
@@ -1623,13 +1588,13 @@ init -1 python:
         hide_masks=False,
         hide_calendar=True,
         unlocked=False,
-        entry_pp=store.mas_background._restaurant_entry,
-        exit_pp=store.mas_background._restaurant_exit,
+        entry_pp=store.mas_background._extra_restaurant_entry,
+        exit_pp=store.mas_background._extra_restaurant_exit,
         ex_props={"skip_outro": None}
     )
 
 init -2 python in mas_background:
-    def _restaurant_entry(_old, **kwargs):
+    def _extra_restaurant_entry(_old, **kwargs):
         """
         Entry programming point for cafe background
 
@@ -1645,11 +1610,11 @@ init -2 python in mas_background:
             store.mas_o31HideVisuals()
             store.mas_d25HideVisuals()
 
-        store.monika_chr.tablechair.table = "submod_restaurant"
-        store.monika_chr.tablechair.chair = "submod_restaurant"
+        store.monika_chr.tablechair.table = "extraplus_restaurant"
+        store.monika_chr.tablechair.chair = "extraplus_restaurant"
 
 
-    def _restaurant_exit(_new, **kwargs):
+    def _extra_restaurant_exit(_new, **kwargs):
         """
         Exit programming point for restaurant background
         """
@@ -1664,132 +1629,542 @@ init -2 python in mas_background:
         store.monika_chr.tablechair.table = "def"
         store.monika_chr.tablechair.chair = "def"
 
-# #====Pool====#
+#====Pool (Rutas actualizadas)
 
-# #Day images
-# image submod_background_pool_day = "Submods/ExtraPlus/submod_assets/backgrounds/pool.png"
-# image submod_background_pool_rain = "Submods/ExtraPlus/submod_assets/backgrounds/pool.png"
-# image submod_background_pool_overcast = "Submods/ExtraPlus/submod_assets/backgrounds/pool.png"
-# image submod_background_pool_snow = "Submods/ExtraPlus/submod_assets/backgrounds/pool.png"
+#Day images
+image submod_background_extrapool_day = "Submods/ExtraPlus/dates/pool_day.png"
+image submod_background_extrapool_rain = "Submods/ExtraPlus/dates/pool/pool_rain.png"
 
-# #Night images
-# image submod_background_pool_night = "Submods/ExtraPlus/submod_assets/backgrounds/pool.png"
-# image submod_background_pool_rain_night = "Submods/ExtraPlus/submod_assets/backgrounds/pool.png"
-# image submod_background_pool_overcast_night = "Submods/ExtraPlus/submod_assets/backgrounds/pool.png"
-# image submod_background_pool_snow_night = "Submods/ExtraPlus/submod_assets/backgrounds/pool.png"
+#Night images
+image submod_background_extrapool_night = "Submods/ExtraPlus/dates/pool/pool_night.png"
+image submod_background_extrapool_rain_night = "Submods/ExtraPlus/dates/pool/pool_rain-n.png"
 
-# #Sunset images
-# image submod_background_pool_ss = "Submods/ExtraPlus/submod_assets/backgrounds/pool.png"
-# image submod_background_pool_rain_ss = "Submods/ExtraPlus/submod_assets/backgrounds/pool.png"
-# image submod_background_pool_overcast_ss = "Submods/ExtraPlus/submod_assets/backgrounds/pool.png"
-# image submod_background_pool_snow_ss = "Submods/ExtraPlus/submod_assets/backgrounds/pool.png"
+#Sunset images
+image submod_background_extrapool_ss = "Submods/ExtraPlus/dates/pool/pool-ss.png"
+image submod_background_extrapool_rain_ss = "Submods/ExtraPlus/dates/pool/pool_rain-ss.png"
 
-# init -1 python:
-#     submod_background_pool = MASFilterableBackground(
-#         "submod_background_pool",
-#         "Pool (Extra+)",
+init -1 python:
+    submod_background_extrapool = MASFilterableBackground(
+        "submod_background_extrapool",
+        "Pool (Extra+)",
 
-#         MASFilterWeatherMap(
-#             day=MASWeatherMap({
-#                 store.mas_weather.PRECIP_TYPE_DEF: "submod_background_pool_day",
-#                 store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_pool_rain",
-#                 store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_pool_overcast",
-#                 store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_pool_snow",
-#             }),
-#             night=MASWeatherMap({
-#                 store.mas_weather.PRECIP_TYPE_DEF: "submod_background_pool_night",
-#                 store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_pool_rain_night",
-#                 store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_pool_overcast_night",
-#                 store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_pool_snow_night",
-#             }),
-#             sunset=MASWeatherMap({
-#                 store.mas_weather.PRECIP_TYPE_DEF: "submod_background_pool_ss",
-#                 store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_pool_rain_ss",
-#                 store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_pool_overcast_ss",
-#                 store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_pool_snow_ss",
-#             }),
-#         ),
+        MASFilterWeatherMap(
+            day=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extrapool_day",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extrapool_rain",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extrapool_rain",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extrapool_rain",
+            }),
+            night=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extrapool_night",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extrapool_rain_night",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extrapool_rain_night",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extrapool_rain_night",
+            }),
+            sunset=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extrapool_ss",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extrapool_rain_ss",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extrapool_rain_ss",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extrapool_rain_ss",
+            }),
+        ),
 
-#         MASBackgroundFilterManager(
-#             MASBackgroundFilterChunk(
-#                 False,
-#                 None,
-#                 MASBackgroundFilterSlice.cachecreate(
-#                     store.mas_sprites.FLT_NIGHT,
-#                     60
-#                 )
-#             ),
-#             MASBackgroundFilterChunk(
-#                 True,
-#                 None,
-#                 MASBackgroundFilterSlice.cachecreate(
-#                     store.mas_sprites.FLT_SUNSET,
-#                     60,
-#                     30*60,
-#                     10,
-#                 ),
-#                 MASBackgroundFilterSlice.cachecreate(
-#                     store.mas_sprites.FLT_DAY,
-#                     60
-#                 ),
-#                 MASBackgroundFilterSlice.cachecreate(
-#                     store.mas_sprites.FLT_SUNSET,
-#                     60,
-#                     30*60,
-#                     10,
-#                 ),
-#             ),
-#             MASBackgroundFilterChunk(
-#                 False,
-#                 None,
-#                 MASBackgroundFilterSlice.cachecreate(
-#                     store.mas_sprites.FLT_NIGHT,
-#                     60
-#                 )
-#             )
-#         ),
+        MASBackgroundFilterManager(
+            MASBackgroundFilterChunk(
+                False,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_NIGHT,
+                    60
+                )
+            ),
+            MASBackgroundFilterChunk(
+                True,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_SUNSET,
+                    60,
+                    30*60,
+                    10,
+                ),
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_DAY,
+                    60
+                ),
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_SUNSET,
+                    60,
+                    30*60,
+                    10,
+                ),
+            ),
+            MASBackgroundFilterChunk(
+                False,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_NIGHT,
+                    60
+                )
+            )
+        ),
 
-#         #FOR BACKGROUND PROPERTIES (DON'T TOUCH "ENTRY_PP:/EXIT_PP:)
-#         disable_progressive=False,
-#         hide_masks=False,
-#         hide_calendar=True,
-#         unlocked=False,
-#         entry_pp=store.mas_background._pool_entry,
-#         exit_pp=store.mas_background._pool_exit,
-#         ex_props={"skip_outro": None}
-#     )
+        #FOR BACKGROUND PROPERTIES (DON'T TOUCH "ENTRY_PP:/EXIT_PP:)
+        disable_progressive=False,
+        hide_masks=False,
+        hide_calendar=True,
+        unlocked=False,
+        entry_pp=store.mas_background._extrapool_entry,
+        exit_pp=store.mas_background._extrapool_exit,
+        ex_props={"skip_outro": None}
+    )
 
-# init -2 python in mas_background:
-#     def _pool_entry(_old, **kwargs):
-#         """
-#         Entry programming point for pool background
+init -2 python in mas_background:
+    def _extrapool_entry(_old, **kwargs):
+        """
+        Entry programming point for pool background
 
-#         NOTE: ANYTHING IN THE `_old is None` CHECK WILL BE RUN **ON LOAD ONLY**
-#         IF IT IS IN THE CORRESPONDING 'else' BLOCK, IT WILL RUN WHEN THE BACKGROUND IS CHANGED DURANTE THE SESSION
+        NOTE: ANYTHING IN THE `_old is None` CHECK WILL BE RUN **ON LOAD ONLY**
+        IF IT IS IN THE CORRESPONDING 'else' BLOCK, IT WILL RUN WHEN THE BACKGROUND IS CHANGED DURANTE THE SESSION
 
-#         IF YOU WANT IT TO RUN IN BOTH CASES, SIMPLY PUT IT AFTER THE ELSE BLOCK
-#         """
-#         if kwargs.get("startup"):
-#             pass
+        IF YOU WANT IT TO RUN IN BOTH CASES, SIMPLY PUT IT AFTER THE ELSE BLOCK
+        """
+        if kwargs.get("startup"):
+            pass
 
-#         else:
-#             store.mas_o31HideVisuals()
-#             store.mas_d25HideVisuals()
+        else:
+            store.mas_o31HideVisuals()
+            store.mas_d25HideVisuals()
 
-#         store.monika_chr.tablechair.table = "submod_pool"
-#         store.monika_chr.tablechair.chair = "submod_pool"
+        store.monika_chr.tablechair.table = "extraplus_pool"
+        store.monika_chr.tablechair.chair = "extraplus_pool"
 
-#     def _pool_exit(_new, **kwargs):
-#         """
-#         Exit programming point for pool background
-#         """
-#         #O31
-#         if store.persistent._mas_o31_in_o31_mode:
-#             store.mas_o31ShowVisuals()
+    def _extrapool_exit(_new, **kwargs):
+        """
+        Exit programming point for pool background
+        """
+        #O31
+        if store.persistent._mas_o31_in_o31_mode:
+            store.mas_o31ShowVisuals()
 
-#         #D25
-#         elif store.persistent._mas_d25_deco_active:
-#             store.mas_d25ShowVisuals()
+        #D25
+        elif store.persistent._mas_d25_deco_active:
+            store.mas_d25ShowVisuals()
 
-#         store.monika_chr.tablechair.table = "def"
-#         store.monika_chr.tablechair.chair = "def"
+        store.monika_chr.tablechair.table = "def"
+        store.monika_chr.tablechair.chair = "def"
+
+#====Library (Rutas actualizadas)
+
+#Day images
+image submod_background_extralibrary_day = "Submods/ExtraPlus/dates/library_day.png"
+image submod_background_extralibrary_rain = "Submods/ExtraPlus/dates/library/library_rain.png"
+
+#Night images
+image submod_background_extralibrary_night = "Submods/ExtraPlus/dates/library/library_night.png"
+image submod_background_extralibrary_rain_night = "Submods/ExtraPlus/dates/library/library_rain-n.png"
+
+#Sunset images
+image submod_background_extralibrary_ss = "Submods/ExtraPlus/dates/library/library-ss.png"
+image submod_background_extralibrary_rain_ss = "Submods/ExtraPlus/dates/library/library_rain-ss.png"
+
+init -1 python:
+    submod_background_extralibrary = MASFilterableBackground(
+        "submod_background_extralibrary",
+        "Library (Extra+)",
+
+        MASFilterWeatherMap(
+            day=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extralibrary_day",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extralibrary_rain",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extralibrary_rain",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extralibrary_rain",
+            }),
+            night=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extralibrary_night",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extralibrary_rain_night",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extralibrary_rain_night",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extralibrary_rain_night",
+            }),
+            sunset=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extralibrary_ss",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extralibrary_rain_ss",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extralibrary_rain_ss",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extralibrary_rain_ss",
+            }),
+        ),
+
+        MASBackgroundFilterManager(
+            MASBackgroundFilterChunk(
+                False,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_NIGHT,
+                    60
+                )
+            ),
+            MASBackgroundFilterChunk(
+                True,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_SUNSET,
+                    60,
+                    30*60,
+                    10,
+                ),
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_DAY,
+                    60
+                ),
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_SUNSET,
+                    60,
+                    30*60,
+                    10,
+                ),
+            ),
+            MASBackgroundFilterChunk(
+                False,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_NIGHT,
+                    60
+                )
+            )
+        ),
+
+        #FOR BACKGROUND PROPERTIES (DON'T TOUCH "ENTRY_PP:/EXIT_PP:)
+        disable_progressive=False,
+        hide_masks=False,
+        hide_calendar=True,
+        unlocked=False,
+        entry_pp=store.mas_background._extralibrary_entry,
+        exit_pp=store.mas_background._extralibrary_exit,
+        ex_props={"skip_outro": None}
+    )
+
+init -2 python in mas_background:
+    def _extralibrary_entry(_old, **kwargs):
+        """
+        Entry programming point for library background
+
+        NOTE: ANYTHING IN THE `_old is None` CHECK WILL BE RUN **ON LOAD ONLY**
+        IF IT IS IN THE CORRESPONDING 'else' BLOCK, IT WILL RUN WHEN THE BACKGROUND IS CHANGED DURANTE THE SESSION
+
+        IF YOU WANT IT TO RUN IN BOTH CASES, SIMPLY PUT IT AFTER THE ELSE BLOCK
+        """
+        if kwargs.get("startup"):
+            pass
+
+        else:
+            store.mas_o31HideVisuals()
+            store.mas_d25HideVisuals()
+
+        store.monika_chr.tablechair.table = "extraplus_library"
+        store.monika_chr.tablechair.chair = "extraplus_library"
+
+    def _extralibrary_exit(_new, **kwargs):
+        """
+        Exit programming point for library background
+        """
+        #O31
+        if store.persistent._mas_o31_in_o31_mode:
+            store.mas_o31ShowVisuals()
+
+        #D25
+        elif store.persistent._mas_d25_deco_active:
+            store.mas_d25ShowVisuals()
+
+        store.monika_chr.tablechair.table = "def"
+        store.monika_chr.tablechair.chair = "def"
+
+#====Arcade (Rutas actualizadas)
+
+#Day images
+image submod_background_extra_arcade_day = "Submods/ExtraPlus/dates/arcade_day.png"
+image submod_background_extra_arcade_rain = "Submods/ExtraPlus/dates/arcade/arcade_rain.png"
+
+#Night images
+image submod_background_extra_arcade_night = "Submods/ExtraPlus/dates/arcade/arcade-n.png"
+image submod_background_extra_arcade_rain_night = "Submods/ExtraPlus/dates/arcade/arcade_rain-n.png"
+
+#Sunset images
+image submod_background_extra_arcade_ss = "Submods/ExtraPlus/dates/arcade/arcade-ss.png"
+image submod_background_extra_arcade_rain_ss = "Submods/ExtraPlus/dates/arcade/arcade_rain-ss.png"
+
+init -1 python:
+    submod_background_extra_arcade = MASFilterableBackground(
+        "submod_background_extra_arcade",
+        "Arcade (Extra+)",
+
+        MASFilterWeatherMap(
+            day=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extra_arcade_day",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extra_arcade_rain",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extra_arcade_rain",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extra_arcade_rain",
+            }),
+            night=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extra_arcade_night",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extra_arcade_rain_night",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extra_arcade_rain_night",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extra_arcade_rain_night",
+            }),
+            sunset=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extra_arcade_ss",
+                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extra_arcade_rain_ss",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extra_arcade_rain_ss",
+                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extra_arcade_rain_ss",
+            }),
+        ),
+
+        MASBackgroundFilterManager(
+            MASBackgroundFilterChunk(
+                False,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_NIGHT,
+                    60
+                )
+            ),
+            MASBackgroundFilterChunk(
+                True,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_SUNSET,
+                    60,
+                    30*60,
+                    10,
+                ),
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_DAY,
+                    60
+                ),
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_SUNSET,
+                    60,
+                    30*60,
+                    10,
+                ),
+            ),
+            MASBackgroundFilterChunk(
+                False,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_NIGHT,
+                    60
+                )
+            )
+        ),
+
+        #FOR BACKGROUND PROPERTIES (DON'T TOUCH "ENTRY_PP:/EXIT_PP:)
+        disable_progressive=False,
+        hide_masks=False,
+        hide_calendar=True,
+        unlocked=False,
+        entry_pp=store.mas_background._extra_arcade_entry,
+        exit_pp=store.mas_background._extra_arcade_exit,
+        ex_props={"skip_outro": None}
+    )
+
+init -2 python in mas_background:
+    def _extra_arcade_entry(_old, **kwargs):
+        """
+        Entry programming point for arcade background
+
+        NOTE: ANYTHING IN THE `_old is None` CHECK WILL BE RUN **ON LOAD ONLY**
+        IF IT IS IN THE CORRESPONDING 'else' BLOCK, IT WILL RUN WHEN THE BACKGROUND IS CHANGED DURANTE THE SESSION
+
+        IF YOU WANT IT TO RUN IN BOTH CASES, SIMPLY PUT IT AFTER THE ELSE BLOCK
+        """
+        if kwargs.get("startup"):
+            pass
+
+        else:
+            store.mas_o31HideVisuals()
+            store.mas_d25HideVisuals()
+
+        store.monika_chr.tablechair.table = "extraplus_arcade"
+        store.monika_chr.tablechair.chair = "extraplus_arcade"
+
+    def _extra_arcade_exit(_new, **kwargs):
+        """
+        Exit programming point for arcade background
+        """
+        #O31
+        if store.persistent._mas_o31_in_o31_mode:
+            store.mas_o31ShowVisuals()
+
+        #D25
+        elif store.persistent._mas_d25_deco_active:
+            store.mas_d25ShowVisuals()
+
+        store.monika_chr.tablechair.table = "def"
+        store.monika_chr.tablechair.chair = "def"
+
+
+#===========================================================================================
+# DEBUGGING
+#===========================================================================================
+
+init -2 python:
+    def extra_plus_asset_linter():
+        """
+        Checks for the existence of all defined image assets and creates a log file.
+        This is a debug tool and should not be in the final release.
+        """
+        import os
+        import datetime
+
+        # --- Helper function to check files ---
+        def check_file(path, found_list, missing_list):
+            full_path = os.path.join(renpy.config.basedir, "game", path)
+            if os.path.isfile(full_path):
+                found_list.append(path)
+            else:
+                missing_list.append(path)
+
+        # --- Lists to store results ---
+        found_assets = []
+        missing_assets = []
+
+        # --- 1. Static and Minigame Assets ---
+        static_assets = [
+            # Shell Game
+            "Submods/ExtraPlus/minigames/shellgame/note_score.png",
+            "Submods/ExtraPlus/minigames/shellgame/cup_hover.png",
+            "Submods/ExtraPlus/minigames/shellgame/ball.png",
+            "Submods/ExtraPlus/minigames/shellgame/cup.png",
+            "Submods/ExtraPlus/minigames/shellgame/monika.png",
+            "Submods/ExtraPlus/minigames/shellgame/yuri.png",
+            "Submods/ExtraPlus/minigames/shellgame/natsuki.png",
+            "Submods/ExtraPlus/minigames/shellgame/sayori.png",
+            # Tic-Tac-Toe
+            "Submods/ExtraPlus/minigames/tictactoe/notebook.png",
+            "Submods/ExtraPlus/minigames/tictactoe/line.png",
+            "Submods/ExtraPlus/minigames/tictactoe/player.png",
+            "Submods/ExtraPlus/minigames/tictactoe/monika.png",
+            # Rock, Paper, Scissors
+            "Submods/ExtraPlus/minigames/rockpaperscissors/paper.png",
+            "Submods/ExtraPlus/minigames/rockpaperscissors/rock.png",
+            "Submods/ExtraPlus/minigames/rockpaperscissors/scissors.png",
+            "Submods/ExtraPlus/minigames/rockpaperscissors/back.png",
+            # Blackjack
+            "Submods/ExtraPlus/minigames/blackjack/back.png",
+            "Submods/ExtraPlus/minigames/blackjack/background.png",
+            "Submods/ExtraPlus/minigames/blackjack/name.png",
+            "Submods/ExtraPlus/minigames/blackjack/score.png",
+            # Misc
+            "Submods/ExtraPlus/others/coin_heads.png",
+            "Submods/ExtraPlus/others/coin_tails.png",
+            "Submods/ExtraPlus/others/sprite_coin.png",
+            "Submods/ExtraPlus/others/maxwell_cat.png",
+            # Date Tables & Chairs
+            "mod_assets/monika/t/chair-extraplus_cafe.png",
+            "mod_assets/monika/t/table-extraplus_cafe.png",
+            "mod_assets/monika/t/table-extraplus_cafe-s.png",
+            "mod_assets/monika/t/chair-extraplus_restaurant.png",
+            "mod_assets/monika/t/table-extraplus_restaurant.png",
+            "mod_assets/monika/t/table-extraplus_restaurant-s.png",
+        ]
+        for asset in static_assets:
+            check_file(asset, found_assets, missing_assets)
+
+        # --- 2. Chibi Assets ---
+        all_chibi_costumes = store.monika_costumes_ + store.natsuki_costumes_ + store.sayori_costumes_ + store.yuri_costumes_
+        for _, costume_data in all_chibi_costumes:
+            doki_folder, idle_sprite, blink_sprite, hover_sprite = costume_data
+            chibi_sprites = [idle_sprite, blink_sprite, hover_sprite] # No store prefix here, these are local to the loop
+            for sprite in chibi_sprites:
+                path = "Submods/ExtraPlus/chibis/{0}/{1}.png".format(doki_folder, sprite)
+                check_file(path, found_assets, missing_assets)
+
+        # --- 3. Chibi Accessories ---
+        # NOTE: These are hardcoded based on the lists in Extra_Plus_Misc.rpy
+        primary_accessories = ['cat_ears', 'christmas_hat', 'demon_horns', 'flowers_crown', 'halo', 'heart_headband', 'hny', 'neon_cat_ears', 'party_hat', 'rabbit_ears', 'witch_hat']
+        secondary_accessories = ['black_bow_tie', 'christmas_tree', 'cloud', 'coffee', 'pumpkin', 'hearts', 'm_slice_cake', 'moustache', 'neon_blush', 'p_slice_cake', 'patch', 'speech_bubble', 'sunglasses']
+
+        for acc in primary_accessories:
+            path = "Submods/ExtraPlus/chibis/accessories_0/{}.png".format(acc)
+            check_file(path, found_assets, missing_assets)
+        for acc in secondary_accessories:
+            path = "Submods/ExtraPlus/chibis/accessories_1/{}.png".format(acc)
+            check_file(path, found_assets, missing_assets)
+
+        # --- 4. Backgrounds (Manual List) ---
+        background_assets = [
+            # Cafe
+            "Submods/ExtraPlus/dates/cafe/cafe_day.png",
+            "Submods/ExtraPlus/dates/cafe/cafe_rain.png",
+            "Submods/ExtraPlus/dates/cafe/cafe-n.png",
+            "Submods/ExtraPlus/dates/cafe/cafe_rain-n.png",
+            "Submods/ExtraPlus/dates/cafe/cafe-ss.png",
+            "Submods/ExtraPlus/dates/cafe/cafe_rain-ss.png",
+            # Restaurant
+            "Submods/ExtraPlus/dates/restaurant/restaurant_day.png",
+            "Submods/ExtraPlus/dates/restaurant/restaurant_rain.png",
+            "Submods/ExtraPlus/dates/restaurant/restaurant-n.png",
+            "Submods/ExtraPlus/dates/restaurant/restaurant_rain-n.png",
+            "Submods/ExtraPlus/dates/restaurant/restaurant-ss.png",
+            "Submods/ExtraPlus/dates/restaurant/restaurant_rain-ss.png",
+            # Pool
+            "Submods/ExtraPlus/dates/pool_day.png",
+            "Submods/ExtraPlus/dates/pool/pool_rain.png",
+            "Submods/ExtraPlus/dates/pool/pool_night.png",
+            "Submods/ExtraPlus/dates/pool/pool_rain-n.png",
+            "Submods/ExtraPlus/dates/pool/pool_ss.png",
+            "Submods/ExtraPlus/dates/pool/pool_rain-ss.png",
+            # Library
+            "Submods/ExtraPlus/dates/library_day.png",
+            "Submods/ExtraPlus/dates/library/library_rain.png",
+            "Submods/ExtraPlus/dates/library/library_night.png",
+            "Submods/ExtraPlus/dates/library/library_rain-n.png",
+            "Submods/ExtraPlus/dates/library/library-ss.png",
+            "Submods/ExtraPlus/dates/library/library_rain-ss.png",
+            # Arcade
+            "Submods/ExtraPlus/dates/arcade_day.png",
+            "Submods/ExtraPlus/dates/arcade/arcade_rain.png",
+            "Submods/ExtraPlus/dates/arcade/arcade-n.png",
+            "Submods/ExtraPlus/dates/arcade/arcade_rain-n.png",
+            "Submods/ExtraPlus/dates/arcade/arcade-ss.png",
+            "Submods/ExtraPlus/dates/arcade/arcade_rain-ss.png"
+        ]
+        for asset in background_assets:
+            check_file(asset, found_assets, missing_assets)
+
+        # --- 5. Blackjack Cards ---
+        for suit in ["hearts", "diamonds", "clubs", "spades"]:
+            for value in range(1, 14):
+                path = "Submods/ExtraPlus/minigames/blackjack/{}/{}.png".format(suit, value)
+                check_file(path, found_assets, missing_assets)
+
+        # --- 6. Date Accessories ---
+        # This list is defined in Extra_Plus_Main.rpy
+        for acs_tuple in store.extraplus_accessories:
+            acs_name = acs_tuple[1]
+            path = "mod_assets/monika/a/{}/0.png".format(acs_name)
+            check_file(path, found_assets, missing_assets)
+
+        # --- 6. Write Log File ---
+        log_path = os.path.join(renpy.config.basedir, 'characters', 'extra_plus_asset_log.txt')
+        try:
+            with open(log_path, 'w') as f:
+                f.write("Extra+ Asset Linter Report - {}\n".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                f.write("="*80 + "\n\n")
+
+                if not missing_assets:
+                    f.write("SUCCESS: All {} assets were found!\n".format(len(found_assets)))
+                else:
+                    f.write("ERROR: Found {} missing assets.\n".format(len(missing_assets)))
+                    f.write("-" * 30 + "\n")
+                    for asset in missing_assets:
+                        f.write("MISSING: {}\n".format(asset))
+
+                f.write("\n\n")
+                f.write("--- Found Assets ({}) ---\n".format(len(found_assets)))
+                for asset in found_assets:
+                    f.write("FOUND: {}\n".format(asset))
+
+            renpy.notify("Asset check complete. See extra_plus_asset_log.txt in /characters.")
+
+        except Exception as e:
+            renpy.notify("Failed to write asset log: {}".format(e))
