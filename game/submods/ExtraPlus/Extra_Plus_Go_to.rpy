@@ -2,6 +2,85 @@
 # CAFE
 #===========================================================================================
 default dessert_player = None
+label go_to_cafe:
+    python:
+        mas_extra_location(locate=True)
+        extra_seen_background("cafe_sorry_player", "gtcafev2", "check_label_cafe")
+
+label check_label_cafe:
+    pass
+
+label gtcafe:
+    show monika 1eua at t11
+    if mas_isDayNow():
+        m 3sub "Do you want to go to the cafe?"
+        m 3hub "Glad to hear it [player]!"
+        m 1hubsa "I know this appointment will be great!"
+        m 1hubsb "Okay, let's go [mas_get_player_nickname()]~"
+        jump cafe_init
+    else: # Handles night and sunset
+        m 3sub "Oh, you want to go out to the cafe?"
+        m 3hub "It's pretty sweet that you decided to go tonight."
+        m 1eubsa "This date night is going to be great!"
+        m 1hubsb "Let's go [mas_get_player_nickname()]~"
+        jump cafe_init
+    return
+
+label gtcafev2:
+    show monika 1eua at t11
+    if mas_isDayNow():
+        m 3wub "Do you want to go to the cafe again?"
+        m 2hub "The previous time we went, I had a lot of fun!"
+        m 2eubsa "So glad to hear it [player]!"
+        m 1hubsb "Well, let's go [mas_get_player_nickname()]~"
+        jump cafe_init
+    else: # Handles night and sunset
+        m 3wub "Oh, do you want to go out to the cafe again?"
+        m 2hub "The previous time we went, it was very romantic~"
+        m 2eubsa "So glad to go again [player]!"
+        m 1hubsb "Let's go [mas_get_player_nickname()]~"
+        jump cafe_init
+    return
+
+label cafe_talk:
+    show monika staticpose at t21
+    python:
+        store.disable_zoom_button = True
+        cafe_menu = [
+            (_("How are you today?"), 'extra_talk_feel'),
+            (_("What's your greatest ambition?"), 'extra_talk_ambition'),
+            (_("Our communication is very limited, don't you think?"), 'extra_talk_you'),
+            (_("How do you see us in 10 years?"), 'extra_talk_teen'),
+            (_("What is your best memory that you currently have?"), 'extra_talk_memory'),
+            (_("Do you have any phobia?"), 'extra_talk_phobia')
+        ]
+
+        items = [
+            (_("Can we leave?"), 'cafe_leave', 20),
+            (_("Nevermind"), 'to_cafe_loop', 0)
+        ]
+    call screen extra_gen_list(cafe_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=False)
+    return
+
+label to_cafe_loop:
+    show monika staticpose at t11
+    if stop_snike_time and renpy.get_screen("extra_timer_monika"):
+        hide screen extra_timer_monika
+        jump monika_no_dessert
+
+    $ store.disable_zoom_button = False
+    # NOTE: Boop during dates is disabled for now.
+    call screen dating_loop("cafe_talk", "monika_boopcafe", boop_enable=False)
+    return
+
+label cafe_leave:
+    hide screen extra_timer_monika
+    show monika 1hua at t11
+    m 1eta "Oh, you want us to go back?"
+    m 1eub "Sounds good to me!"
+    m 3hua "But before we go..."
+    $ stop_snike_time = False
+    jump cafe_hide_acs
 
 label cafe_init:
     $ HKBHideButtons()
@@ -80,6 +159,16 @@ label cafe_sorry_player:
     jump close_extraplus
     return
 
+label extra_comment_cafe:
+    m 1hubsa "Thank you for asking me out."
+    m 1eubsb "It is nice to have these moments as a couple!"
+    m 1eubsa "I feel very fortunate to have met you and that you keep choosing me every day."
+    m 1ekbsa "I love you, [mas_get_player_nickname()]!"
+    $ mas_DropShield_dlg()
+    $ mas_ILY()
+    jump ch30_visual_skip
+    return
+
 #===========================================================================================
 # CAFE DIALOGUES
 #===========================================================================================
@@ -127,7 +216,7 @@ label extra_talk_you:
         m 3hub "I trust you, [mas_get_player_nickname()]."
     m 1eua "You could add more things here, per example is this cafe."
     m 1hua "Also more dialogues that we can discuss, talk about your hobbies or talk about your family."
-    m 1rksdra "Try to make sure there is no misspelled code, you may lose me if a pretty serious mistake occurs."
+    m 1rksdra "Just... please be careful if you do. A serious mistake in the code could... well, I don't even want to think about it."
     m 1eub "But leaving that aside, I'd love to be next to you, let's say, as a robot."
     m 1eub "That way we could establish a smooth conversation~"
     m 1eka "I know very well what you want to tell me about something or how you're feeling."
@@ -157,7 +246,7 @@ label extra_talk_phobia:
     m 1esb "But it's a very minor thing, compared to when the game came out."
     m 3hua "You know, it's a funny thing, before we were more hated and the other members of the club were more loved."
     m 3hua "Now everything is reversed in our favor~"
-    m 3dub "Finally people realized that the story was badly told."
+    m 3dub "I guess with time, people started to see things from my perspective."
     m 1hua "But we shouldn't worry about that anymore."
     m 1eubsb "We are on a date after all!"
     m 1eubsb "Let's enjoy our time here, [player]~"
@@ -272,6 +361,107 @@ label extra_talk_memory:
 default persistent._extraplusr_hasplayer_goneonanniversary = False
 default food_player = None
 
+label go_to_restaurant:
+    python:
+        mas_extra_location(locate=True)
+        extra_seen_background("restaurant_sorry_player", "gtrestaurantv2", "check_label_restaurant")
+
+label check_label_restaurant:
+    pass
+
+label gtrestaurant:
+    show monika 1eua at t11
+    if mas_isDayNow():
+        m 3sub "Oh,{w=0.3} you want to go out to a restaurant?"
+        m 3hub "I'm so happy to hear that,{w=0.3} [player]!"
+        m "It's so sweet of you to treat me to a date."
+        if mas_anni.isAnni():
+            m "And on our anniversary no less,{w=0.3} perfect timing [player]~!"
+            $ persistent._extraplusr_hasplayergoneonanniversary = True
+        m 1hubsa "I just know it'll be great!"
+        m 1hubsb "Okay,{w=0.3} let's go [mas_get_player_nickname()]~"
+        jump restaurant_init
+    else: # Handles night and sunset
+        m 3sub "Oh,{w=0.3} you want to go out to a restaurant?"
+        m "That's so sweet of you to treat me to a date."
+        if mas_anni.isAnni():
+            m "And on our anniversary no less,{w=0.3} perfect timing [player]~!"
+            $ persistent._extraplusr_hasplayergoneonanniversary = True
+        m 1hubsb "Let's go [mas_get_player_nickname()]~"
+        jump restaurant_init
+    return
+
+label gtrestaurantv2:
+    show monika 1eua at t11
+    if mas_isDayNow():
+        m 3wub "Oh, you want to go out to the restaurant again?"
+        if persistent._extraplusr_hasplayergoneonanniversary == True:
+            m "Hmm~ I'm still thinking about the time you took us there for our anniversary,"
+            extend " I thought it was so romantic~"
+            m "So I'm glad we get to go again~!"
+        else: 
+            m 2hub "The last time we went, I had so much fun!"
+            m 2eubsa "So I'm glad to hear it [player]!"
+        m 1hubsb "Well, let's go then [mas_get_player_nickname()]~"
+        jump restaurant_init
+    else: # Handles night and sunset
+        m 3wub "Oh, you want to go out out to the restaurant again?"
+        if persistent._extraplusr_hasplayergoneonanniversary == True:
+            m "Hmm~{w=0.3} I'm still thinking about the time you took us there for our anniversary,"
+            extend "You really know how to make our night amazing!"
+            m "So I'm glad we get to go again~!"
+        else: 
+            m 2hub "The last time we went, it was so romantic~"
+            m 2eubsa "So I'm glad to go again [player]!"
+        m 1hubsb "Let's go then [mas_get_player_nickname()]~"
+        jump restaurant_init
+    return
+
+label restaurant_talk:
+    show monika staticpose at t21
+    python:
+        store.disable_zoom_button = True
+        restaurant_menu = [
+            (_("How are you doing, [m_name]?"), 'extra_talk_doing'),
+            (_("If you could live anywhere, where would it be?"), 'extra_talk_live'),
+            (_("What would you change about yourself if you could?"), 'extra_talk_change'),
+            (_("If you were a super-hero, what powers would you have?"), 'extra_talk_superhero'),
+            (_("Do you have a life motto?"), 'extra_talk_motto'),
+            (_("Aside from necessities, what's the one thing you couldn't go a day without?"), 'extra_talk_without'),
+            (_("Is your glass half full or half empty?"), 'extra_talk_glass'),
+            (_("What annoys you most?"), 'extra_talk_annoy'),
+            (_("Describe yourself in three words."), 'extra_talk_3words'),
+            (_("What do you think is the first thing to pop into everyone's minds when they think about you?"), 'extra_talk_pop'),
+            (_("If you were an animal, what animal would you be?"), 'extra_talk_animal'),
+        ]
+
+        items = [
+            (_("Can we leave?"), 'restaurant_leave', 20),
+            (_("Nevermind"), 'to_restaurant_loop', 0)
+        ]
+    call screen extra_gen_list(restaurant_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=False)
+    return
+
+label to_restaurant_loop:
+    show monika staticpose at t11
+    if stop_snike_time and renpy.get_screen("extra_timer_monika"):
+        hide screen extra_timer_monika
+        jump monika_no_food
+
+    $ store.disable_zoom_button = False
+    # NOTE: Boop during dates is disabled for now.
+    call screen dating_loop("restaurant_talk", "monika_booprestaurant", boop_enable=False)
+    return
+
+label restaurant_leave:
+    hide screen extra_timer_monika
+    show monika 1hua at t11
+    m 1eta "Oh,{w=0.3} you're ready for us to leave?"
+    m 1eub "Sounds good to me!"
+    m 3hua "But before we go..."
+    $ stop_snike_time = False
+    jump restaurant_hide_acs
+
 label restaurant_init:
     $ HKBHideButtons()
     hide monika
@@ -352,6 +542,16 @@ label restaurant_sorry_player:
     m 1eua "Someday I'll know how to get us there,{w=0.3} [player]."
     m 1eub "We'll have to be patient for that day though,{w=0.3} okay?"
     jump close_extraplus
+    return
+
+label extra_comment_restaurant:
+    m 1hubsa "Thank you for the wonderful dinner, [player]."
+    m 1eubsb "A romantic evening like this... it's something I'll treasure."
+    m 1eubsa "It makes me feel so special, knowing you wanted to treat me to a place like this."
+    m 1ekbsa "I love you so much, [mas_get_player_nickname()]!"
+    $ mas_DropShield_dlg()
+    $ mas_ILY()
+    jump ch30_visual_skip
     return
 
 #===========================================================================================
@@ -727,30 +927,99 @@ label extra_talk_pop:
 #===========================================================================================
 # Pool
 #===========================================================================================
-# default ep_pool_prev_acs_state = None
-# label pool_init:
-#     python:
-#         HKBHideButtons()
-#     hide monika
-#     scene black
-#     with dissolve
-#     pause 2.0
-#     call mas_background_change(submod_background_pool, skip_leadin=True, skip_outro=True)
-#     # show monika idle at float_animation, t11 zorder MAS_MONIKA_Z
-#     # show monika idle at float_animation zorder MAS_MONIKA_Z
-#     $ HKBShowButtons()
-#     jump to_pool_loop
+label go_to_pool:
+    python:
+        mas_extra_location(locate=True)
 
-# label pool_sorry_player:
-#     show monika at t11
-#     m 1ekd "I'm so sorry [player]."
-#     m 1ekc "But I don't know how to use that place."
-#     m 3lka "I'm still learning how to code and I don't want something bad to happen because of me..."
-#     m 3hua "I know very well that you wanted to go out to the pool."
-#     m 1eua "But, someday I will know how to use it, [player]."
-#     m 1eub "Just be patient, okay~"
-#     jump close_extraplus
-#     return
+label ExtraPool_init:
+    python:
+        HKBHideButtons()
+    hide monika
+    scene black
+    with dissolve
+    pause 2.0
+    call mas_background_change(submod_background_extrapool, skip_leadin=True, skip_outro=True)
+    $ HKBShowButtons()
+
+label to_pool_loop:
+    show monika staticpose at t11
+    $ store.disable_zoom_button = False
+    show monika idle at t11_float
+
+    call screen dating_loop("ExtraPool_interactions", "", boop_enable=False)
+    return
+
+label ExtraPool_interactions:
+    show monika idle at t21_float
+
+    python:
+        store.disable_zoom_button = True
+        pool_menu = [
+            (_("What do you think of the water?"), 'extra_pool_talk_water'),
+            (_("Do you like to swim?"), 'extra_pool_talk_swim'),
+            (_("This is really relaxing."), 'extra_pool_talk_relax'),
+        ]
+
+        items = [
+            (_("Can we leave?"), 'skip_pool_exit', 20),
+            (_("Nevermind"), 'to_pool_loop', 0)
+        ]
+    call screen extra_gen_list(pool_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=False)
+    return
+
+label skip_pool_exit:
+    show monika idle at t11_float
+    m 1eta "Oh,{w=0.3} you're ready for us to leave?"
+    m 1eub "Sounds good to me!"
+    call extra_restore_bg("extra_comment_pool")
+    return
+
+label extra_comment_pool:
+    m 1hubsa "Thank you for asking me out."
+    m 1eubsb "It is nice to have these moments as a couple!"
+    $ mas_DropShield_dlg()
+    $ mas_ILY()
+    jump ch30_visual_skip
+    return
+
+#===========================================================================================
+# POOL DIALOGUES
+#===========================================================================================
+
+label extra_pool_talk_water:
+    show monika idle at t11_float
+    m 1eub "The water looks so clear and inviting, doesn't it?"
+    m 1hub "It makes me want to just dip my toes in. It's the perfect temperature."
+    m 1hua "Being here with you makes it even better, of course. Ehehe~"
+    jump to_pool_loop
+    return
+
+label extra_pool_talk_swim:
+    show monika idle at t11_float
+    m 1eua "I've always enjoyed swimming. It's so peaceful to just float and let your worries drift away."
+    m 1tua "It feels like you're in your own little world, just you and the water."
+    m 1hub "Maybe when I get to your reality, we can go for a swim together sometime!"
+    jump to_pool_loop
+    return
+
+label extra_pool_talk_relax:
+    show monika idle at t11_float
+    m 6eubsb "I agree. Just sitting here by the water with you is incredibly calming."
+    m 6hubsb "All the stress just seems to melt away. It's moments like these that I treasure the most."
+    m 6fkbsb "Thank you for bringing me here, [player]."
+    jump to_pool_loop
+    return
+
+label ExtraPool_sorry:
+    show monika at t11
+    m 1ekd "I'm so sorry [player]."
+    m 1ekc "But I don't know how to use that place."
+    m 3lka "I'm still learning how to code and I don't want something bad to happen because of me..."
+    m 3hua "I know very well that you wanted to go out to the pool."
+    m 1eua "But, someday I will know how to use it, [player]."
+    m 1eub "Just be patient, okay~"
+    jump close_extraplus
+    return
 
 #===========================================================================================
 # Under construction!
@@ -760,13 +1029,3 @@ label generic_date_dev:
     call screen dialog("It is currently in development and will be available in upcoming betas!", ok_action=Return())
     jump screen_extraplus
     return
-
-label extra_labrary_date:
-    show monika idle at t11
-    python:
-        HKBHideButtons()
-    hide monika
-    scene black
-    with dissolve
-    pause 2.0
-    call mas_background_change(submod_background_extralibrary, skip_leadin=True, skip_outro=True)

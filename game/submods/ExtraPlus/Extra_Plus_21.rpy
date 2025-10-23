@@ -101,18 +101,45 @@ screen blackjack_ui:
             null height 25
             use blackjack_player()
 
+# screen blackjack_monika():
+#     vbox:
+#         xalign 0.5
+#         spacing 15
+#         label _("Monika") xalign 0.5
+    
+#         hbox:
+#             spacing 10
+            # for index, card in enumerate(minigame_monika.hand):
+            #     add If(minigame_monika.revealed[index],
+            #         At(card.image, init_card_slide if index < 2 else hit_card),
+            #         At("bjcard back", init_card_slide if index < 2 else hit_card)
+            #     ) at monika_card_flip
+#             frame:
+#                 xysize (50, 50)
+#                 xalign 0.5
+#                 yalign 0.5
+#                 text "[minigame_monika.total if all(minigame_monika.revealed) else '??']" xalign 0.5 yalign 0.5
+
 screen blackjack_monika():
     vbox:
         xalign 0.5
         spacing 15
-        label _("Monika") xalign 0.5
-    
+        if minigame_monika.total > 21:
+            label _("{color=#ff0000}Busted!{/color}") xalign 0.5
+        elif bj_current_turn == "monika":
+            label _("{color=#00ff00}My Turn~{/color}") xalign 0.5
+        elif not all(minigame_monika.revealed):
+            label _("Waiting...") xalign 0.5
+        else:
+            label _("Done") xalign 0.5
+   
         hbox:
             spacing 10
             for index, card in enumerate(minigame_monika.hand):
                 add If(minigame_monika.revealed[index],
                     At(card.image, init_card_slide if index < 2 else hit_card),
-                    At("bjcard back", init_card_slide if index < 2 else hit_card))
+                    At("bjcard back", init_card_slide if index < 2 else hit_card)
+                ) at monika_card_flip
             frame:
                 xysize (50, 50)
                 xalign 0.5
@@ -123,8 +150,17 @@ screen blackjack_player():
     vbox:
         xalign 0.5
         spacing 15
-        label _(player) xalign 0.5
-        
+        if minigame_player.total > 21:
+            label _("{color=#ff0000}Busted!{/color}") xalign 0.5
+        elif bj_current_turn == "player":
+            if minigame_player.total >= 17 and minigame_player.total < 21:
+                label _("{color=#ffd93d}Careful!{/color}") xalign 0.5
+            else:
+                label _("{color=#00ff00}Your Turn{/color}") xalign 0.5
+        elif bj_player_stand:
+            label _("Standing") xalign 0.5
+        else:
+            label _("Waiting...") xalign 0.5
         hbox:
             spacing 10
             for index, card in enumerate(minigame_player.hand):

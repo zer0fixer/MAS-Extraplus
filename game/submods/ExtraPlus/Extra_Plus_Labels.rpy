@@ -9,7 +9,6 @@ label screen_extraplus:
 label close_extraplus:
     show monika idle at t11
     python:
-        # store.mas_sprites.zoom_level = store.player_zoom
         mas_DropShield_dlg()
         disable_button_zoom()
     jump ch30_visual_skip
@@ -18,8 +17,6 @@ label close_extraplus:
 label close_dev_extraplus:
     show monika idle at t11
     python:
-        # store.mas_sprites.zoom_level = store.player_zoom
-        # store.mas_sprites.adjust_zoom()
         mas_DropShield_dlg()
         disable_button_zoom()
     jump ch30_visual_skip
@@ -44,11 +41,13 @@ label return_boop_screen:
 
 label close_boop_screen:
     show monika idle at t11
-    # python:
-    #     store.mas_sprites.zoom_level = store.player_zoom
-    #     store.mas_sprites.adjust_zoom()
-    #     disable_button_zoom()
+    $ disable_button_zoom()
     jump ch30_visual_skip
+    return
+
+label boop_timer_expired:
+    call screen maxwell_april_fools
+    jump show_boop_screen
     return
 
 label hide_images_rps:
@@ -75,218 +74,6 @@ label extra_restore_bg(label="ch30_visual_skip"):
         HKBShowButtons()
         renpy.jump(label)
     return
-
-#===========================================================================================
-# Label
-#===========================================================================================
-
-#====Cafe
-
-label go_to_cafe:
-    python:
-        mas_extra_location(locate=True)
-        extra_seen_background("cafe_sorry_player", "gtcafev2", "check_label_cafe")
-
-label check_label_cafe:
-    pass
-
-label gtcafe:
-    show monika 1eua at t11
-    if mas_isDayNow():
-        m 3sub "Do you want to go to the cafe?"
-        m 3hub "Glad to hear it [player]!"
-        m 1hubsa "I know this appointment will be great!"
-        m 1hubsb "Okay, let's go [mas_get_player_nickname()]~"
-        jump cafe_init
-    else: # Handles night and sunset
-        m 3sub "Oh, you want to go out to the cafe?"
-        m 3hub "It's pretty sweet that you decided to go tonight."
-        m 1eubsa "This date night is going to be great!"
-        m 1hubsb "Let's go [mas_get_player_nickname()]~"
-        jump cafe_init
-    return
-
-label gtcafev2:
-    show monika 1eua at t11
-    if mas_isDayNow():
-        m 3wub "Do you want to go to the cafe again?"
-        m 2hub "The previous time we went, I had a lot of fun!"
-        m 2eubsa "So glad to hear it [player]!"
-        m 1hubsb "Well, let's go [mas_get_player_nickname()]~"
-        jump cafe_init
-    else: # Handles night and sunset
-        m 3wub "Oh, do you want to go out to the cafe again?"
-        m 2hub "The previous time we went, it was very romantic~"
-        m 2eubsa "So glad to go again [player]!"
-        m 1hubsb "Let's go [mas_get_player_nickname()]~"
-        jump cafe_init
-    return
-
-label cafe_talk:
-    show monika staticpose at t21
-    python:
-        store.disable_zoom_button = True
-        cafe_menu = [
-            (_("How are you today?"), 'extra_talk_feel'),
-            (_("What's your greatest ambition?"), 'extra_talk_ambition'),
-            (_("Our communication is very limited, don't you think?"), 'extra_talk_you'),
-            (_("How do you see us in 10 years?"), 'extra_talk_teen'),
-            (_("What is your best memory that you currently have?"), 'extra_talk_memory'),
-            (_("Do you have any phobia?"), 'extra_talk_phobia')
-        ]
-
-        items = [
-            (_("Can we leave?"), 'cafe_leave', 20),
-            (_("Nevermind"), 'to_cafe_loop', 0)
-        ]
-    call screen extra_gen_list(cafe_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=False)
-    return
-
-label to_cafe_loop:
-    show monika staticpose at t11
-    if stop_snike_time and renpy.get_screen("extra_timer_monika"):
-        hide screen extra_timer_monika
-        jump monika_no_dessert
-
-    $ store.disable_zoom_button = False
-    # NOTE: Boop during dates is disabled for now.
-    call screen dating_loop("cafe_talk", "monika_boopcafe", boop_enable=False)
-    return
-
-label cafe_leave:
-    hide screen extra_timer_monika
-    show monika 1hua at t11
-    m 1eta "Oh, you want us to go back?"
-    m 1eub "Sounds good to me!"
-    m 3hua "But before we go..."
-    $ stop_snike_time = False
-    jump cafe_hide_acs
-
-label extra_comment_cafe:
-    m 1hubsa "Thank you for asking me out."
-    m 1eubsb "It is nice to have these moments as a couple!"
-    m 1eubsa "I feel very fortunate to have met you and that you keep choosing me every day."
-    m 1ekbsa "I love you, [mas_get_player_nickname()]!"
-    $ mas_DropShield_dlg()
-    $ mas_ILY()
-    jump ch30_visual_skip
-    return
-
-#====Restaurant====#
-
-label extra_comment_restaurant:
-    m 1hubsa "Thank you for the wonderful dinner, [player]."
-    m 1eubsb "A romantic evening like this... it's something I'll treasure."
-    m 1eubsa "It makes me feel so special, knowing you wanted to treat me to a place like this."
-    m 1ekbsa "I love you so much, [mas_get_player_nickname()]!"
-    $ mas_DropShield_dlg()
-    $ mas_ILY()
-    jump ch30_visual_skip
-    return
-
-label go_to_restaurant:
-    python:
-        mas_extra_location(locate=True)
-        extra_seen_background("restaurant_sorry_player", "gtrestaurantv2", "check_label_restaurant")
-
-label check_label_restaurant:
-    pass
-
-label gtrestaurant:
-    show monika 1eua at t11
-    if mas_isDayNow():
-        m 3sub "Oh,{w=0.3} you want to go out to a restaurant?"
-        m 3hub "I'm so happy to hear that,{w=0.3} [player]!"
-        m "It's so sweet of you to treat me to a date."
-        if mas_anni.isAnni():
-            m "And on our anniversary no less,{w=0.3} perfect timing [player]~!"
-            $ persistent._extraplusr_hasplayergoneonanniversary = True
-        m 1hubsa "I just know it'll be great!"
-        m 1hubsb "Okay,{w=0.3} let's go [mas_get_player_nickname()]~"
-        jump restaurant_init
-    else: # Handles night and sunset
-        m 3sub "Oh,{w=0.3} you want to go out to a restaurant?"
-        m "That's so sweet of you to treat me to a date."
-        if mas_anni.isAnni():
-            m "And on our anniversary no less,{w=0.3} perfect timing [player]~!"
-            $ persistent._extraplusr_hasplayergoneonanniversary = True
-        m 1hubsb "Let's go [mas_get_player_nickname()]~"
-        jump restaurant_init
-    return
-
-label gtrestaurantv2:
-    show monika 1eua at t11
-    if mas_isDayNow():
-        m 3wub "Oh, you want to go out to the restaurant again?"
-        if persistent._extraplusr_hasplayergoneonanniversary == True:
-            m "Hmm~ I'm still thinking about the time you took us there for our anniversary,"
-            extend " I thought it was so romantic~"
-            m "So I'm glad we get to go again~!"
-        else: 
-            m 2hub "The last time we went, I had so much fun!"
-            m 2eubsa "So I'm glad to hear it [player]!"
-        m 1hubsb "Well, let's go then [mas_get_player_nickname()]~"
-        jump restaurant_init
-    else: # Handles night and sunset
-        m 3wub "Oh, you want to go out out to the restaurant again?"
-        if persistent._extraplusr_hasplayergoneonanniversary == True:
-            m "Hmm~{w=0.3} I'm still thinking about the time you took us there for our anniversary,"
-            extend "You really know how to make our night amazing!"
-            m "So I'm glad we get to go again~!"
-        else: 
-            m 2hub "The last time we went, it was so romantic~"
-            m 2eubsa "So I'm glad to go again [player]!"
-        m 1hubsb "Let's go then [mas_get_player_nickname()]~"
-        jump restaurant_init
-    return
-
-label restaurant_talk:
-    show monika staticpose at t21
-    python:
-        store.disable_zoom_button = True
-        restaurant_menu = [
-            (_("How are you doing, [m_name]?"), 'extra_talk_doing'),
-            (_("If you could live anywhere, where would it be?"), 'extra_talk_live'),
-            (_("What would you change about yourself if you could?"), 'extra_talk_change'),
-            (_("If you were a super-hero, what powers would you have?"), 'extra_talk_superhero'),
-            (_("Do you have a life motto?"), 'extra_talk_motto'),
-            (_("Aside from necessities, what's the one thing you couldn't go a day without?"), 'extra_talk_without'),
-            (_("Is your glass half full or half empty?"), 'extra_talk_glass'),
-            (_("What annoys you most?"), 'extra_talk_annoy'),
-            (_("Describe yourself in three words."), 'extra_talk_3words'),
-            (_("What do you think is the first thing to pop into everyone's minds when they think about you?"), 'extra_talk_pop'),
-            (_("If you were an animal, what animal would you be?"), 'extra_talk_animal'),
-        ]
-
-        items = [
-            (_("Can we leave?"), 'restaurant_leave', 20),
-            (_("Nevermind"), 'to_restaurant_loop', 0)
-        ]
-    call screen extra_gen_list(restaurant_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=False)
-    return
-
-label to_restaurant_loop:
-    show monika staticpose at t11
-    if stop_snike_time and renpy.get_screen("extra_timer_monika"):
-        hide screen extra_timer_monika
-        jump monika_no_food
-
-    $ store.disable_zoom_button = False
-    # NOTE: Boop during dates is disabled for now.
-    call screen dating_loop("restaurant_talk", "monika_booprestaurant", boop_enable=False)
-    return
-
-label restaurant_leave:
-    hide screen extra_timer_monika
-    show monika 1hua at t11
-    m 1eta "Oh,{w=0.3} you're ready for us to leave?"
-    m 1eub "Sounds good to me!"
-    m 3hua "But before we go..."
-    $ stop_snike_time = False
-    jump restaurant_hide_acs
-
-#====Pool====#
-#?????????????
 
 #===========================================================================================
 # Others
@@ -460,13 +247,13 @@ label restaurant_hide_acs:
 ## MENUS
 ################################################################################
 
-label plus_walk:
+label extraplus_walk:
     show monika idle at t21
     python:
         walk_menu = [
             (_("Cafe"), 'go_to_cafe'),
             (_("Restaurant"), 'go_to_restaurant'),
-            (_("Pool"), "generic_date_dev"),
+            (_("Pool"), "go_to_pool"),
             (_("Library"), "generic_date_dev"),
             (_("Arcade"), "generic_date_dev")
         ]
@@ -477,7 +264,7 @@ label plus_walk:
     call screen extra_gen_list(walk_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
     return
 
-label plus_minigames:
+label extraplus_minigames:
     show monika idle at t21
     python:
         minigames_menu = [

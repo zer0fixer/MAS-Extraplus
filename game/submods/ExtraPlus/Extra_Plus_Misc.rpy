@@ -2,9 +2,32 @@
 ## BOOP
 ################################################################################
 
+init python:
+    def show_boop_feedback(message, color="#ff69b4"):
+        """
+        Shows a floating text message on the screen at the mouse position.
+        Used for visual feedback during boop interactions.
+        """
+        t = "boop_notif{}".format(renpy.random.randint(1, 10000))
+        renpy.show_screen("boop_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color)
+
+transform boop_feedback_trans:
+    parallel:
+        ease 1.2 yoffset -150
+    parallel:
+        pause 0.1
+        ease 1.1 alpha 0
+
+screen boop_feedback_notif(msg, tag, txt_color):
+    zorder 2000
+    timer 1.3 action Hide(tag)
+    default p = renpy.get_mouse_pos()
+    text "{}".format(msg) at boop_feedback_trans pos p size 35 color txt_color outlines [ (3, "#000", 0, 0) ]
+
 #====NOISE
 label monika_boopbeta:
     $ persistent.plus_boop[0] += 1
+    $ show_boop_feedback("Boop!")
     if persistent.plus_boop[0] == 1:
         $ mas_gainAffection(3,bypass=True)
         m 1wud "Wait a minute..."
@@ -193,6 +216,7 @@ label boopbeta_war_win:
 #====CHEEKS
 label monika_cheeksbeta:
     $ persistent.plus_boop[1] += 1
+    $ show_boop_feedback("❤", color="#ff69b4")
     if persistent.plus_boop[1] == 1:
         $ mas_gainAffection(3,bypass=True)
         m 2wubsd "Hey, I felt a slight pinch on my cheek."
@@ -281,6 +305,7 @@ label extra_cheeks_dis:
 #====HEADPAT
 label monika_headpatbeta:
     $ persistent.plus_boop[2] += 1
+    $ show_boop_feedback("Pat pat", color="#90ee90")
     if persistent.plus_boop[2] == 1:
         $ mas_gainAffection(3,bypass=True)
         m 6subsa "You're patting me on the head!"
@@ -364,6 +389,7 @@ label extra_headpat_dis:
 #====HANDS
 label monika_handsbeta:
     #Change de expressions
+    $ show_boop_feedback("...", color="#ffffff")
     $ persistent.extra_boop[0] += 1
     if persistent.extra_boop[0] == 1:
         $ mas_gainAffection(3,bypass=True)
@@ -425,6 +451,7 @@ label monika_handsbeta:
 
 #====EARS
 label monika_earsbeta:
+    $ show_boop_feedback("?", color="#add8e6")
     $ persistent.extra_boop[1] += 1
     if persistent.extra_boop[1] == 1:
         $ mas_gainAffection(3, bypass=True)
