@@ -2,11 +2,6 @@
 # MINIGAME#1
 #===========================================================================================
 #====Shell Game
-image note_score = MASFilterSwitch("Submods/ExtraPlus/minigames/shellgame/note_score.png")
-image extra_cup = MASFilterSwitch("Submods/ExtraPlus/minigames/shellgame/{}".format(sg_cup_skin))
-image extra_cup_hover = MASFilterSwitch("Submods/ExtraPlus/minigames/shellgame/cup_hover.png")
-image extra_cup_idle = im.Scale("mod_assets/other/transparent.png", 200, 260)
-image extra_ball = MASFilterSwitch("Submods/ExtraPlus/minigames/shellgame/ball.png")
 image extra_sg_cup:
     xanchor 0.5 yanchor 0.5
     contains:
@@ -25,6 +20,7 @@ image extra_sg_ball:
     contains:
         "extra_ball"
         xalign 0.5 yalign 0.5
+        
 default persistent.sg_max_score = 0
 default sg_target_shuffles = 4
 define sg_original_cup = [0, 1, 2]
@@ -92,6 +88,7 @@ label minigame_sg:
                 sg_target_shuffles = 3
 
     python:
+        disable_button_zoom()
         # Reset stats for a new game session
         store.sg_current_turn = 1
         store.sg_correct_answers = 0
@@ -174,7 +171,7 @@ label sg_loop_game:
 
     $ renpy.pause(sg_cup_speed, hard='True')
 
-    play sound "Submods/ExtraPlus/sfx/cup_shuffle.mp3"
+    play sound sfx_cup_shuffle
 
     show extra_sg_cup as cup_1:
         ease sg_cup_speed xpos sg_cup_coordinates_real[0]

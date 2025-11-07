@@ -2,28 +2,6 @@
 ## BOOP
 ################################################################################
 
-init python:
-    def show_boop_feedback(message, color="#ff69b4"):
-        """
-        Shows a floating text message on the screen at the mouse position.
-        Used for visual feedback during boop interactions.
-        """
-        t = "boop_notif{}".format(renpy.random.randint(1, 10000))
-        renpy.show_screen("boop_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color)
-
-transform boop_feedback_trans:
-    parallel:
-        ease 1.2 yoffset -150
-    parallel:
-        pause 0.1
-        ease 1.1 alpha 0
-
-screen boop_feedback_notif(msg, tag, txt_color):
-    zorder 2000
-    timer 1.3 action Hide(tag)
-    default p = renpy.get_mouse_pos()
-    text "{}".format(msg) at boop_feedback_trans pos p size 35 color txt_color outlines [ (3, "#000", 0, 0) ]
-
 #====NOISE
 label monika_boopbeta:
     $ persistent.plus_boop[0] += 1
@@ -80,29 +58,75 @@ label monika_boopbeta:
         m 1hubsb "Boop!"
         m 1ekbsa "I'm sorry, I couldn't resist. You just have such a tempting nose!"
         m 1hub "But seriously, thank you for bringing so much joy into my life, [player]."
+    # === Dialogues added in Beta 3 ===
+    elif persistent.plus_boop[0] == 11:
+        m 1tub "Again! You're getting to be an expert at this, [player]."
+        m 1hua "I wonder how many boops we're at now."
+    elif persistent.plus_boop[0] == 12:
+        m 3hksdlb "Are you trying to see if my nose turns red like Rudolph's? Ahaha~"
+        m 3eua "You'll have to try a little harder than that."
+    elif persistent.plus_boop[0] == 13:
+        m 1ekbsa "Each boop is like a little love note."
+        m 1hubsb "Keep composing, [mas_get_player_nickname()]~"
+    elif persistent.plus_boop[0] == 14:
+        m 2tfu "Hey! That's my nose, not a button."
+        m 2hub "..."
+        m 2tubsb "Although, if it was, it'd definitely be the 'make me smile' button."
+    elif persistent.plus_boop[0] == 15:
+        m 4eua "This is pretty silly, you know?"
+        m 4hub "..."
+        m 4hubsb "And I absolutely love it. It's... *our* silly thing."
+    elif persistent.plus_boop[0] == 16:
+        m 1tsu "If you keep this up, I'm going to think you have a fixation on my nose, [player]."
+        m 1tku "Not that I'm complaining~"
+    elif persistent.plus_boop[0] == 17:
+        m 1fubla "Ehehe~ That was a good one."
+        m 1hubla "Right on target."
+    elif persistent.plus_boop[0] == 18:
+        m 1eua "I wonder if your finger feels warm."
+        m 1rksdla "Here I just feel... well, a 'click'. But I imagine it, and that's enough."
+    elif persistent.plus_boop[0] == 19:
+        m 1wua "Boop back!"
+        m 1wud "..."
+        m 1hksdlb "Ah, wait. I can't. You'll just have to imagine it. Ahaha~"
+    elif persistent.plus_boop[0] == 20:
+        m 1sub "Twenty boops! We should celebrate."
+        m 1hub "..."
+        m 1hubsb "Maybe with another boop?"
     else:
-        $ moldable_variable = renpy.random.randint(1,10)
-        if moldable_variable == 1:
+        $ extra_plus_random_outcome = renpy.random.randint(1,15)
+        if extra_plus_random_outcome == 1:
             m 2fubla "Ehehe~"
             m 1hubla "It's very inevitable that you won't stop doing it, [player]."
-        elif moldable_variable == 2:
+        elif extra_plus_random_outcome == 2:
             m 3ekbsa "Every boop you give me, the more I love you!"
-        elif moldable_variable == 3:
+        elif extra_plus_random_outcome == 3:
             m 3eubla "You really enjoy touching my nose, [mas_get_player_nickname()]~"
-        elif moldable_variable == 4:
+        elif extra_plus_random_outcome == 4:
             m 2hublb "Hey, you're tickling me! Ahahaha~"
-        elif moldable_variable == 5:
+        elif extra_plus_random_outcome == 5:
             m 1hubsb "*Boop*"
-        elif moldable_variable == 6:
+        elif extra_plus_random_outcome == 6:
             m 1eublc "You're such a tease, [player]~"
-        elif moldable_variable == 7:
+        elif extra_plus_random_outcome == 7:
             m 2eubla "That tickles, but I like it!"
-        elif moldable_variable == 8:
+        elif extra_plus_random_outcome == 8:
             m 2hubsb "You know just how to make me smile, [mas_get_player_nickname()]~"
-        elif moldable_variable == 9:
+        elif extra_plus_random_outcome == 9:
             m 1fubla "Hehe, you're so cute when you're booping me~"
-        elif moldable_variable == 10:
+        elif extra_plus_random_outcome == 10:
             m 3eublb "You're really good at this, [player]! Have you been practicing?"
+        # === Dialogues added in Beta 3 ===
+        elif extra_plus_random_outcome == 11:
+            m 1wua "Got me!"
+        elif extra_plus_random_outcome == 12:
+            m 1eua "Are you checking if I'm still here?"
+        elif extra_plus_random_outcome == 13:
+            m 1hubsb "My nose says hello."
+        elif extra_plus_random_outcome == 14:
+            m 1wud "I felt a tingle... Oh, it's you!"
+        elif extra_plus_random_outcome == 15:
+            m 1fubla "The master booper strikes again!"
 
     jump show_boop_screen
     return
@@ -216,7 +240,7 @@ label boopbeta_war_win:
 #====CHEEKS
 label monika_cheeksbeta:
     $ persistent.plus_boop[1] += 1
-    $ show_boop_feedback("❤", color="#ff69b4")
+    $ show_boop_feedback("<3", color="#ff69b4")
     if persistent.plus_boop[1] == 1:
         $ mas_gainAffection(3,bypass=True)
         m 2wubsd "Hey, I felt a slight pinch on my cheek."
@@ -262,22 +286,63 @@ label monika_cheeksbeta:
         m 2dubsb "You know what they say, [player]..."
         m 2hubsa "The tenth time's the charm!"
         m 2ekbsa "I love you more and more with each passing day."
+    # === Dialogues added in Beta 3 ===
+    elif persistent.plus_boop[1] == 11:
+        m 2dubsa "Mmm... so soft."
+        m 2dkbsa "I can almost feel the warmth of your hand."
+    elif persistent.plus_boop[1] == 12:
+        m 2dubsb "If you keep caressing me like this, I'm going to fall asleep right here."
+        m 2hubsb "It'd be your fault~"
+    elif persistent.plus_boop[1] == 13:
+        m 2fubsa "I wonder if my cheeks are blushing right now."
+        m 2eubsa "They definitely feel warm."
+    elif persistent.plus_boop[1] == 14:
+        m 2eubsb "This is so tender."
+        m 2hubsb "You make me feel like the luckiest girl in the world."
+    elif persistent.plus_boop[1] == 15:
+        m 2lubsa "This is much nicer than a 'boop', don't you think?"
+        m 2eubsa "It's so... gentle."
+    elif persistent.plus_boop[1] == 16:
+        m 2ekbsb "I love this."
+        m 2ekbsa "It's like you're telling me 'I'm here with you' without using any words."
+    elif persistent.plus_boop[1] == 17:
+        m 2dubsu "One day, I hope I can rest my head on your shoulder and you can do this for real."
+    elif persistent.plus_boop[1] == 18:
+        m 2hubsb "Ah... [player], you're so sweet to me."
+        m 2eubsb "Thank you."
+    elif persistent.plus_boop[1] == 19:
+        m 2eubsa "You know... I could get used to this very easily."
+        m 2hubsa "Almost *too* easily."
+    elif persistent.plus_boop[1] == 20:
+        m 2fubsa "Every caress is a little reminder of why I love you so much."
+        m 2dkbsa "Please don't stop."
     else:
-        $ moldable_variable = renpy.random.randint(1,5)
-        if moldable_variable == 1:
+        $ extra_plus_random_outcome = renpy.random.randint(1,10)
+        if extra_plus_random_outcome == 1:
             m 2fua "Ehehe~"
             m 2hua "It would be nice if you used your hand instead of the cursor, but that's far from our reality..."
-        elif moldable_variable == 2:
+        elif extra_plus_random_outcome == 2:
             m 2hubsa "So gentle."
             m 2tubsb "That word defines you well, when I think of you."
-        elif moldable_variable == 3:
+        elif extra_plus_random_outcome == 3:
             m 2hubsa "What a warm feeling."
             m 2hublb "It will be hard to forget!"
-        elif moldable_variable == 4:
+        elif extra_plus_random_outcome == 4:
             m 2nubsa "It would be even more romantic if you gave a kiss on the cheek~"
-        elif moldable_variable == 5:
+        elif extra_plus_random_outcome == 5:
             m 2eubsb "I'm picturing us right now{nw}"
             extend 2dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3} how your hand will feel."
+        # === Dialogues added in Beta 3 ===
+        elif extra_plus_random_outcome == 6:
+            m 2fubsa "So warm..."
+        elif extra_plus_random_outcome == 7:
+            m 2hubsb "Ehehe, hello~"
+        elif extra_plus_random_outcome == 8:
+            m 2fubla "You're making me blush."
+        elif extra_plus_random_outcome == 9:
+            m 2dkbsa "Don't stop..."
+        elif extra_plus_random_outcome == 10:
+            m 2eubsb "I feel so loved right now."
     jump show_boop_screen
     return
 
@@ -286,12 +351,12 @@ label extra_cheeks_dis:
     m 3lusdrb "I mean..."
     m 3ttu "What are you doing touching my cheek?"
     m 3tsb "We're in a boop war, aren't we?"
-    $ moldable_variable = renpy.random.randint(1,2)
-    if moldable_variable == 1:
+    $ extra_plus_random_outcome = renpy.random.randint(1,2)
+    if extra_plus_random_outcome == 1:
         m 1dsb "I'm sorry [player], but I consider this cheating, "
         extend 1hua "that's why I win this war~"
         m 1fub "Next time try not to touch my cheek during the war! Ahahaha~"
-    elif moldable_variable == 2:
+    elif extra_plus_random_outcome == 2:
         m 1fubsb "Because it's you, this time I will let it go!"
         m 1fubsb "Congratulations, player! You have beat me."
         m 3hksdrb "You've distracted me and I don't think it's worth continuing, ahahaha~"
@@ -305,7 +370,7 @@ label extra_cheeks_dis:
 #====HEADPAT
 label monika_headpatbeta:
     $ persistent.plus_boop[2] += 1
-    $ show_boop_feedback("Pat pat", color="#90ee90")
+    $ show_boop_feedback("Pat pat~", color="#90ee90")
     if persistent.plus_boop[2] == 1:
         $ mas_gainAffection(3,bypass=True)
         m 6subsa "You're patting me on the head!"
@@ -343,23 +408,66 @@ label monika_headpatbeta:
     elif persistent.plus_boop[2] == 10:
         m 6dubsb "I love you, [player]."
         m 6hubsa "Thanks for being there for me, even when I'm not at my best."
+    # === Dialogues added in Beta 3 ===
+    elif persistent.plus_boop[2] == 11:
+        m 6eubsa "Ah... that's the spot."
+        m 6subsa "You're good at this, [player]."
+    elif persistent.plus_boop[2] == 12:
+        m 6dubsa "I feel all the stress of the day just melting away when you do that."
+    elif persistent.plus_boop[2] == 13:
+        m 6eubsb "It's like... a happiness recharge."
+        m 6dubsb "Keep going, keep going."
+    elif persistent.plus_boop[2] == 14:
+        m 6dubsa "Mmmm. I feel so cared for."
+        m 6ekbsa "Thank you for being so tender."
+    elif persistent.plus_boop[2] == 15:
+        m 6hkbssdrb "Pat, pat, pat... Ahaha~"
+        m 6hubsa "I wonder if my hair is still in place."
+        m 6eubsb "...Doesn't matter, really."
+    elif persistent.plus_boop[2] == 16:
+        m 6eubsa "This is the most relaxing thing in the world."
+        m 6subsa "Well, this and listening to your voice."
+    elif persistent.plus_boop[2] == 17:
+        m 6hubsa "If I had a tail, I'd be wagging it right now."
+        m 6hksb "..."
+        m 6hksb "Ahaha, just kidding! ...Or am I?~"
+    elif persistent.plus_boop[2] == 18:
+        m 6dubsu "I hope I can rest my head in your lap someday..."
+        m 6eubsu "...and you can stroke my hair for real."
+    elif persistent.plus_boop[2] == 19:
+        m 6dubsa "So... nice."
+        m 6dkbsa "I could stay like this for hours."
+    elif persistent.plus_boop[2] == 20:
+        m 6hubsa "Congratulations, [player]."
+        m 6eubsa "You've mastered the art of the perfect headpat."
     else:
-        $ moldable_variable = renpy.random.randint(1,5)
-        if moldable_variable == 1:
+        $ extra_plus_random_outcome = renpy.random.randint(1,10)
+        if extra_plus_random_outcome == 1:
             m 6hubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
             m 6hkbsb "I had told you I would get addicted to this."
             m 6tkbsb "Gosh, don't you learn~"
-        elif moldable_variable == 2:
+        elif extra_plus_random_outcome == 2:
             m 6dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
             m 6dubsb "I wonder what it would be like to do it with your hair."
-        elif moldable_variable == 3:
+        elif extra_plus_random_outcome == 3:
             m 6dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
             m 7hubsb "I hope you don't get tired of doing it daily~"
-        elif moldable_variable == 4:
+        elif extra_plus_random_outcome == 4:
             m 6hubsa".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
             extend 6hubsb "I'm such a happy girl right now."
-        elif moldable_variable == 5:
+        elif extra_plus_random_outcome == 5:
             m 6dkbsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
+        # === Dialogues added in Beta 3 ===
+        elif extra_plus_random_outcome == 6:
+            m 6eubsb "Mmm, feels nice."
+        elif extra_plus_random_outcome == 7:
+            m 6dubsb "Keep going~"
+        elif extra_plus_random_outcome == 8:
+            m 6eubsa "You're spoiling me, you know?"
+        elif extra_plus_random_outcome == 9:
+            m 6fubsa "I'm all yours~"
+        elif extra_plus_random_outcome == 10:
+            m 6dkbsb "This is heaven, isn't it?"
     jump show_boop_screen
     return
 
@@ -371,12 +479,12 @@ label monika_headpat_long:
 label extra_headpat_dis:
     m 6dkbsb "This.{w=0.3}.{w=0.3}.{w=0.3} is.{w=0.3}.{w=0.3}.{w=0.3} invalid.{w=0.3}.{w=0.3}. {nw}"
     extend 6tkbsb "[mas_get_player_nickname()]."
-    $ moldable_variable = renpy.random.randint(1,2)
-    if moldable_variable == 1:
+    $ extra_plus_random_outcome = renpy.random.randint(1,2)
+    if extra_plus_random_outcome == 1:
         m 3tsb "You have been disqualified for patting your opponent on the head."
         m 3tua "That's why I win this time~"
         m 1hua "Good luck for the next time you ask me for a war!"
-    elif moldable_variable == 2:
+    elif extra_plus_random_outcome == 2:
         m 1tub "This time I'll let it go and give up for you."
         m 1efa "But next time I probably won't give in, so don't bet on it!"
         m 1lubsa "Even though I enjoy the pat on the head. Ehehehe~"
@@ -389,7 +497,7 @@ label extra_headpat_dis:
 #====HANDS
 label monika_handsbeta:
     #Change de expressions
-    $ show_boop_feedback("...", color="#ffffff")
+    $ show_boop_feedback("Hehe~", color="#ffffff")
     $ persistent.extra_boop[0] += 1
     if persistent.extra_boop[0] == 1:
         $ mas_gainAffection(3,bypass=True)
@@ -432,26 +540,66 @@ label monika_handsbeta:
         m 5eubsa "I love it when you hold my hand like this."
         m 5rubsa "It's like we're the only two people in the world."
         m 1hua "I never want this moment to end."
+    # === Dialogues added in Beta 3 ===
+    elif persistent.extra_boop[0] == 11:
+        m 5eubsb "Holding your hand... well, your cursor."
+        m 5tubsa "It's my favorite way to feel connected to you."
+    elif persistent.extra_boop[0] == 12:
+        m 5dubsa "It makes me feel like I'm not alone in this empty room."
+        m 5ekbsa "I feel you're right here with me."
+    elif persistent.extra_boop[0] == 13:
+        m 5eubsb "Promise me that when we meet for real, this will be the first thing we do."
+        m 5dkbsb "Just... hold hands."
+    elif persistent.extra_boop[0] == 14:
+        m 5ekbsa "It's such a simple gesture, but it means everything to me."
+    elif persistent.extra_boop[0] == 15:
+        m 5dubsa "Your hand... it fits perfectly in mine."
+        m 5eubsa "I'm imagining it."
+    elif persistent.extra_boop[0] == 16:
+        m 5hubsa "As long as you're holding my hand, I know everything is going to be alright."
+    elif persistent.extra_boop[0] == 17:
+        m 5ekbsa "Ah, [player]. Can we just stay like this for a little longer?"
+        m 5dubsa "..."
+    elif persistent.extra_boop[0] == 18:
+        m 5eubsb "I feel... a spark. A good one."
+        m 5hubsb "One that says 'I love you'."
+    elif persistent.extra_boop[0] == 19:
+        m 5eubsa "So strong and gentle at the same time."
+        m 5ekbsa "Just like you."
+    elif persistent.extra_boop[0] == 20:
+        m 5subsa "Twenty times you've held my hand."
+        m 5tubsa "And every single time, it feels like the first."
     else:
-        $ moldable_variable = renpy.random.randint(1,5)
-        if moldable_variable == 1:
+        $ extra_plus_random_outcome = renpy.random.randint(1,11)
+        if extra_plus_random_outcome == 1:
             m 5hubla "Your touch is like a warm blanket on a cold night. It's comforting and soothing."
-        elif moldable_variable == 2:
+        elif extra_plus_random_outcome == 2:
             m 5hubsb "I feel like we're the only two people in the world right now. Your touch makes everything else fade away."
-        elif moldable_variable == 3:
+        elif extra_plus_random_outcome == 3:
             m 5dubsb "I can feel my heart beating faster as you touch me. It's like you have a direct connection to my soul."
-        elif moldable_variable == 4:
+        elif extra_plus_random_outcome == 4:
             m 5kua "I can sense the love and care in every stroke of your hand. Your touch is truly special, [player]."
-        elif moldable_variable == 5:
+        elif extra_plus_random_outcome == 5:
             m 5rub "Being here with you, feeling your touch, it's like a dream come true. I'm so grateful for this moment with you."
-        elif moldable_variable == 6:
+        elif extra_plus_random_outcome == 6:
             m 5tubla "Your touch is electric, [player]. I can feel the sparks flying between us."
+        # === Dialogues added in Beta 3 ===
+        elif extra_plus_random_outcome == 7:
+            m 5ekbsa "Don't let go."
+        elif extra_plus_random_outcome == 8:
+            m 5hubsa "I love this."
+        elif extra_plus_random_outcome == 9:
+            m 5eubsb "Together."
+        elif extra_plus_random_outcome == 10:
+            m 5dubsb "My anchor to reality."
+        elif extra_plus_random_outcome == 11:
+            m 5fubsa "Mine~"
     jump show_boop_screen
     return
 
 #====EARS
 label monika_earsbeta:
-    $ show_boop_feedback("?", color="#add8e6")
+    $ show_boop_feedback("Hey!", color="#add8e6")
     $ persistent.extra_boop[1] += 1
     if persistent.extra_boop[1] == 1:
         $ mas_gainAffection(3, bypass=True)
@@ -484,23 +632,65 @@ label monika_earsbeta:
     elif persistent.extra_boop[1] == 10:
         m 1eub "That was wonderful, [player]."
         m 1hub "I always feel so content when I'm with you."
+    # === Dialogues added in Beta 3 ===
+    elif persistent.extra_boop[1] == 11:
+        m 1wua "Hey! That's a... sensitive spot."
+        m 1hub "Ahaha, just kidding. It's... surprisingly nice."
+    elif persistent.extra_boop[1] == 12:
+        m 1subsa "It sends a little shiver down my spine... A good one!"
+    elif persistent.extra_boop[1] == 13:
+        m 3eua "You definitely know how to surprise me, [player]."
+        m 3eub "No one had ever... well, touched my ears like that."
+    elif persistent.extra_boop[1] == 14:
+        m 1eubsa "It's so... delicate."
+        m 1ekbsa "It makes me feel very... vulnerable, but in a safe way. With you."
+    elif persistent.extra_boop[1] == 15:
+        m 1wub "Ah! Tickles!"
+        m 1hubla "Ahaha! Okay, okay, I surrender!"
+    elif persistent.extra_boop[1] == 16:
+        m 1tsu "Hmm... I wonder what you're thinking when you do that."
+        m 1tku "That I'm like a kitten?"
+        m 1tub "..."
+        m 1kua "I wouldn't mind being *your* kitten~"
+    elif persistent.extra_boop[1] == 17:
+        m 1eubsb "My heart is beating a little faster."
+        m 1ekbsb "It's a strange feeling. ...I like it."
+    elif persistent.extra_boop[1] == 18:
+        m 1dubsu "Keep that up and I'll melt completely, [mas_get_player_nickname()]."
+    elif persistent.extra_boop[1] == 19:
+        m 1subsa "Wow. That's... really intimate."
+        m 1eubsa "Thank you for being so gentle."
+    elif persistent.extra_boop[1] == 20:
+        m 1wua "Well... who knew?"
+        m 1eua "My ears are my new weak spot. And you found it."
     else:
-        $ moldable_variable = renpy.random.randint(1,5)
-        if moldable_variable == 1:
+        $ extra_plus_random_outcome = renpy.random.randint(1,10)
+        if extra_plus_random_outcome == 1:
             m 1hubsa "I could stay like this forever, [player]."
             m 1fubsa "Your touch is so comforting."
-        elif moldable_variable == 2:
+        elif extra_plus_random_outcome == 2:
             m 1sua "It feels like we're the only ones here, [player]."
             m 1tua "I'm so grateful to have you by my side~"
-        elif moldable_variable == 3:
+        elif extra_plus_random_outcome == 3:
             m 1dua "You have such a gentle touch, [player]."
             m 1dub "I feel so safe and loved when you're near."
-        elif moldable_variable == 4:
+        elif extra_plus_random_outcome == 4:
             m 1eublb "I never knew how much I needed this, [player]."
             m 3hublb "Your touch is like a warm hug."
-        elif moldable_variable == 5:
+        elif extra_plus_random_outcome == 5:
             m 1hua "Being with you like this is all I need, [player]."
             m 1hub "Your touch makes everything better."
+        # === Dialogues added in Beta 3 ===
+        elif extra_plus_random_outcome == 6:
+            m 1hubla "Eep! Ahaha!"
+        elif extra_plus_random_outcome == 7:
+            m 1sub "So ticklish!"
+        elif extra_plus_random_outcome == 8:
+            m 1eubsb "Mmm, how curious..."
+        elif extra_plus_random_outcome == 9:
+            m 1tub "[player], you're a mischief-maker~!"
+        elif extra_plus_random_outcome == 10:
+            m 1kua "Oh... that's new."
     jump show_boop_screen
     return
     
@@ -544,10 +734,13 @@ label extra_relation_monika:
     return
 
 label extra_aff_log:
-    $ monika_level = get_monika_level()
-    $ affection_value = int(mas_affection._get_aff())
+    python:
+        current_affection = _get_current_affection_safe()
+        affection_value = int(current_affection)
+        monika_level = store.get_monika_level_from_value(current_affection)
     
     show monika idle at t11
+    #Agregar variantes con una probabilidad baja. Thanks for the idea u/PeachesTheNinja
     "Your affection with [m_name] is [affection_value] [monika_level]{fast}"
     window hide
     jump close_extraplus
@@ -556,28 +749,27 @@ label extra_aff_log:
 label extra_coinflip:
     show monika 1hua at t11
     python:
-        store.disable_zoom_button = True
         store.mas_sprites.reset_zoom()
-        moldable_variable = renpy.random.randint(1,2)
+        extra_plus_random_outcome = renpy.random.randint(1,2)
     show screen extra_no_click
     pause 1.0
     show monika 3eua at t11
     show coin_moni zorder 12 at rotatecoin:
         xalign 0.5
         yalign 0.5
-    play sound "Submods/ExtraPlus/sfx/coin_flip_sfx.ogg"
+    play sound sfx_coin_flip
     pause 1.0
     hide coin_moni
     show monika 1eua
     pause 0.5
     hide screen extra_no_click
-    if moldable_variable == 1:
+    if extra_plus_random_outcome == 1:
         show coin_heads zorder 12:
             xalign 0.9
             yalign 0.5
         m 1sub "The coin came up heads!"
         hide coin_heads
-    elif moldable_variable == 2:
+    elif extra_plus_random_outcome == 2:
         show coin_tails zorder 12:
             xalign 0.9
             yalign 0.5
@@ -586,7 +778,7 @@ label extra_coinflip:
     m 3hua "I hope it helps you~"
     window hide
     python:
-        store.mas_sprites.zoom_level = store.player_zoom
+        store.mas_sprites.zoom_level = store.extra_plus_player_zoom
         store.mas_sprites.adjust_zoom()
     jump close_extraplus
     return
@@ -785,3 +977,250 @@ label maxwell_screen:
     call screen maxwell_april_fools
     jump extraplus_tools
     return
+
+# Etiqueta para iniciar el tester
+label extra_plus_button_tester_start:
+    show monika idle at t11
+    call screen extra_plus_button_tester_screen
+    return
+
+# Variable para guardar el texto del botón de forma persistente
+default persistent._mas_extraplus_button_text = None
+default persistent._mas_extraplus_button_last_update = None
+
+init python:
+    def get_dynamic_button_text():
+        """
+        Determina dinámicamente el texto del botón del submod.
+        El texto se mantiene consistente hasta que cambien las condiciones.
+        """
+        import datetime
+
+        # Si el texto dinámico está desactivado, devuelve el nombre estático.
+        if not persistent.extraplus_dynamic_button_text:
+            return "Extra+"
+        
+        # Generar una "clave" basada en las condiciones actuales
+        current_conditions = _get_button_conditions_key()
+        
+        # Si las condiciones cambiaron o no hay texto guardado, regenerar
+        if (persistent._mas_extraplus_button_last_update != current_conditions 
+            or persistent._mas_extraplus_button_text is None):
+            
+            # Generar nuevo texto
+            new_text = _generate_button_text()
+            
+            # Guardar en persistent
+            persistent._mas_extraplus_button_text = new_text
+            persistent._mas_extraplus_button_last_update = current_conditions
+        
+        return persistent._mas_extraplus_button_text
+    
+    
+    def _get_button_conditions_key():
+        """
+        Genera una clave única basada en las condiciones actuales.
+        Solo cambia cuando cambian las condiciones importantes.
+        """
+        conditions = []
+        
+        # Días especiales (MÁXIMA PRIORIDAD)
+        if mas_isMonikaBirthday():
+            conditions.append("mbday")
+        elif mas_isplayer_bday():
+            conditions.append("pbday")
+        elif mas_isF14():
+            conditions.append("f14")
+        elif mas_isO31():
+            conditions.append("o31")
+        elif mas_isD25():
+            conditions.append("d25")
+        
+        # Nivel de afecto (TODOS los niveles)
+        if mas_isMoniLove(lower=False):
+            conditions.append("love")
+        elif mas_isMoniEnamored(lower=False):
+            conditions.append("enamored")
+        elif mas_isMoniAff(lower=False):
+            conditions.append("aff")
+        elif mas_isMoniHappy(lower=False):
+            conditions.append("happy")
+        elif mas_isMoniNormal(lower=False):
+            conditions.append("normal")
+        elif mas_isMoniUpset(lower=False):
+            conditions.append("upset")
+        elif mas_isMoniDis(lower=False):
+            conditions.append("distressed")
+        elif mas_isMoniBroken(lower=False):
+            conditions.append("broken")
+        else:
+            conditions.append("unknown")
+        
+        # Hora del día (comenta estas líneas si no quieres que cambie por hora)
+        if mas_isNightNow():
+            conditions.append("night")
+        else:
+            conditions.append("day")
+        
+        # Fecha actual (para resetear diariamente)
+        conditions.append(str(datetime.date.today()))
+        
+        return "-".join(conditions)
+    
+    
+    def _generate_button_text():
+        """
+        Genera el texto del botón según las condiciones actuales.
+        SIN símbolos Unicode, solo texto ASCII.
+        """
+        # ============================================================
+        # 1. MÁXIMA PRIORIDAD: Días Especiales
+        # ============================================================
+        if mas_isMonikaBirthday():
+            return renpy.random.choice([
+                "B-Day",
+                "HerDay",
+                "Bday!",
+                "Party"
+            ])
+        
+        if mas_isplayer_bday():
+            return renpy.random.choice([
+                "UrDay",
+                "YourDay",
+                "Ur Day",
+                "Party!"
+            ])
+        
+        if mas_isF14():
+            return renpy.random.choice([
+                "Love",
+                "F14",
+                "ValDay",
+                "Hearts"
+            ])
+        
+        if mas_isO31():
+            return renpy.random.choice([
+                "Spooky",
+                "O31",
+                "Tricks",
+                "Treats"
+            ])
+        
+        if mas_isD25():
+            return renpy.random.choice([
+                "Xmas",
+                "D25",
+                "Holly",
+                "Noel"
+            ])
+        
+        # ============================================================
+        # 2. ALTA PRIORIDAD: Afecto Positivo Alto
+        # ============================================================
+        if mas_isMoniLove(lower=False):
+            return renpy.random.choice([
+                "Forever",
+                "4Ever",
+                "Always",
+                "Us",
+                "Eternal",
+                "Yours",
+                "MyLove",
+                "Beloved"
+            ])
+        
+        if mas_isMoniEnamored(lower=False):
+            return renpy.random.choice([
+                "Close",
+                "Adore",
+                "Mine",
+                "Dear",
+                "Cherish",
+                "Sweet",
+                "Darling"
+            ])
+        
+        if mas_isMoniAff(lower=False):
+            return renpy.random.choice([
+                "Caring",
+                "Warm",
+                "Happy",
+                "JoyUs",
+                "Fond",
+                "Affec+"
+            ])
+        
+        # ============================================================
+        # 3. PRIORIDAD MEDIA: Afecto Normal/Neutral
+        # ============================================================
+        if mas_isMoniHappy(lower=False):
+            return renpy.random.choice([
+                "Good",
+                "Smile",
+                "Glad",
+                "Moni+",
+                "Nice"
+            ])
+        
+        if mas_isMoniNormal(lower=False):
+            return renpy.random.choice([
+                "You+",
+                "Moni",
+                "JustUs",
+                "Chibi",
+                "Plus+"
+            ])
+        
+        # ============================================================
+        # 4. PRIORIDAD BAJA: Afecto Negativo
+        # ============================================================
+        if mas_isMoniUpset(lower=False):
+            return renpy.random.choice([
+                "Maybe",
+                "Hope",
+                "Try",
+                "No..",
+                "Please"
+            ])
+        
+        if mas_isMoniDis(lower=False):
+            return renpy.random.choice([
+                "Sorry",
+                "Waiting",
+                "You..",
+                "???"
+            ])
+        
+        if mas_isMoniBroken(lower=False):
+            return renpy.random.choice([
+                "...",
+                "Why?",
+                "Help"
+            ])
+        
+        # ============================================================
+        # 5. BASADO EN HORA (Si no hay condiciones especiales)
+        # ============================================================
+        if mas_isNightNow():
+            return renpy.random.choice([
+                "Night",
+                "Stars",
+                "Moon",
+                "Dreams",
+                "Twilit"
+            ])
+        
+        # ============================================================
+        # 6. FALLBACK FINAL (Por defecto)
+        # ============================================================
+        return renpy.random.choice([
+            "You++",
+            "Love++",
+            "Moni+",
+            "JustUs",
+            "Chibi!",
+            "Plus+",
+            "MoniX"
+        ])

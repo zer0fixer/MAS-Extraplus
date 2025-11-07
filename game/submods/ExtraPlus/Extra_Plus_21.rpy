@@ -1,22 +1,13 @@
 #===========================================================================================
 # MINIGAME#4
 #===========================================================================================
-image bjcard back = MASFilterSwitch("Submods/ExtraPlus/minigames/blackjack/back.png")
-image bg desk_21 = MASFilterSwitch("Submods/ExtraPlus/minigames/blackjack/background.png")
-image bj_name_plate = MASFilterSwitch("Submods/ExtraPlus/minigames/blackjack/name.png")
+#====Blackjack-21
 default blackjack_player_wins = 0
 default blackjack_monika_wins = 0
 default persistent.blackjack_win_game = [False, False, False] #Player, Monika and Tie. Quit [FFF]
 
 init python:
     import random
-    for suit in ["hearts", "diamonds", "clubs", "spades"]:
-        for value in range(1, 14):
-            renpy.image(
-                "card {} {}".format(suit, value),
-                MASFilterSwitch("Submods/ExtraPlus/minigames/blackjack/{}/{}.png".format(suit, value))
-            )
-    
     class BJ_Card(object):
         def __init__(self, suit, value):
             self.suit = suit
@@ -125,9 +116,9 @@ screen blackjack_monika():
         xalign 0.5
         spacing 15
         if minigame_monika.total > 21:
-            label _("{color=#ff0000}Busted!{/color}") xalign 0.5
+            label _("Busted!") xalign 0.5
         elif bj_current_turn == "monika":
-            label _("{color=#00ff00}My Turn~{/color}") xalign 0.5
+            label _("My Turn~") xalign 0.5
         elif not all(minigame_monika.revealed):
             label _("Waiting...") xalign 0.5
         else:
@@ -151,12 +142,12 @@ screen blackjack_player():
         xalign 0.5
         spacing 15
         if minigame_player.total > 21:
-            label _("{color=#ff0000}Busted!{/color}") xalign 0.5
+            label _("Busted!") xalign 0.5
         elif bj_current_turn == "player":
             if minigame_player.total >= 17 and minigame_player.total < 21:
-                label _("{color=#ffd93d}Careful!{/color}") xalign 0.5
+                label _("Careful!") xalign 0.5
             else:
-                label _("{color=#00ff00}Your Turn{/color}") xalign 0.5
+                label _("Your Turn") xalign 0.5
         elif bj_player_stand:
             label _("Standing") xalign 0.5
         else:
@@ -173,9 +164,9 @@ screen blackjack_player():
 
 screen blackjack_stats():
     style_prefix "hkb"
-    add MASFilterSwitch("Submods/ExtraPlus/minigames/blackjack/score.png") pos (5, 350) anchor (0, 0) zoom 0.6 at score_rotate_left
-    text _("Monika: [blackjack_monika_wins]") style "monika_text" size 25 pos (80, 380) anchor (0, 0.5) at score_rotate_left
-    text _("You: [blackjack_player_wins]") style "monika_text" size 25 pos (100, 420) anchor (0, 0.5) at score_rotate_left
+    add "bj_notescore" pos (5, 350) anchor (0, 0) zoom 0.6 at score_rotate_left
+    text _("[m_name]: [blackjack_monika_wins]") style "monika_text" size 25 pos (80, 380) anchor (0, 0.5) at score_rotate_left
+    text _("[player]: [blackjack_player_wins]") style "monika_text" size 25 pos (100, 420) anchor (0, 0.5) at score_rotate_left
     vbox:
         xalign 0.950
         ypos 0.450

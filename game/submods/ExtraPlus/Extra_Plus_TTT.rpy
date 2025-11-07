@@ -2,13 +2,9 @@
 # MINIGAME#2
 #===========================================================================================
 #====Tic-Tac-Toe
-image notebook = MASFilterSwitch("Submods/ExtraPlus/minigames/tictactoe/notebook.png")
-image line_black = MASFilterSwitch("Submods/ExtraPlus/minigames/tictactoe/line.png")
-image line_player = MASFilterSwitch("Submods/ExtraPlus/minigames/tictactoe/player.png")
-image line_moni = MASFilterSwitch("Submods/ExtraPlus/minigames/tictactoe/monika.png")
 image ttt_cross:
     Text(Minigame_TTT[0],
-        font = Pictograms_font,
+        font = ep_pictograms_font,
         size = 180,
         color = Minigame_TTT[1],
         outlines = []
@@ -18,7 +14,7 @@ image ttt_cross:
         linear 0.25 alpha 1.0
 image ttt_cross_cursor:
     Text(Minigame_TTT[0],
-        font = Pictograms_font,
+        font = ep_pictograms_font,
         size = 180,
         color = Minigame_TTT[1],
         outlines = []
@@ -27,7 +23,7 @@ image ttt_cross_cursor:
     truecenter
 image ttt_circle:
     Text(Minigame_TTT[2],
-        font = Pictograms_font,
+        font = ep_pictograms_font,
         size = 180,
         color = Minigame_TTT[3],
         outlines = []
@@ -92,10 +88,10 @@ init 10 python:
                     ttt.field[i] = ttt.playerTurn
                     ttt.playerTurn = not ttt.playerTurn
 
-                    fig = "circle"
-                    if ttt.playerTurn:
-                        fig = "cross"
-                    renpy.play("Submods/ExtraPlus/sfx/ttt_"+ fig + ".ogg", "sound")
+                    if ttt.playerTurn: # If playerTurn is True, it means the *previous* turn was Monika's (circle)
+                        renpy.play(sfx_ttt_circle, "sound")
+                    else: # If playerTurn is False, it means the *previous* turn was Player's (cross)
+                        renpy.play(sfx_ttt_cross, "sound")
 
                     ttt.state = ttt_new_state()
                     ttt_check_state()
@@ -185,8 +181,8 @@ screen ttt_score():
 
 screen minigame_ttt_grid():
     for i in range(2):
-        add "line_black" pos (700, 260 + 192*i) zoom 0.8
-        add "line_black" pos (600 + 192*i, 80) rotate 90 zoom 0.8
+        add "extra_line_black" pos (700, 260 + 192*i) zoom 0.8
+        add "extra_line_black" pos (600 + 192*i, 80) rotate 90 zoom 0.8
 
 screen minigame_ttt_scr():
     key "h" action NullAction()
@@ -225,11 +221,11 @@ screen minigame_ttt_scr():
                 $ color = ttt.state > 0 and 'moni' or 'player'
                 $ state = abs(ttt.state)
                 if state < 3:
-                    add "line_"+color anchor (0.5, 0.5) xzoom diag_sc yzoom sc rotate (90 * state - 45) pos (980, 360) # / Fix
+                    add "extra_line_"+color anchor (0.5, 0.5) xzoom diag_sc yzoom sc rotate (90 * state - 45) pos (980, 360) # / Fix
                 elif state < 6:
-                    add "line_"+color anchor (-55, 0.5) zoom sc rotate 90 pos (192 * state - 128, 360) # | Fix
+                    add "extra_line_"+color anchor (-55, 0.5) zoom sc rotate 90 pos (192 * state - 128, 360) # | Fix
                 else:
-                    add "line_"+color anchor (0.5, 0.5) zoom sc pos (982, 192 * state - 984) # - Fix
+                    add "extra_line_"+color anchor (0.5, 0.5) zoom sc pos (982, 192 * state - 984) # - Fix
 
 
 
@@ -238,7 +234,7 @@ label minigame_ttt:
     python:
         ttt = extra_minigames(_("Tic Tac Toe"), None, ttt_prep)
         ttt()
-    show notebook zorder 12 at animated_book
+    show extra_notebook zorder 12 at animated_book
     pause 0.5
     # Very first time playing
     if not renpy.seen_label("minigame_ttt"):
@@ -291,11 +287,11 @@ label minigame_ttt_m_comment(id = 0):
     show monika 1hua at t21
     if id == 0:
         #Monika Wins
-        $ moldable_variable = renpy.random.randint(0, 2)
-        if moldable_variable == 0:
+        $ extra_plus_random_outcome = renpy.random.randint(0, 2)
+        if extra_plus_random_outcome == 0:
             m 3hua "Well, I won this game."
             m 3hub "You should think on a better strategy next time!"
-        elif moldable_variable == 1:
+        elif extra_plus_random_outcome == 1:
             m 1sub "Three in a row!"
             m 1huu "Try again~"
         else:
@@ -303,8 +299,8 @@ label minigame_ttt_m_comment(id = 0):
             m 4hua "I know that you'll win next time."
         #Player Wins
     elif id == 1:
-        $ moldable_variable = renpy.random.randint(0, 1)
-        if moldable_variable == 0:
+        $ extra_plus_random_outcome = renpy.random.randint(0, 1)
+        if extra_plus_random_outcome == 0:
             m 1suo "Great [player], you win!"
             m 1suo "Next time I will try my best to win, so be prepared."
         else:
@@ -312,8 +308,8 @@ label minigame_ttt_m_comment(id = 0):
             m 1eub "But I'll try to beat you, [mas_get_player_nickname()]!"
         #Tie
     elif id == 2:
-        $ moldable_variable = renpy.random.randint(0, 1)
-        if moldable_variable == 0:
+        $ extra_plus_random_outcome = renpy.random.randint(0, 1)
+        if extra_plus_random_outcome == 0:
             m 1lkb "Oh, the page is full."
             m 1eub "Let's try again, [mas_get_player_nickname()]!"
         else:
@@ -334,7 +330,7 @@ label minigame_ttt_m_comment(id = 0):
 
 label minigame_ttt_quit:
     hide paper
-    hide notebook
+    hide extra_notebook
     pause 0.3
     show monika 1hua at t11
     # Tie

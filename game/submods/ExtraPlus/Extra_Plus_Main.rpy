@@ -11,7 +11,7 @@ init -990 python in mas_submod_utils:
         author="ZeroFixer",
         name="Extra Plus",
         description="Expand your time with Monika with new minigames, dates, and interactions.",
-        version="1.3.3",
+        version="1.3.4",
         settings_pane="_extra_plus_submod_settings"
     )
 
@@ -82,30 +82,33 @@ default persistent.chibika_drag_x = chibi_xpos
 default persistent.chibika_drag_y = 385
 
 # Data structure for chibi outfits
-# (Doki Name, Base Sprite Name, Blink State, Hover State)
+# (Doki Folder, Base Sprite Name, Blink State, Hover State)
 define -1 blanket_monika = ("darling", "idle", "blink", "hover")
 define -1 blanket_nat = ("cupcake", "idle", "blink", "hover")
 define -1 blanket_sayo = ("cinnamon", "idle", "blink", "hover")
 define -1 blanket_yuri = ("teacup", "idle", "blink", "hover")
 define -1 android_monika = ("darling", "android_idle", "android_blink", "android_hover")
-define -1 casual_monika = ("darling", "casual_idle", "casual_blink", "casual_hover")
 define -1 bikini_monika = ("darling", "bikini_idle", "bikini_blink", "bikini_hover")
+define -1 casual_monika = ("darling", "casual_idle", "casual_blink", "casual_hover")
+define -1 casual_yuri = ("teacup", "casual_idle", "casual_blink", "casual_hover")
+define -1 casual_nat = ("cupcake", "casual_idle", "casual_blink", "casual_hover")
+define -1 casual_sayo = ("cinnamon", "casual_idle", "casual_blink", "casual_hover")
 
 default persistent.chibika_current_costume = blanket_monika
 
 define monika_costumes_ = [("Blanket", blanket_monika), ("Android", android_monika), ("Casual", casual_monika)]
-define natsuki_costumes_ = [("Blanket", blanket_nat)]
-define sayori_costumes_ = [("Blanket", blanket_sayo)]
-define yuri_costumes_ = [("Blanket", blanket_yuri)]
+define natsuki_costumes_ = [("Blanket", blanket_nat), ("Casual", casual_nat)]
+define sayori_costumes_ = [("Blanket", blanket_sayo), ("Casual", casual_sayo)]
+define yuri_costumes_ = [("Blanket", blanket_yuri), ("Casual", casual_yuri)]
 
 default -1 persistent.chibi_accessory_1_ = "0nothing"
 default -1 persistent.chibi_accessory_2_ = "0nothing"
 default -1 persistent.hi_chibika = False
 default -1 persistent.enable_drag_chibika = False
 
-default -1 chibi_sprite_path = "Submods/ExtraPlus/chibis/{}/{}.png"
-default -1 chibi_accessory_path_0 = "Submods/ExtraPlus/chibis/accessories_0/{}.png"
-default -1 chibi_accessory_path_1 = "Submods/ExtraPlus/chibis/accessories_1/{}.png" 
+default -1 chibi_sprite_path = _ep_join(EP_CHIBIS, "{0}", "{1}.png")
+default -1 chibi_accessory_path_0 = _ep_join(EP_CHIBI_ACC_0, "{}.png")
+default -1 chibi_accessory_path_1 = _ep_join(EP_CHIBI_ACC_1, "{}.png")
 
 #====ExtraPlus Buttons
 define minigames_menu = []
@@ -113,12 +116,22 @@ define tools_menu = []
 define walk_menu = []
 
 #====Misc
-default last_affection_notify_time = 0
-default stop_snike_time = False
-define -1 Pictograms_font = "Submods/ExtraPlus/others/pictograms_icons.ttf"
-default plus_snack_time = None
-default moldable_variable = None
-define 3 extra_plus_file = os.path.join(renpy.config.basedir, "game", "Submods", "ExtraPlus", "Extra_Plus_Main.rpy")
+default persistent.extraplus_dynamic_button_text = True
+default last_affection_notify_time = 0 # Used for the affection notifier in the button.
+default stop_snike_time = False # This variable seems to be a typo, should it be 'stop_snack_time'?
+define -1 ep_pictograms_font = _ep_join(EP_OTHERS, "pictograms_icons.ttf")
+define -1 ep_affection_icons = _ep_join(EP_OTHERS, "peperrito_faces.ttf")
+
+#====SFX
+define sfx_cup_shuffle = _ep_join(EP_SFX, "cup_shuffle.mp3")
+define sfx_coin_flip = _ep_join(EP_SFX, "coin_flip_sfx.ogg")
+define sfx_maxwell_theme = _ep_join(EP_SFX, "maxwell_theme.ogg")
+define sfx_ttt_cross = _ep_join(EP_SFX, "ttt_cross.ogg")
+define sfx_ttt_circle = _ep_join(EP_SFX, "ttt_circle.ogg")
+
+default plus_snack_time = None  # Timer for snacks in dates
+default extra_plus_random_outcome = None  # Used for various random choices in the submod
+define 3 extra_plus_file = _ep_get_game_path(EP_ROOT, "Extra_Plus_Main.rpy")
 
 #====BG (Date locations)
 default extra_old_bg = None
@@ -126,8 +139,7 @@ default extra_chair = None
 default extra_table = None
 
 #====ZOOM
-default player_zoom = None
-default disable_zoom_button = False
+default extra_plus_player_zoom = None
 
 #====Windows Title
 define backup_window_title = "Monika After Story   "
@@ -166,38 +178,101 @@ define _plus_not_met = [
 ]
 
 init 5 python:
-    #====Monika idle v2
-    monika_extraplus = MASMoniIdleDisp(
+    #====New Monika idle
+    extra_no_learning = MASMoniIdleDisp(
         (
-            MASMoniIdleExp("1eua", duration=30),
-            MASMoniIdleExp("1eubla", duration=30),
-            MASMoniIdleExp("1hua", duration=30),
-            MASMoniIdleExp("1hubsa", duration=40, aff_range=(mas_aff.ENAMORED, mas_aff.LOVE)),
-            MASMoniIdleExp("1eubsa", duration=40, aff_range=(mas_aff.ENAMORED, mas_aff.LOVE)),
-            MASMoniIdleExp("1eua", duration=30),
-            MASMoniIdleExp("1hua", duration=30),
-            MASMoniIdleExp("1eubla", duration=40, aff_range=(mas_aff.ENAMORED, mas_aff.LOVE)),
-            MASMoniIdleExp("1esa", duration=30),
+            # Broken (how dared you, monster?)
+            MASMoniIdleExp("6ckc", duration=60, aff_range=(None, mas_aff.BROKEN), tag="broken_exps"),
+            # Distressed
+            MASMoniIdleExp("6rkc", duration=(5, 10), aff_range=(mas_aff.DISTRESSED, mas_aff.DISTRESSED), tag="dist_exps"),
+            MASMoniIdleExp("6lkc", duration=(5, 10), aff_range=(mas_aff.DISTRESSED, mas_aff.DISTRESSED), tag="dist_exps"),
             MASMoniIdleExpGroup(
                 [
-                    MASMoniIdleExp("1eua", duration=30),
-                    MASMoniIdleExp("1sua", duration=4),
-                    MASMoniIdleExp("1ekblu", duration=40, aff_range=(mas_aff.ENAMORED, mas_aff.LOVE)),
-                    MASMoniIdleExp("1tuu", duration=30),
-                    MASMoniIdleExp("1hua", duration=30),
-                ]
+                    MASMoniIdleExpRngGroup(
+                        [
+                            MASMoniIdleExp("6rktpc", duration=(5, 10)),
+                            MASMoniIdleExp("6lktpc", duration=(5, 10))
+                        ],
+                        max_uses=4
+                    ),
+                    MASMoniIdleExpRngGroup(
+                        [
+                            MASMoniIdleExp("6rktdc", duration=(5, 10)),
+                            MASMoniIdleExp("6lktdc", duration=(5, 10))
+                        ]
+                    ),
+                    MASMoniIdleExp("6dktdc", duration=(3, 5))
+                ],
+                aff_range=(mas_aff.DISTRESSED, mas_aff.DISTRESSED),
+                weight=2,
+                tag="dist_exps"
             ),
-            MASMoniIdleExp("1eua_follow", duration=40),
-            MASMoniIdleExp("1kua", duration=1),
-            MASMoniIdleExp("1eua", duration=30),
-            MASMoniIdleExp("1mubla", duration=30, aff_range=(mas_aff.ENAMORED, mas_aff.LOVE)),
-            MASMoniIdleExp("1eubsa", duration=40, aff_range=(mas_aff.ENAMORED, mas_aff.LOVE)),
-            MASMoniIdleExp("1huu", duration=30),
+            # Below 0 and Upset
+            MASMoniIdleExp("2esc", duration=5, aff_range=(mas_aff.UPSET, mas_aff.NORMAL), conditional="mas_isBelowZero()", weight=None, repeatable=False, tag="below_zero_startup_exps"),
+            MASMoniIdleExp("2esc", aff_range=(mas_aff.UPSET, mas_aff.NORMAL), conditional="mas_isBelowZero()", weight=95, tag="below_zero_exps"),
+            MASMoniIdleExp("1tsc", aff_range=(mas_aff.UPSET, mas_aff.NORMAL), conditional="mas_isBelowZero()", weight=5, tag="below_zero_exps"), # Reemplazo de 5tsc
+            # Normal
+            MASMoniIdleExp("1esa", duration=60, aff_range=(mas_aff.NORMAL, mas_aff.NORMAL), conditional="not mas_isBelowZero()", tag="norm_exps"),
+            # Happy
+            MASMoniIdleExp("1eua", duration=60, aff_range=(mas_aff.HAPPY, mas_aff.HAPPY), tag="happy_exps"),
+            # Affectionate
+            MASMoniIdleExp("1eubla", duration=(25, 35), aff_range=(mas_aff.AFFECTIONATE, None), weight=10),
+            MASMoniIdleExp("1hubsa", duration=(20, 30), aff_range=(mas_aff.AFFECTIONATE, None), weight=10),
+            MASMoniIdleExp("1eubsa", duration=(20, 30), aff_range=(mas_aff.AFFECTIONATE, None), weight=10),
+            MASMoniIdleExp("1ekblu", duration=(25, 35), aff_range=(mas_aff.AFFECTIONATE, None), weight=5),
+            MASMoniIdleExp("1tuu", duration=(20, 30), aff_range=(mas_aff.AFFECTIONATE, None), weight=5),
+            MASMoniIdleExp("1mubla", duration=(25, 35), aff_range=(mas_aff.AFFECTIONATE, None), weight=5),
+
+            MASMoniIdleExpGroup(
+                [
+                    MASMoniIdleExp("1eua", duration=1),
+                    MASMoniIdleExp("1sua", duration=4),
+                    MASMoniIdleExp("1eua"),
+                ],
+                aff_range=(mas_aff.AFFECTIONATE, None),
+                weight=15,
+                tag="idle_star_eyes"
+            ),
+            MASMoniIdleExpGroup(
+                [
+                    MASMoniIdleExp("1eua", duration=1),
+                    MASMoniIdleExp("1kua", duration=1),
+                    MASMoniIdleExp("1eua"),
+                ],
+                aff_range=(mas_aff.AFFECTIONATE, None),
+                weight=15,
+                tag="idle_wink"
+            ),
+            MASMoniIdleExpRngGroup(
+                [
+                    MASMoniIdleExp("1eua", weight=70),
+                    MASMoniIdleExp("1eua_follow", weight=30)# 30% to follow
+                ],
+                max_uses=1,
+                aff_range=(mas_aff.AFFECTIONATE, mas_aff.AFFECTIONATE),
+                weight=70,
+                tag="aff_exps"
+            ),
+            MASMoniIdleExp("1hua", aff_range=(mas_aff.AFFECTIONATE, mas_aff.AFFECTIONATE), weight=15, tag="aff_exps"),
+            # Enamored & Love (combinados para no usar pose 5)
+            MASMoniIdleExp("1eua", duration=5, aff_range=(mas_aff.ENAMORED, None), weight=None, repeatable=False, tag="enam_plus_startup_exps"),
+            MASMoniIdleExpRngGroup(
+                [
+                    MASMoniIdleExp("1eua", weight=50),
+                    MASMoniIdleExp("1eua_follow", weight=50)
+                ],
+                max_uses=1,
+                aff_range=(mas_aff.ENAMORED, None),
+                weight=60,
+                tag="enam_love_no_lean_exps"
+            ),
+            MASMoniIdleExp("1tsu", aff_range=(mas_aff.ENAMORED, None), weight=15, tag="enam_love_no_lean_exps"),
+            MASMoniIdleExp("1huu", aff_range=(mas_aff.ENAMORED, None), weight=15, tag="enam_love_no_lean_exps"),
         )
     )
 
 #===========================================================================================
-# BOOP ZONES
+# INTERACTION ZONES
 #===========================================================================================
 init -1 python:
     import pygame
@@ -226,12 +301,10 @@ init -1 python:
     # Create a clickzone manager
     extra_plus_boop_cz_manager = mas_interactions.MASClickZoneManager()
 
-    # Add zones to the manager
     for zone_key, vx_list in extra_plus_cz_map.items():
         extra_plus_boop_cz_manager.add(zone_key, MASClickZone(vx_list))
 
     # Define actions for each zone (primary and alternate)
-    # The action can be a label name (string) or a more complex object if needed.
     extra_plus_boop_zone_actions = {
         "extra_head": ("monika_headpatbeta", "monika_headpat_long"),
         "extra_nose": ("monika_boopbeta", "monika_boopbeta_war"),
@@ -242,10 +315,7 @@ init -1 python:
         "extra_ear_r": "monika_earsbeta",
     }
 
-    # Create the zoomable interactable
-    # The MASZoomableInteractable from zz_interactions.rpy doesn't support alternate actions out of the box.
-    # We will use a custom interactable that inherits from it to add this functionality.
-    # For now, let's just handle primary actions. The screen will be updated.
+    # Create the interactable.
     # Instantiate the base MASZoomableInteractable. We only need it for check_over.
     extra_plus_boop_interactable = MASZoomableInteractable(
         extra_plus_boop_cz_manager,
@@ -307,11 +377,96 @@ init -9 python in mas_interactions:
         return
 
 #===========================================================================================
+# FOLDERS
+#===========================================================================================
+init -995 python:
+    import os
+    # --- Cross-platform path helper functions (adapted from FontSwitcher) ---
+    # Moved to the top level of the python block to be accessible by all functions.
+    def _ep_normalize_path(path):
+        """Normalizes a path by replacing '\\' with '/' for compatibility."""
+        return path.replace("\\", "/")
+
+    def _ep_get_game_path(*args):
+        """Builds a normalized, absolute path from the 'game' directory."""
+        game_dir = _ep_normalize_path(os.path.join(renpy.config.basedir, "game"))
+        # Simply joins the game base directory with all provided arguments.
+        # The arguments should already be correctly formed relative paths
+        # (e.g., using EP_submods_folder or EP_ROOT).
+        return _ep_normalize_path(os.path.join(game_dir, *args))
+    
+    def _ep_join(*args):
+        """
+        Joins path components and normalizes them.
+        Usage: _ep_join("Submods", "ExtraPlus", "dates", "cafe.png")
+        """
+        return _ep_normalize_path(os.path.join(*args))
+
+    def find_submods_folder(base_path="."):
+        for folder in os.listdir(base_path):
+            if folder.lower() == "submods" and os.path.isdir(os.path.join(base_path, folder)):
+                return folder
+        return "Submods"  # Default value if not found
+
+    # Detect 'submods' folder case-insensitively
+    EP_submods_folder = find_submods_folder()
+    
+    # ==========================================
+    # SUBMOD BASE PATH DEFINITIONS
+    # ==========================================
+    
+    # Submod root folder
+    EP_ROOT = _ep_join(EP_submods_folder, "ExtraPlus")
+    
+    # Main subfolders
+    EP_MINIGAMES = _ep_join(EP_ROOT, "minigames")
+    EP_DATES = _ep_join(EP_ROOT, "dates")
+    EP_CHIBIS = _ep_join(EP_ROOT, "chibis")
+    EP_OTHERS = _ep_join(EP_ROOT, "others")
+    EP_SFX = _ep_join(EP_ROOT, "sfx")
+    
+    # Specific minigames
+    EP_MG_SHELLGAME = _ep_join(EP_MINIGAMES, "shellgame")
+    EP_MG_RPS = _ep_join(EP_MINIGAMES, "rockpaperscissors")
+    EP_MG_BLACKJACK = _ep_join(EP_MINIGAMES, "blackjack")
+    EP_MG_TICTACTOE = _ep_join(EP_MINIGAMES, "tictactoe")
+    
+    # Date folders
+    EP_DATE_CAFE = _ep_join(EP_DATES, "cafe")
+    EP_DATE_RESTAURANT = _ep_join(EP_DATES, "restaurant")
+    EP_DATE_POOL = _ep_join(EP_DATES, "pool")
+    EP_DATE_LIBRARY = _ep_join(EP_DATES, "library")
+    EP_DATE_ARCADE = _ep_join(EP_DATES, "arcade")
+    
+    # Chibi subfolders
+    EP_CHIBI_ACC_0 = _ep_join(EP_CHIBIS, "accessories_0")
+    EP_CHIBI_ACC_1 = _ep_join(EP_CHIBIS, "accessories_1")
+
+#===========================================================================================
 # FUNCTIONS
 #===========================================================================================
 init 5 python:
     import time
     import datetime
+
+    def show_boop_feedback(message, color="#ff69b4"):
+        """
+        Shows a floating text message on the screen at the mouse position.
+        Used for visual feedback during boop interactions.
+        """
+        t = "boop_notif{}".format(renpy.random.randint(1, 10000))
+        renpy.show_screen("boop_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color)
+
+    def create_gift_file(filename):
+        """
+        Creates an empty .gift file in the characters directory.
+        
+        Args:
+            filename (str): The name of the gift file (e.g., "roses.gift").
+        """
+        filepath = os.path.join(renpy.config.basedir, 'characters', filename)
+        with open(filepath, "a"):
+            pass  # Just create an empty file
 
     def migrate_chibi_costume_data():
         """
@@ -326,10 +481,10 @@ init 5 python:
         # Case 2: New data (tuple) exists, but the game might be running an older script.
         # This handles downgrading from a newer version.
         # We check if the first element is a string, which is characteristic of the new tuple format.
-        elif isinstance(persistent.chibika_current_costume, tuple) and isinstance(persistent.chibika_current_costume[0], basestring):
+        elif isinstance(persistent.chibika_current_costume, tuple) and isinstance(persistent.chibika_current_costume[0], basestring): # Use 'str' for Python 3 compatibility
             # If it's a tuple with a string, it's the new format.
             # We check if the expected file for the new format exists. If not, we revert.
-            if not renpy.loadable("Submods/ExtraPlus/chibis/darling/idle.png"):
+            if not renpy.loadable(_ep_join(EP_CHIBIS, "darling", "idle.png")):
                 persistent.chibika_current_costume = ["sticker_up", "sticker_sleep", "sticker_baka"]
 
     def make_bday_oki_doki():
@@ -350,13 +505,38 @@ init 5 python:
         if not persistent._mas_bday_in_bday_mode or not persistent._mas_bday_visuals:
             config.overlay_screens.append("bday_oki_doki")
 
+    def _get_current_affection_safe():
+        """
+        Safely gets the current affection by reading directly from persistent.
+        This avoids cache issues between the log and the UI.
+        
+        OUT:
+            float - current affection without cache
+        """
+        try:
+            # Read directly from the mod's internal data
+            raw_data = store.mas_affection.__get_data()
+            
+            if raw_data and len(raw_data) > 0:
+                return raw_data[0]  # The first element is the affection value
+            else:
+                # If raw_data is None or empty, use the standard method
+                return store._mas_getAffection()
+        
+        except Exception as e:
+            # Fallback silencioso en caso de error
+            return store._mas_getAffection()
+
     def notify_affection():
         """Notify the player of their affection value every 10 seconds."""
         current_time = time.time()
         if current_time - store.last_affection_notify_time >= 10:
             store.last_affection_notify_time = current_time
-            affection_value = int(mas_affection._get_aff())
-            renpy.notify("{1} {0} {1}".format(affection_value, get_monika_level()))
+            current_affection = _get_current_affection_safe()
+            renpy.notify("{1} {0} {1}".format(
+                int(current_affection), 
+                store.get_monika_level_from_value(current_affection)
+            ))
 
     def show_costume_menu(costumes, return_label):
         """Show a menu to select a costume."""
@@ -364,20 +544,26 @@ init 5 python:
         items = [(_("Nevermind"), return_label, 20)]
         renpy.call_screen("extra_gen_list", dokis_items, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
 
-    def get_monika_level():
+    def get_monika_level_from_value(affection_val):
         """Return Monika's affection level as an icon string."""
-        affection = mas_affection._get_aff()
-        if affection >= 400:
+        if affection_val >= 1000:
+            icon = "\""
+        elif affection_val >= 400:
+            icon = ";"
+        elif affection_val >= 100:
+            icon = "2"
+        elif affection_val >= 30:
+            icon = "#"
+        elif affection_val <= -30:
+            icon = "%"
+        elif affection_val <= -100:
             icon = "8"
-        elif affection >= 100:
-            icon = "7"
-        elif affection <= -30:
-            icon = "!"
         else:
-            icon = "&"
+            icon = "/"
 
         formatted_icon = (
-            "{size=+4}{color=#FFFFFF}{font=" + Pictograms_font + "}" + icon + "{/font}{/color}{/size}"
+            "{size=+5}{color=#FFFFFF}{font=" + ep_affection_icons + "}" + icon + "{/font}{/color}{/size}"
+
         )
         return formatted_icon
 
@@ -478,19 +664,18 @@ init 5 python:
 
     def extra_visible_zoom():
         """Check if the custom zoom button is visible."""
-        return "button_custom_zoom" in config.overlay_screens
+        return "extrabutton_custom_zoom" in config.overlay_screens
 
     def extra_button_zoom():
         """Add the custom zoom button if not visible."""
         if not extra_visible_zoom():
-            config.overlay_screens.append("button_custom_zoom")
+            config.overlay_screens.append("extrabutton_custom_zoom")
 
-    def disable_button_zoom():
+    def disable_button_zoom(): # This function is now only used to hide the button when exiting menus.
         """Remove the custom zoom button if visible."""
-        store.disable_zoom_button = False
         if extra_visible_zoom():
-            config.overlay_screens.remove("button_custom_zoom")
-            renpy.hide_screen("button_custom_zoom")
+            config.overlay_screens.remove("extrabutton_custom_zoom")
+            renpy.hide_screen("extrabutton_custom_zoom")
 
     def mas_extra_location(locate=None):
         """Save or load the current room's chair, table, and background."""
@@ -503,7 +688,7 @@ init 5 python:
             store.monika_chr.tablechair.chair = store.extra_chair
             store.monika_chr.tablechair.table = store.extra_table
             store.mas_current_background = store.extra_old_bg
-
+            
     def extra_seen_background(sorry, extra_label, view_label):
         """Handle affection and label jump based on background seen status."""
         if store.mas_affection._get_aff() < 300:
@@ -647,9 +832,9 @@ init 5 python:
             return "cancel"
 
     migrate_chibi_costume_data()
-    ExtraButton()
     extra_rng_cup()
-    save_title_windows()
+    if plus_files_exist():
+        ExtraButton()
     
 init 999 python:
     if store.persistent.hi_chibika:
@@ -659,6 +844,8 @@ init 999 python:
 
     if mas_isMonikaBirthday():
         show_bday_screen()
+
+    save_title_windows()
 
 init -1 python:
     renpy.music.register_channel("maxwellcat", "sfx", True)
@@ -710,17 +897,17 @@ init -1 python:
             self.gift = gift
 
         def __call__(self):
-            file_path = os.path.join(renpy.config.basedir, 'characters', self.gift)
-            with open(file_path, 'a') as f:
-                messages = [
-                    _("All set! The '{}' gift is ready for you.").format(self.name),
-                    _("Here's a '{}' for Monika! I hope she loves it.").format(self.name),
-                    _("Perfect! Your '{}' is ready for Monika.").format(self.name),
-                    _("A '{}' for Monika! It's all set.").format(self.name),
-                    _("Your '{}' gift has been created!").format(self.name),
-                    _("One '{}' gift, coming right up! It's ready.").format(self.name)
-                ]
-                renpy.notify(random.choice(messages))
+            create_gift_file(self.gift)
+            messages = [
+                _("All set! The '{}' gift is ready for you.").format(self.name),
+                _("Here's a '{}' for Monika! I hope she loves it.").format(self.name),
+                _("Perfect! Your '{}' is ready for Monika.").format(self.name),
+                _("A '{}' for Monika! It's all set.").format(self.name),
+                _("Your '{}' gift has been created!").format(self.name),
+                _("One '{}' gift, coming right up! It's ready.").format(self.name)
+            ]
+            renpy.notify(random.choice(messages))
+            store.mas_checkReactions()
             renpy.jump('plus_make_gift')
 
     class DokiAccessory():
@@ -782,6 +969,37 @@ init python:
             self.image = image
             self.beats = beats
 
+    for suit in ["hearts", "diamonds", "clubs", "spades"]:
+        for value in range(1, 14):
+            renpy.image("card {} {}".format(suit, value), MASFilterSwitch(
+                _ep_join(EP_MG_BLACKJACK, suit, "{}.png".format(value))
+            ))
+
+#====Rock Paper Scissors
+image extra_paper = MASFilterSwitch(_ep_join(EP_MG_RPS, "paper.png"))
+image extra_rock = MASFilterSwitch(_ep_join(EP_MG_RPS, "rock.png"))
+image extra_scissors = MASFilterSwitch(_ep_join(EP_MG_RPS, "scissors.png"))
+image extra_card_back = MASFilterSwitch(_ep_join(EP_MG_RPS, "back.png"))
+
+#====Shell Game
+image note_score = MASFilterSwitch(_ep_join(EP_MG_SHELLGAME, "note_score.png"))
+image extra_cup = MASFilterSwitch(_ep_join(EP_MG_SHELLGAME, "{}".format(sg_cup_skin)))
+image extra_cup_hover = MASFilterSwitch(_ep_join(EP_MG_SHELLGAME, "cup_hover.png"))
+image extra_cup_idle = im.Scale("mod_assets/other/transparent.png", 200, 260)
+image extra_ball = MASFilterSwitch(_ep_join(EP_MG_SHELLGAME, "ball.png"))
+
+#====Tic-Tac-Toe
+image extra_notebook = MASFilterSwitch(_ep_join(EP_MG_TICTACTOE, "notebook.png"))
+image extra_line_black = MASFilterSwitch(_ep_join(EP_MG_TICTACTOE, "line.png"))
+image extra_line_player = MASFilterSwitch(_ep_join(EP_MG_TICTACTOE, "player.png"))
+image extra_line_moni = MASFilterSwitch(_ep_join(EP_MG_TICTACTOE, "monika.png"))
+
+#====Blackjack-21
+image bjcard back = MASFilterSwitch(_ep_join(EP_MG_BLACKJACK, "back.png"))
+image bg desk_21 = MASFilterSwitch(_ep_join(EP_MG_BLACKJACK, "background.png"))
+image bj_name_plate = MASFilterSwitch(_ep_join(EP_MG_BLACKJACK, "name.png"))
+image bj_notescore = MASFilterSwitch(_ep_join(EP_MG_BLACKJACK, "score.png"))
+
 #====Chibi
 image chibi_blink_effect:
     block:
@@ -808,7 +1026,9 @@ image chibi_blink_effect:
         0.06
         repeat
 
-image chibi_hover_effect = MASFilterSwitch("Submods/ExtraPlus/chibis/{}/{}.png".format(persistent.chibika_current_costume[0], persistent.chibika_current_costume[3]))
+image chibi_hover_effect:
+    block:
+        MASFilterSwitch(chibi_sprite_path.format(persistent.chibika_current_costume[0], persistent.chibika_current_costume[3]))
 
 image extra_chibi_base = LiveComposite(
     (119, 188),
@@ -823,10 +1043,10 @@ image extra_chibi_hover = LiveComposite(
     )
 
 #====Coin
-image coin_heads = MASFilterSwitch("Submods/ExtraPlus/others/coin_heads.png")
-image coin_tails = MASFilterSwitch("Submods/ExtraPlus/others/coin_tails.png")
-image sprite_coin = anim.Filmstrip("Submods/ExtraPlus/others/sprite_coin.png", (100, 100), (3, 2), .125, loop=True)
-image sprite_coin_n = anim.Filmstrip("Submods/ExtraPlus/others/sprite_coin-n.png", (100, 100), (3, 2), .125, loop=True)
+image coin_heads = MASFilterSwitch(_ep_join(EP_OTHERS, "coin_heads.png"))
+image coin_tails = MASFilterSwitch(_ep_join(EP_OTHERS, "coin_tails.png"))
+image sprite_coin = anim.Filmstrip(_ep_join(EP_OTHERS, "sprite_coin.png"), (100, 100), (3, 2), .125, loop=True)
+image sprite_coin_n = anim.Filmstrip(_ep_join(EP_OTHERS, "sprite_coin-n.png"), (100, 100), (3, 2), .125, loop=True)
 image coin_moni:
     ConditionSwitch(
         "mas_isDayNow()", "sprite_coin",
@@ -839,10 +1059,10 @@ image zonethree = im.Scale("mod_assets/other/transparent.png", 40, 40)
 image zonefour = im.Scale("mod_assets/other/transparent.png", 90, 60)
 
 #====Idle edit
-image monika staticpose = monika_extraplus
+image monika staticpose = extra_no_learning
 
 #====Misc
-image maxwell_animation = anim.Filmstrip("Submods/ExtraPlus/others/maxwell_cat.png", (297, 300), (10, 15), 0.0900, loop=False)
+image maxwell_animation = anim.Filmstrip(_ep_join(EP_OTHERS, "maxwell_cat.png"), (297, 300), (10, 15), 0.0900, loop=False)
 
 #===========================================================================================
 # SCREEN
@@ -857,7 +1077,7 @@ screen extraplus_button():
         yanchor 1.0
         ypos 50
 
-        $ buttons_text = _("Extra+")
+        $ buttons_text = _(get_dynamic_button_text())
         if renpy.get_screen("hkb_overlay"):
             if mas_hotkeys.talk_enabled:
                 key "a" action Function(notify_affection)
@@ -877,7 +1097,7 @@ screen extraplus_interactions():
         yanchor 1.0
         ypos 210
 
-        textbutton _("Close") action Jump("close_extraplus")
+        use extra_close_button("close_extraplus")
         textbutton _("Dates") action Jump("extraplus_walk")
         textbutton _("Games") action If(mas_affection._get_aff() >= 30, true=Jump("extraplus_minigames"), false=NullAction())
         textbutton _("Tools") action Jump("extraplus_tools")
@@ -893,8 +1113,9 @@ screen sticker_customization():
         yanchor 1.0
         ypos 90
 
-        textbutton _("Close") action Jump("close_dev_extraplus")
+        use extra_close_button("close_dev_extraplus")
         textbutton _("Return") action Jump("extraplus_tools")
+        
 
     frame:
         xalign 0.5
@@ -971,10 +1192,11 @@ screen boop_revamped():
         xpos 0.05
         yanchor 1.0
         ypos 90
-        textbutton _("Close") action Jump("close_boop_screen")
+
+        use extra_close_button("close_boop_screen")
         textbutton _("Return") action Jump("return_boop_screen")
 
-screen button_custom_zoom():
+screen extrabutton_custom_zoom():
     #Shows a button to open the custom zoom menu if the overlay is active.
     zorder 51
     style_prefix "hkb"
@@ -987,7 +1209,9 @@ screen button_custom_zoom():
             ypos 635
 
         if renpy.get_screen("hkb_overlay"):
-            textbutton _("Zoom") action If(store.disable_zoom_button, true = None, false = Show("extra_custom_zoom"))
+            # El botón se desactiva (atenúa) automáticamente si la pantalla de diálogo 'say' está visible.
+            # Usamos renpy.get_screen("say"), que es compatible con versiones antiguas de Ren'Py.
+            textbutton _("Zoom") action Show("extra_custom_zoom") sensitive not renpy.get_screen("say")
 
 screen extra_custom_zoom():
     #Provides a custom zoom slider and reset button for adjusting the game’s zoom level.
@@ -1003,9 +1227,9 @@ screen extra_custom_zoom():
             else:
                 area (60, 596, 120, 35)
             style "hkb_button"
-            action [SetField(store, "player_zoom", store.mas_sprites.zoom_level), Hide("extra_custom_zoom")]
+            action [SetField(store, "extra_plus_player_zoom", store.mas_sprites.zoom_level), Hide("extra_custom_zoom")]
 
-        frame:
+        frame: # Zoom slider frame
             area (195, 450, 80, 255)
             style "mas_extra_menu_frame"
             vbox:
@@ -1017,7 +1241,7 @@ screen extra_custom_zoom():
                     xsize 72 ysize 35 xalign 0.3
                     action SetField(store.mas_sprites, "zoom_level", store.mas_sprites.default_zoom_level)
                     
-                # actual slider for adjusting zoom
+                # Slider for adjusting zoom
                 bar value FieldValue(store.mas_sprites, "zoom_level", store.mas_sprites.max_zoom):
                     style "mas_adjust_vbar"
                     xalign 0.5
@@ -1171,9 +1395,10 @@ screen extra_gen_list(extra_list, extra_area, others, close=None):
 
     if close:
         vbox:
-            xpos 0.097 ypos 50
+            xpos 0.097
             yanchor 1.0
-            textbutton _("Close") style "hkb_button" action Jump("close_extraplus")
+            ypos 50
+            use extra_close_button("close_extraplus")
 
 screen dating_loop(ask, label_boop, boop_enable=False):
     #Displays a simple menu for dating events, with a talk button and optional boop interaction.
@@ -1252,7 +1477,7 @@ screen maxwell_april_fools():
         label _("Interactions\navailable:")
         text _(" Cheeks\n Head\n Nose\n Ears\n Hands\n") outlines [(2, "#808080", 0, 0)]
 
-    on "show" action Play("maxwellcat", "Submods/ExtraPlus/sfx/maxwell_theme.ogg")
+    on "show" action Play("maxwellcat", sfx_maxwell_theme)
     add "maxwell_animation":
         xpos 0.45
         zoom 0.4
@@ -1271,7 +1496,7 @@ screen extraplus_stats_screen():
         yanchor 1.0
         ypos 90
 
-        textbutton _("Close") action [Function(disable_button_zoom), Function(Return)]
+        use extra_close_button("close_extraplus")
         textbutton _("Return") action Jump("extraplus_tools")
 
     frame:
@@ -1307,6 +1532,10 @@ screen _extra_plus_submod_settings():
         xfill True
         xmaximum 1000
 
+        textbutton _("{b}Enable dynamic button text{/b}"):
+            action ToggleField(persistent, "extraplus_dynamic_button_text")
+            hovered tooltip.Action("If enabled, the submod button text will change based on affection, events, or time of day. If disabled, it will always say 'Extra+'.")
+
         textbutton _("{b}Check for missing files{/b}"):
             action Function(extra_plus_asset_linter)
             hovered tooltip.Action("This will check if all submod files are installed correctly and create a log file in the 'characters' folder.")
@@ -1315,9 +1544,37 @@ screen _extra_plus_submod_settings():
             action Function(extra_plus_cleanup_old_files)
             hovered tooltip.Action("This will remove obsolete files and folders from previous versions of the submod.")
 
+screen boop_feedback_notif(msg, tag, txt_color):
+    zorder 2000
+    timer 1.3 action Hide(tag)
+    default p = renpy.get_mouse_pos()
+    text "{}".format(msg) at boop_feedback_trans pos p size 30 color txt_color outlines [ (2, "#000", 0, 0) ]
+
+# screen boop_feedback_notif(msg, tag, txt_color):
+#     zorder 2000
+#     timer 1.3 action Hide(tag)
+#     default p = renpy.get_mouse_pos()
+#     text "{}".format(msg) at boop_feedback_trans pos p size 40 color txt_color outlines [ (1, "#000", 0, 0) ] style "monika_text"
+
+screen extra_close_button(jump_action="close_extraplus"):
+    zorder 51
+    style_prefix "hkb"
+
+    vbox:
+        key "x" action Jump(jump_action)
+        textbutton _("Close") action Jump(jump_action)
+
 #===========================================================================================
 # TRANSFORM
 #===========================================================================================
+
+transform boop_feedback_trans:
+    parallel:
+        ease 1.2 yoffset -150
+    parallel:
+        pause 0.1
+        ease 1.1 alpha 0
+
 transform monika_card_flip:
     yzoom -1.0
 
@@ -1428,16 +1685,16 @@ transform score_rotate_left:
 #====Cafe
 
 #Day images
-image submod_background_cafe_day = "Submods/ExtraPlus/dates/cafe/cafe_day.png"
-image submod_background_cafe_rain = "Submods/ExtraPlus/dates/cafe/cafe_rain.png"
+image submod_background_cafe_day = _ep_join(EP_DATE_CAFE, "cafe_day.png")
+image submod_background_cafe_rain = _ep_join(EP_DATE_CAFE, "cafe_rain.png")
 
 #Night images
-image submod_background_cafe_night = "Submods/ExtraPlus/dates/cafe/cafe-n.png"
-image submod_background_cafe_rain_night = "Submods/ExtraPlus/dates/cafe/cafe_rain-n.png"
+image submod_background_cafe_night = _ep_join(EP_DATE_CAFE, "cafe-n.png")
+image submod_background_cafe_rain_night = _ep_join(EP_DATE_CAFE, "cafe_rain-n.png")
 
 #Sunset images
-image submod_background_cafe_ss = "Submods/ExtraPlus/dates/cafe/cafe-ss.png"
-image submod_background_cafe_rain_ss = "Submods/ExtraPlus/dates/cafe/cafe_rain-ss.png"
+image submod_background_cafe_ss = _ep_join(EP_DATE_CAFE, "cafe-ss.png")
+image submod_background_cafe_rain_ss = _ep_join(EP_DATE_CAFE, "cafe_rain-ss.png")
 
 init -1 python:
     submod_background_cafe = MASFilterableBackground(
@@ -1552,16 +1809,16 @@ init -2 python in mas_background:
 #====Restaurant (Rutas actualizadas)
 
 #Day images
-image submod_background_extraplus_restaurant_day = "Submods/ExtraPlus/dates/restaurant/restaurant_day.png"
-image submod_background_extraplus_restaurant_rain = "Submods/ExtraPlus/dates/restaurant/restaurant_rain.png"
+image submod_background_extraplus_restaurant_day = _ep_join(EP_DATE_RESTAURANT, "restaurant_day.png")
+image submod_background_extraplus_restaurant_rain = _ep_join(EP_DATE_RESTAURANT, "restaurant_rain.png")
 
 #Night images
-image submod_background_extraplus_restaurant_night = "Submods/ExtraPlus/dates/restaurant/restaurant-n.png"
-image submod_background_extraplus_restaurant_rain_night = "Submods/ExtraPlus/dates/restaurant/restaurant_rain-n.png"
+image submod_background_extraplus_restaurant_night = _ep_join(EP_DATE_RESTAURANT, "restaurant-n.png")
+image submod_background_extraplus_restaurant_rain_night = _ep_join(EP_DATE_RESTAURANT, "restaurant_rain-n.png")
 
 #Sunset images
-image submod_background_extraplus_restaurant_ss = "Submods/ExtraPlus/dates/restaurant/restaurant-ss.png"
-image submod_background_extraplus_restaurant_rain_ss = "Submods/ExtraPlus/dates/restaurant/restaurant_rain-ss.png"
+image submod_background_extraplus_restaurant_ss = _ep_join(EP_DATE_RESTAURANT, "restaurant-ss.png")
+image submod_background_extraplus_restaurant_rain_ss = _ep_join(EP_DATE_RESTAURANT, "restaurant_rain-ss.png")
 
 init -1 python:
     submod_background_restaurant = MASFilterableBackground(
@@ -1677,16 +1934,16 @@ init -2 python in mas_background:
 #====Pool (Rutas actualizadas)
 
 #Day images
-image submod_background_extrapool_day = "Submods/ExtraPlus/dates/pool/pool_day.png"
-image submod_background_extrapool_rain = "Submods/ExtraPlus/dates/pool/pool_rain.png"
+image submod_background_extrapool_day = _ep_join(EP_DATE_POOL, "pool_day.png")
+image submod_background_extrapool_rain = _ep_join(EP_DATE_POOL, "pool_rain.png")
 
 #Night images
-image submod_background_extrapool_night = "Submods/ExtraPlus/dates/pool/pool-n.png"
-image submod_background_extrapool_rain_night = "Submods/ExtraPlus/dates/pool/pool_rain-n.png"
+image submod_background_extrapool_night = _ep_join(EP_DATE_POOL, "pool-n.png")
+image submod_background_extrapool_rain_night = _ep_join(EP_DATE_POOL, "pool_rain-n.png")
 
 #Sunset images
-image submod_background_extrapool_ss = "Submods/ExtraPlus/dates/pool/pool-ss.png"
-image submod_background_extrapool_rain_ss = "Submods/ExtraPlus/dates/pool/pool_rain-ss.png"
+image submod_background_extrapool_ss = _ep_join(EP_DATE_POOL, "pool-ss.png")
+image submod_background_extrapool_rain_ss = _ep_join(EP_DATE_POOL, "pool_rain-ss.png")
 
 init -1 python:
     submod_background_extrapool = MASFilterableBackground(
@@ -1801,16 +2058,16 @@ init -2 python in mas_background:
 #====Library (Rutas actualizadas)
 
 #Day images
-image submod_background_extralibrary_day = "Submods/ExtraPlus/dates/library/library_day.png"
-image submod_background_extralibrary_rain = "Submods/ExtraPlus/dates/library/library_rain.png"
+image submod_background_extralibrary_day = _ep_join(EP_DATE_LIBRARY, "library_day.png")
+image submod_background_extralibrary_rain = _ep_join(EP_DATE_LIBRARY, "library_rain.png")
 
 #Night images
-image submod_background_extralibrary_night = "Submods/ExtraPlus/dates/library/library-n.png"
-image submod_background_extralibrary_rain_night = "Submods/ExtraPlus/dates/library/library_rain-n.png"
+image submod_background_extralibrary_night = _ep_join(EP_DATE_LIBRARY, "library-n.png")
+image submod_background_extralibrary_rain_night = _ep_join(EP_DATE_LIBRARY, "library_rain-n.png")
 
 #Sunset images
-image submod_background_extralibrary_ss = "Submods/ExtraPlus/dates/library/library-ss.png"
-image submod_background_extralibrary_rain_ss = "Submods/ExtraPlus/dates/library/library_rain-ss.png"
+image submod_background_extralibrary_ss = _ep_join(EP_DATE_LIBRARY, "library-ss.png")
+image submod_background_extralibrary_rain_ss = _ep_join(EP_DATE_LIBRARY, "library_rain-ss.png")
 
 init -1 python:
     submod_background_extralibrary = MASFilterableBackground(
@@ -1925,16 +2182,16 @@ init -2 python in mas_background:
 #====Arcade (Rutas actualizadas)
 
 #Day images
-image submod_background_extra_arcade_day = "Submods/ExtraPlus/dates/arcade/arcade_day.png"
-image submod_background_extra_arcade_rain = "Submods/ExtraPlus/dates/arcade/arcade_rain.png"
+image submod_background_extra_arcade_day = _ep_join(EP_DATE_ARCADE, "arcade_day.png")
+image submod_background_extra_arcade_rain = _ep_join(EP_DATE_ARCADE, "arcade_rain.png")
 
 #Night images
-image submod_background_extra_arcade_night = "Submods/ExtraPlus/dates/arcade/arcade-n.png"
-image submod_background_extra_arcade_rain_night = "Submods/ExtraPlus/dates/arcade/arcade_rain-n.png"
+image submod_background_extra_arcade_night = _ep_join(EP_DATE_ARCADE, "arcade-n.png")
+image submod_background_extra_arcade_rain_night = _ep_join(EP_DATE_ARCADE, "arcade_rain-n.png")
 
 #Sunset images
-image submod_background_extra_arcade_ss = "Submods/ExtraPlus/dates/arcade/arcade-ss.png"
-image submod_background_extra_arcade_rain_ss = "Submods/ExtraPlus/dates/arcade/arcade_rain-ss.png"
+image submod_background_extra_arcade_ss = _ep_join(EP_DATE_ARCADE, "arcade-ss.png")
+image submod_background_extra_arcade_rain_ss = _ep_join(EP_DATE_ARCADE, "arcade_rain-ss.png")
 
 init -1 python:
     submod_background_extra_arcade = MASFilterableBackground(
@@ -2062,7 +2319,7 @@ init -2 python:
 
         # --- Helper function to check files ---
         def check_file(path, found_list, missing_list):
-            full_path = os.path.join(renpy.config.basedir, "game", path)
+            full_path = _ep_get_game_path(path)
             if os.path.isfile(full_path):
                 found_list.append(path)
             else:
@@ -2075,34 +2332,34 @@ init -2 python:
         # --- 1. Static and Minigame Assets ---
         static_assets = [
             # Shell Game
-            "Submods/ExtraPlus/minigames/shellgame/note_score.png",
-            "Submods/ExtraPlus/minigames/shellgame/cup_hover.png",
-            "Submods/ExtraPlus/minigames/shellgame/ball.png",
-            "Submods/ExtraPlus/minigames/shellgame/cup.png",
-            "Submods/ExtraPlus/minigames/shellgame/monika.png",
-            "Submods/ExtraPlus/minigames/shellgame/yuri.png",
-            "Submods/ExtraPlus/minigames/shellgame/natsuki.png",
-            "Submods/ExtraPlus/minigames/shellgame/sayori.png",
+            _ep_join(EP_MG_SHELLGAME, "note_score.png"),
+            _ep_join(EP_MG_SHELLGAME, "cup_hover.png"),
+            _ep_join(EP_MG_SHELLGAME, "ball.png"),
+            _ep_join(EP_MG_SHELLGAME, "cup.png"),
+            _ep_join(EP_MG_SHELLGAME, "monika.png"),
+            _ep_join(EP_MG_SHELLGAME, "yuri.png"),
+            _ep_join(EP_MG_SHELLGAME, "natsuki.png"),
+            _ep_join(EP_MG_SHELLGAME, "sayori.png"),
             # Tic-Tac-Toe
-            "Submods/ExtraPlus/minigames/tictactoe/notebook.png",
-            "Submods/ExtraPlus/minigames/tictactoe/line.png",
-            "Submods/ExtraPlus/minigames/tictactoe/player.png",
-            "Submods/ExtraPlus/minigames/tictactoe/monika.png",
+            _ep_join(EP_MG_TICTACTOE, "notebook.png"),
+            _ep_join(EP_MG_TICTACTOE, "line.png"),
+            _ep_join(EP_MG_TICTACTOE, "player.png"),
+            _ep_join(EP_MG_TICTACTOE, "monika.png"),
             # Rock, Paper, Scissors
-            "Submods/ExtraPlus/minigames/rockpaperscissors/paper.png",
-            "Submods/ExtraPlus/minigames/rockpaperscissors/rock.png",
-            "Submods/ExtraPlus/minigames/rockpaperscissors/scissors.png",
-            "Submods/ExtraPlus/minigames/rockpaperscissors/back.png",
+            _ep_join(EP_MG_RPS, "paper.png"),
+            _ep_join(EP_MG_RPS, "rock.png"),
+            _ep_join(EP_MG_RPS, "scissors.png"),
+            _ep_join(EP_MG_RPS, "back.png"),
             # Blackjack
-            "Submods/ExtraPlus/minigames/blackjack/back.png",
-            "Submods/ExtraPlus/minigames/blackjack/background.png",
-            "Submods/ExtraPlus/minigames/blackjack/name.png",
-            "Submods/ExtraPlus/minigames/blackjack/score.png",
+            _ep_join(EP_MG_BLACKJACK, "back.png"),
+            _ep_join(EP_MG_BLACKJACK, "background.png"),
+            _ep_join(EP_MG_BLACKJACK, "name.png"),
+            _ep_join(EP_MG_BLACKJACK, "score.png"),
             # Misc
-            "Submods/ExtraPlus/others/coin_heads.png",
-            "Submods/ExtraPlus/others/coin_tails.png",
-            "Submods/ExtraPlus/others/sprite_coin.png",
-            "Submods/ExtraPlus/others/maxwell_cat.png",
+            _ep_join(EP_OTHERS, "coin_heads.png"),
+            _ep_join(EP_OTHERS, "coin_tails.png"),
+            _ep_join(EP_OTHERS, "sprite_coin.png"),
+            _ep_join(EP_OTHERS, "maxwell_cat.png"),
             # Date Tables & Chairs
             "mod_assets/monika/t/chair-extraplus_cafe.png",
             "mod_assets/monika/t/table-extraplus_cafe.png",
@@ -2117,10 +2374,10 @@ init -2 python:
         # --- 2. Chibi Assets ---
         all_chibi_costumes = store.monika_costumes_ + store.natsuki_costumes_ + store.sayori_costumes_ + store.yuri_costumes_
         for _, costume_data in all_chibi_costumes:
-            doki_folder, idle_sprite, blink_sprite, hover_sprite = costume_data
-            chibi_sprites = [idle_sprite, blink_sprite, hover_sprite] # No store prefix here, these are local to the loop
+            doki_folder, idle_sprite, blink_sprite, hover_sprite = costume_data # No store prefix here, these are local to the loop
+            chibi_sprites = [idle_sprite, blink_sprite, hover_sprite]
             for sprite in chibi_sprites:
-                path = "Submods/ExtraPlus/chibis/{0}/{1}.png".format(doki_folder, sprite)
+                path = _ep_join(EP_CHIBIS, doki_folder, "{}.png".format(sprite))
                 check_file(path, found_assets, missing_assets)
 
         # --- 3. Chibi Accessories ---
@@ -2129,49 +2386,49 @@ init -2 python:
         secondary_accessories = ['black_bow_tie', 'christmas_tree', 'cloud', 'coffee', 'pumpkin', 'hearts', 'm_slice_cake', 'moustache', 'neon_blush', 'p_slice_cake', 'patch', 'speech_bubble', 'sunglasses']
 
         for acc in primary_accessories:
-            path = "Submods/ExtraPlus/chibis/accessories_0/{}.png".format(acc)
+            path = _ep_join(EP_CHIBI_ACC_0, "{}.png".format(acc))
             check_file(path, found_assets, missing_assets)
         for acc in secondary_accessories:
-            path = "Submods/ExtraPlus/chibis/accessories_1/{}.png".format(acc)
+            path = _ep_join(EP_CHIBI_ACC_1, "{}.png".format(acc))
             check_file(path, found_assets, missing_assets)
 
         # --- 4. Backgrounds (Manual List) ---
         background_assets = [
             # Cafe
-            "Submods/ExtraPlus/dates/cafe/cafe_day.png",
-            "Submods/ExtraPlus/dates/cafe/cafe_rain.png",
-            "Submods/ExtraPlus/dates/cafe/cafe-n.png",
-            "Submods/ExtraPlus/dates/cafe/cafe_rain-n.png",
-            "Submods/ExtraPlus/dates/cafe/cafe-ss.png",
-            "Submods/ExtraPlus/dates/cafe/cafe_rain-ss.png",
+            _ep_join(EP_DATE_CAFE, "cafe_day.png"),
+            _ep_join(EP_DATE_CAFE, "cafe_rain.png"),
+            _ep_join(EP_DATE_CAFE, "cafe-n.png"),
+            _ep_join(EP_DATE_CAFE, "cafe_rain-n.png"),
+            _ep_join(EP_DATE_CAFE, "cafe-ss.png"),
+            _ep_join(EP_DATE_CAFE, "cafe_rain-ss.png"),
             # Restaurant
-            "Submods/ExtraPlus/dates/restaurant/restaurant_day.png",
-            "Submods/ExtraPlus/dates/restaurant/restaurant_rain.png",
-            "Submods/ExtraPlus/dates/restaurant/restaurant-n.png",
-            "Submods/ExtraPlus/dates/restaurant/restaurant_rain-n.png",
-            "Submods/ExtraPlus/dates/restaurant/restaurant-ss.png",
-            "Submods/ExtraPlus/dates/restaurant/restaurant_rain-ss.png",
+            _ep_join(EP_DATE_RESTAURANT, "restaurant_day.png"),
+            _ep_join(EP_DATE_RESTAURANT, "restaurant_rain.png"),
+            _ep_join(EP_DATE_RESTAURANT, "restaurant-n.png"),
+            _ep_join(EP_DATE_RESTAURANT, "restaurant_rain-n.png"),
+            _ep_join(EP_DATE_RESTAURANT, "restaurant-ss.png"),
+            _ep_join(EP_DATE_RESTAURANT, "restaurant_rain-ss.png"),
             # Pool
-            "Submods/ExtraPlus/dates/pool/pool_day.png",
-            "Submods/ExtraPlus/dates/pool/pool_rain.png",
-            "Submods/ExtraPlus/dates/pool/pool-n.png",
-            "Submods/ExtraPlus/dates/pool/pool_rain-n.png",
-            "Submods/ExtraPlus/dates/pool/pool-ss.png",
-            "Submods/ExtraPlus/dates/pool/pool_rain-ss.png",
-            # # Library
-            # "Submods/ExtraPlus/dates/library/library_day.png",
-            # "Submods/ExtraPlus/dates/library/library_rain.png",
-            # "Submods/ExtraPlus/dates/library/library-n.png",
-            # "Submods/ExtraPlus/dates/library/library_rain-n.png",
-            # "Submods/ExtraPlus/dates/library/library-ss.png",
-            # "Submods/ExtraPlus/dates/library/library_rain-ss.png",
-            # # Arcade
-            # "Submods/ExtraPlus/dates/arcade/arcade_day.png",
-            # "Submods/ExtraPlus/dates/arcade/arcade_rain.png",
-            # "Submods/ExtraPlus/dates/arcade/arcade-n.png",
-            # "Submods/ExtraPlus/dates/arcade/arcade_rain-n.png",
-            # "Submods/ExtraPlus/dates/arcade/arcade-ss.png",
-            # "Submods/ExtraPlus/dates/arcade/arcade_rain-ss.png"
+            _ep_join(EP_DATE_POOL, "pool_day.png"),
+            _ep_join(EP_DATE_POOL, "pool_rain.png"),
+            _ep_join(EP_DATE_POOL, "pool-n.png"),
+            _ep_join(EP_DATE_POOL, "pool_rain-n.png"),
+            _ep_join(EP_DATE_POOL, "pool-ss.png"),
+            _ep_join(EP_DATE_POOL, "pool_rain-ss.png"),
+            # Library
+            # _ep_join(EP_DATE_LIBRARY, "library_day.png"),
+            # _ep_join(EP_DATE_LIBRARY, "library_rain.png"),
+            # _ep_join(EP_DATE_LIBRARY, "library-n.png"),
+            # _ep_join(EP_DATE_LIBRARY, "library_rain-n.png"),
+            # _ep_join(EP_DATE_LIBRARY, "library-ss.png"),
+            # _ep_join(EP_DATE_LIBRARY, "library_rain-ss.png"),
+            # Arcade
+            # _ep_join(EP_DATE_ARCADE, "arcade_day.png"),
+            # _ep_join(EP_DATE_ARCADE, "arcade_rain.png"),
+            # _ep_join(EP_DATE_ARCADE, "arcade-n.png"),
+            # _ep_join(EP_DATE_ARCADE, "arcade_rain-n.png"),
+            # _ep_join(EP_DATE_ARCADE, "arcade-ss.png"),
+            # _ep_join(EP_DATE_ARCADE, "arcade_rain-ss.png"),
         ]
         for asset in background_assets:
             check_file(asset, found_assets, missing_assets)
@@ -2179,7 +2436,7 @@ init -2 python:
         # --- 5. Blackjack Cards ---
         for suit in ["hearts", "diamonds", "clubs", "spades"]:
             for value in range(1, 14):
-                path = "Submods/ExtraPlus/minigames/blackjack/{}/{}.png".format(suit, value)
+                path = _ep_join(EP_MG_BLACKJACK, suit, "{}.png".format(value))
                 check_file(path, found_assets, missing_assets)
 
         # --- 6. Date Accessories ---
@@ -2190,7 +2447,7 @@ init -2 python:
             check_file(path, found_assets, missing_assets)
 
         # --- 6. Write Log File ---
-        log_path = os.path.join(renpy.config.basedir, 'characters', 'extra_plus_asset_log.txt')
+        log_path = _ep_normalize_path(os.path.join(renpy.config.basedir, 'characters', 'extra_plus_asset_log.txt'))
         try:
             with open(log_path, 'w') as f:
                 f.write("Extra+ Asset Linter Report - {}\n".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
@@ -2221,35 +2478,34 @@ init -2 python:
         import os
         import shutil
 
-        basedir = renpy.config.basedir
         files_deleted = 0
         folders_deleted = 0
         errors = []
 
         def delete_file(path):
             """Safely deletes a file and logs the result."""
-            full_path = os.path.join(basedir, "game", path)
+            full_path = _ep_get_game_path(path)
             if os.path.isfile(full_path):
                 try:
                     os.remove(full_path)
                     return 1
                 except Exception as e:
-                    errors.append("Failed to delete file {}: {}".format(path, e))
+                    errors.append("Failed to delete file {}: {}".format(_ep_normalize_path(path), e))
             return 0
 
         def delete_folder(path):
             """Safely deletes a folder and its contents, and logs the result."""
-            full_path = os.path.join(basedir, "game", path)
+            full_path = _ep_get_game_path(path)
             if os.path.isdir(full_path):
                 try:
                     shutil.rmtree(full_path)
                     return 1
                 except Exception as e:
-                    errors.append("Failed to delete folder {}: {}".format(path, e))
+                    errors.append("Failed to delete folder {}: {}".format(_ep_normalize_path(path), e))
             return 0
 
-        # 1. Delete old folder (relative to game directory)
-        folders_deleted += delete_folder("Submods/ExtraPlus/submod_assets")
+        # 1. Delete old folder (relative to EP_ROOT)
+        folders_deleted += delete_folder(_ep_join(EP_ROOT, "submod_assets"))
 
         # 2. Delete old table/chair assets (relative to game directory)
         table_chair_files = [

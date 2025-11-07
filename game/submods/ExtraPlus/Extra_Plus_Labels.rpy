@@ -23,7 +23,7 @@ label close_dev_extraplus:
     return
 
 label show_boop_screen:
-    show monika staticpose at t11
+    show monika staticpose
     $ store.boop_war_active = False
     # Call the screen and wait for it to return a value (the label to jump to)
     call screen boop_revamped
@@ -257,7 +257,6 @@ label extraplus_walk:
             (_("Library"), "generic_date_dev"),
             (_("Arcade"), "generic_date_dev")
         ]
-        store.disable_zoom_button = True
         m_talk = renpy.substitute(renpy.random.choice(date_talk))
         renpy.say(m, m_talk, interact=False)
         items = [(_("Nevermind"), 'screen_extraplus', 20)]
@@ -274,7 +273,6 @@ label extraplus_minigames:
             (_("Blackjack (21)"), 'blackjack_start')
         ]
         
-        store.disable_zoom_button = True
         m_talk = renpy.substitute(renpy.random.choice(minigames_talk))
         renpy.say(m, m_talk, interact=False)
         items = [(_("Nevermind"), 'screen_extraplus', 20)]
@@ -285,19 +283,18 @@ label extraplus_minigames:
 label extraplus_tools:
     show monika idle at t21
     python:
-        store.player_zoom = store.mas_sprites.zoom_level
+        store.extra_plus_player_zoom = store.mas_sprites.zoom_level
         tools_menu = [
+            # (_("PROBAR NOMBRES DE BOTÓN"), 'extra_plus_button_tester_start'),
             (_("View [m_name]'s Affection"), 'extra_aff_log'),
+            (_("Your MAS Journey"), 'extra_show_stats'),
             (_("Create a gift for [m_name]"), 'plus_make_gift'),
             (_("Change the window's title"), 'extra_window_title'),
-            (_("[m_name], I want to make a backup"), 'extra_mas_backup'),
-            (_("[m_name], can you flip a coin?"), 'extra_coinflip'),
             (_("Hi [player]!"), 'extra_dev_mode'),
             (_("How long have we been together, [m_name]?"), 'extra_relation_monika'),
-            (_("Your MAS Journey"), 'extra_show_stats')
-            
+            (_("[m_name], I want to make a backup"), 'extra_mas_backup'),
+            (_("[m_name], can you flip a coin?"), 'extra_coinflip')
         ]
-        store.disable_zoom_button = True
         items = [
             (_("Github Repository"), 'github_submod', 20),
             (_("Nevermind"), 'screen_extraplus', 0)
@@ -338,10 +335,9 @@ label plus_make_file:
         elif makegift == "cancel":
             renpy.jump("plus_make_gift")
         else:
-            filepath = os.path.join(renpy.config.basedir, 'characters', makegift + ".gift")
-            with open(filepath, "a"):
-                pass  # just create an empty file
-            renpy.notify(_("Done: /characters/{}.gift").format(makegift))
+            create_gift_file(makegift + ".gift")
+            renpy.notify(_("Done! Created '/characters/{}.gift'").format(makegift))
+            store.mas_checkReactions()
             renpy.jump("plus_make_gift")
             
     return

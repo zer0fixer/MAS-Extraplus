@@ -2,10 +2,6 @@
 # MINIGAME#3
 #===========================================================================================
 #====Rock Paper Scissors
-image extra_paper = MASFilterSwitch("Submods/ExtraPlus/minigames/rockpaperscissors/paper.png")
-image extra_rock = MASFilterSwitch("Submods/ExtraPlus/minigames/rockpaperscissors/rock.png")
-image extra_scissors = MASFilterSwitch("Submods/ExtraPlus/minigames/rockpaperscissors/scissors.png")
-image extra_card_back = MASFilterSwitch("Submods/ExtraPlus/minigames/rockpaperscissors/back.png")
 default persistent.psr_result_game = [False, False, False] #Player, Monika and Tie. Quit [FFF]
 default rps_your_choice = 0
 default extra_player_wins = 0

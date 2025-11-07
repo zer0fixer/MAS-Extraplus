@@ -45,7 +45,6 @@ label gtcafev2:
 label cafe_talk:
     show monika staticpose at t21
     python:
-        store.disable_zoom_button = True
         cafe_menu = [
             (_("How are you today?"), 'extra_talk_feel'),
             (_("What's your greatest ambition?"), 'extra_talk_ambition'),
@@ -68,7 +67,6 @@ label to_cafe_loop:
         hide screen extra_timer_monika
         jump monika_no_dessert
 
-    $ store.disable_zoom_button = False
     # NOTE: Boop during dates is disabled for now.
     call screen dating_loop("cafe_talk", "monika_boopcafe", boop_enable=False)
     return
@@ -175,8 +173,8 @@ label extra_comment_cafe:
 
 label extra_talk_feel:
     show monika staticpose at t11
-    $ moldable_variable = renpy.random.randint(1,3)
-    if moldable_variable == 1:
+    $ extra_plus_random_outcome = renpy.random.randint(1,3)
+    if extra_plus_random_outcome == 1:
         m 1hkbsb "I'm feeling a little nervous, we're on a date after all!"
         #In case someone doesn't take their Monika for a walk.
         if renpy.seen_label("bye_going_somewhere"):
@@ -188,12 +186,12 @@ label extra_talk_feel:
             m 3hubsa "So thank you for inviting me."
             m 3hubsb "You can do it through a USB stick though, even though I can't see anything."
             m 3ekbsa "I know very well that it will be very romantic."
-    elif moldable_variable == 2:
+    elif extra_plus_random_outcome == 2:
         m 1eubla "I'm so happy you're here."
         m 1eublb "Sharing a dessert with you is quite romantic."
         m 1hublb "I hope we can do it in your reality!"
         m 1hubla "I know you have a lot on your mind for both of us~"
-    elif moldable_variable == 3:
+    elif extra_plus_random_outcome == 3:
         m 1dubsa "I feel like I will remember this day forever."
         m 1dubsa "After all we are on a date."
         m 1kubsb "I know that someday we will do it in your reality!"
@@ -420,7 +418,6 @@ label gtrestaurantv2:
 label restaurant_talk:
     show monika staticpose at t21
     python:
-        store.disable_zoom_button = True
         restaurant_menu = [
             (_("How are you doing, [m_name]?"), 'extra_talk_doing'),
             (_("If you could live anywhere, where would it be?"), 'extra_talk_live'),
@@ -448,7 +445,6 @@ label to_restaurant_loop:
         hide screen extra_timer_monika
         jump monika_no_food
 
-    $ store.disable_zoom_button = False
     # NOTE: Boop during dates is disabled for now.
     call screen dating_loop("restaurant_talk", "monika_booprestaurant", boop_enable=False)
     return
@@ -943,7 +939,6 @@ label ExtraPool_init:
 
 label to_pool_loop:
     show monika staticpose at t11
-    $ store.disable_zoom_button = False
     show monika idle at t11_float
 
     call screen dating_loop("ExtraPool_interactions", "", boop_enable=False)
@@ -953,7 +948,6 @@ label ExtraPool_interactions:
     show monika idle at t21_float
 
     python:
-        store.disable_zoom_button = True
         pool_menu = [
             (_("What do you think of the water?"), 'extra_pool_talk_water'),
             (_("Do you like to swim?"), 'extra_pool_talk_swim'),
