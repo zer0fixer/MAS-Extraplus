@@ -73,11 +73,12 @@ define date_talk = [
 default persistent.plus_boop = [0, 0, 0] #Nose, Cheeks, Headpat.
 default boop_war_count = 0
 default persistent.extra_boop = [0, 0, 0] #Hands, Ears.
+default boop_war_active = False
 
 #====Chibika and friends?
 define chibi_xpos = 0.05
-default chibika_y_position = 345 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else 385
-default dating_ypos_value = 555 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else 595
+default -5 chibika_y_position = 345 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else 385
+default -5 dating_ypos_value = 555 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else 595
 default persistent.chibika_drag_x = chibi_xpos
 default persistent.chibika_drag_y = 385
 
@@ -116,9 +117,13 @@ define tools_menu = []
 define walk_menu = []
 
 #====Misc
-default persistent.extraplus_dynamic_button_text = True
-default last_affection_notify_time = 0 # Used for the affection notifier in the button.
-default stop_snike_time = False # This variable seems to be a typo, should it be 'stop_snack_time'?
+default persistent.extraplus_dynamic_button_text = False
+default persistent._extraplus_button_text = None
+default persistent._extraplus_button_last_update = None
+default last_affection_notify_time = 0
+default stop_snike_time = False
+default games_idle_timer = 600
+default seen_notification_games = False
 define -1 ep_pictograms_font = _ep_join(EP_OTHERS, "pictograms_icons.ttf")
 define -1 ep_affection_icons = _ep_join(EP_OTHERS, "peperrito_faces.ttf")
 
@@ -131,7 +136,7 @@ define sfx_ttt_circle = _ep_join(EP_SFX, "ttt_circle.ogg")
 
 default plus_snack_time = None  # Timer for snacks in dates
 default extra_plus_random_outcome = None  # Used for various random choices in the submod
-define 3 extra_plus_file = _ep_get_game_path(EP_ROOT, "Extra_Plus_Main.rpy")
+define -5 extra_plus_file = _ep_get_game_path(EP_ROOT, "Extra_Plus_Main.rpy")
 
 #====BG (Date locations)
 default extra_old_bg = None
@@ -190,7 +195,7 @@ init 5 python:
                 [
                     MASMoniIdleExpRngGroup(
                         [
-                            MASMoniIdleExp("6rktpc", duration=(5, 10)),
+                                    MASMoniIdleExp("6rktpc", duration=(5, 10)), # Replaces 6rktp
                             MASMoniIdleExp("6lktpc", duration=(5, 10))
                         ],
                         max_uses=4
@@ -198,16 +203,16 @@ init 5 python:
                     MASMoniIdleExpRngGroup(
                         [
                             MASMoniIdleExp("6rktdc", duration=(5, 10)),
-                            MASMoniIdleExp("6lktdc", duration=(5, 10))
+                            MASMoniIdleExp("6lktdc", duration=(5, 10)) # Replaces 6lktd
                         ]
                     ),
-                    MASMoniIdleExp("6dktdc", duration=(3, 5))
+                    MASMoniIdleExp("6dktdc", duration=(3, 5)) # Replaces 6dktd
                 ],
                 aff_range=(mas_aff.DISTRESSED, mas_aff.DISTRESSED),
                 weight=2,
                 tag="dist_exps"
             ),
-            # Below 0 and Upset
+            # Below 0 and Upset (Replaces 5tsc)
             MASMoniIdleExp("2esc", duration=5, aff_range=(mas_aff.UPSET, mas_aff.NORMAL), conditional="mas_isBelowZero()", weight=None, repeatable=False, tag="below_zero_startup_exps"),
             MASMoniIdleExp("2esc", aff_range=(mas_aff.UPSET, mas_aff.NORMAL), conditional="mas_isBelowZero()", weight=95, tag="below_zero_exps"),
             MASMoniIdleExp("1tsc", aff_range=(mas_aff.UPSET, mas_aff.NORMAL), conditional="mas_isBelowZero()", weight=5, tag="below_zero_exps"), # Reemplazo de 5tsc
@@ -254,7 +259,7 @@ init 5 python:
                 tag="aff_exps"
             ),
             MASMoniIdleExp("1hua", aff_range=(mas_aff.AFFECTIONATE, mas_aff.AFFECTIONATE), weight=15, tag="aff_exps"),
-            # Enamored & Love (combinados para no usar pose 5)
+            # Enamored & Love (combined to avoid using pose 5)
             MASMoniIdleExp("1eua", duration=5, aff_range=(mas_aff.ENAMORED, None), weight=None, repeatable=False, tag="enam_plus_startup_exps"),
             MASMoniIdleExpRngGroup(
                 [
@@ -274,114 +279,174 @@ init 5 python:
 #===========================================================================================
 # INTERACTION ZONES
 #===========================================================================================
-init -1 python:
+init -10 python in mas_interactions:
+    # Define zone keys
+    ZONE_EXTRA_HEAD = "extra_head"
+    ZONE_EXTRA_NOSE = "extra_nose"
+    ZONE_EXTRA_CHEEK_L = "extra_cheek_l"
+    ZONE_EXTRA_CHEEK_R = "extra_cheek_r"
+    ZONES_EXTRA_CHEEKS = (ZONE_EXTRA_CHEEK_L, ZONE_EXTRA_CHEEK_R)
+    ZONE_EXTRA_HANDS = "extra_hands"
+    ZONE_EXTRA_EAR_L = "extra_ear_l"
+    ZONE_EXTRA_EAR_R = "extra_ear_r"
+
+init -5 python:
     import pygame
+    class ExtraPlusInteractionManager(object):
 
-    # Create a new clickzone map for Extra+ boops
-    # NOTE: These are rectangular for simplicity, but can be complex polygons.
-    # Using more accurate polygons based on original imagebutton areas.
-    extra_plus_cz_map = {
-        # Coords from original imagebuttons: (x, y, w, h) -> polygon
-        # Head: ("zonetwo", 550, 10, ...) -> zonetwo is 180x120
-        "extra_head": [(550, 10), (730, 10), (730, 130), (550, 130)],
-        # Nose: ("zoneone", 618, 235, ...) -> zoneone is 30x30
-        "extra_nose": [(618, 235), (648, 235), (648, 265), (618, 265)],
-        # Right Cheek: ("zonethree", 675, 256, ...) -> zonethree is 40x40
+        def __init__(self, cz_map, action_map):
+            """
+            Constructor: Receives the zone and action maps.
+            """
+            # Configuration maps
+            self.zone_map = cz_map
+            self.action_map = action_map
+            
+            # Internal state
+            self.boop_war_active = False
+
+            # Create MAS components internally
+            self.cz_manager = mas_interactions.MASClickZoneManager()
+            for zone_key, vx_list in self.zone_map.items():
+                self.cz_manager.add(zone_key, MASClickZone(vx_list))
+            
+            self.interactable = MASZoomableInteractable(
+                self.cz_manager,
+                zone_actions={},  # Actions handled manually
+                debug=False
+            )
+        
+        def get_hovered_zone(self):
+            """
+            Gets the current zone under the mouse.
+            """
+            x, y = renpy.get_mouse_pos()
+            return self.interactable.check_over(x, y)
+
+        def handle_click(self, button):
+            """
+            Unified click handler.
+            button 1 = left, button 3 = right
+            """
+            hovered_zone = self.get_hovered_zone()
+            if not hovered_zone:
+                return
+
+            # === CASE 1: During Boop War ===
+            if self.boop_war_active:
+                # During the war, only left-click has an effect
+                if button == 1:
+                    if hovered_zone == mas_interactions.ZONE_EXTRA_NOSE:
+                        renpy.jump("boopwar_loop")
+                    # Group disqualification zones
+                    elif hovered_zone == mas_interactions.ZONE_EXTRA_HEAD:
+                        renpy.jump("extra_headpat_dis")
+                    elif hovered_zone in mas_interactions.ZONES_EXTRA_CHEEKS:
+                        renpy.jump("extra_cheeks_dis")
+                
+                # Ignore any other click (including right-click) during the war
+                return # End the function here if the war is active
+
+            # === CASE 2: Normal Interaction ===
+            action = self.action_map.get(hovered_zone)
+            if not action:
+                return
+
+            # Left Click (Primary)
+            if button == 1:
+                primary_label = action[0] if isinstance(action, tuple) else action
+                if primary_label and renpy.has_label(primary_label):
+                    renpy.jump(primary_label)
+            
+            # Right Click (Alternate)
+            elif button == 3:
+                if not isinstance(action, tuple) or len(action) < 2:
+                    return # No alternate action
+                
+                alternate_label = action[1]
+                if not alternate_label:
+                    return
+
+                # Special case: Start boop war
+                if alternate_label == "monika_boopbeta_war":
+                    self.boop_war_active = True # The state is handled INSIDE the class
+                
+                if renpy.has_label(alternate_label):
+                    renpy.jump(alternate_label)
+
+        def handle_dating_click(self, boop_jump_label):
+            """
+            Special handler for dates.
+            """
+            hovered_zone = self.get_hovered_zone()
+            
+            # Only respond to the nose
+            if hovered_zone == mas_interactions.ZONE_EXTRA_NOSE:
+                if renpy.has_label(boop_jump_label):
+                    renpy.play(gui.activate_sound, channel="sound")
+                    renpy.jump(boop_jump_label)
+        
+        def set_boop_war(self, status):
+            """
+            Safe method to change the state from outside.
+            """
+            self.boop_war_active = status
+            
+        def set_debug(self, status):
+            """
+            Activates/deactivates debug mode.
+            """
+            self.interactable._debug = status
+            self.cz_manager._debug(status)
+            renpy.restart_interaction()
+            renpy.notify("Debug mode " + ("ON" if status else "OFF"))
+
+
+    # Optimized coordinates based on the original imagebuttons
+    # Format: [(x1, y1), (x2, y2), (x3, y3), (x4, y4)]
+    # Where (x1,y1) is the top-left corner and is read clockwise
+    
+    EP_cz_map = {
+        # Head (wide area for headpats)
+        "extra_head":    [(550, 10), (730, 10), (730, 130), (550, 130)],
+        # Nose (small and precise area)
+        "extra_nose":    [(618, 235), (648, 235), (648, 265), (618, 265)],
+        # Right cheek (Monika's right, screen left)
         "extra_cheek_r": [(675, 256), (715, 256), (715, 296), (675, 296)],
-        # Left Cheek: ("zonethree", 570, 256, ...)
+        # Left cheek (Monika's left, screen right)
         "extra_cheek_l": [(570, 256), (610, 256), (610, 296), (570, 296)],
-        # Hands: ("zonefour", 600, 327, ...) -> zonefour is 90x60
-        "extra_hands": [(600, 327), (690, 327), (690, 387), (600, 387)],
-        # Right Ear: ("zoneone", 754, 195, ...)
-        "extra_ear_r": [(754, 195), (784, 195), (784, 225), (754, 225)],
-        # Left Ear: ("zoneone", 514, 220, ...)
-        "extra_ear_l": [(514, 220), (544, 220), (544, 250), (514, 250)],
+        # Hands (wider area)
+        "extra_hands":   [(600, 327), (690, 327), (690, 387), (600, 387)],
+        # Right ear
+        "extra_ear_r":   [(754, 195), (784, 195), (784, 225), (754, 225)],
+        # Left ear
+        "extra_ear_l":   [(514, 220), (544, 220), (544, 250), (514, 250)],
     }
-
-    # Create a clickzone manager
-    extra_plus_boop_cz_manager = mas_interactions.MASClickZoneManager()
-
-    for zone_key, vx_list in extra_plus_cz_map.items():
-        extra_plus_boop_cz_manager.add(zone_key, MASClickZone(vx_list))
-
-    # Define actions for each zone (primary and alternate)
-    extra_plus_boop_zone_actions = {
+    
+    # Mapping of zones to actions (primary, alternate)
+    # If there is only one action, it can be put as a direct string
+    EP_boop_zone_actions = {
         "extra_head": ("monika_headpatbeta", "monika_headpat_long"),
         "extra_nose": ("monika_boopbeta", "monika_boopbeta_war"),
-        "extra_cheek_l": "monika_cheeksbeta",
+        "extra_cheek_l": "monika_cheeksbeta",  # Only primary action
         "extra_cheek_r": "monika_cheeksbeta",
         "extra_hands": "monika_handsbeta",
         "extra_ear_l": "monika_earsbeta",
         "extra_ear_r": "monika_earsbeta",
     }
 
-    # Create the interactable.
-    # Instantiate the base MASZoomableInteractable. We only need it for check_over.
-    extra_plus_boop_interactable = MASZoomableInteractable(
-        extra_plus_boop_cz_manager,
-        zone_actions={k: (v[0] if isinstance(v, tuple) else v) for k, v in extra_plus_boop_zone_actions.items()}
+    # 'store.' is used to make it accessible in screens
+    store.EP_interaction_manager = ExtraPlusInteractionManager(
+        EP_cz_map, 
+        EP_boop_zone_actions
     )
-
-init -9 python in mas_interactions:
-    # Define zone keys
-    ZONE_EXTRA_HEAD = "extra_head"
-    ZONE_EXTRA_NOSE = "extra_nose"
-    ZONE_EXTRA_CHEEK_L = "extra_cheek_l"
-    ZONE_EXTRA_CHEEK_R = "extra_cheek_r"
-    ZONE_EXTRA_HANDS = "extra_hands"
-    ZONE_EXTRA_EAR_L = "extra_ear_l"
-    ZONE_EXTRA_EAR_R = "extra_ear_r"
-
-    def handle_primary_boop_action():
-        """
-        Handles the primary (left-click) action on a boop zone and jumps if valid.
-        """
-        x, y = renpy.get_mouse_pos()
-        hovered_zone_key = store.extra_plus_boop_interactable.check_over(x, y)
-
-        if hovered_zone_key:
-            # During boop war, only the nose is a valid target.
-            if store.boop_war_active:
-                if hovered_zone_key == ZONE_EXTRA_NOSE:
-                    renpy.jump("boopwar_loop")
-                # Handle clicks on other zones during boop war
-                elif hovered_zone_key == ZONE_EXTRA_HEAD:
-                    renpy.jump("extra_headpat_dis")
-                elif hovered_zone_key in [ZONE_EXTRA_CHEEK_L, ZONE_EXTRA_CHEEK_R]:
-                    renpy.jump("extra_cheeks_dis")
-                return # Ignore other zones like hands/ears during war
-
-            # Normal interaction
-            action = store.extra_plus_boop_zone_actions.get(hovered_zone_key)
-            primary_action = action[0] if isinstance(action, tuple) else action
-
-            if primary_action and renpy.has_label(primary_action):
-                renpy.jump(primary_action)
-
-    def handle_alternate_boop_action():
-        """
-        Checks for an alternate action on the hovered boop zone and jumps if valid.
-        This prevents jumping to a 'None' label.
-        """
-        x, y = renpy.get_mouse_pos()
-        hovered_zone_key = store.extra_plus_boop_interactable.check_over(x, y)
-
-        if hovered_zone_key and not store.boop_war_active:
-            action = store.extra_plus_boop_zone_actions.get(hovered_zone_key)
-            # Check if the action is a tuple and has an alternate action (at index 1)
-            if isinstance(action, tuple) and len(action) > 1 and action[1]:
-                if action[1] == "monika_boopbeta_war":
-                    store.boop_war_active = True
-                renpy.jump(action[1])
-        # If no valid zone or alternate action, do nothing.
-        return
 
 #===========================================================================================
 # FOLDERS
 #===========================================================================================
 init -995 python:
     import os
-    # --- Cross-platform path helper functions (adapted from FontSwitcher) ---
+    # --- Cross-platform path helper functions ---
     # Moved to the top level of the python block to be accessible by all functions.
     def _ep_normalize_path(path):
         """Normalizes a path by replacing '\\' with '/' for compatibility."""
@@ -449,6 +514,245 @@ init 5 python:
     import time
     import datetime
 
+    USE_TIME_OF_DAY_CHANGE = True  # Set to True for the text to change according to the time
+    USE_DAILY_RESET = False  # Set to True for the text to change every day
+    
+    def _show_idle_notification(context=""):
+        """
+        Displays an idle notification.
+        If a context (like 'blackjack' or 'ttt') is provided,
+        it uses specific phrases. Otherwise, it uses general ones.
+        """
+
+        if not store.seen_notification_games:
+            if context == "bj": # Blackjack check
+                game_phrases = [
+                    "Hit or stay, [player]? It's your turn!",
+                    "Are you thinking about your next move?",
+                    "Don't wait too long, the dealer is waiting... and so am I. Ehehe~",
+                    "Trying to count the cards in your head?"
+                ]
+            
+            elif context == "ttt": # Tic-Tac-Toe check
+                game_phrases = [
+                    "It's your turn to place an X... or is it an O?",
+                    "Just a friendly reminder, it's your move!",
+                    "Looking for the winning move? Don't think too hard!",
+                    "I'm waiting... but I won't tell you where to go. Ehehe~"
+                ]
+            
+            elif context == "rps": # Rock Paper Scissors
+                game_phrases = [
+                    "Rock, paper, or scissors, [player]?",
+                    "Don't leave me hanging! What's your choice?",
+                    "C'mon, pick one! I'm ready!",
+                    "Are you trying to predict my move?"
+                ]
+            
+            elif context == "sg": # Shell Game ckeck
+                game_phrases = [
+                    "Keep your eye on the ball... or, well, the cup!",
+                    "Where did it go, [player]?",
+                    "Don't look at me, I'm not going to tell you which one it is!",
+                    "It's your turn to guess!"
+                ]
+            store.seen_notification_games = True
+        else:
+            game_phrases = [
+                "Are you still there, [player]?",
+                "Just checking in... you've been quiet for a while.",
+                "Everything okay? You're staring again, ehehe~",
+                "I was starting to wonder if you fell asleep!",
+                "Boo! Did I scare you?"
+            ]
+        
+        # Call the notification with the chosen list of phrases
+        store.mas_display_notif(
+            store.m_name,
+            game_phrases,
+            'Topic Alerts'
+        )
+
+    def _evaluate_current_conditions():
+        """
+        Evaluates ALL current conditions ONCE.
+        Returns a dictionary with the states.
+        """
+        import datetime
+
+        conditions = {
+            # Días especiales
+            "is_monika_bday": mas_isMonikaBirthday(),
+            "is_player_bday": mas_isplayer_bday(),
+            "is_f14": mas_isF14(),
+            "is_o31": mas_isO31(),
+            "is_d25": mas_isD25(),
+            "is_nye": mas_isNYE(),
+
+            # Affection level (only one will be True)
+            "is_love": mas_isMoniLove(lower=False),
+            "is_enamored": mas_isMoniEnamored(lower=False),
+            "is_aff": mas_isMoniAff(lower=False),
+            "is_happy": mas_isMoniHappy(lower=False),
+            "is_normal": mas_isMoniNormal(lower=False),
+            "is_upset": mas_isMoniUpset(lower=False),
+            "is_distressed": mas_isMoniDis(lower=False),
+            "is_broken": mas_isMoniBroken(lower=False),
+
+            # Time and date (optional)
+            "is_night": mas_isNightNow() if USE_TIME_OF_DAY_CHANGE else False,
+            "date": str(datetime.date.today()) if USE_DAILY_RESET else None
+        }
+
+        return conditions
+
+
+    def _build_conditions_key(conditions):
+        """
+        Builds a unique string key from the evaluated conditions.
+        """
+        key_parts = []
+        
+        # Special days
+        if conditions["is_monika_bday"]:
+            key_parts.append("mbday")
+        elif conditions["is_player_bday"]:
+            key_parts.append("pbday")
+        elif conditions["is_f14"]:
+            key_parts.append("f14")
+        elif conditions["is_o31"]:
+            key_parts.append("o31")
+        elif conditions["is_d25"]:
+            key_parts.append("d25")
+        elif conditions["is_nye"]:
+            key_parts.append("nye")
+        
+        # Affection level
+        if conditions["is_love"]:
+            key_parts.append("love")
+        elif conditions["is_enamored"]:
+            key_parts.append("enamored")
+        elif conditions["is_aff"]:
+            key_parts.append("aff")
+        elif conditions["is_happy"]:
+            key_parts.append("happy")
+        elif conditions["is_normal"]:
+            key_parts.append("normal")
+        elif conditions["is_upset"]:
+            key_parts.append("upset")
+        elif conditions["is_distressed"]:
+            key_parts.append("distressed")
+        elif conditions["is_broken"]:
+            key_parts.append("broken")
+        else:
+            key_parts.append("unknown")
+        
+        # Optionals
+        if conditions["is_night"]:
+            key_parts.append("night")
+        
+        if conditions["date"]:
+            key_parts.append(conditions["date"])
+        
+        return "-".join(key_parts)
+    
+    
+    def _button_text_from_conditions(conditions):
+        """
+        Generates the button text using the already evaluated conditions.
+        Does NOT call MAS functions again.
+        """
+        is_night = conditions["is_night"]
+        
+        # ============================================================
+        # 1. HIGHEST PRIORITY: Special Days
+        # ============================================================
+        if conditions["is_monika_bday"]:
+            return renpy.random.choice(["My B-Day", "Her Day", "Sing 4 Me", "My Day", "Moni!"])
+        
+        if conditions["is_player_bday"]:
+            return renpy.random.choice(["Your Day", "HBD!", "Ur Day", "My Gift", "The Best"])
+        
+        if conditions["is_f14"]:
+            return renpy.random.choice(["Be Mine", "My Love", "Hearts", "XOXO", "Our Day"])
+        
+        if conditions["is_o31"]:
+            return renpy.random.choice(["Spooky", "Boo!", "Tricks", "Treats", "Scary"])
+        
+        if conditions["is_d25"]:
+            return renpy.random.choice(["Joyful", "Our Xmas", "Gift", "Noel", "Holly"])
+        
+        if conditions["is_nye"]:
+            return renpy.random.choice(["New Year", "Cheers", "Toast", "Our Year", "The Eve"])
+        
+        # ============================================================
+        # 2. HIGH PRIORITY: High Positive Affection
+        # ============================================================
+        if conditions["is_love"] or conditions["is_enamored"]:
+            base_texts = ["Forever", "Eternity", "Sunshine", "Beloved", "Darling", "Adored", "Precious", "Cutie", "Sweetie", "Cherish"]
+            
+            if is_night:
+                base_texts.extend(["Moonlight", "Stars", "Night Love", "Dreaming", "Starlight", "Night Dear", "Sleepy?", "Cuddle"])
+            
+            return renpy.random.choice(base_texts)
+        
+        if conditions["is_aff"] or conditions["is_happy"]:
+            base_texts = ["So Sweet", "Caring", "Warmth", "Our Time", "Smile", "Glad", "Hehe~", "Happy", "Cheerful", "Yay!"]
+            
+            if is_night:
+                base_texts.extend(["Night Time", "Calm", "Peaceful", "Night!", "Evening", "Restful", "Nice Night"])
+            
+            return renpy.random.choice(base_texts)
+        
+        if conditions["is_normal"] or conditions["is_upset"]:
+            base_texts = ["Hi again", "Welcome", "Talk?", "On Mind?", "Topics", "Just Us", "Relax", "It's you", "Hurting", "Really?"]
+            
+            if is_night:
+                base_texts.extend(["Sparks", "Sleepy", "Quiet", "Dreams", "Cozy", "Dark...", "Restless", "Tired..."])
+            
+            return renpy.random.choice(base_texts)
+        
+        if conditions["is_distressed"] or conditions["is_broken"]:
+            base_texts = ["No Love?", "Forgot?", "Alone...", "Please...", "...", "You...", "Scared", "Sorry", "Nothing"]
+            
+            if is_night:
+                base_texts.extend(["Awake...", "Lonely", "Dark Night", "Tears...", "Darkness", "Void", "Cold...", "End..."])
+            
+            return renpy.random.choice(base_texts)
+        
+        # ============================================================
+        # 5. SAFETY FALLBACK
+        # ============================================================
+        return "Extra+"
+
+    def get_dynamic_button_text():
+        """
+        Dynamically determines the submod's button text.
+        The text remains consistent until the conditions change.
+        """
+        import datetime
+
+        # If dynamic text is disabled, return the static name
+        if not persistent.extraplus_dynamic_button_text:
+            return "Extra+"
+        
+        # Evaluate current conditions ONCE
+        conditions = _evaluate_current_conditions()
+        conditions_key = _build_conditions_key(conditions)
+        
+        # If conditions changed or there is no saved text, regenerate
+        if (persistent._extraplus_button_last_update != conditions_key 
+            or persistent._extraplus_button_text is None):
+            
+            # Generate new text using the already evaluated conditions
+            new_text = _button_text_from_conditions(conditions)
+            
+            # Save to persistent
+            persistent._extraplus_button_text = new_text
+            persistent._extraplus_button_last_update = conditions_key
+        
+        return persistent._extraplus_button_text
+
     def show_boop_feedback(message, color="#ff69b4"):
         """
         Shows a floating text message on the screen at the mouse position.
@@ -457,16 +761,37 @@ init 5 python:
         t = "boop_notif{}".format(renpy.random.randint(1, 10000))
         renpy.show_screen("boop_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color)
 
-    def create_gift_file(filename):
+    def create_gift_file(basename):
         """
         Creates an empty .gift file in the characters directory.
-        
+
         Args:
-            filename (str): The name of the gift file (e.g., "roses.gift").
+            basename (str): The base name of the gift file (e.g., "roses").
+        
+        Returns:
+            bool: True if the file was created successfully, False otherwise.
         """
-        filepath = os.path.join(renpy.config.basedir, 'characters', filename)
-        with open(filepath, "a"):
-            pass  # Just create an empty file
+        try:
+            filename = basename + ".gift"
+            filepath = os.path.join(renpy.config.basedir, 'characters', filename)
+            with open(filepath, "w") as f:
+                pass  # Just create an empty file
+            return True
+        except Exception as e:
+            renpy.notify(_("Oh no, I couldn't create the gift file."))
+            return False
+
+    def migrate_window_title_data():
+        """
+        Migrates the window title from v1.1.0 (persistent.save_window_title) 
+        to v1.3.4 (persistent._save_window_title).
+        """
+        # Check if the old variable exists
+        if hasattr(persistent, 'save_window_title'):
+            # Copy the value to the new variable (which starts with an underscore)
+            persistent._save_window_title = persistent.save_window_title
+            # Delete the old variable to clean up and prevent it from running again
+            del persistent.save_window_title
 
     def migrate_chibi_costume_data():
         """
@@ -493,7 +818,7 @@ init 5 python:
         renpy.hide_screen("bday_oki_doki")
         try:
             # Create the 'oki doki' file
-            with open(os.path.join(renpy.config.basedir, 'characters', 'oki doki'), 'w') as f:
+            with open(os.path.join(renpy.config.basedir, 'characters', 'oki doki'), "w") as f:
                 pass
             renpy.notify("Everything is ready for the surprise!")
         except Exception as e:
@@ -691,7 +1016,7 @@ init 5 python:
             
     def extra_seen_background(sorry, extra_label, view_label):
         """Handle affection and label jump based on background seen status."""
-        if store.mas_affection._get_aff() < 300:
+        if store.mas_affection._get_aff() < 400:
             renpy.jump(sorry)
 
         if renpy.seen_label(view_label):
@@ -897,17 +1222,18 @@ init -1 python:
             self.gift = gift
 
         def __call__(self):
-            create_gift_file(self.gift)
-            messages = [
-                _("All set! The '{}' gift is ready for you.").format(self.name),
-                _("Here's a '{}' for Monika! I hope she loves it.").format(self.name),
-                _("Perfect! Your '{}' is ready for Monika.").format(self.name),
-                _("A '{}' for Monika! It's all set.").format(self.name),
-                _("Your '{}' gift has been created!").format(self.name),
-                _("One '{}' gift, coming right up! It's ready.").format(self.name)
-            ]
-            renpy.notify(random.choice(messages))
-            store.mas_checkReactions()
+            if create_gift_file(self.gift):
+                messages = [
+                    _("All set! The '{}' gift is ready for you.").format(self.name),
+                    _("Here's a '{}' for Monika! I hope she loves it.").format(self.name),
+                    _("Perfect! Your '{}' is ready for Monika.").format(self.name),
+                    _("A '{}' for Monika! It's all set.").format(self.name),
+                    _("Your '{}' gift has been created!").format(self.name),
+                    _("One '{}' gift, coming right up! It's ready.").format(self.name)
+                ]
+                renpy.notify(random.choice(messages))
+                store.mas_checkReactions()
+
             renpy.jump('plus_make_gift')
 
     class DokiAccessory():
@@ -939,7 +1265,7 @@ init -1 python:
 #===========================================================================================
 # IMAGES
 #===========================================================================================
-init python:
+init 1 python:
     extraplus_accessories = [
         ("extraplus_acs_chocolatecake", "chocolatecake", MASPoseMap(default="0", use_reg_for_l=True), True),
         ("extraplus_acs_fruitcake", "fruitcake", MASPoseMap(default="0", use_reg_for_l=True), True),
@@ -1067,6 +1393,7 @@ image maxwell_animation = anim.Filmstrip(_ep_join(EP_OTHERS, "maxwell_cat.png"),
 #===========================================================================================
 # SCREEN
 #===========================================================================================
+# === Buttons ===
 screen extraplus_button():
     #Displays the Extra+ button on the overlay. Handles hotkeys and button actions for opening the Extra+ menu.
     zorder 15
@@ -1092,262 +1419,16 @@ screen extraplus_interactions():
     #Shows the main Extra+ interactions menu, letting the player choose between date, minigames, tools, or boop options.
     zorder 50
     style_prefix "hkb"
-    vbox:
+    vbox: # Main menu container
         xpos 0.05
         yanchor 1.0
         ypos 210
 
-        use extra_close_button("close_extraplus")
+        use extra_close_button()
         textbutton _("Dates") action Jump("extraplus_walk")
         textbutton _("Games") action If(mas_affection._get_aff() >= 30, true=Jump("extraplus_minigames"), false=NullAction())
         textbutton _("Tools") action Jump("extraplus_tools")
         textbutton _("Boop") action If(mas_affection._get_aff() >= 30, true=Jump("show_boop_screen"), false=NullAction())
-
-#====GAME
-screen sticker_customization():
-    #Allows the player to customize Chibika’s appearance and behavior, including dragging, visibility, and accessories.
-    zorder 50
-    vbox:
-        style_prefix "hkb"
-        xpos 0.05
-        yanchor 1.0
-        ypos 90
-
-        use extra_close_button("close_dev_extraplus")
-        textbutton _("Return") action Jump("extraplus_tools")
-        
-
-    frame:
-        xalign 0.5
-        yalign 0.5
-        padding (60, 30, 30, 30)
-        xmaximum 900
-        ymaximum 650
-        vbox:
-            spacing 18
-            xalign 0.5
-            style_prefix "check"
-
-            label _("Chibi Options"):
-                xalign 0.45
-
-            hbox:
-                spacing 20
-                vbox:
-                    label _("Draggable Chibi:")
-                    # null height 30
-                    textbutton _("[persistent.enable_drag_chibika]") action ToggleField(persistent, "enable_drag_chibika")
-                vbox:
-                    label _("Always on screen:")
-                    textbutton _("[persistent.hi_chibika]") action ToggleField(persistent, "hi_chibika")
-                vbox:
-                    label _("Toggle Visibility:")
-                    # null height 10
-                    textbutton _("Show/Hide") action Function(add_remv_chibi)
-
-            null height 10
-
-            label _("Dress Up!"):
-                xalign 0.45
-
-            hbox:
-                spacing 20
-                vbox:
-                    label _("Outfits:")
-                    # null height 30
-                    textbutton _("Select") action Jump("doki_change_appe")
-                vbox:
-                    label _("Head Accessories:")
-                    textbutton _("Select") action Jump("sticker_primary")
-                vbox:
-                    label _("F/B Accessories:")
-                    textbutton _("Select") action Jump("sticker_secondary")
-
-            null height 10
-
-screen boop_revamped():
-    #Displays the boop interaction menu, showing available zones (cheeks, head, nose, ears, hands) and related actions.
-    zorder 49
-
-    timer 900 action Jump("boop_timer_expired")
-
-    # This transparent button catches all mouse events.
-    imagebutton idle "mod_assets/other/transparent.png" action NullAction()
-
-    key "mouseup_1" action Function(mas_interactions.handle_primary_boop_action)
-    key "mouseup_3" action Function(mas_interactions.handle_alternate_boop_action)
-
-    vbox:
-        style_prefix "check"
-        yanchor 0.5
-        xanchor 1.0
-        xpos 1.0
-        ypos 0.5
-        if not boop_war_active:
-            label _("Interactions\navailable:")
-            text _(" Cheeks\n Head\n Nose\n Ears\n Hands\n") outlines [(2, "#808080", 0, 0)]
-
-    vbox:
-        style_prefix "hkb"
-        xpos 0.05
-        yanchor 1.0
-        ypos 90
-
-        use extra_close_button("close_boop_screen")
-        textbutton _("Return") action Jump("return_boop_screen")
-
-screen extrabutton_custom_zoom():
-    #Shows a button to open the custom zoom menu if the overlay is active.
-    zorder 51
-    style_prefix "hkb"
-    vbox:
-        xpos 0.05
-        yanchor 1.0
-        if store.mas_submod_utils.isSubmodInstalled("Noises Submod"):
-            ypos 595
-        else:
-            ypos 635
-
-        if renpy.get_screen("hkb_overlay"):
-            # El botón se desactiva (atenúa) automáticamente si la pantalla de diálogo 'say' está visible.
-            # Usamos renpy.get_screen("say"), que es compatible con versiones antiguas de Ren'Py.
-            textbutton _("Zoom") action Show("extra_custom_zoom") sensitive not renpy.get_screen("say")
-
-screen extra_custom_zoom():
-    #Provides a custom zoom slider and reset button for adjusting the game’s zoom level.
-    use extra_no_click()
-    zorder 52
-    frame:
-        area (0, 0, 1280, 720)
-        background Solid("#0000007F")
-
-        textbutton _("Close"):
-            if store.mas_submod_utils.isSubmodInstalled("Noises Submod"):
-                area (60, 556, 120, 35)
-            else:
-                area (60, 596, 120, 35)
-            style "hkb_button"
-            action [SetField(store, "extra_plus_player_zoom", store.mas_sprites.zoom_level), Hide("extra_custom_zoom")]
-
-        frame: # Zoom slider frame
-            area (195, 450, 80, 255)
-            style "mas_extra_menu_frame"
-            vbox:
-                spacing 2
-                # resets the zoom value back to default
-                textbutton _("Base"):
-                    style "mas_adjustable_button"
-                    selected False
-                    xsize 72 ysize 35 xalign 0.3
-                    action SetField(store.mas_sprites, "zoom_level", store.mas_sprites.default_zoom_level)
-                    
-                # Slider for adjusting zoom
-                bar value FieldValue(store.mas_sprites, "zoom_level", store.mas_sprites.max_zoom):
-                    style "mas_adjust_vbar"
-                    xalign 0.5
-                $ store.mas_sprites.adjust_zoom()
-
-screen shell_game_minigame():
-    #Displays the shell game minigame interface, letting the player pick a cup and quit the game.
-    zorder 50
-    style_prefix "hkb"
-    use extra_no_click()
-    
-    for i in range(3):
-        imagebutton:
-            xanchor 0.5 yanchor 0.5
-            xpos sg_cup_coordinates[i]
-            ypos 250
-            idle "extra_sg_cup_idle"
-            hover "extra_sg_cup_hover"
-            focus_mask "extra_sg_cup_hover"
-            action SGVerification(i, sg_ball_position, "sg_check_label")
-    
-    vbox:
-        xpos 0.86
-        yanchor 1.0
-        ypos 0.950
-        textbutton _("Quit") action [Hide("shell_game_minigame"), Jump("shell_game_result")]
-
-screen RPS_mg():
-    #Shows the Rock-Paper-Scissors minigame interface, with buttons for each choice and a quit button.
-    zorder 50
-
-    # Monika's card back
-    imagebutton idle "extra_card_back":
-        action NullAction()
-        xalign 0.7
-        yalign 0.1
-
-    # Player's choices
-    $ x_positions = [0.5, 0.7, 0.9]
-    for i, choice in enumerate(extra_rps_choices):
-        imagebutton:
-            idle choice.image
-            hover choice.image at hover_card
-            action [SetVariable("rps_your_choice", choice.value), Hide("RPS_mg"), Jump("rps_loop")]
-            xalign x_positions[i]
-            yalign 0.7
-
-    # Quit button
-    vbox:
-        xpos 0.86
-        yanchor 1.0
-        ypos 0.950
-        textbutton _("Quit") style "hkb_button" action Jump("rps_quit")
-
-screen extra_no_click():
-    #Disables advancing the dialogue or clicking, used to restrict player input during certain events.
-    key "K_SPACE" action NullAction()
-    key "K_RETURN" action NullAction()
-    key "K_KP_ENTER" action NullAction()
-    key "mouseup_1" action NullAction()
-
-    imagebutton:
-        idle "mod_assets/other/transparent.png"
-        action NullAction()
-
-screen doki_chibi_idle():
-    #Displays Chibika on the screen, allowing for dragging if enabled.
-    zorder 52
-    if renpy.get_screen("hkb_overlay"):
-        if persistent.enable_drag_chibika:
-            drag:
-                child "extra_chibi_base"
-                selected_hover_child "extra_chibi_hover"
-                dragged chibi_drag
-                drag_offscreen True
-                xpos persistent.chibika_drag_x
-                ypos persistent.chibika_drag_y
-        else:
-            add "extra_chibi_base":
-                xpos chibi_xpos
-                ypos chibika_y_position
-
-screen score_minigame(game=None):
-    #Shows the current score for a minigame (RPS or Shell Game) with player and opponent stats.
-    key "h" action NullAction()
-    key "mouseup_3" action NullAction()
-    python:
-        if game == "rps":
-            first_text = "Monika"
-            second_text = player
-            first_score = store.extra_moni_wins
-            second_score = store.extra_player_wins
-            
-        elif game == "sg":
-            first_text = "Turns"
-            second_text = "Score"
-            first_score = store.sg_current_turn
-            second_score = store.sg_correct_answers
-        
-    add "note_score"
-    vbox:
-        xpos 0.910
-        ypos 0.025
-        text "[first_text] : [first_score]"  size 25 style "monika_text"
-        text "[second_text] : [second_score]"  size 25 style "monika_text"
-
 
 screen extra_gen_list(extra_list, extra_area, others, close=None):
     #Generates a scrollable menu from a list, used for dynamic option lists in the submod.
@@ -1398,45 +1479,312 @@ screen extra_gen_list(extra_list, extra_area, others, close=None):
             xpos 0.097
             yanchor 1.0
             ypos 50
-            use extra_close_button("close_extraplus")
+            use extra_close_button()
 
-screen dating_loop(ask, label_boop, boop_enable=False):
-    #Displays a simple menu for dating events, with a talk button and optional boop interaction.
+screen extra_close_button(jump_action="close_extraplus"):
     zorder 51
+    style_prefix "hkb"
+
     vbox:
-        xpos 0.05 yanchor 1.0
-        ypos dating_ypos_value
-        textbutton _("Talk") style "hkb_button" action Jump(ask)
+        key "x" action Jump(jump_action)
+        textbutton _("Close") action Jump(jump_action)
 
-    #Noise
-    if boop_enable == True:
-        imagebutton:
-            idle "zoneone"
-            xpos 620 ypos 235
-            action Jump(label_boop)
+# === Chibis ===
+screen doki_chibi_idle():
+    #Displays Chibika on the screen, allowing for dragging if enabled.
+    zorder 52
+    if renpy.get_screen("hkb_overlay"):
+        if persistent.enable_drag_chibika:
+            drag:
+                child "extra_chibi_base"
+                selected_hover_child "extra_chibi_hover"
+                dragged chibi_drag
+                drag_offscreen True
+                xpos persistent.chibika_drag_x
+                ypos persistent.chibika_drag_y
+        else:
+            add "extra_chibi_base":
+                xpos chibi_xpos
+                ypos chibika_y_position
 
-screen extra_timer_monika(time):
-    #Runs a timer that sets a variable when finished, used for timed events.
-    timer time action SetVariable("stop_snike_time", True)
-
-
-screen boop_event(timelock, endlabel, editlabel):
-    #Handles the boop war event, showing interactive zones and a score counter.
-    timer timelock action Jump(endlabel)
+screen sticker_customization():
+    #Allows the player to customize Chibika’s appearance and behavior, including dragging, visibility, and accessories.
     zorder 50
+    vbox:
+        style_prefix "hkb"
+        xpos 0.05
+        yanchor 1.0
+        ypos 90
 
-    # This transparent button ensures the screen can receive key events.
-    imagebutton idle "mod_assets/other/transparent.png" action NullAction()
+        use extra_close_button("close_dev_extraplus")
+        textbutton _("Return") action Jump("extraplus_tools")
 
-    # Use the same logic as the main boop screen to handle clicks.
-    # The handle_primary_boop_action function already knows what to do when boop_war_active is True.
-    key "mouseup_1" action Function(mas_interactions.handle_primary_boop_action)
+    frame:
+        xalign 0.5
+        yalign 0.5
+        padding (60, 30, 30, 30)
+        xmaximum 900
+        ymaximum 650
+        vbox:
+            spacing 18
+            xalign 0.5
+            style_prefix "check"
 
-screen force_mouse_move():
-    #Forces the mouse to move to a specific position, used for certain effects or minigames.
-    on "show":
-        action MouseMove(x=412, y=237, duration=.3)
-    timer .6 repeat True action MouseMove(x=412, y=237, duration=.3)
+            label _("Chibi Options"):
+                xalign 0.45
+
+            hbox:
+                spacing 20
+                vbox:
+                    label _("Draggable Chibi:")
+                    # null height 30
+                    textbutton _("[persistent.enable_drag_chibika]") action ToggleField(persistent, "enable_drag_chibika")
+                vbox:
+                    label _("Always on screen:")
+                    textbutton _("[persistent.hi_chibika]") action ToggleField(persistent, "hi_chibika")
+                vbox:
+                    label _("Toggle Visibility:")
+                    # null height 10
+                    textbutton _("Show/Hide") action Function(add_remv_chibi)
+
+            null height 10
+
+            label _("Dress Up!"):
+                xalign 0.45
+
+            hbox:
+                spacing 20
+                vbox:
+                    label _("Outfits:")
+                    # null height 30
+                    textbutton _("Select") action Jump("doki_change_appe")
+                vbox:
+                    label _("Head Accessories:")
+                    textbutton _("Select") action Jump("sticker_primary")
+                vbox:
+                    label _("F/B Accessories:")
+                    textbutton _("Select") action Jump("sticker_secondary")
+
+            null height 10
+
+# === Zoom ===
+screen extrabutton_custom_zoom():
+    #Shows a button to open the custom zoom menu if the overlay is active.
+    zorder 51
+    style_prefix "hkb"
+    vbox:
+        xpos 0.05
+        yanchor 1.0
+        if store.mas_submod_utils.isSubmodInstalled("Noises Submod"):
+            ypos 595
+        else:
+            ypos 635
+
+        if renpy.get_screen("hkb_overlay"):
+            # The button is automatically disabled (dimmed) if the 'say' dialog screen is visible.
+            # We use renpy.get_screen("say"), which is compatible with older versions of Ren'Py.
+            textbutton _("Zoom") action Show("extra_custom_zoom") sensitive not renpy.get_screen("say")
+
+screen extra_custom_zoom():
+    #Provides a custom zoom slider and reset button for adjusting the game’s zoom level.
+    use extra_no_click()
+    zorder 52
+    frame:
+        area (0, 0, 1280, 720)
+        background Solid("#0000007F")
+
+        textbutton _("Close"):
+            if store.mas_submod_utils.isSubmodInstalled("Noises Submod"):
+                area (60, 556, 120, 35)
+            else:
+                area (60, 596, 120, 35)
+            style "hkb_button"
+            action [SetField(store, "extra_plus_player_zoom", store.mas_sprites.zoom_level), Hide("extra_custom_zoom")]
+
+        frame: # Zoom slider frame
+            area (195, 450, 80, 255)
+            style "mas_extra_menu_frame"
+            vbox:
+                spacing 2
+                # resets the zoom value back to default
+                textbutton _("Base"):
+                    style "mas_adjustable_button"
+                    selected False
+                    xsize 72 ysize 35 xalign 0.3
+                    action SetField(store.mas_sprites, "zoom_level", store.mas_sprites.default_zoom_level)
+                    
+                # Slider for adjusting zoom
+                bar value FieldValue(store.mas_sprites, "zoom_level", store.mas_sprites.max_zoom):
+                    style "mas_adjust_vbar"
+                    xalign 0.5
+                $ store.mas_sprites.adjust_zoom()
+
+# === Games ===
+screen shell_game_minigame():
+    #Displays the shell game minigame interface, letting the player pick a cup and quit the game.
+    zorder 50
+    style_prefix "hkb"
+    use extra_no_click()
+    timer games_idle_timer action Function(_show_idle_notification, context="sg") repeat True
+
+    for i in range(3):
+        imagebutton:
+            xanchor 0.5 yanchor 0.5
+            xpos sg_cup_coordinates[i]
+            ypos 250
+            idle "extra_sg_cup_idle"
+            hover "extra_sg_cup_hover"
+            focus_mask "extra_sg_cup_hover"
+            action SGVerification(i, sg_ball_position, "sg_check_label")
+    
+    vbox:
+        xpos 0.86
+        yanchor 1.0
+        ypos 0.950
+        textbutton _("Quit") action [Hide("shell_game_minigame"), Jump("shell_game_result")]
+
+screen RPS_mg():
+    #Shows the Rock-Paper-Scissors minigame interface, with buttons for each choice and a quit button.
+    zorder 50
+    timer games_idle_timer action Function(_show_idle_notification, context="rps") repeat True
+
+    # Monika's card back
+    imagebutton idle "extra_card_back":
+        action NullAction()
+        xalign 0.7
+        yalign 0.1
+
+    # Player's choices
+    $ x_positions = [0.5, 0.7, 0.9]
+    for i, choice in enumerate(extra_rps_choices):
+        imagebutton:
+            idle choice.image
+            hover choice.image at hover_card
+            action [SetVariable("rps_your_choice", choice.value), Hide("RPS_mg"), Jump("rps_loop")]
+            xalign x_positions[i]
+            yalign 0.7
+
+    # Quit button
+    vbox:
+        xpos 0.86
+        yanchor 1.0
+        ypos 0.950
+        textbutton _("Quit") style "hkb_button" action Jump("rps_quit")
+
+screen extra_no_click():
+    #Disables advancing the dialogue or clicking, used to restrict player input during certain events.
+    key "K_SPACE" action NullAction()
+    key "K_RETURN" action NullAction()
+    key "K_KP_ENTER" action NullAction()
+    key "mouseup_1" action NullAction()
+
+    imagebutton:
+        idle "mod_assets/other/transparent.png"
+        action NullAction()
+
+screen score_minigame(game=None):
+    #Shows the current score for a minigame (RPS or Shell Game) with player and opponent stats.
+    key "h" action NullAction()
+    key "mouseup_3" action NullAction()
+    python:
+        if game == "rps":
+            first_text = "Monika"
+            second_text = player
+            first_score = store.extra_moni_wins
+            second_score = store.extra_player_wins
+            
+        elif game == "sg":
+            first_text = "Turns"
+            second_text = "Score"
+            first_score = store.sg_current_turn
+            second_score = store.sg_correct_answers
+        
+    add "note_score"
+    vbox:
+        xpos 0.910
+        ypos 0.025
+        text "[first_text] : [first_score]"  size 25 style "monika_text"
+        text "[second_text] : [second_score]"  size 25 style "monika_text"
+
+# === Interactions ===
+screen boop_revamped():
+    zorder 49
+    
+    timer 900 action Jump("boop_timer_expired") # 15 minute timer
+    
+    key "mouseup_1" action Function(store.EP_interaction_manager.handle_click, button=1)
+    key "mouseup_3" action Function(store.EP_interaction_manager.handle_click, button=3) # Right click
+    vbox:
+        style_prefix "check"
+        yanchor 0.5
+        xanchor 1.0
+        xpos 1.0
+        ypos 0.5
+        
+        if not boop_war_active:
+            label _("Interactions\navailable:")
+            text _(" Cheeks\n Head\n Nose\n Ears\n Hands\n"):
+                outlines [(2, "#808080", 0, 0)]
+    
+    vbox:
+        style_prefix "hkb"
+        xpos 0.05
+        yanchor 1.0
+        ypos 90
+        
+        use extra_close_button("close_boop_screen")
+        textbutton _("Return") action Jump("return_boop_screen")
+
+screen boop_capture_overlay(label_boop):
+
+    zorder 49  # Below the UI buttons (which are at zorder 51)
+    
+    python:
+        # NOTE: Assuming the manager is in 'store.EP_interaction_manager'
+        # and its .cz_manager is accessible
+        nose_cz = store.EP_interaction_manager.cz_manager.get(
+            store.mas_interactions.ZONE_EXTRA_NOSE, 
+            store.mas_sprites.zoom_level
+        )
+        
+        if nose_cz and not nose_cz.disabled:
+            corners = nose_cz.corners
+            if corners:
+                min_x = min(x for x, y in corners)
+                min_y = min(y for x, y in corners)
+                max_x = max(x for x, y in corners)
+                max_y = max(y for x, y in corners)
+                
+                nose_zone = {
+                    'x': min_x,
+                    'y': min_y,
+                    'w': max_x - min_x,
+                    'h': max_y - min_y
+                }
+    
+    # Render invisible imagebutton only over the nose
+    if nose_zone:
+        imagebutton:
+            xpos nose_zone['x']
+            ypos nose_zone['y']
+            xysize (nose_zone['w'], nose_zone['h'])
+            idle Solid("#00000000")  # Completely transparent
+            action Function(store.EP_interaction_manager.handle_dating_click, label_boop)
+
+screen extra_boop_event(timelock, endlabel, editlabel):
+    zorder 50
+    
+    # Countdown timer
+    timer timelock action Jump(endlabel)
+    
+    # Click capture (handles war logic automatically)
+    key "mouseup_1" action Function(store.EP_interaction_manager.handle_click, button=1)
+
+screen boop_feedback_notif(msg, tag, txt_color):
+    zorder 2000
+    timer 1.3 action Hide(tag)
+    default p = renpy.get_mouse_pos()
+    text "{}".format(msg) at boop_feedback_trans pos p size 30 color txt_color outlines [ (2, "#000", 0, 0) ]
 
 screen boop_war_score_ui():
     #Displays the score counter for the boop war.
@@ -1447,6 +1795,33 @@ screen boop_war_score_ui():
         ypos 0.045
         text _("Boops : [boop_war_count]") size 25 style "monika_text"
 
+# === DATES ===
+screen extra_dating_loop(ask, label_boop, boop_enable=False):
+    zorder 51
+    
+    if boop_enable:
+        use boop_capture_overlay(label_boop)
+    
+    vbox:
+        xpos 0.05 
+        yanchor 1.0
+        ypos dating_ypos_value
+        
+        textbutton _("Talk"):
+            style "hkb_button"
+            action Jump(ask)
+
+screen extra_timer_monika(time):
+    #Runs a timer that sets a variable when finished, used for timed events.
+    timer time action SetVariable("stop_snike_time", True)
+
+screen force_mouse_move():
+    #Forces the mouse to move to a specific position, used for certain effects or minigames.
+    on "show":
+        action MouseMove(x=412, y=237, duration=.3)
+    timer .6 repeat True action MouseMove(x=412, y=237, duration=.3)
+
+# === Mics ===
 screen bday_oki_doki():
     #Shows a special button for Monika’s birthday event.
     zorder 150
@@ -1496,7 +1871,7 @@ screen extraplus_stats_screen():
         yanchor 1.0
         ypos 90
 
-        use extra_close_button("close_extraplus")
+        use extra_close_button()
         textbutton _("Return") action Jump("extraplus_tools")
 
     frame:
@@ -1543,26 +1918,6 @@ screen _extra_plus_submod_settings():
         textbutton _("{b}Clean up old files{/b}"):
             action Function(extra_plus_cleanup_old_files)
             hovered tooltip.Action("This will remove obsolete files and folders from previous versions of the submod.")
-
-screen boop_feedback_notif(msg, tag, txt_color):
-    zorder 2000
-    timer 1.3 action Hide(tag)
-    default p = renpy.get_mouse_pos()
-    text "{}".format(msg) at boop_feedback_trans pos p size 30 color txt_color outlines [ (2, "#000", 0, 0) ]
-
-# screen boop_feedback_notif(msg, tag, txt_color):
-#     zorder 2000
-#     timer 1.3 action Hide(tag)
-#     default p = renpy.get_mouse_pos()
-#     text "{}".format(msg) at boop_feedback_trans pos p size 40 color txt_color outlines [ (1, "#000", 0, 0) ] style "monika_text"
-
-screen extra_close_button(jump_action="close_extraplus"):
-    zorder 51
-    style_prefix "hkb"
-
-    vbox:
-        key "x" action Jump(jump_action)
-        textbutton _("Close") action Jump(jump_action)
 
 #===========================================================================================
 # TRANSFORM
@@ -1677,7 +2032,7 @@ transform score_rotate_left:
     rotate -20
     rotate_pad True
     transform_anchor True
-    
+
 #===========================================================================================
 # BACKGROUNG
 #===========================================================================================
@@ -1806,7 +2161,7 @@ init -2 python in mas_background:
         store.monika_chr.tablechair.table = "def"
         store.monika_chr.tablechair.chair = "def"
 
-#====Restaurant (Rutas actualizadas)
+#====Restaurant (Updated paths)
 
 #Day images
 image submod_background_extraplus_restaurant_day = _ep_join(EP_DATE_RESTAURANT, "restaurant_day.png")
@@ -1931,7 +2286,7 @@ init -2 python in mas_background:
         store.monika_chr.tablechair.table = "def"
         store.monika_chr.tablechair.chair = "def"
 
-#====Pool (Rutas actualizadas)
+#====Pool (Updated paths)
 
 #Day images
 image submod_background_extrapool_day = _ep_join(EP_DATE_POOL, "pool_day.png")
@@ -2055,7 +2410,7 @@ init -2 python in mas_background:
         store.monika_chr.tablechair.table = "def"
         store.monika_chr.tablechair.chair = "def"
 
-#====Library (Rutas actualizadas)
+#====Library (Updated paths)
 
 #Day images
 image submod_background_extralibrary_day = _ep_join(EP_DATE_LIBRARY, "library_day.png")
@@ -2179,7 +2534,7 @@ init -2 python in mas_background:
         store.monika_chr.tablechair.table = "def"
         store.monika_chr.tablechair.chair = "def"
 
-#====Arcade (Rutas actualizadas)
+#====Arcade (Updated paths)
 
 #Day images
 image submod_background_extra_arcade_day = _ep_join(EP_DATE_ARCADE, "arcade_day.png")

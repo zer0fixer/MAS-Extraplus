@@ -32,7 +32,7 @@ image ttt_circle:
         alpha 0.0
         linear 0.25 alpha 1.0
 default persistent.ttt_result_game = [False, False, False] #Player, Monika and Tie. Quit [FFF]
-default Minigame_TTT = [
+default -5 Minigame_TTT = [
     "'",
     "#0142a4",
     "0",
@@ -188,6 +188,7 @@ screen minigame_ttt_scr():
     key "h" action NullAction()
     key "mouseup_3" action NullAction()
     use ttt_score
+    timer games_idle_timer action If(ttt.playerTurn, Function(_show_idle_notification, context="ttt")) repeat True
     layer "master"
     zorder 50
 
@@ -339,7 +340,6 @@ label minigame_ttt_quit:
             m 3esa "Oh, changing your mind?"
             m 3lkb "I was looking forward to playing with you... but I understand."
             m 1hua "We can always play another time!"
-            $ persistent.ttt_result_game = [False, False, False]
         else:
             m 1sua "Wow, we ended in a perfect tie!"
             m 1tua "It's almost like our minds are in sync, ehehe~"
@@ -359,5 +359,7 @@ label minigame_ttt_quit:
         m 1subsa "I knew you were a great strategist. I'm proud of you~"
         m 3hua "I'll have to try even harder next time!"
         $ persistent.ttt_result_game[0] = True
+
+    $ seen_notification_games = False
     jump close_extraplus
     return

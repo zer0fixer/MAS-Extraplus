@@ -80,6 +80,9 @@ screen blackjack_ui:
     use blackjack_stats()
     add "bj_name_plate" pos (548, 33) anchor (0, 0) zoom 0.7
     add "bj_name_plate" pos (548, 375) anchor (0, 0) zoom 0.7
+    if bj_current_turn == "player":
+        timer games_idle_timer action Function(_show_idle_notification, context="bj") repeat True
+
     fixed:
         xalign 0.5 ypos 0.05
         xysize (1400, 650)
@@ -92,31 +95,14 @@ screen blackjack_ui:
             null height 25
             use blackjack_player()
 
-# screen blackjack_monika():
-#     vbox:
-#         xalign 0.5
-#         spacing 15
-#         label _("Monika") xalign 0.5
-    
-#         hbox:
-#             spacing 10
-            # for index, card in enumerate(minigame_monika.hand):
-            #     add If(minigame_monika.revealed[index],
-            #         At(card.image, init_card_slide if index < 2 else hit_card),
-            #         At("bjcard back", init_card_slide if index < 2 else hit_card)
-            #     ) at monika_card_flip
-#             frame:
-#                 xysize (50, 50)
-#                 xalign 0.5
-#                 yalign 0.5
-#                 text "[minigame_monika.total if all(minigame_monika.revealed) else '??']" xalign 0.5 yalign 0.5
-
 screen blackjack_monika():
     vbox:
         xalign 0.5
         spacing 15
         if minigame_monika.total > 21:
             label _("Busted!") xalign 0.5
+        elif bj_game_quit:
+            label _("End") xalign 0.5
         elif bj_current_turn == "monika":
             label _("My Turn~") xalign 0.5
         elif not all(minigame_monika.revealed):
@@ -143,6 +129,8 @@ screen blackjack_player():
         spacing 15
         if minigame_player.total > 21:
             label _("Busted!") xalign 0.5
+        elif bj_game_quit:
+            label _("End") xalign 0.5
         elif bj_current_turn == "player":
             if minigame_player.total >= 17 and minigame_player.total < 21:
                 label _("Careful!") xalign 0.5
@@ -151,7 +139,8 @@ screen blackjack_player():
         elif bj_player_stand:
             label _("Standing") xalign 0.5
         else:
-            label _("Waiting...") xalign 0.5
+            label _("Done") xalign 0.5
+            
         hbox:
             spacing 10
             for index, card in enumerate(minigame_player.hand):
@@ -180,6 +169,7 @@ screen blackjack_stats():
 default bj_current_turn = "player"
 default bj_player_stand = False
 default bj_monika_stand = False
+default bj_game_quit = False
 
 label blackjack_start:
     show monika 1hub at t11
@@ -224,6 +214,7 @@ label blackjack_start:
             $ bj_player_stand = False
             $ bj_monika_stand = False
             $ bj_current_turn = "player"
+            $ bj_game_quit = False
 
             # Reparto inicial
             $ minigame_player.draw_card(minigame_deck)
@@ -240,7 +231,7 @@ label blackjack_start:
             while not game_over:
                 if bj_current_turn == "player":
                     $ bj_result = ui.interact()
-                    
+
                     if bj_result == "hit":
                         $ minigame_player.draw_card(minigame_deck)
                         if minigame_player.total >= 21 or len(minigame_player.hand) == 5:
@@ -324,6 +315,7 @@ label blackjack_results:
 
 label BJ_quit_game:
     $ game_over = True
+    $ bj_game_quit = True
     $ bj_current_turn = "monika"
     if blackjack_player_wins > blackjack_monika_wins:
         m "You finished way ahead! I'm impressed, you're a natural at this."
@@ -348,6 +340,7 @@ label BJ_quit_game:
     hide screen blackjack_ui
     $ blackjack_monika_wins = 0
     $ blackjack_player_wins = 0
+    $ seen_notification_games = False
     call spaceroom(scene_change=True)
     jump close_extraplus
     return

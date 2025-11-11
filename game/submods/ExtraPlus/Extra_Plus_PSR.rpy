@@ -71,6 +71,7 @@ label minigame_rps:
 
 label rps_loop:
     $ monika_choice_val = renpy.random.randint(1, 3)
+    $ renpy.restart_interaction()
     $ player_choice = extra_rps_choices[rps_your_choice - 1]
     $ monika_choice = extra_rps_choices[monika_choice_val - 1]
 
@@ -201,7 +202,6 @@ label rps_result:
             m 1eka "I thought he wanted to play with me for a while..."
             m 3hua "But don't worry, I know you have changed your mind and are not in the mood to play."
             m 3hub "So I hope we can play another time!"
-            $ persistent.psr_result_game = [False, False, False]
             python:
                 extra_moni_wins = 0
                 extra_player_wins = 0
@@ -235,5 +235,6 @@ label rps_result:
     python:
         extra_moni_wins = 0
         extra_player_wins = 0
+        seen_notification_games = False
     jump close_extraplus
     return

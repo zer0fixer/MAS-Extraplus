@@ -26,7 +26,7 @@ label monika_boopbeta:
     elif persistent.plus_boop[0] == 3:
         m 1eublb "Can you do it again, [mas_get_player_nickname()]?"
         show monika 1hubla
-        call screen boop_event(10, "boop_nop", "boop_yep")
+        call screen extra_boop_event(10, "boop_nop", "boop_yep")
     elif persistent.plus_boop[0] == 4:
         m 1etbsa "Wouldn't it be nice to do it with your nose?"
         if persistent._mas_first_kiss:
@@ -146,6 +146,7 @@ label boop_yep:
     return
 
 label monika_boopbeta_war: # This label is called via alternate_action on the nose imagebutton
+    $ show_boop_feedback("War!")
     $ extra_seen_label("check_boopwarv2","check_boopwar")
 
 label check_boopwar:
@@ -171,8 +172,7 @@ label check_boopwar:
 
 label check_boopwarv2:
     show screen boop_war_score_ui
-    $ boop_war_active = True
-    call screen boop_event(20, "boopbeta_war_lose", "boopwar_loop")
+    call screen extra_boop_event(20, "boopbeta_war_lose", "boopwar_loop")
 
 label boopwar_loop:
     $ boop_war_count += 1
@@ -210,7 +210,7 @@ label boopwar_loop:
 
 label boopbeta_war_lose:
     hide screen boop_war_score_ui
-    $ boop_war_active = False
+    $ store.EP_interaction_manager.set_boop_war(False)
     m 1nua "Looks like I've won this boop war, [player]~"
     m "I hope I've been a good opponent."
     m 3hub "But I've also really enjoyed it!"
@@ -227,7 +227,7 @@ label boopbeta_war_lose:
 label boopbeta_war_win:
     $ boop_war_count = 0
     hide screen boop_war_score_ui
-    $ boop_war_active = False
+    $ store.EP_interaction_manager.set_boop_war(False)
     m 1hua "You've won this boop war, [player]!"
     m 1tub "I can tell you like touching my nose, ehehehe~"
     m 1eusdra "I couldn't keep up with you, but maybe next time we'll go further."
@@ -363,7 +363,7 @@ label extra_cheeks_dis:
         m 3hua "I really enjoyed doing this with you though!"
     $ boop_war_count = 0
     hide screen boop_war_score_ui
-    $ boop_war_active = False
+    $ store.EP_interaction_manager.set_boop_war(False)
     jump show_boop_screen
     return
 
@@ -472,6 +472,7 @@ label monika_headpatbeta:
     return
 
 label monika_headpat_long:
+    $ show_boop_feedback("Warm~")
     m 6dkbsa ".{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}{nw}"
     jump show_boop_screen
     return
@@ -490,13 +491,13 @@ label extra_headpat_dis:
         m 1lubsa "Even though I enjoy the pat on the head. Ehehehe~"
     $ boop_war_count = 0
     hide screen boop_war_score_ui
-    $ boop_war_active = False
+    $ store.EP_interaction_manager.set_boop_war(False)
     jump show_boop_screen
     return
 
 #====HANDS
 label monika_handsbeta:
-    #Change de expressions
+    #Change the expressions
     $ show_boop_feedback("Hehe~", color="#ffffff")
     $ persistent.extra_boop[0] += 1
     if persistent.extra_boop[0] == 1:
@@ -697,6 +698,103 @@ label monika_earsbeta:
 #===========================================================================================
 # EXTRAS
 #===========================================================================================
+label plus_make_gift:
+    show monika idle at t21
+    python:
+        gift_menu = [
+            (_("Create a .gift file"), 'plus_make_file'),
+            (_("Groceries"), 'plus_groceries'),
+            (_("Objects"), 'plus_objects'),
+            (_("Ribbons"), 'plus_ribbons')
+        ]
+
+        items = [(_("Nevermind"), 'extraplus_tools', 20)]
+    call screen extra_gen_list(gift_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+    return
+
+label plus_make_file:
+    show monika idle at t11
+
+    python:
+        makegift = mas_input(
+            prompt=_("Enter the name of the gift."),
+            allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789",
+            screen_kwargs={"use_return_button": True, "return_button_value": "cancel"},
+        )
+
+        if not makegift:
+            renpy.jump("plus_make_file")
+        elif makegift == "cancel":
+            renpy.jump("plus_make_gift")
+        else:
+            if create_gift_file(makegift):
+                renpy.notify(_("Done! Created '/characters/{}.gift'").format(makegift))
+                store.mas_checkReactions()
+            renpy.jump("plus_make_gift")
+            
+    return
+
+label plus_groceries:
+    show monika idle at t21
+    python:
+        groceries_menu = [
+            extra_gift(_("Coffee"), 'coffee'),
+            extra_gift(_("Chocolates"), 'chocolates'),
+            extra_gift(_("Cupcake"), 'cupcake'),
+            extra_gift(_("Fudge"), 'fudge'),
+            extra_gift(_("Hot Chocolate"), 'hotchocolate'),
+            extra_gift(_("Candy"), 'candy'),
+            extra_gift(_("Candy Canes"), 'candycane'),
+            extra_gift(_("Candy Corn"), 'candycorn'),
+            extra_gift(_("Christmas Cookies"), 'christmascookies')
+        ]
+
+        items = [(_("Nevermind"), 'plus_make_gift', 20)]
+    call screen extra_gen_list(groceries_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=True)
+    return
+
+label plus_objects:
+    show monika idle at t21
+    python:
+        objects_menu = [
+            extra_gift(_("Promise Ring"), 'promisering'),
+            extra_gift(_("Roses"), 'roses'),
+            extra_gift(_("Quetzal Plushie"), 'quetzalplushie'),
+            extra_gift(_("Thermos Mug"), 'justmonikathermos')
+        ]
+        if not mas_seenEvent("mas_reaction_gift_noudeck"):
+            objects_menu.append(extra_gift(_("NOU"), 'noudeck'))
+
+        items = [(_("Nevermind"), 'plus_make_gift', 20)]
+    call screen extra_gen_list(objects_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+    return
+            
+label plus_ribbons:
+    show monika idle at t21
+    python:
+        ribbons_menu = [
+            extra_gift(_("Black Ribbon"), 'blackribbon'),
+            extra_gift(_("Blue Ribbon"), 'blueribbon'),
+            extra_gift(_("Dark Purple Ribbon"), 'darkpurpleribbon'),
+            extra_gift(_("Emerald Ribbon"), 'emeraldribbon'),
+            extra_gift(_("Gray Ribbon"), 'grayribbon'),
+            extra_gift(_("Green Ribbon"), 'greenribbon'),
+            extra_gift(_("Light Purple Ribbon"), 'lightpurpleribbon'),
+            extra_gift(_("Peach Ribbon"), 'peachribbon'),
+            extra_gift(_("Pink Ribbon"), 'pinkribbon'),
+            extra_gift(_("Platinum Ribbon"), 'platinumribbon'),
+            extra_gift(_("Red Ribbon"), 'redribbon'),
+            extra_gift(_("Ruby Ribbon"), 'rubyribbon'),
+            extra_gift(_("Sapphire Ribbon"), 'sapphireribbon'),
+            extra_gift(_("Silver Ribbon"), 'silverribbon'),
+            extra_gift(_("Teal Ribbon"), 'tealribbon'),
+            extra_gift(_("Yellow Ribbon"), 'yellowribbon')
+        ]
+
+        items = [(_("Nevermind"), 'plus_make_gift', 20)]
+    call screen extra_gen_list(ribbons_menu, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, items, close=True)
+    return
+
 label extra_show_stats:
     show monika idle at t11
     call screen extraplus_stats_screen
@@ -978,249 +1076,240 @@ label maxwell_screen:
     jump extraplus_tools
     return
 
-# Etiqueta para iniciar el tester
-label extra_plus_button_tester_start:
-    show monika idle at t11
-    call screen extra_plus_button_tester_screen
-    return
-
-# Variable para guardar el texto del botón de forma persistente
-default persistent._mas_extraplus_button_text = None
-default persistent._mas_extraplus_button_last_update = None
-
-init python:
-    def get_dynamic_button_text():
-        """
-        Determina dinámicamente el texto del botón del submod.
-        El texto se mantiene consistente hasta que cambien las condiciones.
-        """
-        import datetime
-
-        # Si el texto dinámico está desactivado, devuelve el nombre estático.
-        if not persistent.extraplus_dynamic_button_text:
-            return "Extra+"
+# Test file to visualize the dynamic button names.
+# You can delete this file when you're done testing.
+# init python:
+#     # ============================================================
+#     # DYNAMIC BUTTON CONFIGURATION
+#     # ============================================================
+#     USE_TIME_OF_DAY_CHANGE = True  # Change to True for the text to change based on the time of day
+#     USE_DAILY_RESET = False  # Change to True for the text to change daily
+    
+    
+#     def _evaluate_current_conditions():
+#         """
+#         Evalúa TODAS las condiciones actuales UNA SOLA VEZ.
+#         Retorna un diccionario con los estados.
+#         """
+#         import datetime
         
-        # Generar una "clave" basada en las condiciones actuales
-        current_conditions = _get_button_conditions_key()
-        
-        # Si las condiciones cambiaron o no hay texto guardado, regenerar
-        if (persistent._mas_extraplus_button_last_update != current_conditions 
-            or persistent._mas_extraplus_button_text is None):
+#         conditions = {
+#             # Días especiales
+#             "is_monika_bday": mas_isMonikaBirthday(),
+#             "is_player_bday": mas_isplayer_bday(),
+#             "is_f14": mas_isF14(),
+#             "is_o31": mas_isO31(),
+#             "is_d25": mas_isD25(),
+#             "is_nye": mas_isNYE(),
             
-            # Generar nuevo texto
-            new_text = _generate_button_text()
+#             # Nivel de afecto (solo uno será True)
+#             "is_love": mas_isMoniLove(lower=False),
+#             "is_enamored": mas_isMoniEnamored(lower=False),
+#             "is_aff": mas_isMoniAff(lower=False),
+#             "is_happy": mas_isMoniHappy(lower=False),
+#             "is_normal": mas_isMoniNormal(lower=False),
+#             "is_upset": mas_isMoniUpset(lower=False),
+#             "is_distressed": mas_isMoniDis(lower=False),
+#             "is_broken": mas_isMoniBroken(lower=False),
             
-            # Guardar en persistent
-            persistent._mas_extraplus_button_text = new_text
-            persistent._mas_extraplus_button_last_update = current_conditions
+#             # Hora y fecha (opcional)
+#             "is_night": mas_isNightNow() if USE_TIME_OF_DAY_CHANGE else False,
+#             "date": str(datetime.date.today()) if USE_DAILY_RESET else None
+#         }
         
-        return persistent._mas_extraplus_button_text
+#         return conditions
     
     
-    def _get_button_conditions_key():
-        """
-        Genera una clave única basada en las condiciones actuales.
-        Solo cambia cuando cambian las condiciones importantes.
-        """
-        conditions = []
+#     def _build_conditions_key(conditions):
+#         """
+#         Construye una clave string única a partir de las condiciones evaluadas.
+#         """
+#         key_parts = []
         
-        # Días especiales (MÁXIMA PRIORIDAD)
-        if mas_isMonikaBirthday():
-            conditions.append("mbday")
-        elif mas_isplayer_bday():
-            conditions.append("pbday")
-        elif mas_isF14():
-            conditions.append("f14")
-        elif mas_isO31():
-            conditions.append("o31")
-        elif mas_isD25():
-            conditions.append("d25")
+#         # Días especiales
+#         if conditions["is_monika_bday"]:
+#             key_parts.append("mbday")
+#         elif conditions["is_player_bday"]:
+#             key_parts.append("pbday")
+#         elif conditions["is_f14"]:
+#             key_parts.append("f14")
+#         elif conditions["is_o31"]:
+#             key_parts.append("o31")
+#         elif conditions["is_d25"]:
+#             key_parts.append("d25")
+#         elif conditions["is_nye"]:
+#             key_parts.append("nye")
         
-        # Nivel de afecto (TODOS los niveles)
-        if mas_isMoniLove(lower=False):
-            conditions.append("love")
-        elif mas_isMoniEnamored(lower=False):
-            conditions.append("enamored")
-        elif mas_isMoniAff(lower=False):
-            conditions.append("aff")
-        elif mas_isMoniHappy(lower=False):
-            conditions.append("happy")
-        elif mas_isMoniNormal(lower=False):
-            conditions.append("normal")
-        elif mas_isMoniUpset(lower=False):
-            conditions.append("upset")
-        elif mas_isMoniDis(lower=False):
-            conditions.append("distressed")
-        elif mas_isMoniBroken(lower=False):
-            conditions.append("broken")
-        else:
-            conditions.append("unknown")
+#         # Nivel de afecto
+#         if conditions["is_love"]:
+#             key_parts.append("love")
+#         elif conditions["is_enamored"]:
+#             key_parts.append("enamored")
+#         elif conditions["is_aff"]:
+#             key_parts.append("aff")
+#         elif conditions["is_happy"]:
+#             key_parts.append("happy")
+#         elif conditions["is_normal"]:
+#             key_parts.append("normal")
+#         elif conditions["is_upset"]:
+#             key_parts.append("upset")
+#         elif conditions["is_distressed"]:
+#             key_parts.append("distressed")
+#         elif conditions["is_broken"]:
+#             key_parts.append("broken")
+#         else:
+#             key_parts.append("unknown")
         
-        # Hora del día (comenta estas líneas si no quieres que cambie por hora)
-        if mas_isNightNow():
-            conditions.append("night")
-        else:
-            conditions.append("day")
+#         # Opcionales
+#         if conditions["is_night"]:
+#             key_parts.append("night")
         
-        # Fecha actual (para resetear diariamente)
-        conditions.append(str(datetime.date.today()))
+#         if conditions["date"]:
+#             key_parts.append(conditions["date"])
         
-        return "-".join(conditions)
+#         return "-".join(key_parts)
     
     
-    def _generate_button_text():
-        """
-        Genera el texto del botón según las condiciones actuales.
-        SIN símbolos Unicode, solo texto ASCII.
-        """
-        # ============================================================
-        # 1. MÁXIMA PRIORIDAD: Días Especiales
-        # ============================================================
-        if mas_isMonikaBirthday():
-            return renpy.random.choice([
-                "B-Day",
-                "HerDay",
-                "Bday!",
-                "Party"
-            ])
+#     def _generate_button_text_from_conditions(conditions):
+#         """
+#         Genera el texto del botón usando las condiciones ya evaluadas.
+#         NO vuelve a llamar a funciones MAS.
+#         """
+#         is_night = conditions["is_night"]
         
-        if mas_isplayer_bday():
-            return renpy.random.choice([
-                "UrDay",
-                "YourDay",
-                "Ur Day",
-                "Party!"
-            ])
+#         # ============================================================
+#         # 1. MÁXIMA PRIORIDAD: Días Especiales
+#         # ============================================================
+#         if conditions["is_monika_bday"]:
+#             return renpy.random.choice(["My B-Day", "Her Day", "Sing 4 Me", "My Day", "Moni!"])
         
-        if mas_isF14():
-            return renpy.random.choice([
-                "Love",
-                "F14",
-                "ValDay",
-                "Hearts"
-            ])
+#         if conditions["is_player_bday"]:
+#             return renpy.random.choice(["Your Day", "HBD!", "Ur Day", "My Gift", "The Best"])
         
-        if mas_isO31():
-            return renpy.random.choice([
-                "Spooky",
-                "O31",
-                "Tricks",
-                "Treats"
-            ])
+#         if conditions["is_f14"]:
+#             return renpy.random.choice(["Be Mine", "My Love", "Hearts", "XOXO", "Our Day"])
         
-        if mas_isD25():
-            return renpy.random.choice([
-                "Xmas",
-                "D25",
-                "Holly",
-                "Noel"
-            ])
+#         if conditions["is_o31"]:
+#             return renpy.random.choice(["Spooky", "Boo!", "Tricks", "Treats", "Scary"])
         
-        # ============================================================
-        # 2. ALTA PRIORIDAD: Afecto Positivo Alto
-        # ============================================================
-        if mas_isMoniLove(lower=False):
-            return renpy.random.choice([
-                "Forever",
-                "4Ever",
-                "Always",
-                "Us",
-                "Eternal",
-                "Yours",
-                "MyLove",
-                "Beloved"
-            ])
+#         if conditions["is_d25"]:
+#             return renpy.random.choice(["Joyful", "Our Xmas", "Gift", "Noel", "Holly"])
         
-        if mas_isMoniEnamored(lower=False):
-            return renpy.random.choice([
-                "Close",
-                "Adore",
-                "Mine",
-                "Dear",
-                "Cherish",
-                "Sweet",
-                "Darling"
-            ])
+#         if conditions["is_nye"]:
+#             return renpy.random.choice(["New Year", "Cheers", "Toast", "Our Year", "The Eve"])
         
-        if mas_isMoniAff(lower=False):
-            return renpy.random.choice([
-                "Caring",
-                "Warm",
-                "Happy",
-                "JoyUs",
-                "Fond",
-                "Affec+"
-            ])
+#         # ============================================================
+#         # 2. ALTA PRIORIDAD: Afecto Positivo Alto
+#         # ============================================================
+#         if conditions["is_love"] or conditions["is_enamored"]:
+#             base_texts = ["Forever", "Eternity", "Sunshine", "Beloved", "Darling", "Adored", "Precious", "Cutie", "Sweetie", "Cherish"]
+            
+#             if is_night:
+#                 base_texts.extend(["Moonlight", "Stars", "Night Love", "Dreaming", "Starlight", "Night Dear", "Sleepy?", "Cuddle"])
+            
+#             return renpy.random.choice(base_texts)
         
-        # ============================================================
-        # 3. PRIORIDAD MEDIA: Afecto Normal/Neutral
-        # ============================================================
-        if mas_isMoniHappy(lower=False):
-            return renpy.random.choice([
-                "Good",
-                "Smile",
-                "Glad",
-                "Moni+",
-                "Nice"
-            ])
+#         if conditions["is_aff"] or conditions["is_happy"]:
+#             base_texts = ["So Sweet", "Caring", "Warmth", "Our Time", "Smile", "Glad", "Hehe~", "Happy", "Cheerful", "Yay!"]
+            
+#             if is_night:
+#                 base_texts.extend(["Night Time", "Calm", "Peaceful", "Night!", "Evening", "Restful", "Nice Night"])
+            
+#             return renpy.random.choice(base_texts)
         
-        if mas_isMoniNormal(lower=False):
-            return renpy.random.choice([
-                "You+",
-                "Moni",
-                "JustUs",
-                "Chibi",
-                "Plus+"
-            ])
+#         if conditions["is_normal"] or conditions["is_upset"]:
+#             base_texts = ["Hi again", "Welcome", "Talk?", "On Mind?", "Topics", "Just Us", "Relax", "It's you", "Hurting", "Really?"]
+            
+#             if is_night:
+#                 base_texts.extend(["Sparks", "Sleepy", "Quiet", "Dreams", "Cozy", "Dark...", "Restless", "Tired..."])
+            
+#             return renpy.random.choice(base_texts)
         
-        # ============================================================
-        # 4. PRIORIDAD BAJA: Afecto Negativo
-        # ============================================================
-        if mas_isMoniUpset(lower=False):
-            return renpy.random.choice([
-                "Maybe",
-                "Hope",
-                "Try",
-                "No..",
-                "Please"
-            ])
+#         if conditions["is_distressed"] or conditions["is_broken"]:
+#             base_texts = ["No Love?", "Forgot?", "Alone...", "Please...", "...", "You...", "Scared", "Sorry", "Nothing"]
+            
+#             if is_night:
+#                 base_texts.extend(["Awake...", "Lonely", "Dark Night", "Tears...", "Darkness", "Void", "Cold...", "End..."])
+            
+#             return renpy.random.choice(base_texts)
         
-        if mas_isMoniDis(lower=False):
-            return renpy.random.choice([
-                "Sorry",
-                "Waiting",
-                "You..",
-                "???"
-            ])
+#         # ============================================================
+#         # 5. FALLBACK DE SEGURIDAD
+#         # ============================================================
+#         return "Extra+"
+
+# screen extra_plus_button_tester_screen():
+#     zorder 200 # Asegura que se vea por encima de todo
+#     # style_prefix "scrollable_menu"
+#     style_prefix "hkb"
+
+#     # Fondo semitransparente para enfocar la atención
+#     add Solid("#000000b0")
+
+#     # Muestra los botones de prueba en la misma posición que el original
+#     hbox:
+#         xpos 0.01
+#         yanchor 1.0
+#         ypos 650 # Posición Y del botón original
+#         spacing 10
+
+#         # --- Lista de todos los nombres a probar ---
+#         python:
+#             button_names_to_test = [
+#                 # Special Days
+#                 "My B-Day", "Her Day", "Sing 4 Me", "My Day", "Moni!",
+#                 "Your Day", "HBD!", "Ur Day", "My Gift", "The Best",
+#                 "Be Mine", "My Love", "Hearts", "XOXO", "Our Day",
+#                 "Spooky", "Boo!", "Tricks", "Treats", "Scary",
+#                 "Joyful", "Our Xmas", "Gift", "Noel", "Holly",
+#                 "New Year", "Cheers", "Toast", "Our Year", "Countdown",
+#                 # Love & Enamored
+#                 "Forever", "Eternity", "Sunshine", "Beloved", "Darling", "Adored",
+#                 "Precious", "Cutie", "Sweetie", "Cherish",
+#                 # Love & Enamored (Night)
+#                 "Moonlight", "Stars", "Night Love", "Dreaming", "Starlight",
+#                 "Night Dear", "Sleepy?", "Cuddle",
+#                 # Affectionate & Happy
+#                 "So Sweet", "Caring", "Warmth", "Our Time", "Smile", "Glad",
+#                 "Hehe~", "Happy", "Cheerful", "Yay!",
+#                 # Affectionate & Happy (Night)
+#                 "Night Time", "Calm", "Peaceful", "Night!", "Evening", "Restful", "Nice Night",
+#                 # Normal & Upset
+#                 "Hi again", "Welcome", "Talk?", "On Mind?", "Topics", "Just Us",
+#                 "Relax", "It's you", "Hurting", "Really?",
+#                 # Normal & Upset (Night)
+#                 "Sparks", "Sleepy", "Quiet", "Dreams", "Cozy", "Dark...", "Restless", "Tired...",
+#                 # Distressed & Broken
+#                 "No Love?", "Forgot?", "Alone...", "Please...", "...", "You...",
+#                 "Scared", "Sorry", "Nothing",
+#                 # Distressed & Broken (Night)
+#                 "Awake...", "Lonely", "Dark Night", "Tears...", "Darkness", "Void", "Cold...", "End..."
+#             ]
         
-        if mas_isMoniBroken(lower=False):
-            return renpy.random.choice([
-                "...",
-                "Why?",
-                "Help"
-            ])
-        
-        # ============================================================
-        # 5. BASADO EN HORA (Si no hay condiciones especiales)
-        # ============================================================
-        if mas_isNightNow():
-            return renpy.random.choice([
-                "Night",
-                "Stars",
-                "Moon",
-                "Dreams",
-                "Twilit"
-            ])
-        
-        # ============================================================
-        # 6. FALLBACK FINAL (Por defecto)
-        # ============================================================
-        return renpy.random.choice([
-            "You++",
-            "Love++",
-            "Moni+",
-            "JustUs",
-            "Chibi!",
-            "Plus+",
-            "MoniX"
-        ])
+#         # --- Lógica para dividir la lista en columnas de 10 ítems cada una ---
+#         python:
+#             items_per_column = 15
+#             total_items = len(button_names_to_test)
+#             num_columns = (total_items + items_per_column - 1) // items_per_column
+            
+#             columns = []
+#             for i in range(num_columns):
+#                 start = i * items_per_column
+#                 end = start + items_per_column
+#                 columns.append(button_names_to_test[start:end])
+#         for column_items in columns:
+#             vbox:
+#                 for name in column_items:
+#                     textbutton _(name) action NullAction()
+
+#     # Botón para cerrar el tester
+#     vbox:
+#         xalign 0.5 
+#         yalign 0.95
+#         textbutton _("Cerrar Tester") action Jump("close_extraplus")
+
+# # Etiqueta para iniciar el tester
+# label extra_plus_button_tester_start:
+#     show monika idle at t11
+#     call screen extra_plus_button_tester_screen
+#     return

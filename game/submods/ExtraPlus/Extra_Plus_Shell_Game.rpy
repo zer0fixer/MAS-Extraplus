@@ -34,7 +34,7 @@ default sg_plus_comment = False
 default sg_cup_choice = None
 define sg_cup_coordinates = [695, 925, 1155]
 default sg_cup_coordinates_real = [695, 925, 1155]
-define sg_cup_list = ["cup.png", "monika.png", "yuri.png", "natsuki.png", "sayori.png"]
+define -5 sg_cup_list = ["cup.png", "monika.png", "yuri.png", "natsuki.png", "sayori.png"]
 default sg_cup_skin = None
 
 label minigame_sg:
@@ -354,5 +354,7 @@ label shell_game_result:
         sg_correct_answers = 0 # Reset for next session
         sg_target_shuffles = 6
         sg_shuffle_cups = 0
+        seen_notification_games = False
+        
     jump close_extraplus
     return
