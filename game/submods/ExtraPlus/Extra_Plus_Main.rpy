@@ -117,9 +117,10 @@ define tools_menu = []
 define walk_menu = []
 
 #====Misc
-default persistent.extraplus_dynamic_button_text = False
-default persistent._extraplus_button_text = None
-default persistent._extraplus_button_last_update = None
+default persistent.EP_dynamic_button_text = False
+default persistent.EP_button_conditions_key = None
+default persistent.EP_button_text = None
+default persistent.EP_button_last_update = None
 default last_affection_notify_time = 0
 default stop_snike_time = False
 default games_idle_timer = 600
@@ -195,7 +196,7 @@ init 5 python:
                 [
                     MASMoniIdleExpRngGroup(
                         [
-                                    MASMoniIdleExp("6rktpc", duration=(5, 10)), # Replaces 6rktp
+                            MASMoniIdleExp("6rktpc", duration=(5, 10)), # Replaces 6rktp
                             MASMoniIdleExp("6lktpc", duration=(5, 10))
                         ],
                         max_uses=4
@@ -514,8 +515,8 @@ init 5 python:
     import time
     import datetime
 
-    USE_TIME_OF_DAY_CHANGE = True  # Set to True for the text to change according to the time
-    USE_DAILY_RESET = False  # Set to True for the text to change every day
+    # USE_TIME_OF_DAY_CHANGE = True  # Set to True for the text to change according to the time
+    # USE_DAILY_RESET = False  # Set to True for the text to change every day
     
     def _show_idle_notification(context=""):
         """
@@ -599,13 +600,10 @@ init 5 python:
             "is_distressed": mas_isMoniDis(lower=False),
             "is_broken": mas_isMoniBroken(lower=False),
 
-            # Time and date (optional)
-            "is_night": mas_isNightNow() if USE_TIME_OF_DAY_CHANGE else False,
-            "date": str(datetime.date.today()) if USE_DAILY_RESET else None
+            "is_night": mas_isNightNow()
         }
 
         return conditions
-
 
     def _build_conditions_key(conditions):
         """
@@ -650,13 +648,8 @@ init 5 python:
         # Optionals
         if conditions["is_night"]:
             key_parts.append("night")
-        
-        if conditions["date"]:
-            key_parts.append(conditions["date"])
-        
         return "-".join(key_parts)
-    
-    
+
     def _button_text_from_conditions(conditions):
         """
         Generates the button text using the already evaluated conditions.
@@ -665,7 +658,7 @@ init 5 python:
         is_night = conditions["is_night"]
         
         # ============================================================
-        # 1. HIGHEST PRIORITY: Special Days
+        # 1. HIGHEST PRIORITY
         # ============================================================
         if conditions["is_monika_bday"]:
             return renpy.random.choice(["My B-Day", "Her Day", "Sing 4 Me", "My Day", "Moni!"])
@@ -686,7 +679,7 @@ init 5 python:
             return renpy.random.choice(["New Year", "Cheers", "Toast", "Our Year", "The Eve"])
         
         # ============================================================
-        # 2. HIGH PRIORITY: High Positive Affection
+        # 2. HIGH PRIORITY
         # ============================================================
         if conditions["is_love"] or conditions["is_enamored"]:
             base_texts = ["Forever", "Eternity", "Sunshine", "Beloved", "Darling", "Adored", "Precious", "Cutie", "Sweetie", "Cherish"]
@@ -721,7 +714,7 @@ init 5 python:
             return renpy.random.choice(base_texts)
         
         # ============================================================
-        # 5. SAFETY FALLBACK
+        # 3. SAFETY FALLBACK
         # ============================================================
         return "Extra+"
 
@@ -733,25 +726,29 @@ init 5 python:
         import datetime
 
         # If dynamic text is disabled, return the static name
-        if not persistent.extraplus_dynamic_button_text:
+        if not persistent.EP_dynamic_button_text:
             return "Extra+"
         
         # Evaluate current conditions ONCE
         conditions = _evaluate_current_conditions()
+        today_str = str(datetime.date.today())
         conditions_key = _build_conditions_key(conditions)
         
-        # If conditions changed or there is no saved text, regenerate
-        if (persistent._extraplus_button_last_update != conditions_key 
-            or persistent._extraplus_button_text is None):
-            
+        # Regenerate text if it's a new day, if other conditions changed,
+        # or if there's no text saved yet.
+        # The date check (`today_str`) makes the daily reset explicit.
+        if (persistent.EP_button_last_update != today_str
+            or persistent.EP_button_conditions_key != conditions_key
+            or persistent.EP_button_text is None):
             # Generate new text using the already evaluated conditions
             new_text = _button_text_from_conditions(conditions)
             
             # Save to persistent
-            persistent._extraplus_button_text = new_text
-            persistent._extraplus_button_last_update = conditions_key
+            persistent.EP_button_text = new_text # The new text
+            persistent.EP_button_last_update = today_str # The date of the last update
+            persistent.EP_button_conditions_key = conditions_key # The conditions of the last update
         
-        return persistent._extraplus_button_text
+        return persistent.EP_button_text
 
     def show_boop_feedback(message, color="#ff69b4"):
         """
@@ -1908,7 +1905,7 @@ screen _extra_plus_submod_settings():
         xmaximum 1000
 
         textbutton _("{b}Enable dynamic button text{/b}"):
-            action ToggleField(persistent, "extraplus_dynamic_button_text")
+            action ToggleField(persistent, "EP_dynamic_button_text")
             hovered tooltip.Action("If enabled, the submod button text will change based on affection, events, or time of day. If disabled, it will always say 'Extra+'.")
 
         textbutton _("{b}Check for missing files{/b}"):
