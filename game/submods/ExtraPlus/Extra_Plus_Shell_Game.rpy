@@ -2,6 +2,8 @@
 # MINIGAME#1
 #===========================================================================================
 #====Shell Game
+default persistent.sg_max_score = 0
+
 image extra_sg_cup:
     xanchor 0.5 yanchor 0.5
     contains:
@@ -20,22 +22,51 @@ image extra_sg_ball:
     contains:
         "extra_ball"
         xalign 0.5 yalign 0.5
-        
-default persistent.sg_max_score = 0
-default sg_target_shuffles = 4
-define sg_original_cup = [0, 1, 2]
-default sg_ball_position = 1
-default sg_current_turn = 1
-default sg_shuffle_cups = 0
-default sg_cup_speed = 0.9 
-define difficulty_sg = 1 #1-Easy, 2-Normal, 3-Hard, 4-Progressive
-default sg_correct_answers = 0
-default sg_plus_comment = False
-default sg_cup_choice = None
-define sg_cup_coordinates = [695, 925, 1155]
-default sg_cup_coordinates_real = [695, 925, 1155]
-define -5 sg_cup_list = ["cup.png", "monika.png", "yuri.png", "natsuki.png", "sayori.png"]
-default sg_cup_skin = None
+
+init -5 python in ep_sg:
+    target_shuffles = 4
+    ball_position = 1
+    current_turn = 1
+    shuffle_cups = 0
+    cup_speed = 0.9 
+    difficulty = 1 #1-Easy, 2-Normal, 3-Hard, 4-Progressive
+    correct_answers = 0
+    comment = False
+    cup_choice = None
+    cup_skin = None
+    original_cup = [0, 1, 2]
+    cup_coordinates = [695, 925, 1155]
+    cup_coordinates_real = [695, 925, 1155]
+    CUP_LIST = ["cup.png", "monika.png", "yuri.png", "natsuki.png", "sayori.png"]
+    #====Comments by moni on standard difficulties
+    _compliments = [
+        _("Well done, [player]!"),
+        _("Impressive, keep it up!"),
+        _("You're doing great!"),
+        _("Fantastic, [player]!"),
+        _("Keep it up!"),
+        _("You're making progress!"),
+        _("Bravo, [player]!"),
+        _("Outstanding, [player]!"),
+        _("Way to go, [player]!"),
+        _("Keep up the good work, [player]!"),
+        _("You're doing fantastic!"),
+        _("You're doing amazing!"),
+    ]
+    _failures = [
+        _("Oh, too bad~"),
+        _("It's not that, [player]."),
+        _("Try again~"),
+        _("Don't get distracted, [player]."),
+        _("Keep practicing, [player]."),
+        _("You'll get it next time!"),
+        _("Better luck next try, [player]."),
+        _("Don't give up, [player]!"),
+        _("That's not quite it, [player]."),
+        _("That wasn't the right answer, [player]."),
+        _("Sorry, [player], that's not it."),
+        _("Not quite, try focusing a bit more!")
+    ]
 
 label minigame_sg:
     show monika 1eub at t11
@@ -62,36 +93,36 @@ label minigame_sg:
             m 1eua "Feeling like taking it easy, [player]? "
             extend 1hua "Alright!"
             python:
-                sg_cup_speed = 0.85
-                difficulty_sg = 1
-                sg_target_shuffles = 4
+                ep_sg.cup_speed = 0.85
+                ep_sg.difficulty = 1
+                ep_sg.target_shuffles = 4
         "Normal":
             m 3eub "Want to start with a casual game? "
             extend 3hub "Sounds good!"
             python:
-                sg_cup_speed = 0.5
-                difficulty_sg = 2
-                sg_target_shuffles = 6
+                ep_sg.cup_speed = 0.5
+                ep_sg.difficulty = 2
+                ep_sg.target_shuffles = 6
         "Hard":
             m 3etb "Feeling confident, are we?"
             m 1hub "Ahaha, I like that! Let's do it!"
             python:
-                sg_cup_speed = 0.25
-                difficulty_sg = 3
-                sg_target_shuffles = 8
+                ep_sg.cup_speed = 0.25
+                ep_sg.difficulty = 3
+                ep_sg.target_shuffles = 8
         "Progressive":
             m 1ttb "A challenge, huh? I like your spirit!"
             m 1hub "Let's start easy and get harder as we go!"
             python:
-                sg_cup_speed = 0.7
-                difficulty_sg = 4
-                sg_target_shuffles = 3
+                ep_sg.cup_speed = 0.7
+                ep_sg.difficulty = 4
+                ep_sg.target_shuffles = 3
 
     python:
         disable_button_zoom()
         # Reset stats for a new game session
-        store.sg_current_turn = 1
-        store.sg_correct_answers = 0
+        ep_sg.current_turn = 1
+        ep_sg.correct_answers = 0
 
 label sg_init_game:
     $ config.allow_skipping = False
@@ -99,23 +130,23 @@ label sg_init_game:
     pause 0.2
 
     show extra_sg_cup zorder 12 as cup_1:
-        xpos sg_cup_coordinates[0] ypos -400
+        xpos ep_sg.cup_coordinates[0] ypos -400
         easein_bounce 0.5 ypos 250
 
     show extra_sg_cup zorder 12 as cup_2:
-        xpos sg_cup_coordinates[1] ypos -400
+        xpos ep_sg.cup_coordinates[1] ypos -400
         pause 0.1
         easein_bounce 0.5 ypos 250
 
     show extra_sg_cup zorder 12 as cup_3:
-        xpos sg_cup_coordinates[2] ypos -400
+        xpos ep_sg.cup_coordinates[2] ypos -400
         pause 0.2
         easein_bounce 0.5 ypos 250
 
     pause 1.0
 
     show extra_sg_ball zorder 12 behind cup_2:
-        xpos sg_cup_coordinates[1] ypos 335
+        xpos ep_sg.cup_coordinates[1] ypos 335
 
     show extra_sg_cup as cup_2:
         linear 0.5 ypos 110
@@ -130,24 +161,24 @@ label sg_init_game:
     hide extra_sg_ball
 
     show extra_sg_cup as cup_1:
-        xpos sg_cup_coordinates[0] ypos 250
+        xpos ep_sg.cup_coordinates[0] ypos 250
 
     show extra_sg_cup as cup_2:
-        xpos sg_cup_coordinates[1] ypos 250
+        xpos ep_sg.cup_coordinates[1] ypos 250
 
     show extra_sg_cup as cup_3:
-        xpos sg_cup_coordinates[2] ypos 250
+        xpos ep_sg.cup_coordinates[2] ypos 250
 
     python:
-        sg_cup_coordinates_real[0] = 695
-        sg_cup_coordinates_real[1] = 925
-        sg_cup_coordinates_real[2] = 1155
+        ep_sg.cup_coordinates_real[0] = 695
+        ep_sg.cup_coordinates_real[1] = 925
+        ep_sg.cup_coordinates_real[2] = 1155
 
-        sg_original_cup[0] = 0
-        sg_original_cup[1] = 1
-        sg_original_cup[2] = 2
+        ep_sg.original_cup[0] = 0
+        ep_sg.original_cup[1] = 1
+        ep_sg.original_cup[2] = 2
 
-        sg_ball_position = 1
+        ep_sg.ball_position = 1
         disable_esc()
         mas_MUMURaiseShield()
         afm_pref = renpy.game.preferences.afm_enable
@@ -160,30 +191,30 @@ label sg_loop_game:
     python:
         move_cup_1, move_cup_2 = renpy.random.sample(range(3), 2)
 
-        temp_cup_position = sg_cup_coordinates_real[move_cup_2]
-        sg_cup_coordinates_real[move_cup_2] = sg_cup_coordinates_real[move_cup_1]
-        sg_cup_coordinates_real[move_cup_1] = temp_cup_position
+        temp_cup_position = ep_sg.cup_coordinates_real[move_cup_2]
+        ep_sg.cup_coordinates_real[move_cup_2] = ep_sg.cup_coordinates_real[move_cup_1]
+        ep_sg.cup_coordinates_real[move_cup_1] = temp_cup_position
 
-        if sg_ball_position == move_cup_1:
-            sg_ball_position = move_cup_2
-        elif sg_ball_position == move_cup_2:
-            sg_ball_position = move_cup_1
+        if ep_sg.ball_position == move_cup_1:
+            ep_sg.ball_position = move_cup_2
+        elif ep_sg.ball_position == move_cup_2:
+            ep_sg.ball_position = move_cup_1
 
-    $ renpy.pause(sg_cup_speed, hard='True')
+    $ renpy.pause(ep_sg.cup_speed, hard='True')
 
     play sound sfx_cup_shuffle
 
     show extra_sg_cup as cup_1:
-        ease sg_cup_speed xpos sg_cup_coordinates_real[0]
+        ease ep_sg.cup_speed xpos ep_sg.cup_coordinates_real[0]
 
     show extra_sg_cup as cup_2:
-        ease sg_cup_speed xpos sg_cup_coordinates_real[1]
+        ease ep_sg.cup_speed xpos ep_sg.cup_coordinates_real[1]
 
     show extra_sg_cup as cup_3:
-        ease sg_cup_speed xpos sg_cup_coordinates_real[2]
+        ease ep_sg.cup_speed xpos ep_sg.cup_coordinates_real[2]
 
-    if sg_shuffle_cups != (sg_target_shuffles - 1):
-        $ sg_shuffle_cups += 1
+    if ep_sg.shuffle_cups != (ep_sg.target_shuffles - 1):
+        $ ep_sg.shuffle_cups += 1
         jump sg_loop_game
 
     pause 1.0
@@ -197,53 +228,53 @@ label sg_check_label:
     hide screen shell_game_minigame
 
     show extra_sg_cup as cup_1:
-        xpos sg_cup_coordinates[0] ypos 250
+        xpos ep_sg.cup_coordinates[0] ypos 250
 
     show extra_sg_cup as cup_2:
-        xpos sg_cup_coordinates[1] ypos 250
+        xpos ep_sg.cup_coordinates[1] ypos 250
 
     show extra_sg_cup as cup_3:
-        xpos sg_cup_coordinates[2] ypos 250
+        xpos ep_sg.cup_coordinates[2] ypos 250
     python:
-        store.sg_cup_coordinates_real[0] = 695
-        store.sg_cup_coordinates_real[1] = 925
-        store.sg_cup_coordinates_real[2] = 1155
+        ep_sg.cup_coordinates_real[0] = 695
+        ep_sg.cup_coordinates_real[1] = 925
+        ep_sg.cup_coordinates_real[2] = 1155
         cup_dialogues = ["left", "middle", "right"]
-        chosen_cup_dialogue = cup_dialogues[sg_cup_choice]
+        chosen_cup_dialogue = cup_dialogues[ep_sg.cup_choice]
 
     m 1eub "You chose the [chosen_cup_dialogue] cup..."
 
-    call sg_reveal_cup(sg_cup_choice, is_chosen=True)
+    call sg_reveal_cup(ep_sg.cup_choice, is_chosen=True)
 
-    if sg_plus_comment:
-        m 1sub "[renpy.substitute(renpy.random.choice(_plus_complies))]"
+    if ep_sg.comment:
+        m 1sub "[renpy.substitute(renpy.random.choice(ep_sg._compliments))]"
     else:
-        m 1hub "[renpy.substitute(renpy.random.choice(_plus_not_met))]"
+        m 1hub "[renpy.substitute(renpy.random.choice(ep_sg._failures))]"
 
-    if sg_cup_choice != sg_ball_position:
+    if ep_sg.cup_choice != ep_sg.ball_position:
         m 1lub "The correct cup was..."
-        call sg_reveal_cup(sg_ball_position, is_chosen=False)
+        call sg_reveal_cup(ep_sg.ball_position, is_chosen=False)
         m 1hua "This!"
 
     show extra_sg_cup as cup_1:
-        linear 0.5 xpos sg_cup_coordinates[0] ypos 250
+        linear 0.5 xpos ep_sg.cup_coordinates[0] ypos 250
 
     show extra_sg_cup as cup_2:
-        linear 0.5 xpos sg_cup_coordinates[1] ypos 250
+        linear 0.5 xpos ep_sg.cup_coordinates[1] ypos 250
 
     show extra_sg_cup as cup_3:
-        linear 0.5 xpos sg_cup_coordinates[2] ypos 250
+        linear 0.5 xpos ep_sg.cup_coordinates[2] ypos 250
 
     pause 1.0
 
     hide extra_sg_ball
     python:
-        store.sg_current_turn += 1
-        store.sg_shuffle_cups = 0
-        store.sg_ball_position = 1
-        if difficulty_sg == 4 and sg_current_turn % 6 == 0:
-            store.sg_cup_speed = max(0.15, sg_cup_speed - 0.05)
-            store.sg_target_shuffles += 1
+        ep_sg.current_turn += 1
+        ep_sg.shuffle_cups = 0
+        ep_sg.ball_position = 1
+        if ep_sg.difficulty == 4 and ep_sg.current_turn % 6 == 0:
+            ep_sg.cup_speed = max(0.15, ep_sg.cup_speed - 0.05)
+            ep_sg.target_shuffles += 1
     jump sg_loop_game
     return
 
@@ -251,24 +282,24 @@ label sg_reveal_cup(cup_index, is_chosen):
     if cup_index == 0:
         show extra_sg_cup as cup_1:
             linear 0.5 ypos 110
-        if cup_index == sg_ball_position:
+        if cup_index == ep_sg.ball_position:
             show extra_sg_ball zorder 12 behind cup_1:
-                xpos sg_cup_coordinates[0] ypos 335
+                xpos ep_sg.cup_coordinates[0] ypos 335
     elif cup_index == 1:
         show extra_sg_cup as cup_2:
             linear 0.5 ypos 110
-        if cup_index == sg_ball_position:
+        if cup_index == ep_sg.ball_position:
             show extra_sg_ball zorder 12 behind cup_2:
-                xpos sg_cup_coordinates[1] ypos 335
+                xpos ep_sg.cup_coordinates[1] ypos 335
     elif cup_index == 2:
         show extra_sg_cup as cup_3:
             linear 0.5 ypos 110
-        if cup_index == sg_ball_position:
+        if cup_index == ep_sg.ball_position:
             show extra_sg_ball zorder 12 behind cup_3:
-                xpos sg_cup_coordinates[2] ypos 335
+                xpos ep_sg.cup_coordinates[2] ypos 335
 
-    if is_chosen and cup_index == sg_ball_position:
-        $ sg_correct_answers += 1
+    if is_chosen and cup_index == ep_sg.ball_position:
+        $ ep_sg.correct_answers += 1
     return
 
 #===========================================================================================
@@ -278,20 +309,20 @@ label sg_reveal_cup(cup_index, is_chosen):
 label shell_game_result:
     hide screen score_minigame
     python:
-        new_high_score = (sg_correct_answers > persistent.sg_max_score)
+        new_high_score = (ep_sg.correct_answers > persistent.sg_max_score)
         enable_esc()
         mas_MUMUDropShield()
         renpy.game.preferences.afm_enable = afm_pref
     hide extra_sg_ball
     show extra_sg_cup as cup_1:
-        xpos sg_cup_coordinates[0] ypos 250
+        xpos ep_sg.cup_coordinates[0] ypos 250
         easeout_expo 0.5 ypos -400
     show extra_sg_cup as cup_2:
-        xpos sg_cup_coordinates[1] ypos 250
+        xpos ep_sg.cup_coordinates[1] ypos 250
         pause 0.1
         easeout_expo 0.5 ypos -400
     show extra_sg_cup as cup_3:
-        xpos sg_cup_coordinates[2] ypos 250
+        xpos ep_sg.cup_coordinates[2] ypos 250
         pause 0.2
         easeout_expo 0.5 ypos -400
 
@@ -303,24 +334,24 @@ label shell_game_result:
     show monika at t11
 
     #The player didn't play any rounds.
-    if sg_current_turn == 1 and sg_correct_answers == 0:
+    if ep_sg.current_turn == 1 and ep_sg.correct_answers == 0:
         m 1hka "You didn't want to play after all?"
         m 1eua "That's okay, maybe you'll be in the mood next time."
         m 1dub "I'll be here waiting for you, [player]."
 
     #The player didn't get any correct.
-    elif sg_correct_answers == 0:
+    elif ep_sg.correct_answers == 0:
         m 1eka "[player], are you feeling alright?"
-        m 1ekb "We played for [sg_current_turn] rounds and you didn't get any of them right."
+        m 1ekb "We played for [ep_sg.current_turn] rounds and you didn't get any of them right."
         m 1etd "Were you a little distracted, maybe?"
-        if difficulty_sg == 4: # Dialogue for Progressive
+        if ep_sg.difficulty == 4: # Dialogue for Progressive
             m 3eka "That progressive mode can be tricky at first. The speed really ramps up!"
             m 3hua "Don't worry about it, I'm sure you'll get the hang of it."
         else:
             m 1hua "It's okay, everyone has off-days. Let's do something that cheers you up!"
 
     #Perfect score!
-    elif sg_correct_answers == sg_current_turn:
+    elif ep_sg.correct_answers == ep_sg.current_turn:
         m 2sub "Wow, a perfect score! You got every single one right!"
         if new_high_score:
             m 1hubsa "And it's a new high score! Congratulations, [player]! I'm so proud of you."
@@ -332,29 +363,29 @@ label shell_game_result:
     else:
         m 1eua "That was a good run, [player]!"
         if new_high_score:
-            m 1hubsb "You set a new record of [sg_correct_answers]! That's awesome!"
+            m 1hubsb "You set a new record of [ep_sg.correct_answers]! That's awesome!"
             m 1eua "Even with a few slip-ups, you still managed to beat your best score. That's real progress!"
         else:
-            m 1hua "You got [sg_correct_answers] correct. You did a great job!"
-            if difficulty_sg == 4: # Dialogue for Progressive
+            m 1hua "You got [ep_sg.correct_answers] correct. You did a great job!"
+            if ep_sg.difficulty == 4: # Dialogue for Progressive
                 m 3hua "Keeping up with the progressive speed is tough, but you held on for a long time!"
             else:
                 m 3hub "It's just a matter of practice. I know you'll beat your record of [persistent.sg_max_score] soon!"
 
     m 1hubsa "Well, thank you for playing with me. I had a lot of fun!"
-    if sg_current_turn > 50:
+    if ep_sg.current_turn > 50:
         m 3eka "And also, please rest your eyes for a bit. We played for quite a while..."
         m 1dub "I always get concerned about your health, you know~"
 
     window hide
     python:
-        if sg_correct_answers > persistent.sg_max_score:
-            persistent.sg_max_score = sg_correct_answers
-        sg_current_turn = 0
-        sg_correct_answers = 0 # Reset for next session
-        sg_target_shuffles = 6
-        sg_shuffle_cups = 0
-        seen_notification_games = False
+        if ep_sg.correct_answers > persistent.sg_max_score:
+            persistent.sg_max_score = ep_sg.correct_answers
+        ep_sg.current_turn = 0
+        ep_sg.correct_answers = 0 # Reset for next session
+        ep_sg.target_shuffles = 6
+        ep_sg.shuffle_cups = 0
+        ep_tools.seen_notification_games = False
         
     jump close_extraplus
     return

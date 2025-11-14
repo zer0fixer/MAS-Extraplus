@@ -2,160 +2,165 @@
 # MINIGAME#2
 #===========================================================================================
 #====Tic-Tac-Toe
+default persistent.ttt_result_game = [False, False, False] #Player, Monika and Tie. Quit [FFF]
+
+init -5 python in ep_ttt:
+    game = None
+    colors = [
+        "'",
+        "#0142a4",
+        "0",
+        "#a80000"
+    ]
+
 image ttt_cross:
-    Text(Minigame_TTT[0],
-        font = ep_pictograms_font,
+    Text(ep_ttt.colors[0],
+        font = ep_tools.pictograms_font,
         size = 180,
-        color = Minigame_TTT[1],
+        color = ep_ttt.colors[1],
         outlines = []
     )
     on show:
         alpha 0.5
         linear 0.25 alpha 1.0
 image ttt_cross_cursor:
-    Text(Minigame_TTT[0],
-        font = ep_pictograms_font,
+    Text(ep_ttt.colors[0],
+        font = ep_tools.pictograms_font,
         size = 180,
-        color = Minigame_TTT[1],
+        color = ep_ttt.colors[1],
         outlines = []
     )
     alpha 0.25
     truecenter
 image ttt_circle:
-    Text(Minigame_TTT[2],
-        font = ep_pictograms_font,
+    Text(ep_ttt.colors[2],
+        font = ep_tools.pictograms_font,
         size = 180,
-        color = Minigame_TTT[3],
+        color = ep_ttt.colors[3],
         outlines = []
     )
     on show:
         alpha 0.0
         linear 0.25 alpha 1.0
-default persistent.ttt_result_game = [False, False, False] #Player, Monika and Tie. Quit [FFF]
-default -5 Minigame_TTT = [
-    "'",
-    "#0142a4",
-    "0",
-    "#a80000"
-]
 
-init 10 python:
-    def ttt_prep(self, restart = False, *args, **kwargs):
-        self.field = [None] * 9
-        self.playerTurn = True
-        self.state = 0
+init 10 python in ep_ttt:
+    import store
 
-        if not restart:
+    class TicTacToeGame(object):
+        def __init__(self):
+            self.field = [None] * 9
+            self.playerTurn = True
+            self.state = 0
             self.score = [0, 0]
 
-            def ttt_check_line(id):
-                t_ids = None
-                if id == 1:
-                    t_ids = [0, 4, 8]
-                elif id == 2:
-                    t_ids = [2, 4, 6]
-                elif id < 6:
-                    id -= 3
-                    t_ids = [id, id + 3, id + 6]
+        def check_line(self, id):
+            t_ids = None
+            if id == 1:
+                t_ids = [0, 4, 8]
+            elif id == 2:
+                t_ids = [2, 4, 6]
+            elif id < 6:
+                id -= 3
+                t_ids = [id, id + 3, id + 6]
+            else:
+                ti = (id-6) * 3
+                t_ids = [ti, ti + 1, ti + 2]
+
+            clt, crt = 0, 0
+            for i in t_ids:
+                i = self.field[i]
+                if i is True:
+                    crt += 1
+                elif i is False:
+                    clt += 1
+            return clt, crt, t_ids
+
+        def new_state(self):
+            for i in range(1, 9):
+                clt, crt = self.check_line(i)[:2]
+                if clt == 3:
+                    return i
+                elif crt == 3:
+                    return -i
+
+            for i in self.field:
+                if i is None:
+                    return 0
+            return 9
+
+        def turn(self, i):
+            if self.state == 0 and self.field[i] is None:
+                self.field[i] = self.playerTurn
+                self.playerTurn = not self.playerTurn
+
+                if self.playerTurn: # If playerTurn is True, it means the *previous* turn was Monika's (circle)
+                    renpy.play(store.sfx_ttt_circle, "sound")
+                else: # If playerTurn is False, it means the *previous* turn was Player's (cross)
+                    renpy.play(store.sfx_ttt_cross, "sound")
+
+                self.state = self.new_state()
+                self.check_state()
+                if not self.playerTurn:
+                    renpy.call_in_new_context("minigame_ttt_m_turn")
+
+        def check_state(self):
+            if self.state != 0:
+                if abs(self.state) < 9:
+                    renpy.call_in_new_context("minigame_ttt_m_comment", self.state < 0)
+                    self.restart_round(winner = self.state < 0)
+                elif self.state == -9:
+                    renpy.call_in_new_context("minigame_ttt_m_comment", 3)
+                    self.restart_round(winner = 0)
                 else:
-                    ti = (id-6) * 3
-                    t_ids = [ti, ti + 1, ti + 2]
+                    renpy.call_in_new_context("minigame_ttt_m_comment", 2)
+                    self.restart_round()
 
-                clt, crt = 0, 0
-                for i in t_ids:
-                    i = ttt.field[i]
-                    if i is True:
-                        crt += 1
-                    elif i is False:
-                        clt += 1
-                return clt, crt, t_ids
+        def ai(self):
+            w_lines, l_lines, f_lines = [], [], []
 
-            def ttt_new_state():
-                for i in range(1, 9):
-                    clt, crt = ttt_check_line(i)[:2]
-                    if clt == 3:
-                        return i
-                    elif crt == 3:
-                        return -i
+            for i in range(1, 9):
+                # --- AI Improvement: Strategic Opening Moves ---
+                # If board is empty, take a corner
+                if all(tile is None for tile in self.field):
+                    return self.turn(renpy.random.choice([0, 2, 6, 8]))
 
-                for i in ttt.field:
-                    if i is None:
-                        return 0
-                return 9
+                # If player didn't take center on first move, take it
+                if self.field.count(True) == 1 and self.field[4] is None:
+                    return self.turn(4)
 
-            def ttt_turn(i):
-                if ttt.state == 0 and ttt.field[i] is None:
-                    ttt.field[i] = ttt.playerTurn
-                    ttt.playerTurn = not ttt.playerTurn
+                # --- Original AI Logic ---
+                clt, crt, line = self.check_line(i)
+                if clt == 2 and crt == 0:
+                    w_lines.append(line)
+                elif crt == 2 and clt == 0:
+                    l_lines.append(line)
+                elif clt > 0 and crt == 0:
+                    f_lines.append(line)
 
-                    if ttt.playerTurn: # If playerTurn is True, it means the *previous* turn was Monika's (circle)
-                        renpy.play(sfx_ttt_circle, "sound")
-                    else: # If playerTurn is False, it means the *previous* turn was Player's (cross)
-                        renpy.play(sfx_ttt_cross, "sound")
+            if len(w_lines):
+                line = renpy.random.choice(w_lines)
+                for i in line:
+                    if self.field[i] is None:
+                        return self.turn(i)
+            if len(l_lines):
+                line = renpy.random.choice(l_lines)
+                for i in line:
+                    if self.field[i] is None:
+                        return self.turn(i)
+            if len(f_lines):
+                line = renpy.random.choice(f_lines)
+                possible_moves = list(filter(lambda x: self.field[x] is None, line))
+                return self.turn(renpy.random.choice(possible_moves))
+            else:
+                possible_moves = list(filter(lambda x: self.field[x] is None, range(9)))
+                return self.turn(renpy.random.choice(possible_moves))
 
-                    ttt.state = ttt_new_state()
-                    ttt_check_state()
-                    if not ttt.playerTurn:
-                        renpy.call_in_new_context("minigame_ttt_m_turn")
-
-            def ttt_check_state():
-                if ttt.state != 0:
-                    if abs(ttt.state) < 9:
-                        renpy.call_in_new_context("minigame_ttt_m_comment", ttt.state < 0)
-                        ttt(restart = True, winner = ttt.state < 0)
-                    elif ttt.state == -9:
-                        renpy.call_in_new_context("minigame_ttt_m_comment", 3)
-                        ttt(restart = True, winner = 0)
-                    else:
-                        renpy.call_in_new_context("minigame_ttt_m_comment", 2)
-                        ttt(restart = True)
-
-            def ttt_ai():
-                w_lines, l_lines, f_lines = [], [], []
-
-                for i in range(1, 9):
-                    # --- AI Improvement: Strategic Opening Moves ---
-                    # If board is empty, take a corner
-                    if all(tile is None for tile in ttt.field):
-                        return ttt_turn(renpy.random.choice([0, 2, 6, 8]))
-
-                    # If player didn't take center on first move, take it
-                    if ttt.field.count(True) == 1 and ttt.field[4] is None:
-                        return ttt_turn(4)
-
-                    # --- Original AI Logic ---
-                    clt, crt, line = ttt_check_line(i)
-                    if clt == 2 and crt == 0:
-                        w_lines.append(line)
-                    elif crt == 2 and clt == 0:
-                        l_lines.append(line)
-                    elif clt > 0 and crt == 0:
-                        f_lines.append(line)
-
-                if len(w_lines):
-                    line = renpy.random.choice(w_lines)
-                    for i in line:
-                        if ttt.field[i] is None:
-                            return ttt_turn(i)
-                if len(l_lines):
-                    line = renpy.random.choice(l_lines)
-                    for i in line:
-                        if ttt.field[i] is None:
-                            return ttt_turn(i)
-                if len(f_lines):
-                    line = renpy.random.choice(f_lines)
-                    possible_moves = list(filter(lambda x: ttt.field[x] is None, line))
-                    return ttt_turn(renpy.random.choice(possible_moves))
-                else:
-                    possible_moves = list(filter(lambda x: ttt.field[x] is None, range(9)))
-                    return ttt_turn(renpy.random.choice(possible_moves))
-
-            self.new_state, self.check_state = ttt_new_state, ttt_check_state
-            self.check_line, self.turn, self.ai = ttt_check_line, ttt_turn, ttt_ai
-
-        elif not kwargs.get("winner") is None:
-            w = kwargs['winner']
-            self.score[int(w)] += 1
+        def restart_round(self, winner=None):
+            self.field = [None] * 9
+            self.playerTurn = True
+            self.state = 0
+            if winner is not None:
+                self.score[int(winner)] += 1
 
 screen ttt_score():
     hbox:
@@ -163,19 +168,19 @@ screen ttt_score():
         ypos 0.900
         spacing 100
 
-        text "[m_name]: " + str(ttt.score[0]) style "monika_text":
-            if not ttt.playerTurn:
+        text "[m_name]: " + str(ep_ttt.game.score[0]) style "monika_text":
+            if not ep_ttt.game.playerTurn:
                 color "#a80000"
 
         # Marcador del Jugador
-        text "[player]: " + str(ttt.score[1]) style "monika_text":
-            if ttt.playerTurn:
+        text "[player]: " + str(ep_ttt.game.score[1]) style "monika_text":
+            if ep_ttt.game.playerTurn:
                 color "#0142a4"
     vbox:
         xpos 0.05
         yanchor 2.0
         ypos 300
-        textbutton _("I give up") style "hkb_button" action [SetField(ttt, "state", -9), Function(ttt.check_state)]
+        textbutton _("I give up") style "hkb_button" action [SetField(ep_ttt.game, "state", -9), Function(ep_ttt.game.check_state)]
         null height 6
         textbutton _("Quit") style "hkb_button" action [Hide("minigame_ttt_scr"), Jump("minigame_ttt_quit")]
 
@@ -188,9 +193,10 @@ screen minigame_ttt_scr():
     key "h" action NullAction()
     key "mouseup_3" action NullAction()
     use ttt_score
-    timer games_idle_timer action If(ttt.playerTurn, Function(_show_idle_notification, context="ttt")) repeat True
     layer "master"
     zorder 50
+    if ep_ttt.game.playerTurn:
+        timer ep_tools.games_idle_timer action Function(_show_idle_notification, context="ttt") repeat True
 
     python:
         from math import sqrt
@@ -201,12 +207,12 @@ screen minigame_ttt_scr():
 
     for x in range(3):
         for y in range(3):
-            $i, p = ttt.field[3 * y + x], (595 + 192 * (x+1), 188 * (y+1))
+            $i, p = ep_ttt.game.field[3 * y + x], (595 + 192 * (x+1), 188 * (y+1))
             if i is True:
                 add "ttt_cross" anchor (0.5, 0.5) pos p
             elif i is False:
                 add "ttt_circle" anchor (0.5, 0.5) pos p
-            if ttt.state == 0 and ttt.playerTurn:
+            if ep_ttt.game.state == 0 and ep_ttt.game.playerTurn:
                 button:
                     background None
                     pos p
@@ -216,11 +222,11 @@ screen minigame_ttt_scr():
                         hover_background "ttt_cross_cursor"
                     keyboard_focus i is None
                     keysym 'K_KP' + str(3 * (2-x) + y + 1)
-                    action Function(ttt.turn, 3 * y + x)
+                    action Function(ep_ttt.game.turn, 3 * y + x)
 
-            if ttt.state != 0:
-                $ color = ttt.state > 0 and 'moni' or 'player'
-                $ state = abs(ttt.state)
+            if ep_ttt.game.state != 0:
+                $ color = ep_ttt.game.state > 0 and 'moni' or 'player'
+                $ state = abs(ep_ttt.game.state)
                 if state < 3:
                     add "extra_line_"+color anchor (0.5, 0.5) xzoom diag_sc yzoom sc rotate (90 * state - 45) pos (980, 360) # / Fix
                 elif state < 6:
@@ -228,13 +234,10 @@ screen minigame_ttt_scr():
                 else:
                     add "extra_line_"+color anchor (0.5, 0.5) zoom sc pos (982, 192 * state - 984) # - Fix
 
-
-
 #====Label
 label minigame_ttt:
     python:
-        ttt = extra_minigames(_("Tic Tac Toe"), None, ttt_prep)
-        ttt()
+        ep_ttt.game = ep_ttt.TicTacToeGame()
     show extra_notebook zorder 12 at animated_book
     pause 0.5
     # Very first time playing
@@ -276,7 +279,7 @@ label minigame_ttt_m_turn:
     python:
         randTime = renpy.random.triangular(0.25, 2)
         renpy.pause(randTime)
-        ttt.ai()
+        ep_ttt.game.ai()
     pause 0.25
     return
 
@@ -288,11 +291,11 @@ label minigame_ttt_m_comment(id = 0):
     show monika 1hua at t21
     if id == 0:
         #Monika Wins
-        $ extra_plus_random_outcome = renpy.random.randint(0, 2)
-        if extra_plus_random_outcome == 0:
+        $ ep_tools.random_outcome = renpy.random.randint(0, 2)
+        if ep_tools.random_outcome == 0:
             m 3hua "Well, I won this game."
             m 3hub "You should think on a better strategy next time!"
-        elif extra_plus_random_outcome == 1:
+        elif ep_tools.random_outcome == 1:
             m 1sub "Three in a row!"
             m 1huu "Try again~"
         else:
@@ -300,8 +303,8 @@ label minigame_ttt_m_comment(id = 0):
             m 4hua "I know that you'll win next time."
         #Player Wins
     elif id == 1:
-        $ extra_plus_random_outcome = renpy.random.randint(0, 1)
-        if extra_plus_random_outcome == 0:
+        $ ep_tools.random_outcome = renpy.random.randint(0, 1)
+        if ep_tools.random_outcome == 0:
             m 1suo "Great [player], you win!"
             m 1suo "Next time I will try my best to win, so be prepared."
         else:
@@ -309,8 +312,8 @@ label minigame_ttt_m_comment(id = 0):
             m 1eub "But I'll try to beat you, [mas_get_player_nickname()]!"
         #Tie
     elif id == 2:
-        $ extra_plus_random_outcome = renpy.random.randint(0, 1)
-        if extra_plus_random_outcome == 0:
+        $ ep_tools.random_outcome = renpy.random.randint(0, 1)
+        if ep_tools.random_outcome == 0:
             m 1lkb "Oh, the page is full."
             m 1eub "Let's try again, [mas_get_player_nickname()]!"
         else:
@@ -320,7 +323,7 @@ label minigame_ttt_m_comment(id = 0):
         
         #Reset
     else:
-        if ttt.score[0] == 0 and ttt.score[1] == 0:
+        if ep_ttt.game.score[0] == 0 and ep_ttt.game.score[1] == 0:
             m 1ekd "Giving up on the first round? Are you sure?"
             m 1eka "Alright, if you say so. I'll take the point for this one, then."
         else:
@@ -335,8 +338,8 @@ label minigame_ttt_quit:
     pause 0.3
     show monika 1hua at t11
     # Tie
-    if ttt.score[0] == ttt.score[1]:
-        if ttt.score[0] == 0 and ttt.score[1] == 0:
+    if ep_ttt.game.score[0] == ep_ttt.game.score[1]:
+        if ep_ttt.game.score[0] == 0 and ep_ttt.game.score[1] == 0:
             m 3esa "Oh, changing your mind?"
             m 3lkb "I was looking forward to playing with you... but I understand."
             m 1hua "We can always play another time!"
@@ -347,19 +350,19 @@ label minigame_ttt_quit:
             $ persistent.ttt_result_game[2] = True
 
     # Monika wins
-    elif ttt.score[0] > ttt.score[1]:
+    elif ep_ttt.game.score[0] > ep_ttt.game.score[1]:
         m 3hua "Looks like I get the win this time, [player]~"
         m 3eubsa "You put up a great fight, though. The most important thing is that we had fun together."
         m 1eub "I'm sure you'll get me next time!"
         $ persistent.ttt_result_game[1] = True
 
     # Player wins
-    elif ttt.score[0] < ttt.score[1]:
+    elif ep_ttt.game.score[0] < ep_ttt.game.score[1]:
         m 1hub "You won, [player]! Congratulations!"
         m 1subsa "I knew you were a great strategist. I'm proud of you~"
         m 3hua "I'll have to try even harder next time!"
         $ persistent.ttt_result_game[0] = True
 
-    $ seen_notification_games = False
+    $ ep_tools.seen_notification_games = False
     jump close_extraplus
     return

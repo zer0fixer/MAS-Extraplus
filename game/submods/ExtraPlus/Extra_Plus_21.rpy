@@ -2,11 +2,30 @@
 # MINIGAME#4
 #===========================================================================================
 #====Blackjack-21
-default blackjack_player_wins = 0
-default blackjack_monika_wins = 0
 default persistent.blackjack_win_game = [False, False, False] #Player, Monika and Tie. Quit [FFF]
+init -5 python in ep_bj:
+    player_wins = 0
+    monika_wins = 0
+    current_turn = "player"
+    player_stand = False
+    monika_stand = False
+    game_quit = False
+    comment = renpy.random.choice([
+        _("Playing it safe? I see. My turn, then!"),
+        _("You're confident with your hand. Let's see if it pays off."),
+        _("Alright, you're standing. Let's see how I do against your score."),
+        _("Okay, locking in your score. Here I go!"),
+        _("Standing with that hand? You must be feeling lucky. Let's see if your luck holds out!"),
+        _("You think that's enough to beat me? We'll see about that! Ehehe~"),
+        _("Stopping there? You're either very brave or very smart. Time for me to find out which!"),
+        _("Putting the pressure on me, huh? I like a good challenge!"),
+        _("A strategic choice. You're setting the bar for me to clear."),
+        _("Okay, you're holding. That gives me a target to aim for."),
+        _("Alright, you're all set. I hope you've got a great score!"),
+        _("You've made your move. Let's see what the deck has in store for me!")
+    ])
 
-init python:
+init python in ep_bj:
     import random
     class BJ_Card(object):
         def __init__(self, suit, value):
@@ -80,8 +99,8 @@ screen blackjack_ui:
     use blackjack_stats()
     add "bj_name_plate" pos (548, 33) anchor (0, 0) zoom 0.7
     add "bj_name_plate" pos (548, 375) anchor (0, 0) zoom 0.7
-    if bj_current_turn == "player":
-        timer games_idle_timer action Function(_show_idle_notification, context="bj") repeat True
+    if ep_bj.current_turn == "player":
+        timer ep_tools.games_idle_timer action Function(_show_idle_notification, context="bj") repeat True
 
     fixed:
         xalign 0.5 ypos 0.05
@@ -101,9 +120,11 @@ screen blackjack_monika():
         spacing 15
         if minigame_monika.total > 21:
             label _("Busted!") xalign 0.5
-        elif bj_game_quit:
+        elif minigame_player.total > 21:
+            label _("Sorry~") xalign 0.5
+        elif ep_bj.game_quit:
             label _("End") xalign 0.5
-        elif bj_current_turn == "monika":
+        elif ep_bj.current_turn == "monika":
             label _("My Turn~") xalign 0.5
         elif not all(minigame_monika.revealed):
             label _("Waiting...") xalign 0.5
@@ -129,14 +150,14 @@ screen blackjack_player():
         spacing 15
         if minigame_player.total > 21:
             label _("Busted!") xalign 0.5
-        elif bj_game_quit:
+        elif ep_bj.game_quit:
             label _("End") xalign 0.5
-        elif bj_current_turn == "player":
+        elif ep_bj.current_turn == "player":
             if minigame_player.total >= 17 and minigame_player.total < 21:
                 label _("Careful!") xalign 0.5
             else:
                 label _("Your Turn") xalign 0.5
-        elif bj_player_stand:
+        elif ep_bj.player_stand:
             label _("Standing") xalign 0.5
         else:
             label _("Done") xalign 0.5
@@ -154,22 +175,17 @@ screen blackjack_player():
 screen blackjack_stats():
     style_prefix "hkb"
     add "bj_notescore" pos (5, 350) anchor (0, 0) zoom 0.6 at score_rotate_left
-    text _("[m_name]: [blackjack_monika_wins]") style "monika_text" size 25 pos (80, 380) anchor (0, 0.5) at score_rotate_left
-    text _("[player]: [blackjack_player_wins]") style "monika_text" size 25 pos (100, 420) anchor (0, 0.5) at score_rotate_left
+    text _("[m_name]: [ep_bj.monika_wins]") style "monika_text" size 25 pos (80, 380) anchor (0, 0.5) at score_rotate_left
+    text _("[player]: [ep_bj.player_wins]") style "monika_text" size 25 pos (100, 420) anchor (0, 0.5) at score_rotate_left
     vbox:
         xalign 0.950
         ypos 0.450
         textbutton _("Hit"):
-            action If(bj_current_turn == "player" and len(minigame_player.hand) < 5, Return("hit"))
+            action If(ep_bj.current_turn == "player" and len(minigame_player.hand) < 5, Return("hit"))
         textbutton _("Stand"):
-            action If(bj_current_turn == "player", Return("stand"))
+            action If(ep_bj.current_turn == "player", Return("stand"))
         textbutton _("Quit"):
-            action If(bj_current_turn == "player", Return("quit"))
-
-default bj_current_turn = "player"
-default bj_player_stand = False
-default bj_monika_stand = False
-default bj_game_quit = False
+            action If(ep_bj.current_turn == "player", Return("quit"))
 
 label blackjack_start:
     show monika 1hub at t11
@@ -202,19 +218,19 @@ label blackjack_start:
     window hide
     $ HKBHideButtons()
     $ disable_esc()
-    $ minigame_deck = BJ_Deck()
-    $ minigame_player = BJ_Player(player)
-    $ minigame_monika = BJ_Monika(m_name)
+    $ minigame_deck = ep_bj.BJ_Deck()
+    $ minigame_player = ep_bj.BJ_Player(player)
+    $ minigame_monika = ep_bj.BJ_Monika(m_name)
 
     label bj_game_loop:
         while True:
             $ game_over = False
             $ minigame_player.reset_hand()
             $ minigame_monika.reset_hand()
-            $ bj_player_stand = False
-            $ bj_monika_stand = False
-            $ bj_current_turn = "player"
-            $ bj_game_quit = False
+            $ ep_bj.player_stand = False
+            $ ep_bj.monika_stand = False
+            $ ep_bj.current_turn = "player"
+            $ ep_bj.game_quit = False
 
             # Reparto inicial
             $ minigame_player.draw_card(minigame_deck)
@@ -229,7 +245,7 @@ label blackjack_start:
             show screen blackjack_ui
             
             while not game_over:
-                if bj_current_turn == "player":
+                if ep_bj.current_turn == "player":
                     $ bj_result = ui.interact()
 
                     if bj_result == "hit":
@@ -238,24 +254,10 @@ label blackjack_start:
                             $ game_over = True
                         
                     elif bj_result == "stand":
-                        $ bj_player_stand = True
-                        $ bj_current_turn = "monika"
+                        $ ep_bj.player_stand = True
+                        $ ep_bj.current_turn = "monika"
                         python:
-                            comment = renpy.random.choice([
-                                _("Playing it safe? I see. My turn, then!"),
-                                _("You're confident with your hand. Let's see if it pays off."),
-                                _("Alright, you're standing. Let's see how I do against your score."),
-                                _("Okay, locking in your score. Here I go!"),
-                                _("Standing with that hand? You must be feeling lucky. Let's see if your luck holds out!"),
-                                _("You think that's enough to beat me? We'll see about that! Ehehe~"),
-                                _("Stopping there? You're either very brave or very smart. Time for me to find out which!"),
-                                _("Putting the pressure on me, huh? I like a good challenge!"),
-                                _("A strategic choice. You're setting the bar for me to clear."),
-                                _("Okay, you're holding. That gives me a target to aim for."),
-                                _("Alright, you're all set. I hope you've got a great score!"),
-                                _("You've made your move. Let's see what the deck has in store for me!")
-                            ])
-                            renpy.say(m, comment)
+                            renpy.say(m, ep_bj.comment)
 
                     elif bj_result == "quit":
                         jump BJ_quit_game
@@ -267,36 +269,36 @@ label blackjack_start:
                         if minigame_monika.total >= 21 or len(minigame_monika.hand) == 5:
                             $ game_over = True
                     else:
-                        $ bj_monika_stand = True
+                        $ ep_bj.monika_stand = True
 
                 $ renpy.restart_interaction()
 
-                if game_over or (bj_player_stand and bj_monika_stand):
+                if game_over or (ep_bj.player_stand and ep_bj.monika_stand):
                     $ game_over = True
             
             jump blackjack_results
 
 label blackjack_results:
-    $ bj_current_turn = "monika"
+    $ ep_bj.current_turn = "monika"
     $ minigame_monika.revealed = [True] * len(minigame_monika.hand)
     $ player_total = minigame_player.total
     $ monika_total = minigame_monika.total
 
     if player_total == 21 and len(minigame_player.hand) == 2:
         m "A perfect 21! You've got a real talent for this, [player]!"
-        $ blackjack_player_wins += 1
+        $ ep_bj.player_wins += 1
 
     elif monika_total == 21 and len(minigame_monika.hand) == 2:
         m "Blackjack! Looks like I got lucky this time. Ehehe~"
-        $ blackjack_monika_wins += 1
+        $ ep_bj.monika_wins += 1
 
     elif player_total > 21:
         m "Oh, you went over. That's a tough break. Don't worry, it happens!"
-        $ blackjack_monika_wins += 1
+        $ ep_bj.monika_wins += 1
 
     elif monika_total > 21 and player_total <= 21:
         m "Ah, I busted. Looks like this round goes to you. Well played!"
-        $ blackjack_player_wins += 1
+        $ ep_bj.player_wins += 1
 
     elif player_total == monika_total:
         m "It's a push! We have the exact same score. We really are in sync, aren't we?"
@@ -304,10 +306,10 @@ label blackjack_results:
     else:
         if player_total > monika_total:
             m "You win this round! Nice job staying cool under pressure."
-            $ blackjack_player_wins += 1
+            $ ep_bj.player_wins += 1
         else:
             m "Looks like my hand was just a little bit better. I win this one!"
-            $ blackjack_monika_wins += 1
+            $ ep_bj.monika_wins += 1
 
     window hide
     pause 1
@@ -315,17 +317,17 @@ label blackjack_results:
 
 label BJ_quit_game:
     $ game_over = True
-    $ bj_game_quit = True
-    $ bj_current_turn = "monika"
-    if blackjack_player_wins > blackjack_monika_wins:
+    $ ep_bj.game_quit = True
+    $ ep_bj.current_turn = "monika"
+    if ep_bj.player_wins > ep_bj.monika_wins:
         m "You finished way ahead! I'm impressed, you're a natural at this."
         m "Thanks for playing with me, I had a lot of fun. Let's do this again soon!"
         $ persistent.blackjack_win_game[0] = True
-    elif blackjack_player_wins < blackjack_monika_wins:
+    elif ep_bj.player_wins < ep_bj.monika_wins:
         m "I ended up with more wins, but you put up a great fight!"
         m "I'm sure you'll beat me next time. Thanks for playing with me, [player]!"
         $ persistent.blackjack_win_game[1] = True
-    elif blackjack_player_wins == blackjack_monika_wins and blackjack_player_wins > 0:
+    elif ep_bj.player_wins == ep_bj.monika_wins and ep_bj.player_wins > 0:
         m "Wow, we ended with a perfect tie. It seems we're evenly matched!"
         m "That was a lot of fun. We'll have to play again sometime to find the true winner~"
         $ persistent.blackjack_win_game[2] = True
@@ -338,9 +340,9 @@ label BJ_quit_game:
     $ HKBShowButtons()
     window hide
     hide screen blackjack_ui
-    $ blackjack_monika_wins = 0
-    $ blackjack_player_wins = 0
-    $ seen_notification_games = False
+    $ ep_bj.monika_wins = 0
+    $ ep_bj.player_wins = 0
+    $ ep_tools.seen_notification_games = False
     call spaceroom(scene_change=True)
     jump close_extraplus
     return

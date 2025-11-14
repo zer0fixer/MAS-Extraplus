@@ -1,6 +1,11 @@
 ################################################################################
 ## BOOP
 ################################################################################
+#====Boop count
+default persistent.plus_boop = [0, 0, 0] #Nose, Cheeks, Headpat.
+default persistent.extra_boop = [0, 0, 0] #Hands, Ears.
+default ep_boop_war_active = False
+default ep_boop_war_count = 0
 
 #====NOISE
 label monika_boopbeta:
@@ -94,38 +99,38 @@ label monika_boopbeta:
         m 1hub "..."
         m 1hubsb "Maybe with another boop?"
     else:
-        $ extra_plus_random_outcome = renpy.random.randint(1,15)
-        if extra_plus_random_outcome == 1:
+        $ ep_tools.random_outcome = renpy.random.randint(1,15)
+        if ep_tools.random_outcome == 1:
             m 2fubla "Ehehe~"
             m 1hubla "It's very inevitable that you won't stop doing it, [player]."
-        elif extra_plus_random_outcome == 2:
+        elif ep_tools.random_outcome == 2:
             m 3ekbsa "Every boop you give me, the more I love you!"
-        elif extra_plus_random_outcome == 3:
+        elif ep_tools.random_outcome == 3:
             m 3eubla "You really enjoy touching my nose, [mas_get_player_nickname()]~"
-        elif extra_plus_random_outcome == 4:
+        elif ep_tools.random_outcome == 4:
             m 2hublb "Hey, you're tickling me! Ahahaha~"
-        elif extra_plus_random_outcome == 5:
+        elif ep_tools.random_outcome == 5:
             m 1hubsb "*Boop*"
-        elif extra_plus_random_outcome == 6:
+        elif ep_tools.random_outcome == 6:
             m 1eublc "You're such a tease, [player]~"
-        elif extra_plus_random_outcome == 7:
+        elif ep_tools.random_outcome == 7:
             m 2eubla "That tickles, but I like it!"
-        elif extra_plus_random_outcome == 8:
+        elif ep_tools.random_outcome == 8:
             m 2hubsb "You know just how to make me smile, [mas_get_player_nickname()]~"
-        elif extra_plus_random_outcome == 9:
+        elif ep_tools.random_outcome == 9:
             m 1fubla "Hehe, you're so cute when you're booping me~"
-        elif extra_plus_random_outcome == 10:
+        elif ep_tools.random_outcome == 10:
             m 3eublb "You're really good at this, [player]! Have you been practicing?"
         # === Dialogues added in Beta 3 ===
-        elif extra_plus_random_outcome == 11:
+        elif ep_tools.random_outcome == 11:
             m 1wua "Got me!"
-        elif extra_plus_random_outcome == 12:
+        elif ep_tools.random_outcome == 12:
             m 1eua "Are you checking if I'm still here?"
-        elif extra_plus_random_outcome == 13:
+        elif ep_tools.random_outcome == 13:
             m 1hubsb "My nose says hello."
-        elif extra_plus_random_outcome == 14:
+        elif ep_tools.random_outcome == 14:
             m 1wud "I felt a tingle... Oh, it's you!"
-        elif extra_plus_random_outcome == 15:
+        elif ep_tools.random_outcome == 15:
             m 1fubla "The master booper strikes again!"
 
     jump show_boop_screen
@@ -175,15 +180,16 @@ label check_boopwarv2:
     call screen extra_boop_event(20, "boopbeta_war_lose", "boopwar_loop")
 
 label boopwar_loop:
-    $ boop_war_count += 1
-    if boop_war_count >= 100:
-        $ boop_war_count = 0
+    $ show_boop_feedback("Boop!")
+    $ ep_boop_war_count += 1
+    if ep_boop_war_count >= 100:
+        $ ep_boop_war_count = 0
         jump boopbeta_war_win
-    elif boop_war_count >= 50:
-        $ boop_war_count = 0
+    elif ep_boop_war_count >= 50:
+        $ ep_boop_war_count = 0
         jump boopbeta_war_win
-    elif boop_war_count >= 25:
-        $ boop_war_count = 0
+    elif ep_boop_war_count >= 25:
+        $ ep_boop_war_count = 0
         jump boopbeta_war_win
     python:
         boop_choices = [
@@ -214,18 +220,18 @@ label boopbeta_war_lose:
     m 1nua "Looks like I've won this boop war, [player]~"
     m "I hope I've been a good opponent."
     m 3hub "But I've also really enjoyed it!"
-    if boop_war_count >= 50:
+    if ep_boop_war_count >= 50:
         m 3dua "Besides, it's good to give your hand a little massage."
         m 1eka "I mean, if you use the mouse too much, "
         extend 1ekb "you can develop carpal tunnel syndrome and I don't want that."
         m 1hksdlb "I'm sorry if I've added a new concern, but my intention is to take care of you."
         m 1eubla "I hope you take my recommendation, [player]~"
-    $ boop_war_count = 0
+    $ ep_boop_war_count = 0
     jump show_boop_screen
     return
 
 label boopbeta_war_win:
-    $ boop_war_count = 0
+    $ ep_boop_war_count = 0
     hide screen boop_war_score_ui
     $ store.EP_interaction_manager.set_boop_war(False)
     m 1hua "You've won this boop war, [player]!"
@@ -317,31 +323,31 @@ label monika_cheeksbeta:
         m 2fubsa "Every caress is a little reminder of why I love you so much."
         m 2dkbsa "Please don't stop."
     else:
-        $ extra_plus_random_outcome = renpy.random.randint(1,10)
-        if extra_plus_random_outcome == 1:
+        $ ep_tools.random_outcome = renpy.random.randint(1,10)
+        if ep_tools.random_outcome == 1:
             m 2fua "Ehehe~"
             m 2hua "It would be nice if you used your hand instead of the cursor, but that's far from our reality..."
-        elif extra_plus_random_outcome == 2:
+        elif ep_tools.random_outcome == 2:
             m 2hubsa "So gentle."
             m 2tubsb "That word defines you well, when I think of you."
-        elif extra_plus_random_outcome == 3:
+        elif ep_tools.random_outcome == 3:
             m 2hubsa "What a warm feeling."
             m 2hublb "It will be hard to forget!"
-        elif extra_plus_random_outcome == 4:
+        elif ep_tools.random_outcome == 4:
             m 2nubsa "It would be even more romantic if you gave a kiss on the cheek~"
-        elif extra_plus_random_outcome == 5:
+        elif ep_tools.random_outcome == 5:
             m 2eubsb "I'm picturing us right now{nw}"
             extend 2dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3} how your hand will feel."
         # === Dialogues added in Beta 3 ===
-        elif extra_plus_random_outcome == 6:
+        elif ep_tools.random_outcome == 6:
             m 2fubsa "So warm..."
-        elif extra_plus_random_outcome == 7:
+        elif ep_tools.random_outcome == 7:
             m 2hubsb "Ehehe, hello~"
-        elif extra_plus_random_outcome == 8:
+        elif ep_tools.random_outcome == 8:
             m 2fubla "You're making me blush."
-        elif extra_plus_random_outcome == 9:
+        elif ep_tools.random_outcome == 9:
             m 2dkbsa "Don't stop..."
-        elif extra_plus_random_outcome == 10:
+        elif ep_tools.random_outcome == 10:
             m 2eubsb "I feel so loved right now."
     jump show_boop_screen
     return
@@ -351,17 +357,17 @@ label extra_cheeks_dis:
     m 3lusdrb "I mean..."
     m 3ttu "What are you doing touching my cheek?"
     m 3tsb "We're in a boop war, aren't we?"
-    $ extra_plus_random_outcome = renpy.random.randint(1,2)
-    if extra_plus_random_outcome == 1:
+    $ ep_tools.random_outcome = renpy.random.randint(1,2)
+    if ep_tools.random_outcome == 1:
         m 1dsb "I'm sorry [player], but I consider this cheating, "
         extend 1hua "that's why I win this war~"
         m 1fub "Next time try not to touch my cheek during the war! Ahahaha~"
-    elif extra_plus_random_outcome == 2:
+    elif ep_tools.random_outcome == 2:
         m 1fubsb "Because it's you, this time I will let it go!"
         m 1fubsb "Congratulations, player! You have beat me."
         m 3hksdrb "You've distracted me and I don't think it's worth continuing, ahahaha~"
         m 3hua "I really enjoyed doing this with you though!"
-    $ boop_war_count = 0
+    $ ep_boop_war_count = 0
     hide screen boop_war_score_ui
     $ store.EP_interaction_manager.set_boop_war(False)
     jump show_boop_screen
@@ -441,32 +447,32 @@ label monika_headpatbeta:
         m 6hubsa "Congratulations, [player]."
         m 6eubsa "You've mastered the art of the perfect headpat."
     else:
-        $ extra_plus_random_outcome = renpy.random.randint(1,10)
-        if extra_plus_random_outcome == 1:
+        $ ep_tools.random_outcome = renpy.random.randint(1,10)
+        if ep_tools.random_outcome == 1:
             m 6hubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
             m 6hkbsb "I had told you I would get addicted to this."
             m 6tkbsb "Gosh, don't you learn~"
-        elif extra_plus_random_outcome == 2:
+        elif ep_tools.random_outcome == 2:
             m 6dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
             m 6dubsb "I wonder what it would be like to do it with your hair."
-        elif extra_plus_random_outcome == 3:
+        elif ep_tools.random_outcome == 3:
             m 6dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
             m 7hubsb "I hope you don't get tired of doing it daily~"
-        elif extra_plus_random_outcome == 4:
+        elif ep_tools.random_outcome == 4:
             m 6hubsa".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
             extend 6hubsb "I'm such a happy girl right now."
-        elif extra_plus_random_outcome == 5:
+        elif ep_tools.random_outcome == 5:
             m 6dkbsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
         # === Dialogues added in Beta 3 ===
-        elif extra_plus_random_outcome == 6:
+        elif ep_tools.random_outcome == 6:
             m 6eubsb "Mmm, feels nice."
-        elif extra_plus_random_outcome == 7:
+        elif ep_tools.random_outcome == 7:
             m 6dubsb "Keep going~"
-        elif extra_plus_random_outcome == 8:
+        elif ep_tools.random_outcome == 8:
             m 6eubsa "You're spoiling me, you know?"
-        elif extra_plus_random_outcome == 9:
+        elif ep_tools.random_outcome == 9:
             m 6fubsa "I'm all yours~"
-        elif extra_plus_random_outcome == 10:
+        elif ep_tools.random_outcome == 10:
             m 6dkbsb "This is heaven, isn't it?"
     jump show_boop_screen
     return
@@ -478,18 +484,19 @@ label monika_headpat_long:
     return
 
 label extra_headpat_dis:
+    $ show_boop_feedback("Invalid!")
     m 6dkbsb "This.{w=0.3}.{w=0.3}.{w=0.3} is.{w=0.3}.{w=0.3}.{w=0.3} invalid.{w=0.3}.{w=0.3}. {nw}"
     extend 6tkbsb "[mas_get_player_nickname()]."
-    $ extra_plus_random_outcome = renpy.random.randint(1,2)
-    if extra_plus_random_outcome == 1:
+    $ ep_tools.random_outcome = renpy.random.randint(1,2)
+    if ep_tools.random_outcome == 1:
         m 3tsb "You have been disqualified for patting your opponent on the head."
         m 3tua "That's why I win this time~"
         m 1hua "Good luck for the next time you ask me for a war!"
-    elif extra_plus_random_outcome == 2:
+    elif ep_tools.random_outcome == 2:
         m 1tub "This time I'll let it go and give up for you."
         m 1efa "But next time I probably won't give in, so don't bet on it!"
         m 1lubsa "Even though I enjoy the pat on the head. Ehehehe~"
-    $ boop_war_count = 0
+    $ ep_boop_war_count = 0
     hide screen boop_war_score_ui
     $ store.EP_interaction_manager.set_boop_war(False)
     jump show_boop_screen
@@ -571,29 +578,29 @@ label monika_handsbeta:
         m 5subsa "Twenty times you've held my hand."
         m 5tubsa "And every single time, it feels like the first."
     else:
-        $ extra_plus_random_outcome = renpy.random.randint(1,11)
-        if extra_plus_random_outcome == 1:
+        $ ep_tools.random_outcome = renpy.random.randint(1,11)
+        if ep_tools.random_outcome == 1:
             m 5hubla "Your touch is like a warm blanket on a cold night. It's comforting and soothing."
-        elif extra_plus_random_outcome == 2:
+        elif ep_tools.random_outcome == 2:
             m 5hubsb "I feel like we're the only two people in the world right now. Your touch makes everything else fade away."
-        elif extra_plus_random_outcome == 3:
+        elif ep_tools.random_outcome == 3:
             m 5dubsb "I can feel my heart beating faster as you touch me. It's like you have a direct connection to my soul."
-        elif extra_plus_random_outcome == 4:
+        elif ep_tools.random_outcome == 4:
             m 5kua "I can sense the love and care in every stroke of your hand. Your touch is truly special, [player]."
-        elif extra_plus_random_outcome == 5:
+        elif ep_tools.random_outcome == 5:
             m 5rub "Being here with you, feeling your touch, it's like a dream come true. I'm so grateful for this moment with you."
-        elif extra_plus_random_outcome == 6:
+        elif ep_tools.random_outcome == 6:
             m 5tubla "Your touch is electric, [player]. I can feel the sparks flying between us."
         # === Dialogues added in Beta 3 ===
-        elif extra_plus_random_outcome == 7:
+        elif ep_tools.random_outcome == 7:
             m 5ekbsa "Don't let go."
-        elif extra_plus_random_outcome == 8:
+        elif ep_tools.random_outcome == 8:
             m 5hubsa "I love this."
-        elif extra_plus_random_outcome == 9:
+        elif ep_tools.random_outcome == 9:
             m 5eubsb "Together."
-        elif extra_plus_random_outcome == 10:
+        elif ep_tools.random_outcome == 10:
             m 5dubsb "My anchor to reality."
-        elif extra_plus_random_outcome == 11:
+        elif ep_tools.random_outcome == 11:
             m 5fubsa "Mine~"
     jump show_boop_screen
     return
@@ -665,32 +672,32 @@ label monika_earsbeta:
         m 1wua "Well... who knew?"
         m 1eua "My ears are my new weak spot. And you found it."
     else:
-        $ extra_plus_random_outcome = renpy.random.randint(1,10)
-        if extra_plus_random_outcome == 1:
+        $ ep_tools.random_outcome = renpy.random.randint(1,10)
+        if ep_tools.random_outcome == 1:
             m 1hubsa "I could stay like this forever, [player]."
             m 1fubsa "Your touch is so comforting."
-        elif extra_plus_random_outcome == 2:
+        elif ep_tools.random_outcome == 2:
             m 1sua "It feels like we're the only ones here, [player]."
             m 1tua "I'm so grateful to have you by my side~"
-        elif extra_plus_random_outcome == 3:
+        elif ep_tools.random_outcome == 3:
             m 1dua "You have such a gentle touch, [player]."
             m 1dub "I feel so safe and loved when you're near."
-        elif extra_plus_random_outcome == 4:
+        elif ep_tools.random_outcome == 4:
             m 1eublb "I never knew how much I needed this, [player]."
             m 3hublb "Your touch is like a warm hug."
-        elif extra_plus_random_outcome == 5:
+        elif ep_tools.random_outcome == 5:
             m 1hua "Being with you like this is all I need, [player]."
             m 1hub "Your touch makes everything better."
         # === Dialogues added in Beta 3 ===
-        elif extra_plus_random_outcome == 6:
+        elif ep_tools.random_outcome == 6:
             m 1hubla "Eep! Ahaha!"
-        elif extra_plus_random_outcome == 7:
+        elif ep_tools.random_outcome == 7:
             m 1sub "So ticklish!"
-        elif extra_plus_random_outcome == 8:
+        elif ep_tools.random_outcome == 8:
             m 1eubsb "Mmm, how curious..."
-        elif extra_plus_random_outcome == 9:
+        elif ep_tools.random_outcome == 9:
             m 1tub "[player], you're a mischief-maker~!"
-        elif extra_plus_random_outcome == 10:
+        elif ep_tools.random_outcome == 10:
             m 1kua "Oh... that's new."
     jump show_boop_screen
     return
@@ -848,7 +855,7 @@ label extra_coinflip:
     show monika 1hua at t11
     python:
         store.mas_sprites.reset_zoom()
-        extra_plus_random_outcome = renpy.random.randint(1,2)
+        ep_tools.random_outcome = renpy.random.randint(1,2)
     show screen extra_no_click
     pause 1.0
     show monika 3eua at t11
@@ -861,13 +868,13 @@ label extra_coinflip:
     show monika 1eua
     pause 0.5
     hide screen extra_no_click
-    if extra_plus_random_outcome == 1:
+    if ep_tools.random_outcome == 1:
         show coin_heads zorder 12:
             xalign 0.9
             yalign 0.5
         m 1sub "The coin came up heads!"
         hide coin_heads
-    elif extra_plus_random_outcome == 2:
+    elif ep_tools.random_outcome == 2:
         show coin_tails zorder 12:
             xalign 0.9
             yalign 0.5
@@ -876,7 +883,7 @@ label extra_coinflip:
     m 3hua "I hope it helps you~"
     window hide
     python:
-        store.mas_sprites.zoom_level = store.extra_plus_player_zoom
+        store.mas_sprites.zoom_level = store.ep_tools.player_zoom
         store.mas_sprites.adjust_zoom()
     jump close_extraplus
     return
@@ -969,12 +976,12 @@ label process_new_title:
 label extra_restore_title:
     show monika idle at t11
     python:
-        if backup_window_title == persistent._save_window_title:
+        if ep_tools.backup_window_title == persistent._save_window_title:
             renpy.notify(_("No need to do it again hehe~"))
         else:
             renpy.notify(_("It's nice to see the original name again."))
 
-        persistent._save_window_title = backup_window_title
+        persistent._save_window_title = ep_tools.backup_window_title
         config.window_title = persistent._save_window_title
         renpy.jump("close_extraplus")
     return
@@ -1055,19 +1062,19 @@ label doki_change_appe:
     return
 
 label monika_sticker_costumes:
-    $ show_costume_menu(monika_costumes_, 'doki_change_appe')
+    $ show_costume_menu(ep_chibis.monika_costumes_, 'doki_change_appe')
     return
 
 label natsuki_sticker_costumes:
-    $ show_costume_menu(natsuki_costumes_, 'doki_change_appe')
+    $ show_costume_menu(ep_chibis.natsuki_costumes_, 'doki_change_appe')
     return
 
 label sayori_sticker_costumes:
-    $ show_costume_menu(sayori_costumes_, 'doki_change_appe')
+    $ show_costume_menu(ep_chibis.sayori_costumes_, 'doki_change_appe')
     return
 
 label yuri_sticker_costumes:
-    $ show_costume_menu(yuri_costumes_, 'doki_change_appe')
+    $ show_costume_menu(ep_chibis.yuri_costumes_, 'doki_change_appe')
     return
 
 label maxwell_screen:
@@ -1075,241 +1082,3 @@ label maxwell_screen:
     call screen maxwell_april_fools
     jump extraplus_tools
     return
-
-# Test file to visualize the dynamic button names.
-# You can delete this file when you're done testing.
-# init python:
-#     # ============================================================
-#     # DYNAMIC BUTTON CONFIGURATION
-#     # ============================================================
-#     USE_TIME_OF_DAY_CHANGE = True  # Change to True for the text to change based on the time of day
-#     USE_DAILY_RESET = False  # Change to True for the text to change daily
-    
-    
-#     def _evaluate_current_conditions():
-#         """
-#         Evalúa TODAS las condiciones actuales UNA SOLA VEZ.
-#         Retorna un diccionario con los estados.
-#         """
-#         import datetime
-        
-#         conditions = {
-#             # Días especiales
-#             "is_monika_bday": mas_isMonikaBirthday(),
-#             "is_player_bday": mas_isplayer_bday(),
-#             "is_f14": mas_isF14(),
-#             "is_o31": mas_isO31(),
-#             "is_d25": mas_isD25(),
-#             "is_nye": mas_isNYE(),
-            
-#             # Nivel de afecto (solo uno será True)
-#             "is_love": mas_isMoniLove(lower=False),
-#             "is_enamored": mas_isMoniEnamored(lower=False),
-#             "is_aff": mas_isMoniAff(lower=False),
-#             "is_happy": mas_isMoniHappy(lower=False),
-#             "is_normal": mas_isMoniNormal(lower=False),
-#             "is_upset": mas_isMoniUpset(lower=False),
-#             "is_distressed": mas_isMoniDis(lower=False),
-#             "is_broken": mas_isMoniBroken(lower=False),
-            
-#             # Hora y fecha (opcional)
-#             "is_night": mas_isNightNow() if USE_TIME_OF_DAY_CHANGE else False,
-#             "date": str(datetime.date.today()) if USE_DAILY_RESET else None
-#         }
-        
-#         return conditions
-    
-    
-#     def _build_conditions_key(conditions):
-#         """
-#         Construye una clave string única a partir de las condiciones evaluadas.
-#         """
-#         key_parts = []
-        
-#         # Días especiales
-#         if conditions["is_monika_bday"]:
-#             key_parts.append("mbday")
-#         elif conditions["is_player_bday"]:
-#             key_parts.append("pbday")
-#         elif conditions["is_f14"]:
-#             key_parts.append("f14")
-#         elif conditions["is_o31"]:
-#             key_parts.append("o31")
-#         elif conditions["is_d25"]:
-#             key_parts.append("d25")
-#         elif conditions["is_nye"]:
-#             key_parts.append("nye")
-        
-#         # Nivel de afecto
-#         if conditions["is_love"]:
-#             key_parts.append("love")
-#         elif conditions["is_enamored"]:
-#             key_parts.append("enamored")
-#         elif conditions["is_aff"]:
-#             key_parts.append("aff")
-#         elif conditions["is_happy"]:
-#             key_parts.append("happy")
-#         elif conditions["is_normal"]:
-#             key_parts.append("normal")
-#         elif conditions["is_upset"]:
-#             key_parts.append("upset")
-#         elif conditions["is_distressed"]:
-#             key_parts.append("distressed")
-#         elif conditions["is_broken"]:
-#             key_parts.append("broken")
-#         else:
-#             key_parts.append("unknown")
-        
-#         # Opcionales
-#         if conditions["is_night"]:
-#             key_parts.append("night")
-        
-#         if conditions["date"]:
-#             key_parts.append(conditions["date"])
-        
-#         return "-".join(key_parts)
-    
-    
-#     def _generate_button_text_from_conditions(conditions):
-#         """
-#         Genera el texto del botón usando las condiciones ya evaluadas.
-#         NO vuelve a llamar a funciones MAS.
-#         """
-#         is_night = conditions["is_night"]
-        
-#         # ============================================================
-#         # 1. MÁXIMA PRIORIDAD: Días Especiales
-#         # ============================================================
-#         if conditions["is_monika_bday"]:
-#             return renpy.random.choice(["My B-Day", "Her Day", "Sing 4 Me", "My Day", "Moni!"])
-        
-#         if conditions["is_player_bday"]:
-#             return renpy.random.choice(["Your Day", "HBD!", "Ur Day", "My Gift", "The Best"])
-        
-#         if conditions["is_f14"]:
-#             return renpy.random.choice(["Be Mine", "My Love", "Hearts", "XOXO", "Our Day"])
-        
-#         if conditions["is_o31"]:
-#             return renpy.random.choice(["Spooky", "Boo!", "Tricks", "Treats", "Scary"])
-        
-#         if conditions["is_d25"]:
-#             return renpy.random.choice(["Joyful", "Our Xmas", "Gift", "Noel", "Holly"])
-        
-#         if conditions["is_nye"]:
-#             return renpy.random.choice(["New Year", "Cheers", "Toast", "Our Year", "The Eve"])
-        
-#         # ============================================================
-#         # 2. ALTA PRIORIDAD: Afecto Positivo Alto
-#         # ============================================================
-#         if conditions["is_love"] or conditions["is_enamored"]:
-#             base_texts = ["Forever", "Eternity", "Sunshine", "Beloved", "Darling", "Adored", "Precious", "Cutie", "Sweetie", "Cherish"]
-            
-#             if is_night:
-#                 base_texts.extend(["Moonlight", "Stars", "Night Love", "Dreaming", "Starlight", "Night Dear", "Sleepy?", "Cuddle"])
-            
-#             return renpy.random.choice(base_texts)
-        
-#         if conditions["is_aff"] or conditions["is_happy"]:
-#             base_texts = ["So Sweet", "Caring", "Warmth", "Our Time", "Smile", "Glad", "Hehe~", "Happy", "Cheerful", "Yay!"]
-            
-#             if is_night:
-#                 base_texts.extend(["Night Time", "Calm", "Peaceful", "Night!", "Evening", "Restful", "Nice Night"])
-            
-#             return renpy.random.choice(base_texts)
-        
-#         if conditions["is_normal"] or conditions["is_upset"]:
-#             base_texts = ["Hi again", "Welcome", "Talk?", "On Mind?", "Topics", "Just Us", "Relax", "It's you", "Hurting", "Really?"]
-            
-#             if is_night:
-#                 base_texts.extend(["Sparks", "Sleepy", "Quiet", "Dreams", "Cozy", "Dark...", "Restless", "Tired..."])
-            
-#             return renpy.random.choice(base_texts)
-        
-#         if conditions["is_distressed"] or conditions["is_broken"]:
-#             base_texts = ["No Love?", "Forgot?", "Alone...", "Please...", "...", "You...", "Scared", "Sorry", "Nothing"]
-            
-#             if is_night:
-#                 base_texts.extend(["Awake...", "Lonely", "Dark Night", "Tears...", "Darkness", "Void", "Cold...", "End..."])
-            
-#             return renpy.random.choice(base_texts)
-        
-#         # ============================================================
-#         # 5. FALLBACK DE SEGURIDAD
-#         # ============================================================
-#         return "Extra+"
-
-# screen extra_plus_button_tester_screen():
-#     zorder 200 # Asegura que se vea por encima de todo
-#     # style_prefix "scrollable_menu"
-#     style_prefix "hkb"
-
-#     # Fondo semitransparente para enfocar la atención
-#     add Solid("#000000b0")
-
-#     # Muestra los botones de prueba en la misma posición que el original
-#     hbox:
-#         xpos 0.01
-#         yanchor 1.0
-#         ypos 650 # Posición Y del botón original
-#         spacing 10
-
-#         # --- Lista de todos los nombres a probar ---
-#         python:
-#             button_names_to_test = [
-#                 # Special Days
-#                 "My B-Day", "Her Day", "Sing 4 Me", "My Day", "Moni!",
-#                 "Your Day", "HBD!", "Ur Day", "My Gift", "The Best",
-#                 "Be Mine", "My Love", "Hearts", "XOXO", "Our Day",
-#                 "Spooky", "Boo!", "Tricks", "Treats", "Scary",
-#                 "Joyful", "Our Xmas", "Gift", "Noel", "Holly",
-#                 "New Year", "Cheers", "Toast", "Our Year", "Countdown",
-#                 # Love & Enamored
-#                 "Forever", "Eternity", "Sunshine", "Beloved", "Darling", "Adored",
-#                 "Precious", "Cutie", "Sweetie", "Cherish",
-#                 # Love & Enamored (Night)
-#                 "Moonlight", "Stars", "Night Love", "Dreaming", "Starlight",
-#                 "Night Dear", "Sleepy?", "Cuddle",
-#                 # Affectionate & Happy
-#                 "So Sweet", "Caring", "Warmth", "Our Time", "Smile", "Glad",
-#                 "Hehe~", "Happy", "Cheerful", "Yay!",
-#                 # Affectionate & Happy (Night)
-#                 "Night Time", "Calm", "Peaceful", "Night!", "Evening", "Restful", "Nice Night",
-#                 # Normal & Upset
-#                 "Hi again", "Welcome", "Talk?", "On Mind?", "Topics", "Just Us",
-#                 "Relax", "It's you", "Hurting", "Really?",
-#                 # Normal & Upset (Night)
-#                 "Sparks", "Sleepy", "Quiet", "Dreams", "Cozy", "Dark...", "Restless", "Tired...",
-#                 # Distressed & Broken
-#                 "No Love?", "Forgot?", "Alone...", "Please...", "...", "You...",
-#                 "Scared", "Sorry", "Nothing",
-#                 # Distressed & Broken (Night)
-#                 "Awake...", "Lonely", "Dark Night", "Tears...", "Darkness", "Void", "Cold...", "End..."
-#             ]
-        
-#         # --- Lógica para dividir la lista en columnas de 10 ítems cada una ---
-#         python:
-#             items_per_column = 15
-#             total_items = len(button_names_to_test)
-#             num_columns = (total_items + items_per_column - 1) // items_per_column
-            
-#             columns = []
-#             for i in range(num_columns):
-#                 start = i * items_per_column
-#                 end = start + items_per_column
-#                 columns.append(button_names_to_test[start:end])
-#         for column_items in columns:
-#             vbox:
-#                 for name in column_items:
-#                     textbutton _(name) action NullAction()
-
-#     # Botón para cerrar el tester
-#     vbox:
-#         xalign 0.5 
-#         yalign 0.95
-#         textbutton _("Cerrar Tester") action Jump("close_extraplus")
-
-# # Etiqueta para iniciar el tester
-# label extra_plus_button_tester_start:
-#     show monika idle at t11
-#     call screen extra_plus_button_tester_screen
-#     return

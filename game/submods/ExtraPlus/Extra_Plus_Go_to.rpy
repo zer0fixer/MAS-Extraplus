@@ -1,7 +1,6 @@
 #===========================================================================================
 # CAFE
 #===========================================================================================
-default EP_dessert_player = None
 label go_to_cafe:
     python:
         mas_extra_location(locate=True)
@@ -120,11 +119,11 @@ label extra_cafe_cakes:
         menu:
             m "I hope I'm not the only one indulging, ehehe~{fast}"
             "Yep, I've got one right here.":
-                $ EP_dessert_player = True
+                $ ep_dates.dessert_player = True
                 m 1hub "Great! It feels more like a proper date this way."
                 m 3eub "Enjoy it, [player]!"
             "I'm good, just having coffee.":
-                $ EP_dessert_player = False
+                $ ep_dates.dessert_player = False
                 m 1ekc "Oh, alright! Well, just a coffee is nice too."
                 m 3hka "You can just watch me enjoy this, ehehe~"
         
@@ -147,11 +146,11 @@ label extra_cafe_cakes:
         menu:
             m "I'd feel bad if I was the only one eating one...{fast}"
             "Don't worry, I have a dessert.":
-                $ EP_dessert_player = True
+                $ ep_dates.dessert_player = True
                 m 1hub "I'm glad you have one to accompany me!"
                 m 3eub "Also, I recommend you have a cup of coffee with it."
             "Don't worry about it.":
-                $ EP_dessert_player = False
+                $ ep_dates.dessert_player = False
                 m 1ekc "Well, if you say so."
                 m 1ekb "I'd give you mine, but your screen limits me from doing so..."
                 m 3hka "I hope you at least have a cup of coffee!"
@@ -160,8 +159,8 @@ label extra_cafe_cakes:
     
     # --- END OF FULLY DYNAMIC SECTION ---
 
-    $ plus_snack_time = random.randint(700, 900)
-    show screen extra_timer_monika(plus_snack_time)
+    $ ep_dates.snack_timer = random.randint(700, 900)
+    show screen extra_timer_monika(ep_dates.snack_timer)
     jump to_cafe_loop
     return
 
@@ -191,7 +190,6 @@ label extra_comment_cafe:
 #===========================================================================================
 
 default persistent._extraplusr_hasplayer_goneonanniversary = False
-default EP_food_player = None
 
 label go_to_restaurant:
     python:
@@ -313,11 +311,11 @@ label extra_restaurant_cakes:
         menu:
             m "It's always nice when we can share a meal together.{fast}"
             "Of course, I've got my food right here.":
-                $ EP_food_player = True
+                $ ep_dates.food_player = True
                 m 1hub "Wonderful! Bon appétit, sweetheart~"
                 m 3eub "I'm glad we get to do this again!"
             "I'm just here for the company.":
-                $ EP_food_player = False
+                $ ep_dates.food_player = False
                 m 1ekc "Oh, alright! That's sweet of you."
                 m 3hka "Well, I hope you have a nice drink, at least!"
         
@@ -336,11 +334,11 @@ label extra_restaurant_cakes:
         menu:
             m "I'd feel bad if I was the only one eating...{fast}"
             "Don't worry, I have something.":
-                $ EP_food_player = True
+                $ ep_dates.food_player = True
                 m 1hub "I'm glad you have some to accompany me!"
                 m 3eub "Also I recommend you have a drink to go with it!"
             "Don't worry about it.":
-                $ EP_food_player = False
+                $ ep_dates.food_player = False
                 m 1ekc "Well,{w=0.3} if you say so."
                 m 1ekb "I'd share my food with you,{w=0.3} but your screen is in the way..."
                 m 3hka "Hopefully you at least have a drink with you!"
@@ -349,8 +347,8 @@ label extra_restaurant_cakes:
     
     # --- END OF FULLY DYNAMIC SECTION ---
 
-    $ plus_snack_time = random.randint(900, 1100)
-    show screen extra_timer_monika(plus_snack_time)
+    $ ep_dates.snack_timer = random.randint(900, 1100)
+    show screen extra_timer_monika(ep_dates.snack_timer)
     jump to_restaurant_loop
     return
 
@@ -384,8 +382,8 @@ label extra_comment_restaurant:
 
 label extra_talk_feel:
     show monika staticpose at t11
-    $ extra_plus_random_outcome = renpy.random.randint(1,3)
-    if extra_plus_random_outcome == 1:
+    $ ep_tools.random_outcome = renpy.random.randint(1,3)
+    if ep_tools.random_outcome == 1:
         m 1hkbsb "I'm feeling a little nervous, we're on a date after all!"
         #In case someone doesn't take their Monika for a walk.
         if renpy.seen_label("bye_going_somewhere"):
@@ -397,12 +395,12 @@ label extra_talk_feel:
             m 3hubsa "So thank you for inviting me."
             m 3hubsb "You can do it through a USB stick though, even though I can't see anything."
             m 3ekbsa "I know very well that it will be very romantic."
-    elif extra_plus_random_outcome == 2:
+    elif ep_tools.random_outcome == 2:
         m 1eubla "I'm so happy you're here."
         m 1eublb "Sharing a dessert with you is quite romantic."
         m 1hublb "I hope we can do it in your reality!"
         m 1hubla "I know you have a lot on your mind for both of us~"
-    elif extra_plus_random_outcome == 3:
+    elif ep_tools.random_outcome == 3:
         m 1dubsa "I feel like I will remember this day forever."
         m 1dubsa "After all we are on a date."
         m 1kubsb "I know that someday we will do it in your reality!"

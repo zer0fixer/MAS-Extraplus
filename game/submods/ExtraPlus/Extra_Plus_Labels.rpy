@@ -24,7 +24,6 @@ label close_dev_extraplus:
 
 label show_boop_screen:
     show monika staticpose
-    # $ store.boop_war_active = False
     # Call the screen and wait for it to return a value (the label to jump to)
     call screen boop_revamped
     return
@@ -112,7 +111,7 @@ label extra_cafe_leave:
     m 1eta "Oh, you want us to go back?"
     m 1eub "Sounds good to me!"
     m 3hua "But before we go..."
-    $ stop_snike_time = False
+    $ ep_dates.stop_snike_time = False
     jump cafe_hide_acs
 
 label extra_restaurant_leave:
@@ -121,7 +120,7 @@ label extra_restaurant_leave:
     m 1eta "Oh,{w=0.3} you're ready for us to leave?"
     m 1eub "Sounds good to me!"
     m 3hua "But before we go..."
-    $ stop_snike_time = False
+    $ ep_dates.stop_snike_time = False
     jump restaurant_hide_acs
 
 label monika_boopcafe:
@@ -157,7 +156,7 @@ label monika_booprestaurant:
 #===========================================================================================
 label to_cafe_loop:
     show monika staticpose at t11
-    if stop_snike_time and renpy.get_screen("extra_timer_monika"):
+    if ep_dates.stop_snike_time and renpy.get_screen("extra_timer_monika"):
         hide screen extra_timer_monika
         jump monika_no_dessert
 
@@ -166,7 +165,7 @@ label to_cafe_loop:
 
 label to_restaurant_loop:
     show monika staticpose at t11
-    if stop_snike_time and renpy.get_screen("extra_timer_monika"):
+    if ep_dates.stop_snike_time and renpy.get_screen("extra_timer_monika"):
         hide screen extra_timer_monika
         jump monika_no_food
 
@@ -206,7 +205,7 @@ label monika_no_dessert:
             monika_chr.remove_acs(extraplus_acs_coffeecup)
             monika_chr.wear_acs(extraplus_acs_emptycup)
         m 3dub "Also, this coffee was also good."
-    if EP_dessert_player == True:
+    if ep_dates.dessert_player == True:
         m 1etb "By the way, have you finished your dessert yet?{nw}"
         $ _history_list.pop()
         menu:
@@ -294,7 +293,7 @@ label monika_no_food:
             monika_chr.wear_acs(extraplus_acs_pudding)
     call mas_transition_from_emptydesk("monika 1eua")
 
-    if EP_food_player == True:
+    if ep_dates.food_player == True:
         m 1etb "By the way, have you finished your food yet?{nw}"
         $ _history_list.pop()
         menu:
@@ -356,42 +355,42 @@ label restaurant_hide_acs:
 label extraplus_walk:
     show monika idle at t21
     python:
-        walk_menu = [
+        ep_tools.walk_menu = [
             (_("Cafe"), 'go_to_cafe'),
             (_("Restaurant"), 'go_to_restaurant'),
             (_("Pool"), "go_to_pool"),
             (_("Library"), "generic_date_dev"),
             (_("Arcade"), "generic_date_dev")
         ]
-        m_talk = renpy.substitute(renpy.random.choice(date_talk))
+
+        m_talk = renpy.substitute(renpy.random.choice(ep_dialogues._dates))
         renpy.say(m, m_talk, interact=False)
         items = [(_("Nevermind"), 'screen_extraplus', 20)]
-    call screen extra_gen_list(walk_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+    call screen extra_gen_list(ep_tools.walk_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
     return
 
 label extraplus_minigames:
     show monika idle at t21
     python:
-        minigames_menu = [
+        ep_tools.minigames_menu = [
             (_("Shell Game"), 'minigame_sg'),
             (_("Rock Paper Scissors"), 'minigame_rps'),
             (_("Tic Tac Toe"), 'minigame_ttt'),
             (_("Blackjack (21)"), 'blackjack_start')
         ]
         
-        m_talk = renpy.substitute(renpy.random.choice(minigames_talk))
+        m_talk = renpy.substitute(renpy.random.choice(ep_dialogues._minigames))
         renpy.say(m, m_talk, interact=False)
         items = [(_("Nevermind"), 'screen_extraplus', 20)]
     
-    call screen extra_gen_list(minigames_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+    call screen extra_gen_list(ep_tools.minigames_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
     return
 
 label extraplus_tools:
     show monika idle at t21
     python:
-        store.extra_plus_player_zoom = store.mas_sprites.zoom_level
-        tools_menu = [
-            # (_("Botones"), 'extra_plus_button_tester_start'),
+        store.ep_tools.player_zoom = store.mas_sprites.zoom_level
+        ep_tools.tools_menu = [
             (_("View [m_name]'s Affection"), 'extra_aff_log'),
             (_("Your MAS Journey"), 'extra_show_stats'),
             (_("Create a gift for [m_name]"), 'plus_make_gift'),
@@ -401,11 +400,12 @@ label extraplus_tools:
             (_("[m_name], I want to make a backup"), 'extra_mas_backup'),
             (_("[m_name], can you flip a coin?"), 'extra_coinflip')
         ]
+
         items = [
             (_("Github Repository"), 'github_submod', 20),
             (_("Nevermind"), 'screen_extraplus', 0)
         ]
-    call screen extra_gen_list(tools_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=True)
+    call screen extra_gen_list(ep_tools.tools_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=True)
     return
 
 label cafe_talk:
