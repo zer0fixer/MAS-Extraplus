@@ -37,7 +37,7 @@ Hello, it's good to see you again. To simplify, this submod adds a little bit of
 To unlock the features of Extraplus, you will need to earn Monika's affection:
 
 - **Dating:** Requires `400` affection points.
-- **"Boop" interaction:** Requires `30` affection points.
+- **"Boop" interaction:** Requires `100` affection points.
 - **Minigames:** Requires `30` affection points.
 
 > 💡 **Tip:** To get your own Chibika, go to the `Additions` menu and select the `Hi [Your Name]!` option. This will make her appear, and you can then customize her with accessories and outfits.
