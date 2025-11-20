@@ -28,7 +28,15 @@ init -989 python:
                 "README.md"
             )
         )
-        
+
+    #Just in case (Android Port).
+    # Setting for 'default_zoom_level'
+    if not hasattr(store.mas_sprites, "default_zoom_level"):
+        store.mas_sprites.default_zoom_level = 1.0
+    # Fix for 'zoom_level'
+    if not hasattr(store.mas_sprites, "zoom_level"):
+        store.mas_sprites.zoom_level = 1.0
+
 #===========================================================================================
 # VARIABLES
 #===========================================================================================
@@ -68,19 +76,24 @@ init -5 python in ep_dialogues:
         _("Let's have an unforgettable time today!")
     ]
 
+init -10 python in ep_interactions:
+    boopwar_loop = "boopwar_loop"
+    headpatwar_invalid = "extra_headpat_war_invalid"
+    cheekwar_invalid = "extra_cheeks_war_invalid"
+    alternative_boop = "monika_boopbeta_war"
+
 init -5 python in ep_tools:
     import store
 
     player_zoom = None
-    games_idle_timer = 30
-    seen_notification_games = False
+    games_idle_timer = 300
     minigames_menu = []
     tools_menu = []
     walk_menu = []
     backup_window_title = "Monika After Story   "
     random_outcome = None
     last_affection_notify_time = 0
-    check_file = store.ep_folders._get_game_path(store.ep_folders.EP_ROOT, "Extra_Plus_Main.rpy")
+    check_main_file = store.ep_folders._getGamePath(store.ep_folders.EP_ROOT, "Extra_Plus_Main.rpy")
     pictograms_font = store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "pictograms_icons.ttf")
     affection_icons = store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "peperrito_faces.ttf")
 
@@ -109,14 +122,13 @@ init -5 python in ep_dates:
 
     xpos = 0.05
     ypos = 555 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else 595
-    #====(Date locations)
     old_bg = None
     chair = None
     table = None
     dessert_player = None
     food_player = None
     stop_snike_time = False
-    snack_timer = None  # Timer for snacks in dates
+    snack_timer = None
 
 init -1 python in ep_chibis:
     monika_costumes_ = [(_("Blanket"), blanket_monika), (_("Android"), android_monika), (_("Casual"), casual_monika)]
@@ -256,6 +268,7 @@ init -10 python in mas_interactions:
 
 init -5 python:
     import pygame
+
     class ExtraPlusInteractionManager(object):
 
         def __init__(self, cz_map, action_map):
@@ -268,6 +281,7 @@ init -5 python:
             
             # Internal state
             self.ep_boop_war_active = False
+            self.ep_boop_war_count = 0
 
             # Create MAS components internally
             self.cz_manager = mas_interactions.MASClickZoneManager()
@@ -301,12 +315,14 @@ init -5 python:
                 # During the war, only left-click has an effect
                 if button == 1:
                     if hovered_zone == mas_interactions.ZONE_EXTRA_NOSE:
-                        renpy.jump("boopwar_loop")
+                        self.ep_boop_war_count += 1
+                        renpy.jump(ep_interactions.boopwar_loop)
                     # Group disqualification zones
                     elif hovered_zone == mas_interactions.ZONE_EXTRA_HEAD:
-                        renpy.jump("extra_headpat_dis")
+                        renpy.jump(ep_interactions.headpatwar_invalid)
                     elif hovered_zone in mas_interactions.ZONES_EXTRA_CHEEKS:
-                        renpy.jump("extra_cheeks_dis")
+                        self.ep_boop_war_count = 0
+                        renpy.jump(ep_interactions.cheekwar_invalid)
                 
                 # Ignore any other click (including right-click) during the war
                 return # End the function here if the war is active
@@ -332,7 +348,7 @@ init -5 python:
                     return
 
                 # Special case: Start boop war
-                if alternate_label == "monika_boopbeta_war":
+                if alternate_label == ep_interactions.alternative_boop:
                     self.ep_boop_war_active = True # The state is handled INSIDE the class
                 
                 if renpy.has_label(alternate_label):
@@ -355,6 +371,7 @@ init -5 python:
             Safe method to change the state from outside.
             """
             self.ep_boop_war_active = status
+            self.ep_boop_war_count = 0 # Always reset count when state changes
             
         def set_debug(self, status):
             """
@@ -392,11 +409,11 @@ init -5 python:
     EP_boop_zone_actions = {
         "extra_head": ("monika_headpatbeta", "monika_headpat_long"),
         "extra_nose": ("monika_boopbeta", "monika_boopbeta_war"),
-        "extra_cheek_l": "monika_cheeksbeta",  # Only primary action
-        "extra_cheek_r": "monika_cheeksbeta",
-        "extra_hands": "monika_handsbeta",
-        "extra_ear_l": "monika_earsbeta",
-        "extra_ear_r": "monika_earsbeta",
+        "extra_cheek_l": ("monika_cheeksbeta", "monika_cheek_squish"), # <-- New secondary action
+        "extra_cheek_r": ("monika_cheeksbeta", "monika_cheek_squish"), # <-- New secondary action
+        "extra_hands": ("monika_handsbeta", "monika_hand_hold"),     # <-- New secondary action
+        "extra_ear_l": ("monika_earsbeta", "monika_ear_rub"),      # <-- New secondary action
+        "extra_ear_r": ("monika_earsbeta", "monika_ear_rub"),      # <-- New secondary action
     }
 
     # 'store.' is used to make it accessible in screens
@@ -406,737 +423,35 @@ init -5 python:
     )
 
 #===========================================================================================
-# FOLDERS
-#===========================================================================================
-init -995 python in ep_folders:
-    import os
-    # --- Cross-platform path helper functions ---
-    # Moved to the top level of the python block to be accessible by all functions.
-    def _normalize_path(path):
-        """Normalizes a path by replacing '\\' with '/' for compatibility."""
-        return path.replace("\\", "/")
-
-    def _get_game_path(*args):
-        """Builds a normalized, absolute path from the 'game' directory."""
-        game_dir = _normalize_path(os.path.join(renpy.config.basedir, "game"))
-        # Simply joins the game base directory with all provided arguments.
-        # The arguments should already be correctly formed relative paths
-        # (e.g., using EP_submods_folder or EP_ROOT).
-        return _normalize_path(os.path.join(game_dir, *args))
-    
-    def _join_path(*args):
-        """
-        Joins path components and normalizes them.
-        Usage: _join_path("Submods", "ExtraPlus", "dates", "cafe.png")
-        """
-        return _normalize_path(os.path.join(*args))
-
-    def find_submods_folder(base_path="."):
-        for folder in os.listdir(base_path):
-            if folder.lower() == "submods" and os.path.isdir(os.path.join(base_path, folder)):
-                return folder
-        return "Submods"  # Default value if not found
-
-    # Detect 'submods' folder case-insensitively
-    EP_submods_folder = find_submods_folder()
-    
-    # ==========================================
-    # SUBMOD BASE PATH DEFINITIONS
-    # ==========================================
-    
-    # Submod root folder
-    EP_ROOT = _join_path(EP_submods_folder, "ExtraPlus")
-    
-    # Main subfolders
-    EP_MINIGAMES = _join_path(EP_ROOT, "minigames")
-    EP_DATES = _join_path(EP_ROOT, "dates")
-    EP_CHIBIS = _join_path(EP_ROOT, "chibis")
-    EP_OTHERS = _join_path(EP_ROOT, "others")
-    EP_SFX = _join_path(EP_ROOT, "sfx")
-    
-    # Specific minigames
-    EP_MG_SHELLGAME = _join_path(EP_MINIGAMES, "shellgame")
-    EP_MG_RPS = _join_path(EP_MINIGAMES, "rockpaperscissors")
-    EP_MG_BLACKJACK = _join_path(EP_MINIGAMES, "blackjack")
-    EP_MG_TICTACTOE = _join_path(EP_MINIGAMES, "tictactoe")
-    
-    # Date folders
-    EP_DATE_CAFE = _join_path(EP_DATES, "cafe")
-    EP_DATE_RESTAURANT = _join_path(EP_DATES, "restaurant")
-    EP_DATE_POOL = _join_path(EP_DATES, "pool")
-    EP_DATE_LIBRARY = _join_path(EP_DATES, "library")
-    EP_DATE_ARCADE = _join_path(EP_DATES, "arcade")
-    
-    # Chibi subfolders
-    EP_CHIBI_ACC_0 = _join_path(EP_CHIBIS, "accessories_0")
-    EP_CHIBI_ACC_1 = _join_path(EP_CHIBIS, "accessories_1")
-
-#===========================================================================================
 # FUNCTIONS
 #===========================================================================================
-init 5 python:
-    import time
-    import datetime
+# NOTE: All function logic for Extra+ now lives in the ep_* stores,
+# which are defined in Extra_Plus_Misc.rpy.
 
-    # USE_TIME_OF_DAY_CHANGE = True  # Set to True for the text to change according to the time
-    # USE_DAILY_RESET = False  # Set to True for the text to change every day
-    
-    def _show_idle_notification(context=""):
-        """
-        Displays an idle notification.
-        If a context (like 'blackjack' or 'ttt') is provided,
-        it uses specific phrases. Otherwise, it uses general ones.
-        """
-
-        if not store.ep_tools.seen_notification_games:
-            if context == "bj": # Blackjack check
-                game_phrases = [
-                    "Hit or stay, [player]? It's your turn!",
-                    "Are you thinking about your next move?",
-                    "Don't wait too long, the dealer is waiting... and so am I. Ehehe~",
-                    "Trying to count the cards in your head?"
-                ]
-            
-            elif context == "ttt": # Tic-Tac-Toe check
-                game_phrases = [
-                    "It's your turn to place an X... or is it an O?",
-                    "Just a friendly reminder, it's your move!",
-                    "Looking for the winning move? Don't think too hard!",
-                    "I'm waiting... but I won't tell you where to go. Ehehe~"
-                ]
-            
-            elif context == "rps": # Rock Paper Scissors
-                game_phrases = [
-                    "Rock, paper, or scissors, [player]?",
-                    "Don't leave me hanging! What's your choice?",
-                    "C'mon, pick one! I'm ready!",
-                    "Are you trying to predict my move?"
-                ]
-            
-            elif context == "sg": # Shell Game ckeck
-                game_phrases = [
-                    "Keep your eye on the ball... or, well, the cup!",
-                    "Where did it go, [player]?",
-                    "Don't look at me, I'm not going to tell you which one it is!",
-                    "It's your turn to guess!"
-                ]
-            store.ep_tools.seen_notification_games = True
-        else:
-            game_phrases = [
-                "Are you still there, [player]?",
-                "Just checking in... you've been quiet for a while.",
-                "Everything okay? You're staring again, ehehe~",
-                "I was starting to wonder if you fell asleep!",
-                "Boo! Did I scare you?"
-            ]
-        
-        # Call the notification with the chosen list of phrases
-        store.mas_display_notif(
-            store.m_name,
-            game_phrases,
-            'Topic Alerts'
-        )
-
-    def _evaluate_current_conditions():
-        """
-        Evaluates ALL current conditions ONCE.
-        Returns a dictionary with the states.
-        """
-        import datetime
-
-        conditions = {
-            # Días especiales
-            "is_monika_bday": mas_isMonikaBirthday(),
-            "is_player_bday": mas_isplayer_bday(),
-            "is_f14": mas_isF14(),
-            "is_o31": mas_isO31(),
-            "is_d25": mas_isD25(),
-            "is_nye": mas_isNYE(),
-
-            # Affection level (only one will be True)
-            "is_love": mas_isMoniLove(lower=False),
-            "is_enamored": mas_isMoniEnamored(lower=False),
-            "is_aff": mas_isMoniAff(lower=False),
-            "is_happy": mas_isMoniHappy(lower=False),
-            "is_normal": mas_isMoniNormal(lower=False),
-            "is_upset": mas_isMoniUpset(lower=False),
-            "is_distressed": mas_isMoniDis(lower=False),
-            "is_broken": mas_isMoniBroken(lower=False),
-
-            "is_night": mas_isNightNow()
-        }
-
-        return conditions
-
-    def _build_conditions_key(conditions):
-        """
-        Builds a unique string key from the evaluated conditions.
-        """
-        key_parts = []
-        
-        # Special days
-        if conditions["is_monika_bday"]:
-            key_parts.append("mbday")
-        elif conditions["is_player_bday"]:
-            key_parts.append("pbday")
-        elif conditions["is_f14"]:
-            key_parts.append("f14")
-        elif conditions["is_o31"]:
-            key_parts.append("o31")
-        elif conditions["is_d25"]:
-            key_parts.append("d25")
-        elif conditions["is_nye"]:
-            key_parts.append("nye")
-        
-        # Affection level
-        if conditions["is_love"]:
-            key_parts.append("love")
-        elif conditions["is_enamored"]:
-            key_parts.append("enamored")
-        elif conditions["is_aff"]:
-            key_parts.append("aff")
-        elif conditions["is_happy"]:
-            key_parts.append("happy")
-        elif conditions["is_normal"]:
-            key_parts.append("normal")
-        elif conditions["is_upset"]:
-            key_parts.append("upset")
-        elif conditions["is_distressed"]:
-            key_parts.append("distressed")
-        elif conditions["is_broken"]:
-            key_parts.append("broken")
-        else:
-            key_parts.append("unknown")
-        
-        # Optionals
-        if conditions["is_night"]:
-            key_parts.append("night")
-        return "-".join(key_parts)
-
-    def _button_text_from_conditions(conditions):
-        """
-        Generates the button text using the already evaluated conditions.
-        Does NOT call MAS functions again.
-        """
-        is_night = conditions["is_night"]
-        
-        # ============================================================
-        # 1. HIGHEST PRIORITY
-        # ============================================================
-        if conditions["is_monika_bday"]:
-            return renpy.random.choice(["My B-Day", "Her Day", "Sing 4 Me", "My Day", "Moni!"])
-        
-        if conditions["is_player_bday"]:
-            return renpy.random.choice(["Your Day", "HBD!", "Ur Day", "My Gift", "The Best"])
-        
-        if conditions["is_f14"]:
-            return renpy.random.choice(["Be Mine", "My Love", "Hearts", "XOXO", "Our Day"])
-        
-        if conditions["is_o31"]:
-            return renpy.random.choice(["Spooky", "Boo!", "Tricks", "Treats", "Scary"])
-        
-        if conditions["is_d25"]:
-            return renpy.random.choice(["Joyful", "Our Xmas", "Gift", "Noel", "Holly"])
-        
-        if conditions["is_nye"]:
-            return renpy.random.choice(["New Year", "Cheers", "Toast", "Our Year", "The Eve"])
-        
-        # ============================================================
-        # 2. HIGH PRIORITY
-        # ============================================================
-        if conditions["is_love"] or conditions["is_enamored"]:
-            base_texts = ["Forever", "Eternity", "Sunshine", "Beloved", "Darling", "Adored", "Precious", "Cutie", "Sweetie", "Cherish"]
-            
-            if is_night:
-                base_texts.extend(["Moonlight", "Stars", "Night Love", "Dreaming", "Starlight", "Night Dear", "Sleepy?", "Cuddle"])
-            
-            return renpy.random.choice(base_texts)
-        
-        if conditions["is_aff"] or conditions["is_happy"]:
-            base_texts = ["So Sweet", "Caring", "Warmth", "Our Time", "Smile", "Glad", "Hehe~", "Happy", "Cheerful", "Yay!"]
-            
-            if is_night:
-                base_texts.extend(["Night Time", "Calm", "Peaceful", "Night!", "Evening", "Restful", "Nice Night"])
-            
-            return renpy.random.choice(base_texts)
-        
-        if conditions["is_normal"] or conditions["is_upset"]:
-            base_texts = ["Hi again", "Welcome", "Talk?", "On Mind?", "Topics", "Just Us", "Relax", "It's you", "Hurting", "Really?"]
-            
-            if is_night:
-                base_texts.extend(["Sparks", "Sleepy", "Quiet", "Dreams", "Cozy", "Dark...", "Restless", "Tired..."])
-            
-            return renpy.random.choice(base_texts)
-        
-        if conditions["is_distressed"] or conditions["is_broken"]:
-            base_texts = ["No Love?", "Forgot?", "Alone...", "Please...", "...", "You...", "Scared", "Sorry", "Nothing"]
-            
-            if is_night:
-                base_texts.extend(["Awake...", "Lonely", "Dark Night", "Tears...", "Darkness", "Void", "Cold...", "End..."])
-            
-            return renpy.random.choice(base_texts)
-        
-        # ============================================================
-        # 3. SAFETY FALLBACK
-        # ============================================================
-        return "Extra+"
-
-    def get_dynamic_button_text():
-        """
-        Dynamically determines the submod's button text.
-        The text remains consistent until the conditions change.
-        """
-        import datetime
-
-        # If dynamic text is disabled, return the static name
-        if not persistent.EP_dynamic_button_text:
-            return "Extra+"
-        
-        # Evaluate current conditions ONCE
-        conditions = _evaluate_current_conditions()
-        today_str = str(datetime.date.today())
-        conditions_key = _build_conditions_key(conditions)
-        
-        # Regenerate text if it's a new day, if other conditions changed,
-        # or if there's no text saved yet.
-        # The date check (`today_str`) makes the daily reset explicit.
-        if (persistent.EP_button_last_update != today_str
-            or persistent.EP_button_conditions_key != conditions_key
-            or persistent.EP_button_text is None):
-            # Generate new text using the already evaluated conditions
-            new_text = _button_text_from_conditions(conditions)
-            
-            # Save to persistent
-            persistent.EP_button_text = new_text # The new text
-            persistent.EP_button_last_update = today_str # The date of the last update
-            persistent.EP_button_conditions_key = conditions_key # The conditions of the last update
-        
-        return persistent.EP_button_text
-
-    def show_boop_feedback(message, color="#ff69b4"):
-        """
-        Shows a floating text message on the screen at the mouse position.
-        Used for visual feedback during boop interactions.
-        """
-        t = "boop_notif{}".format(renpy.random.randint(1, 10000))
-        renpy.show_screen("boop_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color)
-
-    def create_gift_file(basename):
-        """
-        Creates an empty .gift file in the characters directory.
-
-        Args:
-            basename (str): The base name of the gift file (e.g., "roses").
-        
-        Returns:
-            bool: True if the file was created successfully, False otherwise.
-        """
-        try:
-            filename = basename + ".gift"
-            filepath = os.path.join(renpy.config.basedir, 'characters', filename)
-            with open(filepath, "w") as f:
-                pass  # Just create an empty file
-            return True
-        except Exception as e:
-            renpy.notify(_("Oh no, I couldn't create the gift file."))
-            return False
-
-    def migrate_window_title_data():
-        """
-        Migrates the window title from v1.1.0 (persistent.save_window_title) 
-        to v1.3.4 (persistent._save_window_title).
-        """
-        # Check if the old variable exists
-        if hasattr(persistent, 'save_window_title'):
-            # Copy the value to the new variable (which starts with an underscore)
-            persistent._save_window_title = persistent.save_window_title
-            # Delete the old variable to clean up and prevent it from running again
-            del persistent.save_window_title
-
-    def migrate_chibi_costume_data():
-        """
-        Migrates `persistent.chibika_current_costume` between old and new data structures
-        to prevent crashes when switching between submod versions.
-        """
-        # Case 1: Old data (list) exists. Migrate to new format (tuple).
-        # This happens when updating from an old version to this one.
-        if isinstance(persistent.chibika_current_costume, list):
-            persistent.chibika_current_costume = ep_chibis.blanket_monika
-
-        # Case 2: New data (tuple) exists, but the game might be running an older script.
-        # This handles downgrading from a newer version.
-        # We check if the first element is a string, which is characteristic of the new tuple format.
-        elif isinstance(persistent.chibika_current_costume, tuple) and isinstance(persistent.chibika_current_costume[0], basestring):
-            # If it's a tuple with a string, it's the new format.
-            # We check if the expected file for the new format exists. If not, we revert.
-            if not renpy.loadable(ep_folders._join_path(ep_folders.EP_CHIBIS, "darling", "idle.png")):
-                persistent.chibika_current_costume = ["sticker_up", "sticker_sleep", "sticker_baka"]
-
-    def make_bday_oki_doki():
-        """Creates the 'oki doki' file for Monika's birthday surprise."""
-        config.overlay_screens.remove("bday_oki_doki")
-        renpy.hide_screen("bday_oki_doki")
-        try:
-            # Create the 'oki doki' file
-            with open(os.path.join(renpy.config.basedir, 'characters', 'oki doki'), "w") as f:
-                pass
-            renpy.notify("Everything is ready for the surprise!")
-        except Exception as e:
-            renpy.notify("Oh no, something went wrong while preparing the decorations.")
-        
-
-    def show_bday_screen():
-        """Show birthday screen if it's Monika's birthday and files are missing."""
-        if not persistent._mas_bday_in_bday_mode or not persistent._mas_bday_visuals:
-            config.overlay_screens.append("bday_oki_doki")
-
-    def _get_current_affection_safe():
-        """
-        Safely gets the current affection by reading directly from persistent.
-        This avoids cache issues between the log and the UI.
-        
-        OUT:
-            float - current affection without cache
-        """
-        try:
-            # Read directly from the mod's internal data
-            raw_data = store.mas_affection.__get_data()
-            
-            if raw_data and len(raw_data) > 0:
-                return raw_data[0]  # The first element is the affection value
-            else:
-                # If raw_data is None or empty, use the standard method
-                return store._mas_getAffection()
-        
-        except Exception as e:
-            # Fallback silencioso en caso de error
-            return store._mas_getAffection()
-
-    def notify_affection():
-        """Notify the player of their affection value every 10 seconds."""
-        current_time = time.time()
-        if current_time - store.ep_tools.last_affection_notify_time >= 10:
-            store.ep_tools.last_affection_notify_time = current_time
-            current_affection = _get_current_affection_safe()
-            renpy.notify("{1} {0} {1}".format(
-                int(current_affection), 
-                store.get_monika_level_from_value(current_affection)
-            ))
-
-    def show_costume_menu(costumes, return_label):
-        """Show a menu to select a costume."""
-        dokis_items = [SelectDOKI(name, cost) for name, cost in costumes]
-        items = [(_("Nevermind"), return_label, 20)]
-        renpy.call_screen("extra_gen_list", dokis_items, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
-
-    def get_monika_level_from_value(affection_val):
-        """Return Monika's affection level as an icon string."""
-        if affection_val >= 1000:
-            icon = "\""
-        elif affection_val >= 400:
-            icon = ";"
-        elif affection_val >= 100:
-            icon = "2"
-        elif affection_val >= 30:
-            icon = "#"
-        elif affection_val <= -30:
-            icon = "%"
-        elif affection_val <= -100:
-            icon = "8"
-        else:
-            icon = "/"
-
-        formatted_icon = (
-            "{size=+5}{color=#FFFFFF}{font=" + ep_tools.affection_icons + "}" + icon + "{/font}{/color}{/size}"
-
-        )
-        return formatted_icon
-
-    def plus_files_exist():
-        """Check if the main Extra Plus file exists."""
-        return os.path.isfile(os.path.normcase(ep_tools.check_file))
-
-    def plus_player_gender():
-        """Return a string for the player's gender."""
-        # Refactored to use a dictionary for a more concise and Pythonic approach.
-        return {"M": "boyfriend", "F": "girlfriend"}.get(persistent.gender, "beloved")
-
-    def extra_rng_cup():
-        """Randomly select a cup skin."""
-        if store.persistent._mas_pm_cares_about_dokis:
-            ep_sg.cup_skin = renpy.random.choice(ep_sg.CUP_LIST)
-        else:
-            ep_sg.cup_skin = renpy.random.choice(["cup.png", "monika.png"])
-
-    def save_title_windows():
-        """Set the window title based on special days or default."""
-        # Refactored to use a data-driven approach for better readability and maintenance.
-        special_days = [
-            (mas_isplayer_bday, " Happy birthday, {}!".format(player)),
-            (mas_isMonikaBirthday, " Happy Birthday, {}!".format(persistent._mas_monika_nickname)),
-            (mas_isF14, " Happy Valentine's Day, {}!".format(player)),
-            (mas_isO31, " Happy Halloween, {}!".format(player)),
-            (mas_isD25, " Merry Christmas, {}!".format(player)),
-            (mas_isD25Eve, " Merry Christmas Eve, {}!".format(player)),
-            (mas_isNYE, " Happy New Year's Eve, {}!".format(player)),
-            (mas_isNYD, " Happy New Year, {}!".format(player))
-        ]
-
-        for condition, title in special_days:
-            if condition():
-                config.window_title = title
-                return
-
-        config.window_title = persistent._save_window_title
-
-    def Extraplus_show():
-        """Show the Extra Plus interactions screen."""
-        mas_RaiseShield_dlg()
-        extra_button_zoom()
-        renpy.invoke_in_new_context(renpy.call_screen, "extraplus_interactions")
-
-    def ExtraButton():
-        """Add the Extra Plus button to the overlay if not visible."""
-        if not ExtraVisible():
-            config.overlay_screens.append("extraplus_button")
-
-    def ExtraVisible():
-        """Check if the Extra Plus button is visible."""
-        return "extraplus_button" in config.overlay_screens
-    
-    def extra_init_chibi():
-        """Initialize Chibika if enabled in settings."""
-        if not extra_visible_chibi():
-            config.overlay_screens.append("doki_chibi_idle")
-
-    def extra_visible_chibi():
-        """Check if Chibika is currently visible."""
-        return "doki_chibi_idle" in config.overlay_screens
-        
-    def extra_remove_chibi():
-        """Remove Chibika from the overlay if visible."""
-        if extra_visible_chibi():
-            config.overlay_screens.remove("doki_chibi_idle")
-            renpy.hide_screen("doki_chibi_idle")
-
-    def add_remv_chibi():
-        """Toggle Chibika's visibility."""
-        # Refactored to be a proper toggle function.
-        if extra_visible_chibi():
-            extra_remove_chibi()
-        else:
-            extra_init_chibi()
-
-    def chibi_drag(drags, drop):
-        """Handle Chibika's drag and drop movement."""
-        persistent.chibika_drag_x = drags[0].x
-        persistent.chibika_drag_y = drags[0].y
-
-    def extra_reset_chibi():
-        """Remove and re-add Chibika to reset her position."""
-        extra_remove_chibi()
-        if not extra_visible_chibi():
-            config.overlay_screens.append("doki_chibi_idle")
-
-    def chibi_draw_accessories(st, at):
-        """Draw Chibika's accessories as a LiveComposite."""
-        return LiveComposite(
-            (119, 188),
-            (0, 0), MASFilterSwitch(ep_chibis.accessory_path_0.format(persistent.chibi_accessory_1_)),
-            (0, 0), MASFilterSwitch(ep_chibis.accessory_path_1.format(persistent.chibi_accessory_2_))
-            ), 5
-
-    def extra_visible_zoom():
-        """Check if the custom zoom button is visible."""
-        return "extrabutton_custom_zoom" in config.overlay_screens
-
-    def extra_button_zoom():
-        """Add the custom zoom button if not visible."""
-        if not extra_visible_zoom():
-            config.overlay_screens.append("extrabutton_custom_zoom")
-
-    def disable_button_zoom(): # This function is now only used to hide the button when exiting menus.
-        """Remove the custom zoom button if visible."""
-        if extra_visible_zoom():
-            config.overlay_screens.remove("extrabutton_custom_zoom")
-            renpy.hide_screen("extrabutton_custom_zoom")
-
-    def mas_extra_location(locate=None):
-        """Save or load the current room's chair, table, and background."""
-        if locate:
-            store.ep_dates.chair = store.monika_chr.tablechair.chair
-            store.ep_dates.table = store.monika_chr.tablechair.table
-            store.ep_dates.old_bg = store.mas_current_background
-
-        else:
-            store.monika_chr.tablechair.chair = store.ep_dates.chair
-            store.monika_chr.tablechair.table = store.ep_dates.table
-            store.mas_current_background = store.ep_dates.old_bg
-            
-    def extra_seen_background(sorry, extra_label, view_label):
-        """Handle affection and label jump based on background seen status."""
-        if store.mas_affection._get_aff() < 400:
-            renpy.jump(sorry)
-
-        if renpy.seen_label(view_label):
-            store.mas_gainAffection(1,bypass=True)
-            renpy.jump(extra_label)
-
-        else:
-            store.mas_gainAffection(5,bypass=True)
-            
-    def extra_seen_label(extra_label, view_label):
-        """Jump to extra_label if view_label has been seen."""
-        if renpy.seen_label(view_label):
-            renpy.jump(extra_label)
-
-    def get_formatted_time_since_install():
-        """
-        Calculates the time since MAS was first run using persistent.sessions
-        and returns it as a formatted string.
-        """
-        if not (persistent.sessions
-            and "first_session" in persistent.sessions
-            and persistent.sessions["first_session"]
-        ):
-            return "a wonderful time"
-
-        try:
-            start_datetime = persistent.sessions["first_session"]
-            start_date = start_datetime.date()
-            current_date = datetime.date.today()
-            delta = current_date - start_date
-            total_days = delta.days
-
-            if total_days < 1:
-                return "less than a day, but every second has been incredible!"
-
-            years = total_days // 365
-            remaining_days = total_days % 365
-            months = remaining_days // 30
-            days = remaining_days % 30
-
-            parts = []
-            if years > 0:
-                parts.append("{0} {1}".format(years, "year" if years == 1 else "years"))
-            if months > 0:
-                parts.append("{0} {1}".format(months, "month" if months == 1 else "months"))
-            if days > 0:
-                parts.append("{0} {1}".format(days, "day" if days == 1 else "days"))
-
-            if len(parts) > 1:
-                last_part = parts.pop()
-                return ", ".join(parts) + " and " + last_part
-            elif parts:
-                return parts[0]
-            else:
-                return "a wonderful time"
-
-        except Exception as e:
-            return "an unforgettable time"
-
-    def get_total_days_since_install():
-            """
-            Calculates the total number of days since MAS was first run.
-            Returns an integer.
-            """
-            if not (persistent.sessions
-                and "first_session" in persistent.sessions
-                and persistent.sessions["first_session"]
-            ):
-                return 0
-
-            try:
-                start_datetime = persistent.sessions["first_session"]
-                start_date = start_datetime.date()
-                current_date = datetime.date.today()
-                delta = current_date - start_date
-                return delta.days
-
-            except Exception as e:
-                return 0
-
-    def extra_get_mas_stats():
-        """
-        Collects session stats from MAS by reading the pre-calculated
-        persistent data, using friendly display names.
-        """
-        stats = {}
-        
-        # Failsafe in case session data has not been created yet
-        if not persistent.sessions:
-            return {
-                "The Day We Met <3": "Not yet recorded",
-                "Visits to The Spaceroom": "0",
-                "Our Time Together": "N/A",
-                "Average Time per Visit": "N/A"
-            }
-
-        # --- Get data directly from the persistent object ---
-        first_session = persistent.sessions.get("first_session")
-        total_playtime = persistent.sessions.get("total_playtime", datetime.timedelta())
-        total_sessions = persistent.sessions.get("total_sessions", 0)
-
-        # --- Format data for display with friendly names ---
-        stats["The Day We Met <3"] = first_session.strftime("%B %d, %Y") if first_session else "Unknown"
-        stats["Visits to The Spaceroom"] = str(total_sessions)
-        h, rem = divmod(total_playtime.total_seconds(), 3600)
-        m, s = divmod(rem, 60)
-        stats["Our Time Together"] = "{:02.0f}h {:02.0f}m".format(h, m)
-        if total_sessions > 0:
-            avg_playtime = total_playtime / total_sessions
-            h_avg, rem_avg = divmod(avg_playtime.total_seconds(), 3600)
-            m_avg, s_avg = divmod(rem_avg, 60)
-            stats["Average Time per Visit"] = "{:02.0f}h {:02.0f}m".format(h_avg, m_avg)
-        else:
-            stats["Average Time per Visit"] = "N/A"
-
-        return stats
-
-    def filtered_clipboard_text(allowed_chars):
-        """
-        Gets text from the clipboard, filters it based on allowed_chars, and returns the result.
-        Compatible with Ren'Py 6.99 using pygame.
-        Returns the filtered text, or "cancel" if the clipboard is empty or an error occurs.
-        """
-        import pygame
-        try:
-            pygame.scrap.init()
-            clipboard_bytes = pygame.scrap.get(pygame.scrap.SCRAP_TEXT)
-
-            if clipboard_bytes:
-                clipboard_text = clipboard_bytes.decode('utf-8', 'ignore')
-                return "".join(char for char in clipboard_text if char in allowed_chars)
-            else:
-                renpy.notify(_("Your clipboard is empty."))
-                return "cancel"
-        except Exception as e:
-            # Failsafe in case clipboard access is blocked or fails
-            renpy.notify(_("Could not access clipboard."))
-            return "cancel"
-
-    migrate_chibi_costume_data()
-    extra_rng_cup()
-    if plus_files_exist():
-        ExtraButton()
-    
+# This block runs late in the init phase to trigger startup functions.
 init 999 python:
-    if store.persistent.hi_chibika:
-        extra_init_chibi()
+    # Migrate old data structures to prevent crashes.
+    store.ep_chibis.migrate_chibi_costume_data()
+    store.ep_files.migrate_window_title_data()
+
+    # Set up core components and states.
+    store.ep_tools.save_title_windows()
+
+    # Set up conditional UI elements.
+    if persistent.hi_chibika:
+        store.ep_chibis.init_chibi()
     else:
-        extra_remove_chibi()
+        store.ep_chibis.remove_chibi()
 
     if mas_isMonikaBirthday():
-        show_bday_screen()
+        store.ep_files.show_bday_screen()
 
-    save_title_windows()
+    if store.ep_files.main_file_exists():
+        store.ep_button.show_button()
 
 init -1 python:
     renpy.music.register_channel("maxwellcat", "sfx", True)
 
-#===========================================================================================
-# CLASSES
-#===========================================================================================
     class SGVerification(Action):
         """Verifies if the selected cup is correct in the shell game."""
         def __init__(self, index, check_index, final_label):
@@ -1158,71 +473,26 @@ init -1 python:
 
             renpy.jump(self.final_label)
 
-    class extra_gift:
-        """Handles the creation of a gift file and notifies the player."""
-        def __init__(self, name, gift):
-            self.name = name
-            self.gift = gift
-
-        def __call__(self):
-            if create_gift_file(self.gift):
-                messages = [
-                    _("All set! The '{}' gift is ready for you.").format(self.name),
-                    _("Here's a '{}' for Monika! I hope she loves it.").format(self.name),
-                    _("Perfect! Your '{}' is ready for Monika.").format(self.name),
-                    _("A '{}' for Monika! It's all set.").format(self.name),
-                    _("Your '{}' gift has been created!").format(self.name),
-                    _("One '{}' gift, coming right up! It's ready.").format(self.name)
-                ]
-                renpy.notify(random.choice(messages))
-                store.mas_checkReactions()
-
-            renpy.jump('plus_make_gift')
-
-    class DokiAccessory():
-        """Represents a Chibika accessory and applies it when called."""
-        def __init__(self, name, acc, category):
-            self.name = name
-            self.acc = acc
-            self.category = category
-
-        def __call__(self):
-            if self.category == "primary":
-                persistent.chibi_accessory_1_ = self.acc
-                renpy.jump("sticker_primary")
-            else:
-                persistent.chibi_accessory_2_ = self.acc
-                renpy.jump("sticker_secondary")
-
-    class SelectDOKI():
-        """Lets the player select a Chibika costume and applies it."""
-        def __init__(self, name, costume):
-            self.name = name
-            self.costume = costume
-
-        def __call__(self):
-            persistent.chibika_current_costume = self.costume
-            extra_reset_chibi()
-            renpy.jump("extra_dev_mode")
 
 #===========================================================================================
 # IMAGES
 #===========================================================================================
 init 5 python:
+    global extraplus_accessories
     extraplus_accessories = [
-        ("extraplus_acs_chocolatecake", "chocolatecake", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("extraplus_acs_fruitcake", "fruitcake", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("extraplus_acs_emptyplate", "emptyplate", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("extraplus_acs_coffeecup", "coffeecup", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("extraplus_acs_emptycup", "emptycup", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("extraplus_acs_pasta", "extraplus_spaghetti", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("extraplus_acs_pancakes", "extraplus_pancakes", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("extraplus_acs_candles", "extraplus_candles", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("extraplus_acs_icecream", "extraplus_icecream", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("extraplus_acs_pudding", "extraplus_lecheflanpudding", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("extraplus_acs_waffles","extraplus_waffles", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("extraplus_acs_flowers", "extraplus_flowers", MASPoseMap(default="0", use_reg_for_l=True), True, 2),
-        ("extraplus_acs_remptyplate", "extraplus_remptyplate", MASPoseMap(default="0", use_reg_for_l=True), True)
+        ("EP_acs_chocolatecake", "chocolatecake", MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_fruitcake", "fruitcake", MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_emptyplate", "emptyplate", MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_coffeecup", "coffeecup", MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_emptycup", "emptycup", MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_pasta", "extraplus_spaghetti", MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_pancakes", "extraplus_pancakes", MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_candles", "extraplus_candles", MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_icecream", "extraplus_icecream", MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_pudding", "extraplus_lecheflanpudding", MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_waffles","extraplus_waffles", MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_flowers", "extraplus_flowers", MASPoseMap(default="0", use_reg_for_l=True), True, 2),
+        ("EP_acs_remptyplate", "extraplus_remptyplate", MASPoseMap(default="0", use_reg_for_l=True), True)
     ]
 
     for info in extraplus_accessories:
@@ -1230,12 +500,6 @@ init 5 python:
         acs = MASAccessory(*info)
         vars()[name] = acs
         store.mas_sprites.init_acs(acs)
-
-    for suit in ["hearts", "diamonds", "clubs", "spades"]:
-        for value in range(1, 14):
-            renpy.image("card {} {}".format(suit, value), MASFilterSwitch(
-                ep_folders._join_path(ep_folders.EP_MG_BLACKJACK, suit, "{}.png".format(value))
-            ))
 
 #====Rock Paper Scissors
 image extra_paper = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_RPS, "paper.png"))
@@ -1245,7 +509,7 @@ image extra_card_back = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_R
 
 #====Shell Game
 image note_score = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "note_score.png"))
-image extra_cup = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "{}".format(ep_sg.cup_skin)))
+image extra_cup = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "{}".format(store.ep_sg.cup_skin)))
 image extra_cup_hover = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "cup_hover.png"))
 image extra_cup_idle = im.Scale("mod_assets/other/transparent.png", 200, 260)
 image extra_ball = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "ball.png"))
@@ -1295,15 +559,14 @@ image chibi_hover_effect:
 image extra_chibi_base = LiveComposite(
     (119, 188),
     (0, 40), "chibi_blink_effect",
-    (0, 0), DynamicDisplayable(chibi_draw_accessories)
+    (0, 0), DynamicDisplayable(store.ep_chibis.chibi_draw_accessories)
     )
 
 image extra_chibi_hover = LiveComposite(
     (119, 188), 
     (0, 40), "chibi_hover_effect",
-    (0, 0), DynamicDisplayable(chibi_draw_accessories)
+    (0, 0), DynamicDisplayable(store.ep_chibis.chibi_draw_accessories)
     )
-
 #====Coin
 image coin_heads = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_OTHERS, "coin_heads.png"))
 image coin_tails = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_OTHERS, "coin_tails.png"))
@@ -1335,17 +598,17 @@ screen extraplus_button():
     zorder 15
     style_prefix "hkb"
 
-    vbox:
+    vbox: # Main button container
         xpos 0.05
         yanchor 1.0
         ypos 50
 
-        $ buttons_text = _(get_dynamic_button_text())
+        $ buttons_text = _(store.ep_button.getDynamicButtonText())
         if renpy.get_screen("hkb_overlay"):
             if mas_hotkeys.talk_enabled:
-                key "a" action Function(notify_affection)
-                key "x" action Function(Extraplus_show)
-                textbutton buttons_text action Function(Extraplus_show)
+                key "a" action Function(store.ep_affection.notify_affection)
+                key "x" action Function(store.ep_button.show_menu)
+                textbutton buttons_text action Function(store.ep_button.show_menu)
             elif mas_submod_utils.current_label == "mas_piano_setupstart":
                 text _("")
             else:
@@ -1362,9 +625,9 @@ screen extraplus_interactions():
 
         use extra_close_button()
         textbutton _("Dates") action Jump("extraplus_walk")
-        textbutton _("Games") action If(mas_affection._get_aff() >= 30, true=Jump("extraplus_minigames"), false=NullAction())
+        textbutton _("Games") action Jump("extraplus_minigames") sensitive (ep_affection.getCurrentAffection() >= 30)
         textbutton _("Tools") action Jump("extraplus_tools")
-        textbutton _("Boop") action If(mas_affection._get_aff() >= 30, true=Jump("show_boop_screen"), false=NullAction())
+        textbutton _("Boop") action Jump("show_boop_screen") sensitive (ep_affection.getCurrentAffection() >= 100)
 
 screen extra_gen_list(extra_list, extra_area, others, close=None):
     #Generates a scrollable menu from a list, used for dynamic option lists in the submod.
@@ -1434,7 +697,7 @@ screen doki_chibi_idle():
             drag:
                 child "extra_chibi_base"
                 selected_hover_child "extra_chibi_hover"
-                dragged chibi_drag
+                dragged store.ep_chibis.chibi_drag
                 drag_offscreen True
                 xpos persistent.chibika_drag_x
                 ypos persistent.chibika_drag_y
@@ -1474,14 +737,14 @@ screen sticker_customization():
                 vbox:
                     label _("Draggable Chibi:")
                     # null height 30
-                    textbutton _("[persistent.enable_drag_chibika]") action ToggleField(persistent, "enable_drag_chibika")
+                    textbutton _("[persistent.enable_drag_chibika]") action ToggleField(store.persistent, "enable_drag_chibika")
                 vbox:
                     label _("Always on screen:")
-                    textbutton _("[persistent.hi_chibika]") action ToggleField(persistent, "hi_chibika")
+                    textbutton _("[persistent.hi_chibika]") action ToggleField(store.persistent, "hi_chibika")
                 vbox:
                     label _("Toggle Visibility:")
                     # null height 10
-                    textbutton _("Show/Hide") action Function(add_remv_chibi)
+                    textbutton _("Show/Hide") action Function(store.ep_chibis.add_remv_chibi)
 
             null height 10
 
@@ -1561,7 +824,7 @@ screen shell_game_minigame():
     zorder 50
     style_prefix "hkb"
     use extra_no_click()
-    timer ep_tools.games_idle_timer action Function(_show_idle_notification, context="sg") repeat True
+    timer ep_tools.games_idle_timer action Function(store.ep_tools.show_idle_notification, context="sg") repeat True
 
     for i in range(3):
         imagebutton:
@@ -1582,7 +845,7 @@ screen shell_game_minigame():
 screen RPS_mg():
     #Shows the Rock-Paper-Scissors minigame interface, with buttons for each choice and a quit button.
     zorder 50
-    timer ep_tools.games_idle_timer action Function(_show_idle_notification, context="rps") repeat True
+    timer ep_tools.games_idle_timer action Function(store.ep_tools.show_idle_notification, context="rps") repeat True
 
     # Monika's card back
     imagebutton idle "extra_card_back":
@@ -1656,8 +919,8 @@ screen boop_revamped():
         xanchor 1.0
         xpos 1.0
         ypos 0.5
-        
-        if not ep_boop_war_active:
+
+        if not store.EP_interaction_manager.ep_boop_war_active:
             label _("Interactions\navailable:")
             text _(" Cheeks\n Head\n Nose\n Ears\n Hands\n"):
                 outlines [(2, "#808080", 0, 0)]
@@ -1667,7 +930,7 @@ screen boop_revamped():
         xpos 0.05
         yanchor 1.0
         ypos 90
-        
+
         use extra_close_button("close_boop_screen")
         textbutton _("Return") action Jump("return_boop_screen")
 
@@ -1678,16 +941,16 @@ screen boop_capture_overlay(label_boop):
     python:
         # NOTE: Assuming the manager is in 'store.EP_interaction_manager'
         # and its .cz_manager is accessible
-        nose_cz = store.EP_interaction_manager.cz_manager.get(
-            store.mas_interactions.ZONE_EXTRA_NOSE, 
+        nose_cz = store.EP_interaction_manager.cz_manager.get( # NOQA
+            store.mas_interactions.ZONE_EXTRA_NOSE,
             store.mas_sprites.zoom_level
         )
-        
+
         if nose_cz and not nose_cz.disabled:
             corners = nose_cz.corners
             if corners:
                 min_x = min(x for x, y in corners)
-                min_y = min(y for x, y in corners)
+                min_y = min(y for x, y in corners) # NOQA
                 max_x = max(x for x, y in corners)
                 max_y = max(y for x, y in corners)
                 
@@ -1697,7 +960,7 @@ screen boop_capture_overlay(label_boop):
                     'w': max_x - min_x,
                     'h': max_y - min_y
                 }
-    
+
     # Render invisible imagebutton only over the nose
     if nose_zone:
         imagebutton:
@@ -1729,7 +992,7 @@ screen boop_war_score_ui():
     vbox:
         xpos 0.910
         ypos 0.045
-        text _("Boops : [ep_boop_war_count]") size 25 style "monika_text"
+        text _("Boops : [store.EP_interaction_manager.ep_boop_war_count]") size 25 style "monika_text"
 
 # === DATES ===
 screen extra_dating_loop(ask, label_boop, boop_enable=False):
@@ -1767,7 +1030,7 @@ screen bday_oki_doki():
         xpos 590
         ypos 0.9
         if mas_submod_utils.current_label == "mas_dockstat_empty_desk_from_empty":
-            textbutton _("Oki Doki") action Function(make_bday_oki_doki)
+            textbutton _("Oki Doki") action Function(store.ep_files.make_bday_oki_doki)
 
 screen maxwell_april_fools():
     #Displays the Maxwell cat animation and plays music for the April Fools event.
@@ -1827,12 +1090,111 @@ screen extraplus_stats_screen():
                 xfill True
                 spacing 30
                 python:
-                    stats_data = extra_get_mas_stats()
+                    stats_data = store.ep_tools.getMasStats()
                 for stat_name, stat_value in stats_data.items():
                     vbox:
                         xfill True
                         text stat_name
                         text str(stat_value)
+
+screen extra_timeline_screen():
+    zorder 49
+    
+    $ EP_timeline_data = store.ep_tools.getTimelineData()
+
+    # --- Navigation Buttons (Left) ---
+    vbox:
+        style_prefix "hkb"
+        xpos 0.05
+        yanchor 1.0
+        ypos 90
+
+        use extra_close_button()
+        textbutton _("Return") action Jump("extraplus_tools")
+
+    # --- Main Panel (Center) ---
+    frame:
+        background None
+        xalign 0.5
+        yalign 0.5
+        xmaximum 600
+        ymaximum 680
+        padding (30, 30, 30, 30)
+
+        vbox:
+            
+            # Title
+            hbox:
+                style_prefix "check"
+                xalign 0.5
+                label _("Our History Together")
+
+            # --- Viewport and Scrollbar ---
+            fixed:
+                # The viewport now takes up the full width to capture the mousewheel everywhere
+                viewport id "timeline_vp":
+                    mousewheel True
+                    draggable True
+                    yfill False
+                    xsize 528
+                    ysize 570
+                    
+                    # The inner vbox has a smaller size to leave space for the scrollbar
+                    vbox:
+                        xsize 510
+                        spacing 10 # Space between cards
+                        
+                        if not EP_timeline_data:
+                            text _("Our story is just beginning..."):
+                                xalign 0.5
+                                yalign 0.5 # This will center it in the available space
+
+                        for entry in EP_timeline_data:
+                            $ date_str = ep_tools.exp_fmt_date(entry.date)
+                            
+                            # --- Event Card ---
+                            frame:
+                                xfill True
+                                padding (12, 12)
+                                background Solid("#00000050") # Semi-transparent background for the card
+
+                                vbox:
+                                    spacing 8
+                                    xfill True
+
+                                    # --- Icon and Title ---
+                                    hbox:
+                                        spacing 10
+                                        
+                                        text _(entry.icon):
+                                            font ep_tools.pictograms_font
+                                            size 25
+                                            color "#FF69B4"
+                                            yalign 0.5
+
+                                        text _("[entry.title]"):
+                                            size 20
+                                            bold True
+                                            yalign 0.5
+                                    
+                                    # --- Description ---
+                                    text _("[entry.description]"):
+                                        size 18
+
+                                    null height 1
+
+                                    # --- Date ---
+                                    text _("Date: [date_str]"):
+                                        size 16
+                                        italic True
+                                        xalign 1.0
+                
+                bar:
+                    style "classroom_vscrollbar" 
+                    value YScrollValue("timeline_vp")
+                    xalign 1.0
+                    yfill True
+                    xsize 18
 
 screen _extra_plus_submod_settings():
     # Displays the settings pane for the Extra+ submod in the MAS settings menu.
@@ -1845,15 +1207,15 @@ screen _extra_plus_submod_settings():
         xmaximum 1000
 
         textbutton _("{b}Enable dynamic button text{/b}"):
-            action ToggleField(persistent, "EP_dynamic_button_text")
+            action ToggleField(store.persistent, "EP_dynamic_button_text")
             hovered tooltip.Action("If enabled, the submod button text will change based on affection, events, or time of day. If disabled, it will always say 'Extra+'.")
 
         textbutton _("{b}Check for missing files{/b}"):
-            action Function(extra_plus_asset_linter)
+            action Function(store.ep_files.run_asset_linter)
             hovered tooltip.Action("This will check if all submod files are installed correctly and create a log file in the 'characters' folder.")
 
         textbutton _("{b}Clean up old files{/b}"):
-            action Function(extra_plus_cleanup_old_files)
+            action Function(store.ep_files.cleanup_old_files)
             hovered tooltip.Action("This will remove obsolete files and folders from previous versions of the submod.")
 
 #===========================================================================================
@@ -1866,9 +1228,6 @@ transform boop_feedback_trans:
     parallel:
         pause 0.1
         ease 1.1 alpha 0
-
-transform monika_card_flip:
-    yzoom -1.0
 
 transform hover_card:
     on idle:
@@ -2594,233 +1953,3 @@ init -2 python in mas_background:
 
         store.monika_chr.tablechair.table = "def"
         store.monika_chr.tablechair.chair = "def"
-
-
-#===========================================================================================
-# DEBUGGING
-#===========================================================================================
-
-init -2 python:
-    def extra_plus_asset_linter():
-        """
-        Checks for the existence of all defined image assets and creates a log file.
-        This is a debug tool and should not be in the final release.
-        """
-        import os
-        import datetime
-
-        # --- Helper function to check files ---
-        def check_file(path, found_list, missing_list):
-            full_path = ep_folders._get_game_path(path)
-            if os.path.isfile(full_path):
-                found_list.append(path)
-            else:
-                missing_list.append(path)
-
-        # --- Lists to store results ---
-        found_assets = []
-        missing_assets = []
-
-        # --- 1. Static and Minigame Assets ---
-        static_assets = [
-            # Shell Game
-            ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "note_score.png"),
-            ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "cup_hover.png"),
-            ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "ball.png"),
-            ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "cup.png"),
-            ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "monika.png"),
-            ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "yuri.png"),
-            ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "natsuki.png"),
-            ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "sayori.png"),
-            # Tic-Tac-Toe
-            ep_folders._join_path(ep_folders.EP_MG_TICTACTOE, "notebook.png"),
-            ep_folders._join_path(ep_folders.EP_MG_TICTACTOE, "line.png"),
-            ep_folders._join_path(ep_folders.EP_MG_TICTACTOE, "player.png"),
-            ep_folders._join_path(ep_folders.EP_MG_TICTACTOE, "monika.png"),
-            # Rock, Paper, Scissors
-            ep_folders._join_path(ep_folders.EP_MG_RPS, "paper.png"),
-            ep_folders._join_path(ep_folders.EP_MG_RPS, "rock.png"),
-            ep_folders._join_path(ep_folders.EP_MG_RPS, "scissors.png"),
-            ep_folders._join_path(ep_folders.EP_MG_RPS, "back.png"),
-            # Blackjack
-            ep_folders._join_path(ep_folders.EP_MG_BLACKJACK, "back.png"),
-            ep_folders._join_path(ep_folders.EP_MG_BLACKJACK, "background.png"),
-            ep_folders._join_path(ep_folders.EP_MG_BLACKJACK, "name.png"),
-            ep_folders._join_path(ep_folders.EP_MG_BLACKJACK, "score.png"),
-            # Misc
-            ep_folders._join_path(ep_folders.EP_OTHERS, "coin_heads.png"),
-            ep_folders._join_path(ep_folders.EP_OTHERS, "coin_tails.png"),
-            ep_folders._join_path(ep_folders.EP_OTHERS, "sprite_coin.png"),
-            ep_folders._join_path(ep_folders.EP_OTHERS, "maxwell_cat.png"),
-            # Date Tables & Chairs
-            "mod_assets/monika/t/chair-extraplus_cafe.png",
-            "mod_assets/monika/t/table-extraplus_cafe.png",
-            "mod_assets/monika/t/table-extraplus_cafe-s.png",
-            "mod_assets/monika/t/chair-extraplus_restaurant.png",
-            "mod_assets/monika/t/table-extraplus_restaurant.png",
-            "mod_assets/monika/t/table-extraplus_restaurant-s.png",
-        ]
-        for asset in static_assets:
-            check_file(asset, found_assets, missing_assets)
-
-        # --- 2. Chibi Assets ---
-        all_chibi_costumes = store.ep_chibis.monika_costumes_ + store.ep_chibis.natsuki_costumes_ + store.ep_chibis.sayori_costumes_ + store.ep_chibis.yuri_costumes_
-        for _, costume_data in all_chibi_costumes:
-            doki_folder, idle_sprite, blink_sprite, hover_sprite = costume_data # No store prefix here, these are local to the loop
-            chibi_sprites = [idle_sprite, blink_sprite, hover_sprite]
-            for sprite in chibi_sprites:
-                path = ep_folders._join_path(ep_folders.EP_CHIBIS, doki_folder, "{}.png".format(sprite))
-                check_file(path, found_assets, missing_assets)
-
-        # --- 3. Chibi Accessories ---
-        # NOTE: These are hardcoded based on the lists in Extra_Plus_Misc.rpy
-        primary_accessories = ['cat_ears', 'christmas_hat', 'demon_horns', 'flowers_crown', 'halo', 'heart_headband', 'hny', 'neon_cat_ears', 'party_hat', 'rabbit_ears', 'witch_hat']
-        secondary_accessories = ['black_bow_tie', 'christmas_tree', 'cloud', 'coffee', 'pumpkin', 'hearts', 'm_slice_cake', 'moustache', 'neon_blush', 'p_slice_cake', 'patch', 'speech_bubble', 'sunglasses']
-
-        for acc in primary_accessories:
-            path = ep_folders._join_path(ep_folders.EP_CHIBI_ACC_0, "{}.png".format(acc))
-            check_file(path, found_assets, missing_assets)
-        for acc in secondary_accessories:
-            path = ep_folders._join_path(ep_folders.EP_CHIBI_ACC_1, "{}.png".format(acc))
-            check_file(path, found_assets, missing_assets)
-
-        # --- 4. Backgrounds (Manual List) ---
-        background_assets = [
-            # Cafe
-            ep_folders._join_path(ep_folders.EP_DATE_CAFE, "cafe_day.png"),
-            ep_folders._join_path(ep_folders.EP_DATE_CAFE, "cafe_rain.png"),
-            ep_folders._join_path(ep_folders.EP_DATE_CAFE, "cafe-n.png"),
-            ep_folders._join_path(ep_folders.EP_DATE_CAFE, "cafe_rain-n.png"),
-            ep_folders._join_path(ep_folders.EP_DATE_CAFE, "cafe-ss.png"),
-            ep_folders._join_path(ep_folders.EP_DATE_CAFE, "cafe_rain-ss.png"),
-            # Restaurant
-            ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "restaurant_day.png"),
-            ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "restaurant_rain.png"),
-            ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "restaurant-n.png"),
-            ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "restaurant_rain-n.png"),
-            ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "restaurant-ss.png"),
-            ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "restaurant_rain-ss.png"),
-            # Pool
-            ep_folders._join_path(ep_folders.EP_DATE_POOL, "pool_day.png"),
-            ep_folders._join_path(ep_folders.EP_DATE_POOL, "pool_rain.png"),
-            ep_folders._join_path(ep_folders.EP_DATE_POOL, "pool-n.png"),
-            ep_folders._join_path(ep_folders.EP_DATE_POOL, "pool_rain-n.png"),
-            ep_folders._join_path(ep_folders.EP_DATE_POOL, "pool-ss.png"),
-            ep_folders._join_path(ep_folders.EP_DATE_POOL, "pool_rain-ss.png"),
-            # Library
-            # ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "library_day.png"),
-            # ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "library_rain.png"),
-            # ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "library-n.png"),
-            # ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "library_rain-n.png"),
-            # ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "library-ss.png"),
-            # ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "library_rain-ss.png"),
-            # Arcade
-            # ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "arcade_day.png"),
-            # ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "arcade_rain.png"),
-            # ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "arcade-n.png"),
-            # ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "arcade_rain-n.png"),
-            # ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "arcade-ss.png"),
-            # ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "arcade_rain-ss.png"),
-        ]
-        for asset in background_assets:
-            check_file(asset, found_assets, missing_assets)
-
-        # --- 5. Blackjack Cards ---
-        for suit in ["hearts", "diamonds", "clubs", "spades"]:
-            for value in range(1, 14):
-                path = ep_folders._join_path(ep_folders.EP_MG_BLACKJACK, suit, "{}.png".format(value))
-                check_file(path, found_assets, missing_assets)
-
-        # --- 6. Date Accessories ---
-        # This list is defined in Extra_Plus_Main.rpy
-        for acs_tuple in store.extraplus_accessories:
-            acs_name = acs_tuple[1]
-            path = "mod_assets/monika/a/{}/0.png".format(acs_name)
-            check_file(path, found_assets, missing_assets)
-
-        # --- 6. Write Log File ---
-        log_path = ep_folders._normalize_path(os.path.join(renpy.config.basedir, 'characters', 'extra_plus_asset_log.txt'))
-        try:
-            with open(log_path, 'w') as f:
-                f.write("Extra+ Asset Linter Report - {}\n".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-                f.write("="*80 + "\n\n")
-
-                if not missing_assets:
-                    f.write("SUCCESS: All {} assets were found!\n".format(len(found_assets)))
-                else:
-                    f.write("ERROR: Found {} missing assets.\n".format(len(missing_assets)))
-                    f.write("-" * 30 + "\n")
-                    for asset in missing_assets:
-                        f.write("MISSING: {}\n".format(asset))
-
-                f.write("\n\n")
-                f.write("--- Found Assets ({}) ---\n".format(len(found_assets)))
-                for asset in found_assets:
-                    f.write("FOUND: {}\n".format(asset))
-
-            renpy.notify("Asset check complete. See extra_plus_asset_log.txt in /characters.")
-
-        except Exception as e:
-            renpy.notify("Failed to write asset log: {}".format(e))
-
-    def extra_plus_cleanup_old_files():
-        """
-        Deletes obsolete files and folders from previous versions of the submod.
-        """
-        import os
-        import shutil
-
-        files_deleted = 0
-        folders_deleted = 0
-        errors = []
-
-        def delete_file(path):
-            """Safely deletes a file and logs the result."""
-            full_path = ep_folders._get_game_path(path)
-            if os.path.isfile(full_path):
-                try:
-                    os.remove(full_path)
-                    return 1
-                except Exception as e:
-                    errors.append("Failed to delete file {}: {}".format(ep_folders._normalize_path(path), e))
-            return 0
-
-        def delete_folder(path):
-            """Safely deletes a folder and its contents, and logs the result."""
-            full_path = ep_folders._get_game_path(path)
-            if os.path.isdir(full_path):
-                try:
-                    shutil.rmtree(full_path)
-                    return 1
-                except Exception as e:
-                    errors.append("Failed to delete folder {}: {}".format(ep_folders._normalize_path(path), e))
-            return 0
-
-        # 1. Delete old folder (relative to EP_ROOT)
-        folders_deleted += delete_folder(ep_folders._join_path(ep_folders.EP_ROOT, "submod_assets"))
-
-        # 2. Delete old table/chair assets (relative to game directory)
-        table_chair_files = [
-            "mod_assets/monika/t/chair-submod_cafe.png",
-            "mod_assets/monika/t/chair-submod_restaurant.png",
-            "mod_assets/monika/t/table-submod_cafe.png",
-            "mod_assets/monika/t/table-submod_cafe-s.png",
-            "mod_assets/monika/t/table-submod_restaurant.png",
-            "mod_assets/monika/t/table-submod_restaurant-s.png"
-        ]
-        for f in table_chair_files:
-            files_deleted += delete_file(f)
-        
-        # 3. Delete old accessory files (relative to game directory)
-        for acs_tuple in store.extraplus_accessories:
-            acs_file_name_base = acs_tuple[1]
-            files_deleted += delete_file("mod_assets/monika/a/acs-{}-0.png".format(acs_file_name_base))
-
-        # --- Final Notification ---
-        if files_deleted > 0 or folders_deleted > 0:
-            renpy.notify("Cleanup complete! Removed {} files and {} folders.".format(files_deleted, folders_deleted))
-        else:
-            renpy.notify("No old files or folders were found to clean up.")
-
-        if errors:
-            renpy.notify("Some errors occurred during cleanup. Please check the logs.")

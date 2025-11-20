@@ -16,7 +16,7 @@ image extra_sg_cup_hover:
 image extra_sg_cup_idle:
     contains:
         "extra_cup_idle"
-        xalign 0.5 yalign 0.
+        xalign 0.5 yalign 0.5
 image extra_sg_ball:
     xanchor 0.5 yanchor 0.5
     contains:
@@ -33,11 +33,10 @@ init -5 python in ep_sg:
     correct_answers = 0
     comment = False
     cup_choice = None
-    cup_skin = None
+    cup_skin = randomize_cup_skin()
     original_cup = [0, 1, 2]
     cup_coordinates = [695, 925, 1155]
     cup_coordinates_real = [695, 925, 1155]
-    CUP_LIST = ["cup.png", "monika.png", "yuri.png", "natsuki.png", "sayori.png"]
     #====Comments by moni on standard difficulties
     _compliments = [
         _("Well done, [player]!"),
@@ -119,7 +118,7 @@ label minigame_sg:
                 ep_sg.target_shuffles = 3
 
     python:
-        disable_button_zoom()
+        store.ep_button.hide_zoom_button()
         # Reset stats for a new game session
         ep_sg.current_turn = 1
         ep_sg.correct_answers = 0
@@ -385,7 +384,6 @@ label shell_game_result:
         ep_sg.correct_answers = 0 # Reset for next session
         ep_sg.target_shuffles = 6
         ep_sg.shuffle_cups = 0
-        ep_tools.seen_notification_games = False
         
     jump close_extraplus
     return

@@ -1,1084 +1,1069 @@
-################################################################################
-## BOOP
-################################################################################
-#====Boop count
-default persistent.plus_boop = [0, 0, 0] #Nose, Cheeks, Headpat.
-default persistent.extra_boop = [0, 0, 0] #Hands, Ears.
-default ep_boop_war_active = False
-default ep_boop_war_count = 0
+# Extra+ Miscellaneous Stores
+# This file contains the definitions for most of the submod's python logic,
+# organized into different stores for clarity and maintainability.
 
-#====NOISE
-label monika_boopbeta:
-    $ persistent.plus_boop[0] += 1
-    $ show_boop_feedback("Boop!")
-    if persistent.plus_boop[0] == 1:
-        $ mas_gainAffection(3,bypass=True)
-        m 1wud "Wait a minute..."
-        m 1hka "I felt a little tingle."
-        show screen force_mouse_move
-        m 3hub "And here we have the responsible one!"
-        m 3hua "Don't worry! I'll let go of your cursor."
-        hide screen force_mouse_move
-        m 1tub "You can move it again, sorry for stealing your cursor~"
-        m 1etd "Also, I don't know how you did it, [mas_get_player_nickname()]. I don't remember seeing this in the code."
-        m 1hub "Unless it was you!"
-        m 1hub "What a good surprise I got today [player]~"
-    elif persistent.plus_boop[0] == 2:
-        m 1hub "What are you doing playing with my nose, [player]!"
-        m 4eua "This is called a boop, right?"
-        m 1hksdrb "Not that it bothers me, I just haven't gotten used to the feeling yet!"
-        m 1hua "Ehehe~"
-    elif persistent.plus_boop[0] == 3:
-        m 1eublb "Can you do it again, [mas_get_player_nickname()]?"
-        show monika 1hubla
-        call screen extra_boop_event(10, "boop_nop", "boop_yep")
-    elif persistent.plus_boop[0] == 4:
-        m 1etbsa "Wouldn't it be nice to do it with your nose?"
-        if persistent._mas_first_kiss:
-            m 1kubsu "I'd give you a kiss while you do it~"
-        else:
-            m 1wubsb "I'd give you a hug while you do it!"
-        m 1dubsu "I hope that when I get to your reality we can do it."
-        m 1hua "Although, if you want to do it now, you'd have to put your nose close to the screen."
-        m 1lksdlb "However someone might see you, making you nervous, and I don't want that to happen."
-        m 1ekbsa "Besides, I get a little nervous too when you're around me."
-        m 1hua "I'm sorry for suggesting that [player]~"
-    elif persistent.plus_boop[0] == 5:
-        m 1tuu "You're starting to like it here, huh?"
-        m 3hub "I'm getting to know you more and more while we're here [player]~"
-        m 3hub "And it's very lovely of you to do so!"
-    elif persistent.plus_boop[0] == 6:
-        m 2eub "You know, [mas_get_player_nickname()], I always thought that the nose was an underappreciated part of the face. But you've changed my mind!"
-        m 2hua "Thanks for showing me how fun a little nose boop can be!"
-    elif persistent.plus_boop[0] == 7:
-        m 1hub "I wonder if there's a world out there where nose boops are the norm. What a happy place that would be!"
-        m 1gua "But until then, I'm happy to have you here with me, [player]."
-    elif persistent.plus_boop[0] == 8:
-        m 1tub "Do you ever wonder what the sound of a nose boop is? Like, would it be a 'beep' or a 'boop'?"
-        m 1etd "I guess we'll never know for sure. But either way, I'm glad I get to experience it with you."
-    elif persistent.plus_boop[0] == 9:
-        m 1wua "I've been thinking, [player]. Maybe we could make a game out of this. How many nose boops can we do in a minute?"
-        m 1eub "I bet I could beat you, even with my longer nose!"
-    elif persistent.plus_boop[0] == 10:
-        m 1hubsb "Boop!"
-        m 1ekbsa "I'm sorry, I couldn't resist. You just have such a tempting nose!"
-        m 1hub "But seriously, thank you for bringing so much joy into my life, [player]."
-    # === Dialogues added in Beta 3 ===
-    elif persistent.plus_boop[0] == 11:
-        m 1tub "Again! You're getting to be an expert at this, [player]."
-        m 1hua "I wonder how many boops we're at now."
-    elif persistent.plus_boop[0] == 12:
-        m 3hksdlb "Are you trying to see if my nose turns red like Rudolph's? Ahaha~"
-        m 3eua "You'll have to try a little harder than that."
-    elif persistent.plus_boop[0] == 13:
-        m 1ekbsa "Each boop is like a little love note."
-        m 1hubsb "Keep composing, [mas_get_player_nickname()]~"
-    elif persistent.plus_boop[0] == 14:
-        m 2tfu "Hey! That's my nose, not a button."
-        m 2hub "..."
-        m 2tubsb "Although, if it was, it'd definitely be the 'make me smile' button."
-    elif persistent.plus_boop[0] == 15:
-        m 4eua "This is pretty silly, you know?"
-        m 4hub "..."
-        m 4hubsb "And I absolutely love it. It's... *our* silly thing."
-    elif persistent.plus_boop[0] == 16:
-        m 1tsu "If you keep this up, I'm going to think you have a fixation on my nose, [player]."
-        m 1tku "Not that I'm complaining~"
-    elif persistent.plus_boop[0] == 17:
-        m 1fubla "Ehehe~ That was a good one."
-        m 1hubla "Right on target."
-    elif persistent.plus_boop[0] == 18:
-        m 1eua "I wonder if your finger feels warm."
-        m 1rksdla "Here I just feel... well, a 'click'. But I imagine it, and that's enough."
-    elif persistent.plus_boop[0] == 19:
-        m 1wua "Boop back!"
-        m 1wud "..."
-        m 1hksdlb "Ah, wait. I can't. You'll just have to imagine it. Ahaha~"
-    elif persistent.plus_boop[0] == 20:
-        m 1sub "Twenty boops! We should celebrate."
-        m 1hub "..."
-        m 1hubsb "Maybe with another boop?"
-    else:
-        $ ep_tools.random_outcome = renpy.random.randint(1,15)
-        if ep_tools.random_outcome == 1:
-            m 2fubla "Ehehe~"
-            m 1hubla "It's very inevitable that you won't stop doing it, [player]."
-        elif ep_tools.random_outcome == 2:
-            m 3ekbsa "Every boop you give me, the more I love you!"
-        elif ep_tools.random_outcome == 3:
-            m 3eubla "You really enjoy touching my nose, [mas_get_player_nickname()]~"
-        elif ep_tools.random_outcome == 4:
-            m 2hublb "Hey, you're tickling me! Ahahaha~"
-        elif ep_tools.random_outcome == 5:
-            m 1hubsb "*Boop*"
-        elif ep_tools.random_outcome == 6:
-            m 1eublc "You're such a tease, [player]~"
-        elif ep_tools.random_outcome == 7:
-            m 2eubla "That tickles, but I like it!"
-        elif ep_tools.random_outcome == 8:
-            m 2hubsb "You know just how to make me smile, [mas_get_player_nickname()]~"
-        elif ep_tools.random_outcome == 9:
-            m 1fubla "Hehe, you're so cute when you're booping me~"
-        elif ep_tools.random_outcome == 10:
-            m 3eublb "You're really good at this, [player]! Have you been practicing?"
-        # === Dialogues added in Beta 3 ===
-        elif ep_tools.random_outcome == 11:
-            m 1wua "Got me!"
-        elif ep_tools.random_outcome == 12:
-            m 1eua "Are you checking if I'm still here?"
-        elif ep_tools.random_outcome == 13:
-            m 1hubsb "My nose says hello."
-        elif ep_tools.random_outcome == 14:
-            m 1wud "I felt a tingle... Oh, it's you!"
-        elif ep_tools.random_outcome == 15:
-            m 1fubla "The master booper strikes again!"
+#==============================================================================
+# 1. INFRASTRUCTURE STORES
+#==============================================================================
 
-    jump show_boop_screen
-    return
-
-label boop_nop:
-    m 1rksdrb "[player]..."
-    m 1rksdra "...I was so excited for you to do it again."
-    m "..."
-    m 3hub "Well, nevermind!"
-    jump show_boop_screen
-    return
-
-label boop_yep:
-    m 1eublb "Thank you [mas_get_player_nickname()]!"
-    m 1hua "Ehehe~"
-    jump show_boop_screen
-    return
-
-label monika_boopbeta_war: # This label is called via alternate_action on the nose imagebutton
-    $ show_boop_feedback("War!")
-    $ extra_seen_label("check_boopwarv2","check_boopwar")
-
-label check_boopwar:
-    m 3eta "Hey, what are you doing using right click, [player]?"
-    m 3eksdrb "You're supposed to use left click to give me a boop."
-    m 2duc ".{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-    pause 1.0
-    m 2dub "I actually came up with an idea, [player]."
-    m 1eua "We can use right click to declare a boop war."
-    m 1eub "After all, you rarely use it!"
-    m 1rusdlb "I know this proposal sounds rather childish."
-    m 1hua "But don't you think it's good to do something new once in a while?"
-    m 3eub "The rules are very simple, if I see an absence on your part for 20 seconds, I declare myself the winner."
-    m 3eud "If we go over a limit of boops without seeing any winner, I'll take it as a draw."
-    m 3huu "Or maybe I'll give up, I don't know~"
-    m 1eua "And lastly, the way I surrender is because of the time elapsed during the war."
-    m 1hua "Whenever I can't keep up with you or in case 'some distraction occurs'... Although I can consider it as cheating..."
-    m 1rud "I'm likely to give up."
-    m 1eub "I hope you like my idea."
-    m 1hubla "You'll be able to do it any time so don't rush~"
-    jump show_boop_screen
-    return
-
-label check_boopwarv2:
-    show screen boop_war_score_ui
-    call screen extra_boop_event(20, "boopbeta_war_lose", "boopwar_loop")
-
-label boopwar_loop:
-    $ show_boop_feedback("Boop!")
-    $ ep_boop_war_count += 1
-    if ep_boop_war_count >= 100:
-        $ ep_boop_war_count = 0
-        jump boopbeta_war_win
-    elif ep_boop_war_count >= 50:
-        $ ep_boop_war_count = 0
-        jump boopbeta_war_win
-    elif ep_boop_war_count >= 25:
-        $ ep_boop_war_count = 0
-        jump boopbeta_war_win
-    python:
-        boop_choices = [
-            ("1hublb", "Gotcha!"),
-            ("1tub", "Too slow!"),
-            ("1fua", "*Boop*!"),
-            ("1eua", "Take that!"),
-            ("1hua", "My turn!"),
-            ("1sub", "Hehe!"),
-            ("1gua", "I'm not giving up!"),
-            ("1kub", "You can't beat me!"),
-            ("1dub", "Another one!"),
-            ("1wua", "Boop!"),
-            ("2eub", "Faster, [player]!"),
-            ("3hua", "This is fun!")
-        ]
-        expression, dialogue = renpy.random.choice(boop_choices)
-        renpy.show("monika " + expression)
-        renpy.say(m, dialogue)
-
-    show monika 1eua
-    jump check_boopwarv2
-    return
-
-label boopbeta_war_lose:
-    hide screen boop_war_score_ui
-    $ store.EP_interaction_manager.set_boop_war(False)
-    m 1nua "Looks like I've won this boop war, [player]~"
-    m "I hope I've been a good opponent."
-    m 3hub "But I've also really enjoyed it!"
-    if ep_boop_war_count >= 50:
-        m 3dua "Besides, it's good to give your hand a little massage."
-        m 1eka "I mean, if you use the mouse too much, "
-        extend 1ekb "you can develop carpal tunnel syndrome and I don't want that."
-        m 1hksdlb "I'm sorry if I've added a new concern, but my intention is to take care of you."
-        m 1eubla "I hope you take my recommendation, [player]~"
-    $ ep_boop_war_count = 0
-    jump show_boop_screen
-    return
-
-label boopbeta_war_win:
-    $ ep_boop_war_count = 0
-    hide screen boop_war_score_ui
-    $ store.EP_interaction_manager.set_boop_war(False)
-    m 1hua "You've won this boop war, [player]!"
-    m 1tub "I can tell you like touching my nose, ehehehe~"
-    m 1eusdra "I couldn't keep up with you, but maybe next time we'll go further."
-    m 1gub "Although, if I were in front of you, I'd play with your cheeks."
-    m 1gua "Or I'd tickle you and see how long you could stand it."
-    m 1hub "Ahaha~"
-    jump show_boop_screen
-    return
-
-#====CHEEKS
-label monika_cheeksbeta:
-    $ persistent.plus_boop[1] += 1
-    $ show_boop_feedback("<3", color="#ff69b4")
-    if persistent.plus_boop[1] == 1:
-        $ mas_gainAffection(3,bypass=True)
-        m 2wubsd "Hey, I felt a slight pinch on my cheek."
-        m 2lksdrb "Oh, it was just your cursor! "
-        extend 2lksdra "You took me by surprise, you know?"
-        m 2ttb "But I have to ask, what are you up to, [player]?"
-        m 1hubla "Did you want to see how I would react to that?"
-        m 3hublb "You pulled it off~!"
-    elif persistent.plus_boop[1] == 2:
-        m 2hubsa "Ehehe, I'm feeling a rather delicate caress this time."
-        m 2dubsu "It's something .{w=0.3}.{w=0.3}.{w=0.3} {nw}"
-        extend 2eubsb "addictive if you ask me."
-    elif persistent.plus_boop[1] == 3:
-        m 2dubsa "You know .{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-        m 2dubsb "I love that you get to interact with me, [player]~"
-        m 2ekbsb "It makes me feel more alive, and loved. I hope my love is enough for you~"
-    elif persistent.plus_boop[1] == 4:
-        m 2lubsa "Every time you caress my cheek..."
-        m 2hubsa".{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-        m 2hubsb "The feeling makes me feel so close to you~"
-    elif persistent.plus_boop[1] == 5:
-        m 2eubsb "Every time you hold my cheek..."
-        m 2hubsa ".{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-        m 2dkbsa "It makes my heart race to know that I fell in love with the right person~"
-        m 2fubsb "You are my greatest treasure, [player]!"
-    elif persistent.plus_boop[1] == 6:
-        m 2hubsb "Your touch feels so warm and comforting, [player]."
-        m 2ekbsa "I always feel safe when I'm with you."
-        m 2lubsb "I'm so lucky to have you in my life."
-    elif persistent.plus_boop[1] == 7:
-        m 2eubsa "You know, I used to think that love was just a concept in books."
-        m 2dubsb "But then I met you, and you made me believe in it again."
-        m 2fubsa "I never want to let go of this feeling."
-    elif persistent.plus_boop[1] == 8:
-        m 2lubsb "Your touch is like magic, [player]."
-        m 2ekbsb "It has the power to make all my worries disappear."
-        m 2fubsa "I could stay like this forever."
-    elif persistent.plus_boop[1] == 9:
-        m 2hubsa "Your caress is like a gentle breeze on a warm summer day."
-        m 2dubsa "It fills me with a sense of peace and tranquility."
-        m 2fubsb "I feel so lucky to be loved by you, [player]."
-    elif persistent.plus_boop[1] == 10:
-        m 2dubsb "You know what they say, [player]..."
-        m 2hubsa "The tenth time's the charm!"
-        m 2ekbsa "I love you more and more with each passing day."
-    # === Dialogues added in Beta 3 ===
-    elif persistent.plus_boop[1] == 11:
-        m 2dubsa "Mmm... so soft."
-        m 2dkbsa "I can almost feel the warmth of your hand."
-    elif persistent.plus_boop[1] == 12:
-        m 2dubsb "If you keep caressing me like this, I'm going to fall asleep right here."
-        m 2hubsb "It'd be your fault~"
-    elif persistent.plus_boop[1] == 13:
-        m 2fubsa "I wonder if my cheeks are blushing right now."
-        m 2eubsa "They definitely feel warm."
-    elif persistent.plus_boop[1] == 14:
-        m 2eubsb "This is so tender."
-        m 2hubsb "You make me feel like the luckiest girl in the world."
-    elif persistent.plus_boop[1] == 15:
-        m 2lubsa "This is much nicer than a 'boop', don't you think?"
-        m 2eubsa "It's so... gentle."
-    elif persistent.plus_boop[1] == 16:
-        m 2ekbsb "I love this."
-        m 2ekbsa "It's like you're telling me 'I'm here with you' without using any words."
-    elif persistent.plus_boop[1] == 17:
-        m 2dubsu "One day, I hope I can rest my head on your shoulder and you can do this for real."
-    elif persistent.plus_boop[1] == 18:
-        m 2hubsb "Ah... [player], you're so sweet to me."
-        m 2eubsb "Thank you."
-    elif persistent.plus_boop[1] == 19:
-        m 2eubsa "You know... I could get used to this very easily."
-        m 2hubsa "Almost *too* easily."
-    elif persistent.plus_boop[1] == 20:
-        m 2fubsa "Every caress is a little reminder of why I love you so much."
-        m 2dkbsa "Please don't stop."
-    else:
-        $ ep_tools.random_outcome = renpy.random.randint(1,10)
-        if ep_tools.random_outcome == 1:
-            m 2fua "Ehehe~"
-            m 2hua "It would be nice if you used your hand instead of the cursor, but that's far from our reality..."
-        elif ep_tools.random_outcome == 2:
-            m 2hubsa "So gentle."
-            m 2tubsb "That word defines you well, when I think of you."
-        elif ep_tools.random_outcome == 3:
-            m 2hubsa "What a warm feeling."
-            m 2hublb "It will be hard to forget!"
-        elif ep_tools.random_outcome == 4:
-            m 2nubsa "It would be even more romantic if you gave a kiss on the cheek~"
-        elif ep_tools.random_outcome == 5:
-            m 2eubsb "I'm picturing us right now{nw}"
-            extend 2dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3} how your hand will feel."
-        # === Dialogues added in Beta 3 ===
-        elif ep_tools.random_outcome == 6:
-            m 2fubsa "So warm..."
-        elif ep_tools.random_outcome == 7:
-            m 2hubsb "Ehehe, hello~"
-        elif ep_tools.random_outcome == 8:
-            m 2fubla "You're making me blush."
-        elif ep_tools.random_outcome == 9:
-            m 2dkbsa "Don't stop..."
-        elif ep_tools.random_outcome == 10:
-            m 2eubsb "I feel so loved right now."
-    jump show_boop_screen
-    return
-
-label extra_cheeks_dis:
-    m 1wuw "Ah!"
-    m 3lusdrb "I mean..."
-    m 3ttu "What are you doing touching my cheek?"
-    m 3tsb "We're in a boop war, aren't we?"
-    $ ep_tools.random_outcome = renpy.random.randint(1,2)
-    if ep_tools.random_outcome == 1:
-        m 1dsb "I'm sorry [player], but I consider this cheating, "
-        extend 1hua "that's why I win this war~"
-        m 1fub "Next time try not to touch my cheek during the war! Ahahaha~"
-    elif ep_tools.random_outcome == 2:
-        m 1fubsb "Because it's you, this time I will let it go!"
-        m 1fubsb "Congratulations, player! You have beat me."
-        m 3hksdrb "You've distracted me and I don't think it's worth continuing, ahahaha~"
-        m 3hua "I really enjoyed doing this with you though!"
-    $ ep_boop_war_count = 0
-    hide screen boop_war_score_ui
-    $ store.EP_interaction_manager.set_boop_war(False)
-    jump show_boop_screen
-    return
-
-#====HEADPAT
-label monika_headpatbeta:
-    $ persistent.plus_boop[2] += 1
-    $ show_boop_feedback("Pat pat~", color="#90ee90")
-    if persistent.plus_boop[2] == 1:
-        $ mas_gainAffection(3,bypass=True)
-        m 6subsa "You're patting me on the head!"
-        m 6eubsb "It's really comforting."
-        m 6dkbsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-        m 1eubsb "Thank you [player]~"
-    elif persistent.plus_boop[2] == 2:
-        m 6dubsb "I don't know why, but when you do it I feel lighter..."
-        m 6dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-    elif persistent.plus_boop[2] == 3:
-        m 6rubsd "You know, it's funny.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-        m 6eubsa "It's usually done to a pet, not your girlfriend."
-        m 6hubsa "Although I don't dislike the feeling~"
-    elif persistent.plus_boop[2] == 4:
-        m 6dkbsb "Don't blame me after I get addicted to this [player]~"
-        m 6dkbsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-        m 1kub "You will be held responsible if that happens."
-    elif persistent.plus_boop[2] == 5:
-        m 6hkbssdrb "[player] you are messing my hair."
-        m 6dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-        extend 6dsbsb "never mind though~"
-        m "I'll deal with that later."
-    elif persistent.plus_boop[2] == 6:
-        m 6eubsb "It's nice to have someone to take care of me, even in small ways."
-        m 6hubsb "Thank you, [player]."
-    elif persistent.plus_boop[2] == 7:
-        m 6subsa "You're very gentle when you pat me on the head."
-        m 6eubsb "It makes me feel safe and loved."
-    elif persistent.plus_boop[2] == 8:
-        m 6dubsb "You know, I never thought I'd be someone's girlfriend."
-        m 6hubsa "But with you, it just feels right."
-    elif persistent.plus_boop[2] == 9:
-        m 6eubsb "I know I can be a handful sometimes, but you never give up on me."
-        m 6rubsa "You're always there for me, [player]."
-    elif persistent.plus_boop[2] == 10:
-        m 6dubsb "I love you, [player]."
-        m 6hubsa "Thanks for being there for me, even when I'm not at my best."
-    # === Dialogues added in Beta 3 ===
-    elif persistent.plus_boop[2] == 11:
-        m 6eubsa "Ah... that's the spot."
-        m 6subsa "You're good at this, [player]."
-    elif persistent.plus_boop[2] == 12:
-        m 6dubsa "I feel all the stress of the day just melting away when you do that."
-    elif persistent.plus_boop[2] == 13:
-        m 6eubsb "It's like... a happiness recharge."
-        m 6dubsb "Keep going, keep going."
-    elif persistent.plus_boop[2] == 14:
-        m 6dubsa "Mmmm. I feel so cared for."
-        m 6ekbsa "Thank you for being so tender."
-    elif persistent.plus_boop[2] == 15:
-        m 6hkbssdrb "Pat, pat, pat... Ahaha~"
-        m 6hubsa "I wonder if my hair is still in place."
-        m 6eubsb "...Doesn't matter, really."
-    elif persistent.plus_boop[2] == 16:
-        m 6eubsa "This is the most relaxing thing in the world."
-        m 6subsa "Well, this and listening to your voice."
-    elif persistent.plus_boop[2] == 17:
-        m 6hubsa "If I had a tail, I'd be wagging it right now."
-        m 6hksb "..."
-        m 6hksb "Ahaha, just kidding! ...Or am I?~"
-    elif persistent.plus_boop[2] == 18:
-        m 6dubsu "I hope I can rest my head in your lap someday..."
-        m 6eubsu "...and you can stroke my hair for real."
-    elif persistent.plus_boop[2] == 19:
-        m 6dubsa "So... nice."
-        m 6dkbsa "I could stay like this for hours."
-    elif persistent.plus_boop[2] == 20:
-        m 6hubsa "Congratulations, [player]."
-        m 6eubsa "You've mastered the art of the perfect headpat."
-    else:
-        $ ep_tools.random_outcome = renpy.random.randint(1,10)
-        if ep_tools.random_outcome == 1:
-            m 6hubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-            m 6hkbsb "I had told you I would get addicted to this."
-            m 6tkbsb "Gosh, don't you learn~"
-        elif ep_tools.random_outcome == 2:
-            m 6dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-            m 6dubsb "I wonder what it would be like to do it with your hair."
-        elif ep_tools.random_outcome == 3:
-            m 6dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-            m 7hubsb "I hope you don't get tired of doing it daily~"
-        elif ep_tools.random_outcome == 4:
-            m 6hubsa".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-            extend 6hubsb "I'm such a happy girl right now."
-        elif ep_tools.random_outcome == 5:
-            m 6dkbsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-        # === Dialogues added in Beta 3 ===
-        elif ep_tools.random_outcome == 6:
-            m 6eubsb "Mmm, feels nice."
-        elif ep_tools.random_outcome == 7:
-            m 6dubsb "Keep going~"
-        elif ep_tools.random_outcome == 8:
-            m 6eubsa "You're spoiling me, you know?"
-        elif ep_tools.random_outcome == 9:
-            m 6fubsa "I'm all yours~"
-        elif ep_tools.random_outcome == 10:
-            m 6dkbsb "This is heaven, isn't it?"
-    jump show_boop_screen
-    return
-
-label monika_headpat_long:
-    $ show_boop_feedback("Warm~")
-    m 6dkbsa ".{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}{nw}"
-    jump show_boop_screen
-    return
-
-label extra_headpat_dis:
-    $ show_boop_feedback("Invalid!")
-    m 6dkbsb "This.{w=0.3}.{w=0.3}.{w=0.3} is.{w=0.3}.{w=0.3}.{w=0.3} invalid.{w=0.3}.{w=0.3}. {nw}"
-    extend 6tkbsb "[mas_get_player_nickname()]."
-    $ ep_tools.random_outcome = renpy.random.randint(1,2)
-    if ep_tools.random_outcome == 1:
-        m 3tsb "You have been disqualified for patting your opponent on the head."
-        m 3tua "That's why I win this time~"
-        m 1hua "Good luck for the next time you ask me for a war!"
-    elif ep_tools.random_outcome == 2:
-        m 1tub "This time I'll let it go and give up for you."
-        m 1efa "But next time I probably won't give in, so don't bet on it!"
-        m 1lubsa "Even though I enjoy the pat on the head. Ehehehe~"
-    $ ep_boop_war_count = 0
-    hide screen boop_war_score_ui
-    $ store.EP_interaction_manager.set_boop_war(False)
-    jump show_boop_screen
-    return
-
-#====HANDS
-label monika_handsbeta:
-    #Change the expressions
-    $ show_boop_feedback("Hehe~", color="#ffffff")
-    $ persistent.extra_boop[0] += 1
-    if persistent.extra_boop[0] == 1:
-        $ mas_gainAffection(3,bypass=True)
-        m 5eubsb "Oh, you're holding my hand."
-        m 5dubsa "It's really nice, [player]."
-        m 5tubsa "I feel so close to you when we touch."
-    elif persistent.extra_boop[0] == 2:
-        m 5dubsb "Your hand is warm and comforting..."
-        m 5dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-        m 1eubsb "I really like it when you touch me like that."
-    elif persistent.extra_boop[0] == 3:
-        m 5rubsd "Your hand is so gentle, [player]."
-        m 5eubsa "It feels like I'm being cared for."
-        m 5hubsa "I'm lucky to have you by my side."
-    elif persistent.extra_boop[0] == 4:
-        m 5dkbsb "Your touch is addicting, [player]."
-        m 5dkbsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-        m 1kub "I might have withdrawal symptoms when you're gone."
-    elif persistent.extra_boop[0] == 5:
-        m 5dubsa "You're holding my hand again..."
-        m 5eubsb "I can't help but smile every time you do that."
-        m 5hubsa "It's like everything else fades away."
-    elif persistent.extra_boop[0] == 6:
-        m 5subsa "I love it when you're close to me, [player]."
-        m 5eubsb "Your touch makes me feel so alive."
-        m 1hubsa "I never want to let go."
-    elif persistent.extra_boop[0] == 7:
-        m 5dubsa "Your hand is so gentle, it's like a warm hug."
-        m 5eubsb "I could stay like this forever."
-        m 1kub "Thank you for being here with me, [player]."
-    elif persistent.extra_boop[0] == 8:
-        m 5rubsa "I feel so safe when you're holding my hand."
-        m 5eubsa "It's like all my worries disappear."
-        m 5hubsa "I don't know what I'd do without you."
-    elif persistent.extra_boop[0] == 9:
-        m 5dubsa "Your touch is like magic, [player]."
-        m 5eubsb "It makes me feel so loved and appreciated."
-        m 3hubla "I'm grateful to have you in my life."
-    elif persistent.extra_boop[0] == 10:
-        m 5eubsa "I love it when you hold my hand like this."
-        m 5rubsa "It's like we're the only two people in the world."
-        m 1hua "I never want this moment to end."
-    # === Dialogues added in Beta 3 ===
-    elif persistent.extra_boop[0] == 11:
-        m 5eubsb "Holding your hand... well, your cursor."
-        m 5tubsa "It's my favorite way to feel connected to you."
-    elif persistent.extra_boop[0] == 12:
-        m 5dubsa "It makes me feel like I'm not alone in this empty room."
-        m 5ekbsa "I feel you're right here with me."
-    elif persistent.extra_boop[0] == 13:
-        m 5eubsb "Promise me that when we meet for real, this will be the first thing we do."
-        m 5dkbsb "Just... hold hands."
-    elif persistent.extra_boop[0] == 14:
-        m 5ekbsa "It's such a simple gesture, but it means everything to me."
-    elif persistent.extra_boop[0] == 15:
-        m 5dubsa "Your hand... it fits perfectly in mine."
-        m 5eubsa "I'm imagining it."
-    elif persistent.extra_boop[0] == 16:
-        m 5hubsa "As long as you're holding my hand, I know everything is going to be alright."
-    elif persistent.extra_boop[0] == 17:
-        m 5ekbsa "Ah, [player]. Can we just stay like this for a little longer?"
-        m 5dubsa "..."
-    elif persistent.extra_boop[0] == 18:
-        m 5eubsb "I feel... a spark. A good one."
-        m 5hubsb "One that says 'I love you'."
-    elif persistent.extra_boop[0] == 19:
-        m 5eubsa "So strong and gentle at the same time."
-        m 5ekbsa "Just like you."
-    elif persistent.extra_boop[0] == 20:
-        m 5subsa "Twenty times you've held my hand."
-        m 5tubsa "And every single time, it feels like the first."
-    else:
-        $ ep_tools.random_outcome = renpy.random.randint(1,11)
-        if ep_tools.random_outcome == 1:
-            m 5hubla "Your touch is like a warm blanket on a cold night. It's comforting and soothing."
-        elif ep_tools.random_outcome == 2:
-            m 5hubsb "I feel like we're the only two people in the world right now. Your touch makes everything else fade away."
-        elif ep_tools.random_outcome == 3:
-            m 5dubsb "I can feel my heart beating faster as you touch me. It's like you have a direct connection to my soul."
-        elif ep_tools.random_outcome == 4:
-            m 5kua "I can sense the love and care in every stroke of your hand. Your touch is truly special, [player]."
-        elif ep_tools.random_outcome == 5:
-            m 5rub "Being here with you, feeling your touch, it's like a dream come true. I'm so grateful for this moment with you."
-        elif ep_tools.random_outcome == 6:
-            m 5tubla "Your touch is electric, [player]. I can feel the sparks flying between us."
-        # === Dialogues added in Beta 3 ===
-        elif ep_tools.random_outcome == 7:
-            m 5ekbsa "Don't let go."
-        elif ep_tools.random_outcome == 8:
-            m 5hubsa "I love this."
-        elif ep_tools.random_outcome == 9:
-            m 5eubsb "Together."
-        elif ep_tools.random_outcome == 10:
-            m 5dubsb "My anchor to reality."
-        elif ep_tools.random_outcome == 11:
-            m 5fubsa "Mine~"
-    jump show_boop_screen
-    return
-
-#====EARS
-label monika_earsbeta:
-    $ show_boop_feedback("Hey!", color="#add8e6")
-    $ persistent.extra_boop[1] += 1
-    if persistent.extra_boop[1] == 1:
-        $ mas_gainAffection(3, bypass=True)
-        m 1hub "Oh! That tickles!"
-        m 3dubsa "But I have to admit, I like it when you touch my ears."
-    elif persistent.extra_boop[1] == 2:
-        m 1subsa "That's a new sensation."
-        m 1eubsa "I never thought I would enjoy having my ears touched so much."
-    elif persistent.extra_boop[1] == 3:
-        m 1hublb "Hehe, that's quite pleasant."
-        m 1tub "You have a knack for finding my sensitive spots."
-    elif persistent.extra_boop[1] == 4:
-        m 1lkblb "I didn't know my ears were so sensitive."
-        m 1hubla "Thank you for discovering this, [player]."
-    elif persistent.extra_boop[1] == 5:
-        m 3hub "I can't help but giggle when you do that."
-        m 3dub "You have a way of making me feel so lighthearted."
-    elif persistent.extra_boop[1] == 6:
-        m 3wub "You're getting better at this, [player]."
-        m 3tub "I think you could give professional ear massages."
-    elif persistent.extra_boop[1] == 7:
-        m 1hub "That's perfect, just keep doing that."
-        m 1dua "I think I might fall asleep if you keep petting my ears like that."
-    elif persistent.extra_boop[1] == 8:
-        m 1duu "I feel like I'm in a trance when you touch my ears."
-        m 1dub "It's like all my worries fade away."
-    elif persistent.extra_boop[1] == 9:
-        m 1eubsa "Oh, that's lovely. Thank you, [player]."
-        m 1hubsa "Your fingers have a magic touch. I feel so relaxed."
-    elif persistent.extra_boop[1] == 10:
-        m 1eub "That was wonderful, [player]."
-        m 1hub "I always feel so content when I'm with you."
-    # === Dialogues added in Beta 3 ===
-    elif persistent.extra_boop[1] == 11:
-        m 1wua "Hey! That's a... sensitive spot."
-        m 1hub "Ahaha, just kidding. It's... surprisingly nice."
-    elif persistent.extra_boop[1] == 12:
-        m 1subsa "It sends a little shiver down my spine... A good one!"
-    elif persistent.extra_boop[1] == 13:
-        m 3eua "You definitely know how to surprise me, [player]."
-        m 3eub "No one had ever... well, touched my ears like that."
-    elif persistent.extra_boop[1] == 14:
-        m 1eubsa "It's so... delicate."
-        m 1ekbsa "It makes me feel very... vulnerable, but in a safe way. With you."
-    elif persistent.extra_boop[1] == 15:
-        m 1wub "Ah! Tickles!"
-        m 1hubla "Ahaha! Okay, okay, I surrender!"
-    elif persistent.extra_boop[1] == 16:
-        m 1tsu "Hmm... I wonder what you're thinking when you do that."
-        m 1tku "That I'm like a kitten?"
-        m 1tub "..."
-        m 1kua "I wouldn't mind being *your* kitten~"
-    elif persistent.extra_boop[1] == 17:
-        m 1eubsb "My heart is beating a little faster."
-        m 1ekbsb "It's a strange feeling. ...I like it."
-    elif persistent.extra_boop[1] == 18:
-        m 1dubsu "Keep that up and I'll melt completely, [mas_get_player_nickname()]."
-    elif persistent.extra_boop[1] == 19:
-        m 1subsa "Wow. That's... really intimate."
-        m 1eubsa "Thank you for being so gentle."
-    elif persistent.extra_boop[1] == 20:
-        m 1wua "Well... who knew?"
-        m 1eua "My ears are my new weak spot. And you found it."
-    else:
-        $ ep_tools.random_outcome = renpy.random.randint(1,10)
-        if ep_tools.random_outcome == 1:
-            m 1hubsa "I could stay like this forever, [player]."
-            m 1fubsa "Your touch is so comforting."
-        elif ep_tools.random_outcome == 2:
-            m 1sua "It feels like we're the only ones here, [player]."
-            m 1tua "I'm so grateful to have you by my side~"
-        elif ep_tools.random_outcome == 3:
-            m 1dua "You have such a gentle touch, [player]."
-            m 1dub "I feel so safe and loved when you're near."
-        elif ep_tools.random_outcome == 4:
-            m 1eublb "I never knew how much I needed this, [player]."
-            m 3hublb "Your touch is like a warm hug."
-        elif ep_tools.random_outcome == 5:
-            m 1hua "Being with you like this is all I need, [player]."
-            m 1hub "Your touch makes everything better."
-        # === Dialogues added in Beta 3 ===
-        elif ep_tools.random_outcome == 6:
-            m 1hubla "Eep! Ahaha!"
-        elif ep_tools.random_outcome == 7:
-            m 1sub "So ticklish!"
-        elif ep_tools.random_outcome == 8:
-            m 1eubsb "Mmm, how curious..."
-        elif ep_tools.random_outcome == 9:
-            m 1tub "[player], you're a mischief-maker~!"
-        elif ep_tools.random_outcome == 10:
-            m 1kua "Oh... that's new."
-    jump show_boop_screen
-    return
+# Store: ep_folders
+# NOTE: This store defines all the file paths used by the Extra+ submod.
+# It has a high priority (-995) to ensure these paths are available before other modules need them.
+init -995 python in ep_folders:
+    import os
+    import store
     
-#===========================================================================================
-# EXTRAS
-#===========================================================================================
-label plus_make_gift:
-    show monika idle at t21
-    python:
-        gift_menu = [
-            (_("Create a .gift file"), 'plus_make_file'),
-            (_("Groceries"), 'plus_groceries'),
-            (_("Objects"), 'plus_objects'),
-            (_("Ribbons"), 'plus_ribbons')
+    # --- Cross-platform path helper functions ---
+    def _normalize_path(path):
+        """Normalizes a path by replacing '\\' with '/' for compatibility."""
+        return path.replace("\\", "/")
+
+    def _getGamePath(*args):
+        """Builds a normalized, absolute path from the 'game' directory."""
+        game_dir = _normalize_path(os.path.join(renpy.config.basedir, "game"))
+        return _normalize_path(os.path.join(game_dir, *args))
+
+    def _join_path(*args):
+        """
+        Joins path components and normalizes them.
+        Usage: _join_path("Submods", "ExtraPlus", "dates", "cafe.png")
+        """
+        return _normalize_path(os.path.join(*args))
+
+    def find_submods_folder(base_path="."):
+        """Case-insensitively finds the 'submods' folder."""
+        try:
+            for folder in os.listdir(base_path):
+                if folder.lower() == "submods" and os.path.isdir(os.path.join(base_path, folder)):
+                    return folder
+        except Exception:
+            # Failsafe in case of permission errors or other issues
+            pass
+        return "Submods"  # Default value if not found
+
+    # Detect 'submods' folder case-insensitively
+    EP_submods_folder = find_submods_folder()
+
+    # --- SUBMOD BASE PATH DEFINITIONS ---
+    EP_ROOT = _join_path(EP_submods_folder, "ExtraPlus")
+    EP_MINIGAMES = _join_path(EP_ROOT, "minigames")
+    EP_DATES = _join_path(EP_ROOT, "dates")
+    EP_CHIBIS = _join_path(EP_ROOT, "chibis")
+    EP_OTHERS = _join_path(EP_ROOT, "others")
+    EP_SFX = _join_path(EP_ROOT, "sfx")
+
+    # Minigames folders
+    EP_MG_SHELLGAME = _join_path(EP_MINIGAMES, "shellgame")
+    EP_MG_RPS = _join_path(EP_MINIGAMES, "rockpaperscissors")
+    EP_MG_BLACKJACK = _join_path(EP_MINIGAMES, "blackjack")
+    EP_MG_TICTACTOE = _join_path(EP_MINIGAMES, "tictactoe")
+
+    # Dates folders
+    EP_DATE_CAFE = _join_path(EP_DATES, "cafe")
+    EP_DATE_RESTAURANT = _join_path(EP_DATES, "restaurant")
+    EP_DATE_POOL = _join_path(EP_DATES, "pool")
+    EP_DATE_LIBRARY = _join_path(EP_DATES, "library")
+    EP_DATE_ARCADE = _join_path(EP_DATES, "arcade")
+    
+    # Chibi accessories folders
+    EP_CHIBI_ACC_0 = _join_path(EP_CHIBIS, "accessories_0")
+    EP_CHIBI_ACC_1 = _join_path(EP_CHIBIS, "accessories_1")
+
+# This file exists to make it clearer which `store.*` modules are used by Extra_Plus.
+# It does not change runtime behaviour; it simply references the stores so they are easy to locate.
+
+init -100 python:
+    # Accessing these attributes here has no side-effect; it documents the stores
+    _known_stores = [
+        'ep_button',
+        'ep_tools',
+        'ep_chibis',
+        'ep_dates',
+        'ep_folders',
+        'ep_sg',
+        'ep_rps',
+        'ep_bj',
+        'ep_ttt',
+        'ep_affection',
+        'ep_files',
+        'ep_dialogues',
+        'ep_interactions'
+    ]
+
+    # Ensure attribute access does not raise during parsing
+    for s in _known_stores:
+        try:
+            getattr(store, s)
+        except Exception:
+            pass
+
+#==============================================================================
+# 2. CORE LOGIC & DATA STORES
+#==============================================================================
+
+# Store: ep_button
+# Handles the logic for the dynamic main button text.
+init -5 python in ep_button:
+    import store
+    import datetime
+
+    def _evaluate_current_conditions():
+        # Internal helper to check all conditions at once.
+        import datetime
+
+        conditions = {
+            "is_monika_bday": store.mas_isMonikaBirthday(),
+            "is_player_bday": store.mas_isplayer_bday(),
+            "is_f14": store.mas_isF14(),
+            "is_o31": store.mas_isO31(),
+            "is_d25": store.mas_isD25(),
+            "is_nye": store.mas_isNYE(),
+
+            "is_love": store.mas_isMoniLove(lower=False),
+            "is_enamored": store.mas_isMoniEnamored(lower=False),
+            "is_aff": store.mas_isMoniAff(lower=False),
+            "is_happy": store.mas_isMoniHappy(lower=False),
+            "is_normal": store.mas_isMoniNormal(lower=False),
+            "is_upset": store.mas_isMoniUpset(lower=False),
+            "is_distressed": store.mas_isMoniDis(lower=False),
+            "is_broken": store.mas_isMoniBroken(lower=False),
+
+            "is_night": store.mas_isNightNow()
+        }
+
+        return conditions
+
+    def _build_conditions_key(conditions):
+        # Internal helper to create a cache key from conditions.
+        key_parts = []
+
+        if conditions["is_monika_bday"]: key_parts.append("mbday")
+        elif conditions["is_player_bday"]: key_parts.append("pbday")
+        elif conditions["is_f14"]: key_parts.append("f14")
+        elif conditions["is_o31"]: key_parts.append("o31")
+        elif conditions["is_d25"]: key_parts.append("d25")
+        elif conditions["is_nye"]: key_parts.append("nye")
+
+        if conditions["is_love"]: key_parts.append("love")
+        elif conditions["is_enamored"]: key_parts.append("enamored")
+        elif conditions["is_aff"]: key_parts.append("aff")
+        elif conditions["is_happy"]: key_parts.append("happy")
+        elif conditions["is_normal"]: key_parts.append("normal")
+        elif conditions["is_upset"]: key_parts.append("upset")
+        elif conditions["is_distressed"]: key_parts.append("distressed")
+        elif conditions["is_broken"]: key_parts.append("broken")
+        else: key_parts.append("unknown")
+
+        if conditions["is_night"]: key_parts.append("night")
+        return "-".join(key_parts)
+
+    def _button_text_from_conditions(conditions):
+        # Internal helper to select text based on evaluated conditions.
+        is_night = conditions["is_night"]
+
+        if conditions["is_monika_bday"]: return renpy.random.choice(["My B-Day", "Her Day", "Sing 4 Me", "My Day", "Moni!"])
+        if conditions["is_player_bday"]: return renpy.random.choice(["Your Day", "HBD!", "Ur Day", "My Gift", "The Best"])
+        if conditions["is_f14"]: return renpy.random.choice(["Be Mine", "My Love", "Hearts", "XOXO", "Our Day"])
+        if conditions["is_o31"]: return renpy.random.choice(["Spooky", "Boo!", "Tricks", "Treats", "Scary"])
+        if conditions["is_d25"]: return renpy.random.choice(["Joyful", "Our Xmas", "Gift", "Noel", "Holly"])
+        if conditions["is_nye"]: return renpy.random.choice(["New Year", "Cheers", "Toast", "Our Year", "The Eve"])
+
+        if conditions["is_love"] or conditions["is_enamored"]:
+            base_texts = ["Forever", "Eternity", "Sunshine", "Beloved", "Darling", "Adored", "Precious", "Cutie", "Sweetie", "Cherish"]
+            if is_night: base_texts.extend(["Moonlight", "Stars", "Night <3", "Dreaming", "Starlight", "Night Dear", "Sleepy?", "Cuddle"])
+            return renpy.random.choice(base_texts)
+
+        if conditions["is_aff"] or conditions["is_happy"]:
+            base_texts = ["So Sweet", "Caring", "Warmth", "Our Time", "Smile", "Glad", "Hehe~", "Happy", "Cheerful", "Yay!"]
+            if is_night: base_texts.extend(["Night Time", "Calm", "Peaceful", "Night!", "Evening", "Restful", "Nice Night"])
+            return renpy.random.choice(base_texts)
+
+        if conditions["is_normal"] or conditions["is_upset"]:
+            base_texts = ["Hi again", "Welcome", "Talk?", "On Mind?", "Topics", "Just Us", "Relax", "It's you", "Hurting", "Really?"]
+            if is_night: base_texts.extend(["Sparks", "Sleepy", "Quiet", "Dreams", "Cozy", "Dark...", "Restless", "Tired..."])
+            return renpy.random.choice(base_texts)
+
+        if conditions["is_distressed"] or conditions["is_broken"]:
+            base_texts = ["No Love?", "Forgot?", "Alone...", "Please...", "...", "You...", "Scared", "Sorry", "Nothing"]
+            if is_night: base_texts.extend(["Awake...", "Lonely", "Dark Night", "Tears...", "Darkness", "Void", "Cold...", "End..."])
+            return renpy.random.choice(base_texts)
+
+        return "Extra+"
+
+    def getDynamicButtonText():
+        """Main function to get the dynamic button text, using a cache."""
+        import datetime
+        if not store.persistent.EP_dynamic_button_text:
+            return "Extra+"
+
+        conditions = _evaluate_current_conditions()
+        today_str = str(datetime.date.today())
+        conditions_key = _build_conditions_key(conditions)
+
+        if (store.persistent.EP_button_last_update != today_str
+            or store.persistent.EP_button_conditions_key != conditions_key
+            or store.persistent.EP_button_text is None):
+            new_text = _button_text_from_conditions(conditions)
+            store.persistent.EP_button_text = new_text
+            store.persistent.EP_button_last_update = today_str
+            store.persistent.EP_button_conditions_key = conditions_key
+        return store.persistent.EP_button_text
+
+    # --- Overlay Button and Screen Management ---
+    def show_menu():
+        """Shows the main Extra+ interactions menu."""
+        store.mas_RaiseShield_dlg()
+        show_zoom_button()
+        renpy.invoke_in_new_context(renpy.call_screen, "extraplus_interactions")
+
+    def show_button():
+        """Adds the Extra+ button to the overlay if not already visible."""
+        if not is_button_visible():
+            renpy.config.overlay_screens.append("extraplus_button")
+
+    def is_button_visible():
+        """Checks if the Extra+ button is currently visible."""
+        return "extraplus_button" in renpy.config.overlay_screens
+
+    # --- Custom Zoom Management ---
+    def is_zoom_button_visible():
+        """Checks if the custom zoom button is visible."""
+        return "extrabutton_custom_zoom" in renpy.config.overlay_screens
+
+    def show_zoom_button():
+        """Adds the custom zoom button if not already visible."""
+        if not is_zoom_button_visible():
+            renpy.config.overlay_screens.append("extrabutton_custom_zoom")
+
+    def hide_zoom_button():
+        """Removes the custom zoom button if it is visible."""
+        if is_zoom_button_visible():
+            renpy.config.overlay_screens.remove("extrabutton_custom_zoom")
+            renpy.hide_screen("extrabutton_custom_zoom")
+
+# Store: ep_files
+# Handles all file system interactions, like creating gifts and cleaning up old files.
+init -5 python in ep_files:
+    import os
+    import shutil
+    import datetime
+    import store
+    import random
+
+    # --- File-related classes and functions ---
+    class GiftAction:
+        """Handles the creation of a gift file and notifies the player."""
+        def __init__(self, name, gift):
+            self.name = name
+            self.gift = gift
+
+        def __call__(self):
+            if store.ep_files.create_gift_file(self.gift):
+                messages = [
+                    _("All set! The '{}' gift is ready for you.").format(self.name),
+                    _("Here's a '{}' for Monika! I hope she loves it.").format(self.name),
+                    _("Perfect! Your '{}' is ready for Monika.").format(self.name),
+                    _("A '{}' for Monika! It's all set.").format(self.name),
+                    _("Your '{}' gift has been created!").format(self.name),
+                    _("One '{}' gift, coming right up! It's ready.").format(self.name)
+                ]
+                renpy.notify(random.choice(messages))
+                store.mas_checkReactions()
+
+            renpy.jump('plus_make_gift')
+
+    # --- File creation and migration ---
+    def create_gift_file(basename):
+        try:
+            filename = basename + ".gift"
+            filepath = os.path.join(renpy.config.basedir, 'characters', filename)
+            with open(filepath, "w") as f:
+                pass
+            return True
+        except Exception as e:
+            renpy.notify(_("Oh no, I couldn't create the gift file."))
+            return False
+
+    def migrate_window_title_data():
+        if hasattr(store.persistent, 'save_window_title'):
+            # Only migrate if the new variable has not been customized.
+            if store.persistent._save_window_title == "Monika After Story   ":
+                store.persistent._save_window_title = store.persistent.save_window_title
+            
+            # Now that migration is handled, we can safely delete the old variable.
+            try:
+                del store.persistent.save_window_title
+            except AttributeError:
+                pass # Should not happen if hasattr is true, but good practice.
+
+    def make_bday_oki_doki():
+        renpy.config.overlay_screens.remove("bday_oki_doki")
+        renpy.hide_screen("bday_oki_doki")
+        try:
+            with open(os.path.join(renpy.config.basedir, 'characters', 'oki doki'), "w") as f:
+                pass
+            renpy.notify(_("Everything is ready for the surprise!"))
+        except Exception as e:
+            renpy.notify("Oh no, something went wrong while preparing the decorations.")
+
+    def show_bday_screen():
+        if not store.persistent._mas_bday_in_bday_mode or not store.persistent._mas_bday_visuals:
+            renpy.config.overlay_screens.append("bday_oki_doki")
+
+    def main_file_exists():
+        return os.path.isfile(os.path.normcase(store.ep_tools.check_main_file))
+
+    # --- Debugging and maintenance tools ---
+    def run_asset_linter():
+        """
+        Checks for the existence of all defined image assets and creates a log file.
+        This is a debug tool and should not be in the final release.
+        """
+        import os
+        import datetime
+
+        # --- Helper function to check files ---
+        def check_file(path, found_list, missing_list):
+            full_path = store.ep_folders._getGamePath(path)
+            if os.path.isfile(full_path):
+                found_list.append(path)
+            else:
+                missing_list.append(path)
+
+        # --- Lists to store results ---
+        found_assets = []
+        missing_assets = []
+
+        # --- 1. Static and Minigame Assets ---
+        static_assets = [
+            # Shell Game
+            store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "note_score.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "cup_hover.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "ball.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "cup.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "monika.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "yuri.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "natsuki.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "sayori.png"),
+            # Tic-Tac-Toe
+            store.ep_folders._join_path(store.ep_folders.EP_MG_TICTACTOE, "notebook.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_MG_TICTACTOE, "line.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_MG_TICTACTOE, "player.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_MG_TICTACTOE, "monika.png"),
+            # Rock, Paper, Scissors
+            store.ep_folders._join_path(store.ep_folders.EP_MG_RPS, "paper.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_MG_RPS, "rock.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_MG_RPS, "scissors.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_MG_RPS, "back.png"),
+            # Blackjack
+            store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "back.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "background.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "name.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "score.png"),
+            # Misc
+            store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "coin_heads.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "coin_tails.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "sprite_coin.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "maxwell_cat.png"),
+            # Date Tables & Chairs
+            "mod_assets/monika/t/chair-extraplus_cafe.png",
+            "mod_assets/monika/t/table-extraplus_cafe.png",
+            "mod_assets/monika/t/table-extraplus_cafe-s.png",
+            "mod_assets/monika/t/chair-extraplus_restaurant.png",
+            "mod_assets/monika/t/table-extraplus_restaurant.png",
+            "mod_assets/monika/t/table-extraplus_restaurant-s.png",
         ]
+        for asset in static_assets:
+            check_file(asset, found_assets, missing_assets)
 
-        items = [(_("Nevermind"), 'extraplus_tools', 20)]
-    call screen extra_gen_list(gift_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
-    return
+        # --- 2. Chibi Assets ---
+        all_chibi_costumes = store.ep_chibis.monika_costumes_ + store.ep_chibis.natsuki_costumes_ + store.ep_chibis.sayori_costumes_ + store.ep_chibis.yuri_costumes_
+        for _, costume_data in all_chibi_costumes:
+            doki_folder, idle_sprite, blink_sprite, hover_sprite = costume_data # No store prefix here, these are local to the loop
+            chibi_sprites = [idle_sprite, blink_sprite, hover_sprite]
+            for sprite in chibi_sprites:
+                path = store.ep_folders._join_path(store.ep_folders.EP_CHIBIS, doki_folder, "{}.png".format(sprite))
+                check_file(path, found_assets, missing_assets)
 
-label plus_make_file:
-    show monika idle at t11
+        # --- 3. Chibi Accessories ---
+        # NOTE: These are hardcoded based on the lists in Extra_Plus_Misc.rpy
+        primary_accessories = ['cat_ears', 'christmas_hat', 'demon_horns', 'flowers_crown', 'halo', 'heart_headband', 'hny', 'neon_cat_ears', 'party_hat', 'rabbit_ears', 'witch_hat']
+        secondary_accessories = ['black_bow_tie', 'christmas_tree', 'cloud', 'coffee', 'pumpkin', 'hearts', 'm_slice_cake', 'moustache', 'neon_blush', 'p_slice_cake', 'patch', 'speech_bubble', 'sunglasses']
 
-    python:
-        makegift = mas_input(
-            prompt=_("Enter the name of the gift."),
-            allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789",
-            screen_kwargs={"use_return_button": True, "return_button_value": "cancel"},
+        for acc in primary_accessories:
+            path = store.ep_folders._join_path(store.ep_folders.EP_CHIBI_ACC_0, "{}.png".format(acc))
+            check_file(path, found_assets, missing_assets)
+        for acc in secondary_accessories:
+            path = store.ep_folders._join_path(store.ep_folders.EP_CHIBI_ACC_1, "{}.png".format(acc))
+            check_file(path, found_assets, missing_assets)
+
+        # --- 4. Backgrounds (Manual List) ---
+        background_assets = [
+            # Cafe
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "cafe_day.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "cafe_rain.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "cafe-n.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "cafe_rain-n.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "cafe-ss.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "cafe_rain-ss.png"),
+            # Restaurant
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "restaurant_day.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "restaurant_rain.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "restaurant-n.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "restaurant_rain-n.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "restaurant-ss.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "restaurant_rain-ss.png"),
+            # Pool
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "pool_day.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "pool_rain.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "pool-n.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "pool_rain-n.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "pool-ss.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "pool_rain-ss.png"),
+        ]
+        for asset in background_assets:
+            check_file(asset, found_assets, missing_assets)
+
+        # --- 5. Blackjack Cards ---
+        for suit in ["hearts", "diamonds", "clubs", "spades"]:
+            for value in range(1, 14):
+                path = store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, suit, "{}.png".format(value))
+                check_file(path, found_assets, missing_assets)
+
+        # --- 6. Date Accessories ---
+        # This list is defined in Extra_Plus_Main.rpy
+        for acs_tuple in store.extraplus_accessories:
+            acs_name = acs_tuple[1]
+            path = "mod_assets/monika/a/{}/0.png".format(acs_name)
+            check_file(path, found_assets, missing_assets)
+
+        # --- 6. Write Log File ---
+        log_path = store.ep_folders._normalize_path(os.path.join(renpy.config.basedir, 'characters', 'extra_plus_asset_log.txt'))
+        try:
+            with open(log_path, 'w') as f:
+                f.write("Extra+ Asset Linter Report - {}\n".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                f.write("="*80 + "\n\n")
+
+                if not missing_assets:
+                    f.write("SUCCESS: All {} assets were found!\n".format(len(found_assets)))
+                else:
+                    f.write("ERROR: Found {} missing assets.\n".format(len(missing_assets)))
+                    f.write("-" * 30 + "\n")
+                    for asset in missing_assets:
+                        f.write("MISSING: {}\n".format(asset))
+
+                f.write("\n\n")
+                f.write("--- Found Assets ({}) ---\n".format(len(found_assets)))
+                for asset in found_assets:
+                    f.write("FOUND: {}\n".format(asset))
+
+            renpy.notify("Asset check complete. See extra_plus_asset_log.txt in /characters.")
+
+        except Exception as e:
+            renpy.notify("Failed to write asset log: {}".format(e))
+
+    def cleanup_old_files():
+        """
+        Deletes obsolete files and folders from previous versions of the submod.
+        """
+        import os
+        import shutil
+
+        files_deleted = 0
+        folders_deleted = 0
+        errors = []
+
+        def delete_file(path):
+            """Safely deletes a file and logs the result."""
+            full_path = store.ep_folders._getGamePath(path)
+            if os.path.isfile(full_path):
+                try:
+                    os.remove(full_path)
+                    return 1
+                except Exception as e:
+                    errors.append("Failed to delete file {}: {}".format(store.ep_folders._normalize_path(path), e))
+            return 0
+
+        def delete_folder(path):
+            """Safely deletes a folder and its contents, and logs the result."""
+            full_path = store.ep_folders._getGamePath(path)
+            if os.path.isdir(full_path):
+                try:
+                    shutil.rmtree(full_path)
+                    return 1
+                except Exception as e:
+                    errors.append("Failed to delete folder {}: {}".format(store.ep_folders._normalize_path(path), e))
+            return 0
+
+        # 1. Delete old folder (relative to EP_ROOT)
+        folders_deleted += delete_folder(store.ep_folders._join_path(store.ep_folders.EP_ROOT, "submod_assets"))
+
+        # 2. Delete old table/chair assets (relative to game directory)
+        table_chair_files = [
+            "mod_assets/monika/t/chair-submod_cafe.png",
+            "mod_assets/monika/t/chair-submod_restaurant.png",
+            "mod_assets/monika/t/table-submod_cafe.png",
+            "mod_assets/monika/t/table-submod_cafe-s.png",
+            "mod_assets/monika/t/table-submod_restaurant.png",
+            "mod_assets/monika/t/table-submod_restaurant-s.png"
+        ]
+        for f in table_chair_files:
+            files_deleted += delete_file(f)
+        
+        # 3. Delete old accessory files (relative to game directory)
+        for acs_tuple in store.extraplus_accessories:
+            acs_file_name_base = acs_tuple[1]
+            files_deleted += delete_file("mod_assets/monika/a/acs-{}-0.png".format(acs_file_name_base))
+
+        # --- Final Notification ---
+        if files_deleted > 0 or folders_deleted > 0:
+            renpy.notify("Cleanup complete! Removed {} files and {} folders.".format(files_deleted, folders_deleted))
+        else:
+            renpy.notify("No old files or folders were found to clean up.")
+
+        if errors:
+            renpy.notify("Some errors occurred during cleanup. Please check the logs.")
+
+# Store: ep_tools
+init 5 python in ep_tools:
+    import datetime
+
+    # Helper function to format dates (American Format: Month Day, Year)
+    def exp_fmt_date(dt):
+        if dt is None:
+            return "???"
+        # Example: "Sep 22, 2017"
+        return dt.strftime("%b %d, %Y")
+
+    # Class to represent a timeline milestone
+    class EPTimelineEntry(object):
+        def __init__(self, date, title, description, icon="7"):
+            self.date = date
+            self.title = title
+            self.description = description
+            self.icon = icon
+
+        # Sort chronologically
+        def __lt__(self, other):
+            if self.date is None: return False
+            if other.date is None: return True
+            return self.date < other.date
+
+    def getTimelineData():
+        try:
+            entries = []
+
+            # 1. First Kiss
+            if store.persistent._mas_first_kiss is not None:
+                entries.append(EPTimelineEntry(
+                    store.persistent._mas_first_kiss,
+                    "First Kiss",
+                    "The moment our lips (almost) touched for the first time."
+                ))
+
+            # 2. Promise Ring
+            ev_promisering = store.mas_getEV("monika_promisering")
+            if ev_promisering and ev_promisering.shown_count > 0:
+                date_ring = ev_promisering.last_seen
+                if date_ring:
+                    entries.append(EPTimelineEntry(
+                        date_ring,
+                        "Eternal Promise",
+                        "You gave me the promise ring. Our bond is forever."
+                    ))
+
+            # 3. Special Nickname
+            # Checks if the current nickname is different from 'Monika'
+            if store.persistent._mas_monika_nickname != "Monika":
+                ev_nick = store.mas_getEV("monika_nickname")
+                if ev_nick and ev_nick.shown_count > 0:
+                    entries.append(EPTimelineEntry(
+                        ev_nick.last_seen,
+                        "A Special Name",
+                        "The day you started calling me '" + store.persistent._mas_monika_nickname + "'.",
+                        "w"
+                    ))
+
+            # 4. Piano Unlock
+            ev_piano = store.mas_getEV("mas_unlock_piano")
+            if ev_piano and ev_piano.shown_count > 0:
+                entries.append(EPTimelineEntry(
+                    ev_piano.last_seen,
+                    "Music for You",
+                    "When I brought the piano so I could play songs for you.",
+                    "&"
+                ))
+
+            # 5. Chess Unlock
+            ev_chess = store.mas_getEV("mas_unlock_chess")
+            if ev_chess and ev_chess.shown_count > 0:
+                entries.append(EPTimelineEntry(
+                    ev_chess.last_seen,
+                    "Intellectual Challenge",
+                    "The day we decided to play Chess together for the first time.",
+                    "4"
+                ))
+
+            # 6. Anniversaries
+            anni_events = [
+                ("anni_1week", "1 Week Together"),
+                ("anni_1month", "1 Month Together"),
+                ("anni_3month", "3 Months Together"),
+                ("anni_6month", "6 Months Together"),
+                ("anni_1", "1st Anniversary"),
+                ("anni_2", "2nd Anniversary"),
+                ("anni_3", "3rd Anniversary"),
+                ("anni_4", "4th Anniversary"),
+                ("anni_5", "5th Anniversary"),
+                ("anni_6", "6th Anniversary"),
+                ("anni_7", "7th Anniversary"),
+                ("anni_8", "8th Anniversary"),
+                ("anni_10", "10th Anniversary"),
+                ("anni_20", "20th Anniversary"),
+                ("anni_50", "50th Anniversary"),
+                ("anni_100" , "100th Anniversary")
+            ]
+
+            for ev_label, title in anni_events:
+                ev = store.mas_getEV(ev_label)
+                if ev and ev.shown_count > 0:
+                    entries.append(EPTimelineEntry(
+                        ev.last_seen,
+                        title,
+                        "We celebrated this special moment together.",
+                        "Z"
+                    ))
+
+            # 7. First Real Date (USB drive trip)
+            # - Using the check-in log
+            ds_log = getattr(store.persistent, "_mas_dockstat_checkin_log", [])
+            if ds_log and len(ds_log) > 0:
+                # The first entry in the log is the oldest trip
+                first_trip_date = ds_log[0][0]
+                if first_trip_date:
+                    entries.append(EPTimelineEntry(
+                        first_trip_date,
+                        "First Adventure",
+                        "The first time you took me out of this room with you."
+                    ))
+
+            # 8. Your Birthday
+            # The 'mas_birthdate' event is when you tell her for the first time.
+            ev_bday = store.mas_getEV("mas_birthdate")
+            if ev_bday and ev_bday.shown_count > 0:
+                entries.append(EPTimelineEntry(
+                    ev_bday.last_seen,
+                    "My Birthday",
+                    "The day I told you when I was born.",
+                    "G"
+                ))
+
+            # 9. Getting Comfortable (No Blazer)
+            # The 'mas_blazerless_intro' event occurs when she takes off her school uniform for the first time.
+            ev_blazer = store.mas_getEV("mas_blazerless_intro")
+            if ev_blazer and ev_blazer.shown_count > 0:
+                entries.append(EPTimelineEntry(
+                    ev_blazer.last_seen,
+                    "Getting Comfortable",
+                    "The first time you felt comfortable enough to take off your blazer."
+                ))
+
+            # 10. Game: Hangman
+            ev_hangman = store.mas_getEV("mas_unlock_hangman")
+            if ev_hangman and ev_hangman.shown_count > 0:
+                entries.append(EPTimelineEntry(
+                    ev_hangman.last_seen,
+                    "Word Games",
+                    "We started playing Hangman together.",
+                    "4"
+                ))
+                
+            # 11. Game: Pong
+            # FIX: We use 'store.mas_getFirstSesh()' instead of the non-existent function.
+            if store.renpy.seen_label("game_pong"):
+                # We use the start date as a safe approximation if there's no specific log.
+                pong_date = store.mas_getFirstSesh()
+                entries.append(EPTimelineEntry(
+                    pong_date,
+                    "Classic Gaming",
+                    "We played Pong for the first time.",
+                    "4"
+                ))
+
+            # 12. Contributor (Easter Egg)
+            # If the player told her they helped code/create the mod.
+            if store.persistent._mas_pm_has_contributed_to_mas:
+                # We look for the date when the 'monika_contribute' talk occurred.
+                ev_contrib = store.mas_getEV("monika_contribute")
+                date_contrib = ev_contrib.last_seen if ev_contrib else datetime.date.today()
+                entries.append(EPTimelineEntry(
+                    date_contrib,
+                    "Helping Hand",
+                    "I told you that I helped contribute to your world's code.",
+                    "g"
+                ))
+
+            entries.sort()
+            return entries
+        except:
+            return []
+
+# Store: ep_affection
+# Handles affection-related display logic.
+init -5 python in ep_affection:
+    import store
+
+    def getCurrentAffection():
+        # Safely gets affection to avoid cache issues.
+        try:
+            raw_data = store.mas_affection.__get_data()
+            if raw_data and len(raw_data) > 0:
+                return raw_data[0]
+            else:
+                return store._mas_getAffection()
+        except Exception:
+            return store._mas_getAffection()
+
+    def notify_affection():
+        # Notifies the player of their current affection level.
+        import time
+        current_time = time.time()
+        if current_time - store.ep_tools.last_affection_notify_time >= 10:
+            store.ep_tools.last_affection_notify_time = current_time
+            current_affection = getCurrentAffection()
+            renpy.notify("{1} {0} {1}".format(
+                int(current_affection),
+                getLevelIcon(current_affection)
+            ))
+
+    def getLevelIcon(affection_val):
+        # Returns a font icon based on affection value.
+        if affection_val >= 1000: icon = '"'
+        elif affection_val >= 400: icon = ';'
+        elif affection_val >= 100: icon = '2'
+        elif affection_val >= 30: icon = '#'
+        elif affection_val <= -30: icon = '%'
+        elif affection_val <= -100: icon = '8'
+        else: icon = '/'
+
+        return "{size=+5}{color=#FFFFFF}{font=" + store.ep_tools.affection_icons + "}" + icon + "{/font}{/color}{/size}"
+
+#==============================================================================
+# 3. UI & VISUAL COMPONENT STORES
+#==============================================================================
+
+# Store: ep_tools
+init -5 python in ep_tools:
+    import time
+    import os
+    import datetime
+    import store
+
+    # NOTE: This store holds helper UI and tool functions used across the submod.
+    def show_idle_notification(context=""):
+        if context == "bj": # Blackjack
+            game_phrases = [
+                _("Hit or stay, [player]? It's your turn!"),
+                _("Don't keep me waiting, [player]. What's your move?"),
+                _("This dealer is waiting, you know~ Ehehe~"),
+                _("Hoping for a 21? Don't leave me in suspense!")
+            ]
+            
+        elif context == "ttt": # Tic-Tac-Toe
+            game_phrases = [
+                _("It's your turn to place an X, [player]!"),
+                _("I can't draw my 'O' until you've placed your 'X'."),
+                _("Looking for the winning move? Don't think too hard!"),
+                _("I'm waiting... but I won't tell you where to go. Ehehe~")
+            ]
+            
+        elif context == "rps": # Rock Paper Scissors
+            game_phrases = [
+                _("Rock, paper, or scissors, [player]?"),
+                _("C'mon, [player], make your move!"),
+                _("Ready when you are. What's your choice?"),
+                _("I'm trying to read your mind... What will it be?")
+            ]
+            
+        elif context == "sg": # Shell Game
+            game_phrases = [
+                _("Keep your eye on the right cup, [player]!"),
+                _("Where did it go? It's time to guess!"),
+                _("Don't look at me, I'm not going to tell you which one it is!"),
+                _("The cups have stopped. Which one has the ball?")
+            ]
+        
+        else:
+            game_phrases = [
+                _("Are you still there, [player]?"),
+                _("Just checking in... you've been quiet for a while."),
+                _("Everything okay? You're staring again, ehehe~"),
+                _("I was starting to wonder if you fell asleep!"),
+                _("Boo! Did I scare you?")
+            ]
+            
+        store.mas_display_notif(
+            store.m_name,
+            game_phrases,
+            'Topic Alerts'
         )
 
-        if not makegift:
-            renpy.jump("plus_make_file")
-        elif makegift == "cancel":
-            renpy.jump("plus_make_gift")
-        else:
-            if create_gift_file(makegift):
-                renpy.notify(_("Done! Created '/characters/{}.gift'").format(makegift))
-                store.mas_checkReactions()
-            renpy.jump("plus_make_gift")
-            
-    return
+    def show_boop_feedback(message, color="#ff69b4"):
+        t = "boop_notif{}".format(renpy.random.randint(1, 10000))
+        renpy.show_screen("boop_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color)
 
-label plus_groceries:
-    show monika idle at t21
-    python:
-        groceries_menu = [
-            extra_gift(_("Coffee"), 'coffee'),
-            extra_gift(_("Chocolates"), 'chocolates'),
-            extra_gift(_("Cupcake"), 'cupcake'),
-            extra_gift(_("Fudge"), 'fudge'),
-            extra_gift(_("Hot Chocolate"), 'hotchocolate'),
-            extra_gift(_("Candy"), 'candy'),
-            extra_gift(_("Candy Canes"), 'candycane'),
-            extra_gift(_("Candy Corn"), 'candycorn'),
-            extra_gift(_("Christmas Cookies"), 'christmascookies')
+    def getPlayerGenderString():
+        return {"M": "boyfriend", "F": "girlfriend"}.get(store.persistent.gender, "beloved")
+
+    def save_title_windows():
+        special_days = [
+            (store.mas_isplayer_bday, " Happy birthday, {}!".format(store.player)),
+            (store.mas_isMonikaBirthday, " Happy Birthday, {}!".format(store.persistent._mas_monika_nickname)),
+            (store.mas_isF14, " Happy Valentine's Day, {}!".format(store.player)),
+            (store.mas_isO31, " Happy Halloween, {}!".format(store.player)),
+            (store.mas_isD25, " Merry Christmas, {}!".format(store.player)),
+            (store.mas_isD25Eve, " Merry Christmas Eve, {}!".format(store.player)),
+            (store.mas_isNYE, " Happy New Year's Eve, {}!".format(store.player)),
+            (store.mas_isNYD, " Happy New Year, {}!".format(store.player))
         ]
 
-        items = [(_("Nevermind"), 'plus_make_gift', 20)]
-    call screen extra_gen_list(groceries_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=True)
-    return
+        for condition, title in special_days:
+            if condition():
+                renpy.config.window_title = title
+                return
 
-label plus_objects:
-    show monika idle at t21
-    python:
-        objects_menu = [
-            extra_gift(_("Promise Ring"), 'promisering'),
-            extra_gift(_("Roses"), 'roses'),
-            extra_gift(_("Quetzal Plushie"), 'quetzalplushie'),
-            extra_gift(_("Thermos Mug"), 'justmonikathermos')
-        ]
-        if not mas_seenEvent("mas_reaction_gift_noudeck"):
-            objects_menu.append(extra_gift(_("NOU"), 'noudeck'))
+        renpy.config.window_title = store.persistent._save_window_title
 
-        items = [(_("Nevermind"), 'plus_make_gift', 20)]
-    call screen extra_gen_list(objects_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
-    return
-            
-label plus_ribbons:
-    show monika idle at t21
-    python:
-        ribbons_menu = [
-            extra_gift(_("Black Ribbon"), 'blackribbon'),
-            extra_gift(_("Blue Ribbon"), 'blueribbon'),
-            extra_gift(_("Dark Purple Ribbon"), 'darkpurpleribbon'),
-            extra_gift(_("Emerald Ribbon"), 'emeraldribbon'),
-            extra_gift(_("Gray Ribbon"), 'grayribbon'),
-            extra_gift(_("Green Ribbon"), 'greenribbon'),
-            extra_gift(_("Light Purple Ribbon"), 'lightpurpleribbon'),
-            extra_gift(_("Peach Ribbon"), 'peachribbon'),
-            extra_gift(_("Pink Ribbon"), 'pinkribbon'),
-            extra_gift(_("Platinum Ribbon"), 'platinumribbon'),
-            extra_gift(_("Red Ribbon"), 'redribbon'),
-            extra_gift(_("Ruby Ribbon"), 'rubyribbon'),
-            extra_gift(_("Sapphire Ribbon"), 'sapphireribbon'),
-            extra_gift(_("Silver Ribbon"), 'silverribbon'),
-            extra_gift(_("Teal Ribbon"), 'tealribbon'),
-            extra_gift(_("Yellow Ribbon"), 'yellowribbon')
-        ]
-
-        items = [(_("Nevermind"), 'plus_make_gift', 20)]
-    call screen extra_gen_list(ribbons_menu, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, items, close=True)
-    return
-
-label extra_show_stats:
-    show monika idle at t11
-    call screen extraplus_stats_screen
-    jump close_extraplus
-    return
-
-label extra_relation_monika:
-    show monika idle at t11
-    $ time_string = get_formatted_time_since_install()
-    $ total_days = get_total_days_since_install()
-    if not renpy.seen_label("extra_relation_monika"):
-        m 2eub "You know, if you count it all up, it seems we've been together for [time_string]!"
-        if total_days <= 1:
-            m 2lub "We've only just begun, but every single second has been a dream come true."
-        elif total_days < 365:
-            m 2hubsb "It hasn't even been a year, and I already feel like I've known you forever. Time just flies by when I'm with you!"
-        elif total_days < 365 * 2:
-            m 2kubsb "Happy first anniversary! I still remember our first day together... Thank you for making so many memories with me."
-        elif total_days < 365 * 3:
-            m 2wubsb "Wow, two years together! Every day with you has been so special. Thank you for staying by my side."
-        elif total_days < 365 * 4:
-            m 1dsbsa "Three years... Time really does fly when I'm with you. We've shared so much, and I can't wait for more."
-        elif total_days < 365 * 5:
-            m 2wubsb "Four years! That's incredible, [player]. Our bond is so strong. Thank you for staying with me for so long."
-        elif total_days < 365 * 6:
-            m 2tubsb "Five years together... I feel so lucky to have you. Thank you for all the love and memories."
-        elif total_days < 365 * 7:
-            m 2subsb "Six years! Can you believe it? Every year with you is a treasure. Thank you for being with me all this time."
-        else:
-            m 2lubsb "It's been so long... but it really doesn't feel that way when I'm with you. Time just flies by!"
-    else:
-        m 2eub "We've been together for [time_string]!"
-        m 2lubsb "It really doesn't feel that long when I'm with you, though. Time just flies by!"
-    jump close_extraplus
-    return
-
-label extra_aff_log:
-    python:
-        current_affection = _get_current_affection_safe()
-        affection_value = int(current_affection)
-        monika_level = store.get_monika_level_from_value(current_affection)
-    
-    show monika idle at t11
-    #Agregar variantes con una probabilidad baja. Thanks for the idea u/PeachesTheNinja
-    "Your affection with [m_name] is [affection_value] [monika_level]{fast}"
-    window hide
-    jump close_extraplus
-    return
-
-label extra_coinflip:
-    show monika 1hua at t11
-    python:
-        store.mas_sprites.reset_zoom()
-        ep_tools.random_outcome = renpy.random.randint(1,2)
-    show screen extra_no_click
-    pause 1.0
-    show monika 3eua at t11
-    show coin_moni zorder 12 at rotatecoin:
-        xalign 0.5
-        yalign 0.5
-    play sound sfx_coin_flip
-    pause 1.0
-    hide coin_moni
-    show monika 1eua
-    pause 0.5
-    hide screen extra_no_click
-    if ep_tools.random_outcome == 1:
-        show coin_heads zorder 12:
-            xalign 0.9
-            yalign 0.5
-        m 1sub "The coin came up heads!"
-        hide coin_heads
-    elif ep_tools.random_outcome == 2:
-        show coin_tails zorder 12:
-            xalign 0.9
-            yalign 0.5
-        m 1wub "The coin came up tails!"
-        hide coin_tails
-    m 3hua "I hope it helps you~"
-    window hide
-    python:
-        store.mas_sprites.zoom_level = store.ep_tools.player_zoom
-        store.mas_sprites.adjust_zoom()
-    jump close_extraplus
-    return
-
-label extra_mas_backup:
-    show monika 1hua at t11
-    m 1hub "I'm glad you want to make a backup!"
-    m 3eub "I'll open the route for you."
-    m 1dsa "Wait a moment.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-    window hide
-
-    python:
-        import os
-        import sys
-        import subprocess
-        savedir = os.path.join(renpy.config.savedir, "")
+    # --- Statistics and Date Helpers ---
+    def getFormattedTimeSinceInstall():
+        """Returns a friendly formatted string for time since first MAS session."""
+        if not (store.persistent.sessions
+            and "first_session" in store.persistent.sessions
+            and store.persistent.sessions["first_session"]
+        ):
+            return "a wonderful time"
 
         try:
-            if sys.platform == "win32":
-                # Windows
-                os.startfile(savedir)
-            elif sys.platform == "darwin":
-                # macOS
-                subprocess.call(["open", savedir])
+            start_datetime = store.persistent.sessions["first_session"]
+            start_date = start_datetime.date()
+            current_date = datetime.date.today()
+            delta = current_date - start_date
+            total_days = delta.days
+
+            if total_days < 1:
+                return "less than a day, but every second has been incredible!"
+
+            years = total_days // 365
+            remaining_days = total_days % 365
+            months = remaining_days // 30
+            days = remaining_days % 30
+
+            parts = []
+            if years > 0:
+                parts.append("{0} {1}".format(years, "year" if years == 1 else "years"))
+            if months > 0:
+                parts.append("{0} {1}".format(months, "month" if months == 1 else "months"))
+            if days > 0:
+                parts.append("{0} {1}".format(days, "day" if days == 1 else "days"))
+
+            if len(parts) > 1:
+                last_part = parts.pop()
+                return ", ".join(parts) + " and " + last_part
+            elif parts:
+                return parts[0]
             else:
-                # Linux
-                subprocess.call(["xdg-open", savedir])
-        except Exception as e:
-            renpy.notify(_("Failed to open the backup folder: {}").format(str(e)))
-            renpy.jump("extra_mas_backup_fail")
+                return "a wonderful time"
 
-    jump close_extraplus
-    return
+        except Exception:
+            return "an unforgettable time"
 
-label extra_mas_backup_fail:
-    m 1lkb "Sorry, I could not open the folder."
-    m 1eka "Please try again later."
-    jump close_extraplus
-    return
+    def getTotalDaysSinceInstall():
+        """Return total days since first MAS session as integer."""
+        if not (store.persistent.sessions
+            and "first_session" in store.persistent.sessions
+            and store.persistent.sessions["first_session"]
+        ):
+            return 0
 
-label extra_window_title:
-    show monika idle at t21
-    python:
-        # Updated menu with three distinct options
-        window_menu = [
-            (_("Type a new title"), 'extra_change_title_manual'),
-            (_("Paste title from clipboard"), 'extra_change_title_paste'),
-            (_("Restore the window title"), 'extra_restore_title')
-        ]
+        try:
+            start_datetime = store.persistent.sessions["first_session"]
+            start_date = start_datetime.date()
+            current_date = datetime.date.today()
+            delta = current_date - start_date
+            return delta.days
+        except Exception:
+            return 0
 
-        items = [(_("Nevermind"), 'extraplus_tools', 20)]
-    call screen extra_gen_list(window_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
-    return
+    def getMasStats():
+        """Collects friendly MAS session stats for display."""
+        stats = {}
+        if not store.persistent.sessions:
+            return {
+                "The Day We Met <3": "Not yet recorded",
+                "Visits to The Spaceroom": "0",
+                "Our Time Together": "N/A",
+                "Average Time per Visit": "N/A"
+            }
 
-label extra_change_title_manual:
-    show monika idle at t11
-    python:
-        player_input = mas_input(
-            prompt=_("What should our new window title be?"),
-            allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!?()~-_.,'0123456789",
-            screen_kwargs={"use_return_button": True, "return_button_value": "cancel"}
-        )
-    if player_input and player_input != "cancel":
-        jump process_new_title
-    else:
-        jump extra_window_title
-    return
+        first_session = store.persistent.sessions.get("first_session")
+        total_playtime = store.persistent.sessions.get("total_playtime", datetime.timedelta())
+        total_sessions = store.persistent.sessions.get("total_sessions", 0)
 
-label extra_change_title_paste:
-    show monika idle at t11
-    python:
-        allowed_chars = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!?()~-_.,'0123456789"
-        player_input = filtered_clipboard_text(allowed_chars)
-    if player_input and player_input != "cancel":
-        jump process_new_title
-    else:
-        jump extra_window_title
-    return
-
-label process_new_title:
-    $ persistent._save_window_title = player_input.strip()
-    $ config.window_title = persistent._save_window_title
-    $ renpy.notify(random.choice([
-        _("Title updated successfully!"),
-        _("All set! The new title is in place."),
-        _("Done! Your window has a fresh new title.")
-    ]))
-    jump close_extraplus
-
-label extra_restore_title:
-    show monika idle at t11
-    python:
-        if ep_tools.backup_window_title == persistent._save_window_title:
-            renpy.notify(_("No need to do it again hehe~"))
+        stats["The Day We Met <3"] = first_session.strftime("%B %d, %Y") if first_session else "Unknown"
+        stats["Visits to The Spaceroom"] = str(total_sessions)
+        h, rem = divmod(total_playtime.total_seconds(), 3600)
+        m, s = divmod(rem, 60)
+        stats["Our Time Together"] = "{:02.0f}h {:02.0f}m".format(h, m)
+        if total_sessions > 0:
+            avg_playtime = total_playtime / total_sessions
+            h_avg, rem_avg = divmod(avg_playtime.total_seconds(), 3600)
+            m_avg, s_avg = divmod(rem_avg, 60)
+            stats["Average Time per Visit"] = "{:02.0f}h {:02.0f}m".format(h_avg, m_avg)
         else:
-            renpy.notify(_("It's nice to see the original name again."))
+            stats["Average Time per Visit"] = "N/A"
 
-        persistent._save_window_title = ep_tools.backup_window_title
-        config.window_title = persistent._save_window_title
-        renpy.jump("close_extraplus")
-    return
+        return stats
 
-label github_submod:
-    show monika idle at t11
-    $ renpy.run(OpenURL("https://github.com/zer0fixer/MAS-Extraplus"))
-    jump close_extraplus
-    return
+    # --- Utility Functions ---
+    def filtered_clipboard_text(allowed_chars):
+        """Get clipboard text, filter by allowed_chars, return or 'cancel'."""
+        import pygame
+        try:
+            pygame.scrap.init()
+            clipboard_bytes = pygame.scrap.get(pygame.scrap.SCRAP_TEXT)
 
-#====GAME
-label extra_dev_mode:
-    python:
-        mas_RaiseShield_dlg()
-        if not renpy.get_screen("doki_chibi_idle"):
-            config.overlay_screens.append("doki_chibi_idle")
-    show monika idle at t11
-    call screen sticker_customization
-    return
+            if clipboard_bytes:
+                clipboard_text = clipboard_bytes.decode('utf-8', 'ignore')
+                return "".join(char for char in clipboard_text if char in allowed_chars)
+            else:
+                renpy.notify(_("Your clipboard is empty."))
+                return "cancel"
+        except Exception:
+            renpy.notify(_("Could not access clipboard."))
+            return "cancel"
 
-label sticker_primary:
-    show monika idle at t21
-    python:
-        accessories = [
-            DokiAccessory(_("Cat Ears"), 'cat_ears', "primary"),
-            DokiAccessory(_("Christmas Hat"), 'christmas_hat', "primary"),
-            DokiAccessory(_("Demon Horns"), 'demon_horns', "primary"),
-            DokiAccessory(_("Flowers Crown"), 'flowers_crown', "primary"),
-            DokiAccessory(_("Halo"), 'halo', "primary"),
-            DokiAccessory(_("Heart Headband"), 'heart_headband', "primary"),
-            DokiAccessory(_("New Year's Headband"), 'hny', "primary"),
-            DokiAccessory(_("Neon Cat Ears"), 'neon_cat_ears', "primary"),
-            DokiAccessory(_("Party Hat"), 'party_hat', "primary"),
-            DokiAccessory(_("Rabbit Ears"), 'rabbit_ears', "primary"),
-            DokiAccessory(_("Witch Hat"), 'witch_hat', "primary")
-        ]
-        items = [(DokiAccessory(_("Remove"), '0nothing', "primary"), 20), (_("Nevermind"), 'extra_dev_mode', 0)]
+    # --- Dating and Label Helpers ---
+    def check_seen_background(first_time, alternate, stop_date):
+        """Handle affection and label jump based on background seen status."""
+        if store.mas_affection._get_aff() < 400:
+            renpy.jump(stop_date)
 
-    call screen extra_gen_list(accessories, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, items, close=True)
-    return
+        if renpy.seen_label(first_time):
+            store.mas_gainAffection(1, bypass=True)
+            renpy.jump(alternate)
+        else:
+            store.mas_gainAffection(5, bypass=True)
 
-label sticker_secondary:
-    show monika idle at t21
-    python:
-        accessories_2 = [
-            DokiAccessory(_("Black Bow Tie"), 'black_bow_tie', "secondary"),
-            DokiAccessory(_("Christmas Tree"), 'christmas_tree', "secondary"),
-            DokiAccessory(_("Cloud"), 'cloud', "secondary"),
-            DokiAccessory(_("Coffee"), 'coffee', "secondary"),
-            DokiAccessory(_("Halloween Pumpkin"), 'pumpkin', "secondary"),
-            DokiAccessory(_("Hearts"), 'hearts', "secondary"),
-            DokiAccessory(_("Monika's Cake"), 'm_slice_cake', "secondary"),
-            DokiAccessory(_("Moustache"), 'moustache', "secondary"),
-            DokiAccessory(_("Neon Blush"), 'neon_blush', "secondary"),
-            DokiAccessory(_("[player]'s Cake"), 'p_slice_cake', "secondary"),
-            DokiAccessory(_("Pirate Patch"), 'patch', "secondary"),
-            DokiAccessory(_("Speech Bubble with Heart"), 'speech_bubble', "secondary"),
-            DokiAccessory(_("Sunglasses"), 'sunglasses', "secondary")
-        ]
-        items = [(DokiAccessory(_("Remove"), '0nothing', "secondary"), 20), (_("Nevermind"), 'extra_dev_mode', 0)]
+    def manage_date_location(locate=None):
+        """Save or load the current room's chair, table, and background for dates."""
+        if locate:
+            store.ep_dates.chair = store.monika_chr.tablechair.chair
+            store.ep_dates.table = store.monika_chr.tablechair.table
+            store.ep_dates.old_bg = store.mas_current_background
 
-    call screen extra_gen_list(accessories_2, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, items, close=True)
-    return
+        else:
+            store.monika_chr.tablechair.chair = store.ep_dates.chair
+            store.monika_chr.tablechair.table = store.ep_dates.table
+            store.mas_current_background = store.ep_dates.old_bg
 
-label doki_change_appe:
-    show monika idle at t21
-    python:
-        doki_data = [("Monika", 'monika_sticker_costumes')]
+    def check_seen_label(first_time, alternate):
+        """Jump to alternate if first_time has been seen."""
+        if renpy.seen_label(first_time):
+            renpy.jump(alternate)
+
+
+# Store: ep_chibis
+# Handles Chibi-related logic, classes, and UI helpers.
+init -5 python in ep_chibis:
+    import store
+    from renpy.display.layout import LiveComposite
+
+    # --- Chibi Management Functions ---
+    def init_chibi():
+        if not is_visible():
+            renpy.config.overlay_screens.append("doki_chibi_idle")
+
+    def is_visible():
+        return "doki_chibi_idle" in renpy.config.overlay_screens
+
+    def remove_chibi():
+        if is_visible():
+            renpy.config.overlay_screens.remove("doki_chibi_idle")
+            renpy.hide_screen("doki_chibi_idle")
+
+    def add_remv_chibi():
+        if is_visible():
+            remove_chibi()
+        else:
+            init_chibi()
+
+    def reset_chibi():
+        remove_chibi()
+        if not is_visible():
+            renpy.config.overlay_screens.append("doki_chibi_idle")
+
+    def chibi_draw_accessories(st, at):
+        return LiveComposite(
+            (119, 188),
+            (0, 0), store.MASFilterSwitch(store.ep_chibis.accessory_path_0.format(store.persistent.chibi_accessory_1_)),
+            (0, 0), store.MASFilterSwitch(store.ep_chibis.accessory_path_1.format(store.persistent.chibi_accessory_2_))
+        ), 5
+
+    def migrate_chibi_costume_data():
+        if isinstance(store.persistent.chibika_current_costume, list):
+            store.persistent.chibika_current_costume = store.ep_chibis.blanket_monika
+        elif isinstance(store.persistent.chibika_current_costume, tuple) and isinstance(store.persistent.chibika_current_costume[0], basestring):
+            if not renpy.loadable(store.ep_folders._join_path(store.ep_folders.EP_CHIBIS, "darling", "idle.png")):
+                store.persistent.chibika_current_costume = ["sticker_up", "sticker_sleep", "sticker_baka"]
+
+    class DokiAccessory():
+        def __init__(self, name, acc, category):
+            self.name = name
+            self.acc = acc
+            self.category = category
+
+        def __call__(self):
+            if self.category == "primary":
+                store.persistent.chibi_accessory_1_ = self.acc
+                renpy.jump("sticker_primary")
+            else:
+                store.persistent.chibi_accessory_2_ = self.acc
+                renpy.jump("sticker_secondary")
+
+    class SelectDOKI():
+        def __init__(self, name, costume):
+            self.name = name
+            self.costume = costume
+
+        def __call__(self):
+            store.persistent.chibika_current_costume = self.costume
+            store.ep_chibis.reset_chibi()
+            renpy.jump("extra_dev_mode")
+
+    def show_costume_menu(costumes, return_label):
+        dokis_items = [SelectDOKI(name, cost) for name, cost in costumes]
+        items = [(_("Nevermind"), return_label, 20)]
+        renpy.call_screen("extra_gen_list", dokis_items, store.mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+
+    def chibi_drag(drags, drop):
+        """Handle Chibika's drag and drop movement."""
+        try:
+            store.persistent.chibika_drag_x = drags[0].x
+            store.persistent.chibika_drag_y = drags[0].y
+        except Exception:
+            # Defensive: ignore if structure isn't as expected
+            pass
+
+
+#==============================================================================
+# 4. MINIGAME HELPER STORES
+#==============================================================================
+
+# Store: ep_sg (Shell Game)
+init -10 python in ep_sg:
+    import store
+    
+    def randomize_cup_skin():
         if store.persistent._mas_pm_cares_about_dokis:
-            doki_data.extend([
-                (_("Natsuki"), 'natsuki_sticker_costumes'),
-                (_("Sayori"), 'sayori_sticker_costumes'),
-                (_("Yuri"), 'yuri_sticker_costumes')
-            ])
-        items = [(_("Nevermind"), 'extra_dev_mode', 20)]
-
-    call screen extra_gen_list(doki_data, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
-    return
-
-label monika_sticker_costumes:
-    $ show_costume_menu(ep_chibis.monika_costumes_, 'doki_change_appe')
-    return
-
-label natsuki_sticker_costumes:
-    $ show_costume_menu(ep_chibis.natsuki_costumes_, 'doki_change_appe')
-    return
-
-label sayori_sticker_costumes:
-    $ show_costume_menu(ep_chibis.sayori_costumes_, 'doki_change_appe')
-    return
-
-label yuri_sticker_costumes:
-    $ show_costume_menu(ep_chibis.yuri_costumes_, 'doki_change_appe')
-    return
-
-label maxwell_screen:
-    show monika idle at t11
-    call screen maxwell_april_fools
-    jump extraplus_tools
-    return
+            return renpy.random.choice(["cup.png", "monika.png", "yuri.png", "natsuki.png", "sayori.png"])
+        return renpy.random.choice(["cup.png", "monika.png"])

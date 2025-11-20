@@ -3,7 +3,7 @@
 #===========================================================================================
 #====Rock Paper Scissors
 default persistent.psr_result_game = [False, False, False] #Player, Monika and Tie. Quit [FFF]
-default -5 persistent.rps_player_history = []
+default persistent.rps_player_history = []
 
 init python in ep_rps:
     import store
@@ -33,7 +33,7 @@ init python in ep_rps:
     choices = [RPSChoice("Rock", 1, "extra_rock", 3), RPSChoice("Paper", 2, "extra_paper", 1), RPSChoice("Scissors", 3, "extra_scissors", 2)]
 
 
-    def get_monika_choice():
+    def getMonikaChoice():
         """
         Determines Monika's choice based on the player's history.
         """
@@ -153,7 +153,7 @@ label minigame_rps:
 
 label rps_loop:
     $ store.persistent.rps_player_history.append(ep_rps.your_choice)
-    $ monika_choice_val = ep_rps.get_monika_choice()
+    $ monika_choice_val = ep_rps.getMonikaChoice()
     $ renpy.restart_interaction()
     $ player_choice = ep_rps.choices[ep_rps.your_choice - 1]
     $ monika_choice = ep_rps.choices[monika_choice_val - 1]
@@ -318,6 +318,5 @@ label rps_result:
     python:
         ep_rps.moni_wins = 0
         ep_rps.player_wins = 0
-        ep_tools.seen_notification_games = False
     jump close_extraplus
     return

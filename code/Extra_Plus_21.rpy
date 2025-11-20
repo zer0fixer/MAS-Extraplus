@@ -3,7 +3,10 @@
 #===========================================================================================
 #====Blackjack-21
 default persistent.blackjack_win_game = [False, False, False] #Player, Monika and Tie. Quit [FFF]
+
 init -5 python in ep_bj:
+    import store
+
     player_wins = 0
     monika_wins = 0
     current_turn = "player"
@@ -25,13 +28,35 @@ init -5 python in ep_bj:
         _("You've made your move. Let's see what the deck has in store for me!")
     ])
 
+    def getCardImage(suit, value):
+        """
+        Generates the image of a card dynamically.
+        More efficient than preloading all cards.
+        """
+        card_path = store.ep_folders._join_path(
+            store.ep_folders.EP_MG_BLACKJACK, 
+            suit, 
+            "{}.png".format(value)
+        )
+        return store.MASFilterSwitch(card_path)
+
 init python in ep_bj:
     import random
+    import store
+
     class BJ_Card(object):
         def __init__(self, suit, value):
             self.suit = suit
             self.value = value
-            self.image = "card {} {}".format(self.suit, self.value)
+            # self.image = "card {} {}".format(self.suit, self.value)
+            self._image = None
+
+        @property
+        def image(self):
+            """Genera la imagen solo cuando se solicita"""
+            if self._image is None:
+                self._image = getCardImage(self.suit, self.value)
+            return self._image
 
     class BJ_Deck(object):
         def __init__(self):
@@ -71,18 +96,21 @@ init python in ep_bj:
         def calculate_total(self):
             self.total = 0
             num_aces = 0
-
-            # Sum non-ace cards first
+            
+            # Sum all cards, treating Aces as 1 initially
             for card in self.hand:
-                if card.value > 10:
+                if card.value > 10:  # Jack (11), Queen (12), King (13)
                     self.total += 10
-                elif card.value > 1:
-                    self.total += card.value
-                else: # It's an Ace
+                elif card.value == 1:  # Ace
+                    self.total += 1
                     num_aces += 1
-            # Add aces, treating them as 11 if possible, otherwise 1
-            for _ in range(num_aces):
-                self.total += 11 if self.total + 11 <= 21 else 1
+                else:  # 2-10
+                    self.total += card.value
+            
+            # Try to upgrade ONE ace from 1 to 11 if it doesn't bust
+            # (Adding 10 to an ace valued at 1 makes it 11)
+            if num_aces > 0 and self.total + 10 <= 21:
+                self.total += 10
 
     class BJ_Monika(BJ_Player):
         def should_hit(self):
@@ -100,7 +128,7 @@ screen blackjack_ui:
     add "bj_name_plate" pos (548, 33) anchor (0, 0) zoom 0.7
     add "bj_name_plate" pos (548, 375) anchor (0, 0) zoom 0.7
     if ep_bj.current_turn == "player":
-        timer ep_tools.games_idle_timer action Function(_show_idle_notification, context="bj") repeat True
+        timer ep_tools.games_idle_timer action Function(store.ep_tools.show_idle_notification, context="bj") repeat True
 
     fixed:
         xalign 0.5 ypos 0.05
@@ -137,7 +165,7 @@ screen blackjack_monika():
                 add If(minigame_monika.revealed[index],
                     At(card.image, init_card_slide if index < 2 else hit_card),
                     At("bjcard back", init_card_slide if index < 2 else hit_card)
-                ) at monika_card_flip
+                    )
             frame:
                 xysize (50, 50)
                 xalign 0.5
@@ -253,6 +281,12 @@ label blackjack_start:
                         if minigame_player.total >= 21 or len(minigame_player.hand) == 5:
                             $ game_over = True
                         
+                        elif minigame_player.total == 21 or len(minigame_player.hand) == 5:
+                            $ ep_bj.player_stand = True
+                            $ ep_bj.current_turn = "monika"
+                            python:
+                                renpy.say(m, ep_bj.comment)
+                        
                     elif bj_result == "stand":
                         $ ep_bj.player_stand = True
                         $ ep_bj.current_turn = "monika"
@@ -283,26 +317,35 @@ label blackjack_results:
     $ minigame_monika.revealed = [True] * len(minigame_monika.hand)
     $ player_total = minigame_player.total
     $ monika_total = minigame_monika.total
-
-    if player_total == 21 and len(minigame_player.hand) == 2:
+    
+    # Natural blackjack (21 with 2 cards) - highest priority
+    if player_total == 21 and len(minigame_player.hand) == 2 and not (monika_total == 21 and len(minigame_monika.hand) == 2):
         m "A perfect 21! You've got a real talent for this, [player]!"
         $ ep_bj.player_wins += 1
-
-    elif monika_total == 21 and len(minigame_monika.hand) == 2:
+    
+    elif monika_total == 21 and len(minigame_monika.hand) == 2 and not (player_total == 21 and len(minigame_player.hand) == 2):
         m "Blackjack! Looks like I got lucky this time. Ehehe~"
         $ ep_bj.monika_wins += 1
-
+    
+    # Both have natural blackjack
+    elif player_total == 21 and len(minigame_player.hand) == 2 and monika_total == 21 and len(minigame_monika.hand) == 2:
+        m "We both got natural blackjacks! That's a push, [player]."
+    
+    # If the player busts, they lose IMMEDIATELY (regardless of whether Monika also busts)
     elif player_total > 21:
         m "Oh, you went over. That's a tough break. Don't worry, it happens!"
         $ ep_bj.monika_wins += 1
-
-    elif monika_total > 21 and player_total <= 21:
+    
+    # If Monika busts but the player doesn't, the player wins
+    elif monika_total > 21:
         m "Ah, I busted. Looks like this round goes to you. Well played!"
         $ ep_bj.player_wins += 1
-
+    
+    # Tie (same score without busting)
     elif player_total == monika_total:
         m "It's a push! We have the exact same score. We really are in sync, aren't we?"
-
+    
+    # Normal comparison (both ≤ 21)
     else:
         if player_total > monika_total:
             m "You win this round! Nice job staying cool under pressure."
@@ -310,7 +353,7 @@ label blackjack_results:
         else:
             m "Looks like my hand was just a little bit better. I win this one!"
             $ ep_bj.monika_wins += 1
-
+    
     window hide
     pause 1
     jump bj_game_loop
@@ -342,7 +385,6 @@ label BJ_quit_game:
     hide screen blackjack_ui
     $ ep_bj.monika_wins = 0
     $ ep_bj.player_wins = 0
-    $ ep_tools.seen_notification_games = False
     call spaceroom(scene_change=True)
     jump close_extraplus
     return

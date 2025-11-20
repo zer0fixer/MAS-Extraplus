@@ -23,6 +23,7 @@ image ttt_cross:
     on show:
         alpha 0.5
         linear 0.25 alpha 1.0
+        
 image ttt_cross_cursor:
     Text(ep_ttt.colors[0],
         font = ep_tools.pictograms_font,
@@ -32,6 +33,7 @@ image ttt_cross_cursor:
     )
     alpha 0.25
     truecenter
+
 image ttt_circle:
     Text(ep_ttt.colors[2],
         font = ep_tools.pictograms_font,
@@ -196,7 +198,7 @@ screen minigame_ttt_scr():
     layer "master"
     zorder 50
     if ep_ttt.game.playerTurn:
-        timer ep_tools.games_idle_timer action Function(_show_idle_notification, context="ttt") repeat True
+        timer ep_tools.games_idle_timer action Function(store.ep_tools.show_idle_notification, context="ttt") repeat True
 
     python:
         from math import sqrt

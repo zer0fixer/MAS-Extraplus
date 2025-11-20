@@ -3,8 +3,8 @@
 #===========================================================================================
 label go_to_cafe:
     python:
-        mas_extra_location(locate=True)
-        extra_seen_background("cafe_sorry_player", "gtcafev2", "gtcafe")
+        store.ep_tools.manage_date_location(locate=True)
+        store.ep_tools.check_seen_background("gtcafe", "gtcafev2", "cafe_sorry_player")
 
 label gtcafe:
     show monika 1eua at t11
@@ -13,20 +13,18 @@ label gtcafe:
         m 1hubsa "That's such a sweet idea, [player]!"
         m 1eubsa "A cute, cozy date just for the two of us."
         m 1hubsb "I love it! Let's go~"
-        jump extra_cafe_init
     else:
         if mas_isDayNow():
             m 3sub "Do you want to go to the cafe?"
             m 3hub "Glad to hear it [player]!"
             m 1hubsa "I know this appointment will be great!"
             m 1hubsb "Okay, let's go [mas_get_player_nickname()]~"
-            jump extra_cafe_init
         else: # Handles night and sunset
             m 3sub "Oh, you want to go out to the cafe?"
             m 3hub "It's pretty sweet that you decided to go tonight."
             m 1eubsa "This date night is going to be great!"
             m 1hubsb "Let's go [mas_get_player_nickname()]~"
-            jump extra_cafe_init
+    jump extra_cafe_init
     return
 
 label gtcafev2:
@@ -36,20 +34,18 @@ label gtcafev2:
         m 2hub "That's perfect! It's kind of like 'our spot', isn't it?"
         m 2eubsa "A quiet, sweet celebration just for us."
         m 1hubsb "I can't wait. Let's go, [mas_get_player_nickname()]~"
-        jump extra_cafe_init
     else:
         if mas_isDayNow():
             m 3wub "Do you want to go to the cafe again?"
             m 2hub "The previous time we went, I had a lot of fun!"
             m 2eubsa "So glad to hear it [player]!"
             m 1hubsb "Well, let's go [mas_get_player_nickname()]~"
-            jump extra_cafe_init
         else: # Handles night and sunset
             m 3wub "Oh, do you want to go out to the cafe again?"
             m 2hub "The previous time we went, it was very romantic~"
             m 2eubsa "So glad to go again [player]!"
             m 1hubsb "Let's go [mas_get_player_nickname()]~"
-            jump extra_cafe_init
+    jump extra_cafe_init
     return
 
 label extra_cafe_cakes:
@@ -193,8 +189,9 @@ default persistent._extraplusr_hasplayer_goneonanniversary = False
 
 label go_to_restaurant:
     python:
-        mas_extra_location(locate=True)
-        extra_seen_background("restaurant_sorry_player", "gtrestaurantv2", "gtrestaurant")
+        store.ep_tools.manage_date_location(locate=True)
+        store.ep_tools.check_seen_background("gtrestaurant", "gtrestaurantv2", "restaurant_sorry_player")
+
 
 label gtrestaurant:
     show monika 1eua at t11
@@ -623,7 +620,7 @@ label extra_talk_doing:
                 extend 1hublb "I love you...!"
 
     else:
-        $ monika_couple = plus_player_gender()
+        $ monika_couple = ep_tools.getPlayerGenderString()
         m 1eka "I wasn't feeling so well before coming here, to be honest."
         m 1rkc "I was feeling kind of upset over some stuff..."
         m 1fub "But being with you...{w=0.3}{nw}"
@@ -892,7 +889,7 @@ label extra_talk_motto:
 
 label extra_talk_3words:
     show monika staticpose at t11
-    $ monika_couple = plus_player_gender()
+    $ monika_couple = ep_tools.getPlayerGenderString()
     m 1esc "3 words?"
     m 4eub "{i}Passionate.{i}{w=0.5}{nw} "
     extend 4eub "{i}Determined.{i}{w=0.5}{nw} "
@@ -912,7 +909,7 @@ label extra_talk_3words:
 
 label extra_talk_pop:
     show monika staticpose at t11
-    $ monika_couple = plus_player_gender()
+    $ monika_couple = ep_tools.getPlayerGenderString()
     m 6wublo "Oh!{w=0.3} That's a really interesting question!"
     m 6rtu "Maybe people think of my poems?"
     extend " Like the 'Hole in the wall' one?"
@@ -935,8 +932,8 @@ label extra_talk_pop:
 # Pool
 #===========================================================================================
 label go_to_pool:
-    python:
-        mas_extra_location(locate=True)
+    $ store.ep_tools.manage_date_location(locate=True)
+    jump ExtraPool_init
 
 label skip_pool_exit:
     show monika idle at t11_float
