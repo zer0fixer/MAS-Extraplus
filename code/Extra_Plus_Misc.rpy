@@ -57,6 +57,7 @@ init -995 python in ep_folders:
     EP_MG_RPS = _join_path(EP_MINIGAMES, "rockpaperscissors")
     EP_MG_BLACKJACK = _join_path(EP_MINIGAMES, "blackjack")
     EP_MG_TICTACTOE = _join_path(EP_MINIGAMES, "tictactoe")
+    EP_MG_FRIDGE = _join_path(EP_MINIGAMES, "fridgemagnets")
 
     # Dates folders
     EP_DATE_CAFE = _join_path(EP_DATES, "cafe")
@@ -68,34 +69,7 @@ init -995 python in ep_folders:
     # Chibi accessories folders
     EP_CHIBI_ACC_0 = _join_path(EP_CHIBIS, "accessories_0")
     EP_CHIBI_ACC_1 = _join_path(EP_CHIBIS, "accessories_1")
-
-# This file exists to make it clearer which `store.*` modules are used by Extra_Plus.
-# It does not change runtime behaviour; it simply references the stores so they are easy to locate.
-
-init -100 python:
-    # Accessing these attributes here has no side-effect; it documents the stores
-    _known_stores = [
-        'ep_button',
-        'ep_tools',
-        'ep_chibis',
-        'ep_dates',
-        'ep_folders',
-        'ep_sg',
-        'ep_rps',
-        'ep_bj',
-        'ep_ttt',
-        'ep_affection',
-        'ep_files',
-        'ep_dialogues',
-        'ep_interactions'
-    ]
-
-    # Ensure attribute access does not raise during parsing
-    for s in _known_stores:
-        try:
-            getattr(store, s)
-        except Exception:
-            pass
+    EP_CHIBI_ACC_2 = _join_path(EP_CHIBIS, "accessories_2")
 
 #==============================================================================
 # 2. CORE LOGIC & DATA STORES
@@ -157,44 +131,68 @@ init -5 python in ep_button:
         if conditions["is_night"]: key_parts.append("night")
         return "-".join(key_parts)
 
-    def _button_text_from_conditions(conditions):
+    def _button_text_conditions(conditions):
         # Internal helper to select text based on evaluated conditions.
-        is_night = conditions["is_night"]
+        # Data-driven approach for selecting button text. Max 8 chars.
+        text_options = {
+            # Special Days (highest priority)
+            "is_monika_bday": [_("My B-Day"), _("Her Day"), _("My Song"), _("My Day"), _("Moni!")],
+            "is_player_bday": [_("Your Day"), _("HBD!"), _("Ur Day"), _("My Gift"), _("The Best")],
+            "is_f14":         [_("Be Mine"), _("My Love"), _("Hearts"), _("XOXO"), _("Our Day")],
+            "is_o31":         [_("Spooky"), _("Boo!"), _("Tricks"), _("Treats"), _("Scary")],
+            "is_d25":         [_("Joyful"), _("Our Xmas"), _("Gift"), _("Noel"), _("Holly")],
+            "is_nye":         [_("New Year"), _("Cheers"), _("Toast"), _("Our Year"), _("The Eve")],
+            
+            # Affection Levels
+            # LOVE (1000+): Deep connection, devotion, eternal.
+            "is_love":        [_("Forever"), _("Eternity"), _("Sunshine"), _("Beloved"), _("Darling"), _("Adored"), _("Precious"), _("My Soul"), _("TrueLove"), _("My Hero")],
+            # ENAMORED (400-999): Intense romantic feelings, obsession.
+            "is_enamored":    [_("Dearest"), _("Only You"), _("My Dear"), _("In Love"), _("Kiss Me"), _("Hold Me"), _("Yours"), _("Passion"), _("Together"), _("Sweetie")],
+            # AFFECTIONATE (100-399): Warm, caring, sweet.
+            "is_aff":         [_("So Sweet"), _("Caring"), _("Warmth"), _("Our Time"), _("My Dear"), _("Cutie"), _("Closer"), _("Affection"), _("Hugs"), _("Gentle")],
+            # HAPPY (30-99): Cheerful, upbeat, positive.
+            "is_happy":       [_("Smile"), _("Glad"), _("Hehe~"), _("Happy"), _("Cheerful"), _("Yay!"), _("Joy!"), _("Fun!"), _("Radiant"), _("Good Day")],
+            # NORMAL (-29 to 29): Casual, attentive, waiting.
+            "is_normal":      [_("Hey You"), _("Just Me"), _("Us Two"), _("Thinking"), _("My Poet"), _("Listen"), _("Guess?"), _("It's You"), _("Hello"), _("Hi There")],
+            # UPSET (-30 to -99): Annoyed, bored, slight coldness.
+            "is_upset":       [_("Really?"), _("Sigh..."), _("Bored..."), _("Hmph."), _("Okay..."), _("Unsure"), _("Waiting"), _("Why?"), _("..."), _("Tired")],
+            # DISTRESSED (-100 to ...): Hurt, sad, feeling ignored.
+            "is_distressed":  [_("No Love?"), _("Forgot?"), _("Alone..."), _("Please.."), _("Sadness"), _("You..."), _("Scared"), _("Sorry"), _("Empty"), _("Hurts")],
+            # BROKEN (Low Affection): Glitchy, despondent, hopeless.
+            "is_broken":      [_("Help..."), _("Error"), _("Null"), _("Void"), _("Gone..."), _("Zero"), _("End..."), _("Pain"), _("Why..."), _("Stop")],
+        }
+        
+        # Night-specific additions (Max 8 chars)
+        night_additions = {
+            # Romantic nights
+            "is_love":        [_("My Moon"), _("Stars"), _("Night <3"), _("Dreaming"), _("My Star")],
+            "is_enamored":    [_("Moonlit"), _("Gazing"), _("Us nite"), _("Resting"), _("Warmth")],
+            # Happy/Affectionate nights
+            "is_aff":         [_("Tonight"), _("Calm"), _("Peaceful"), _("Restful"), _("Lovely")],
+            "is_happy":       [_("Dreams"), _("GoodNite"), _("Sleepy?"), _("Cozy"), _("Bedtime")],
+            # Neutral/Bad nights
+            "is_normal":      [_("Sparks"), _("Sleepy"), _("Quiet"), _("Dark..."), _("Late...")],
+            "is_upset":       [_("Cold..."), _("Alone?"), _("No Sleep"), _("Shadows"), _("Cloudy")],
+            # Terrible nights
+            "is_distressed":  [_("Awake..."), _("Lonely"), _("So Dark"), _("Tears..."), _("Cold")],
+            "is_broken":      [_("Darkness"), _("Void"), _("Error"), _("Endless"), _("Nothing")],
+        }
 
-        if conditions["is_monika_bday"]: return renpy.random.choice(["My B-Day", "Her Day", "Sing 4 Me", "My Day", "Moni!"])
-        if conditions["is_player_bday"]: return renpy.random.choice(["Your Day", "HBD!", "Ur Day", "My Gift", "The Best"])
-        if conditions["is_f14"]: return renpy.random.choice(["Be Mine", "My Love", "Hearts", "XOXO", "Our Day"])
-        if conditions["is_o31"]: return renpy.random.choice(["Spooky", "Boo!", "Tricks", "Treats", "Scary"])
-        if conditions["is_d25"]: return renpy.random.choice(["Joyful", "Our Xmas", "Gift", "Noel", "Holly"])
-        if conditions["is_nye"]: return renpy.random.choice(["New Year", "Cheers", "Toast", "Our Year", "The Eve"])
+        # Find the first matching condition
+        for key, texts in text_options.items():
+            if conditions.get(key):
+                final_texts = list(texts) # Create a copy
+                if conditions.get("is_night") and key in night_additions:
+                    final_texts.extend(night_additions[key])
+                return renpy.random.choice(final_texts)
 
-        if conditions["is_love"] or conditions["is_enamored"]:
-            base_texts = ["Forever", "Eternity", "Sunshine", "Beloved", "Darling", "Adored", "Precious", "Cutie", "Sweetie", "Cherish"]
-            if is_night: base_texts.extend(["Moonlight", "Stars", "Night <3", "Dreaming", "Starlight", "Night Dear", "Sleepy?", "Cuddle"])
-            return renpy.random.choice(base_texts)
-
-        if conditions["is_aff"] or conditions["is_happy"]:
-            base_texts = ["So Sweet", "Caring", "Warmth", "Our Time", "Smile", "Glad", "Hehe~", "Happy", "Cheerful", "Yay!"]
-            if is_night: base_texts.extend(["Night Time", "Calm", "Peaceful", "Night!", "Evening", "Restful", "Nice Night"])
-            return renpy.random.choice(base_texts)
-
-        if conditions["is_normal"] or conditions["is_upset"]:
-            base_texts = ["Hi again", "Welcome", "Talk?", "On Mind?", "Topics", "Just Us", "Relax", "It's you", "Hurting", "Really?"]
-            if is_night: base_texts.extend(["Sparks", "Sleepy", "Quiet", "Dreams", "Cozy", "Dark...", "Restless", "Tired..."])
-            return renpy.random.choice(base_texts)
-
-        if conditions["is_distressed"] or conditions["is_broken"]:
-            base_texts = ["No Love?", "Forgot?", "Alone...", "Please...", "...", "You...", "Scared", "Sorry", "Nothing"]
-            if is_night: base_texts.extend(["Awake...", "Lonely", "Dark Night", "Tears...", "Darkness", "Void", "Cold...", "End..."])
-            return renpy.random.choice(base_texts)
-
-        return "Extra+"
+        return _("Extra+") # Default fallback
 
     def getDynamicButtonText():
         """Main function to get the dynamic button text, using a cache."""
         import datetime
         if not store.persistent.EP_dynamic_button_text:
-            return "Extra+"
+            return _("Extra+")
 
         conditions = _evaluate_current_conditions()
         today_str = str(datetime.date.today())
@@ -203,7 +201,7 @@ init -5 python in ep_button:
         if (store.persistent.EP_button_last_update != today_str
             or store.persistent.EP_button_conditions_key != conditions_key
             or store.persistent.EP_button_text is None):
-            new_text = _button_text_from_conditions(conditions)
+            new_text = _button_text_conditions(conditions)
             store.persistent.EP_button_text = new_text
             store.persistent.EP_button_last_update = today_str
             store.persistent.EP_button_conditions_key = conditions_key
@@ -211,35 +209,22 @@ init -5 python in ep_button:
 
     # --- Overlay Button and Screen Management ---
     def show_menu():
-        """Shows the main Extra+ interactions menu."""
         store.mas_RaiseShield_dlg()
         show_zoom_button()
         renpy.invoke_in_new_context(renpy.call_screen, "extraplus_interactions")
 
     def show_button():
-        """Adds the Extra+ button to the overlay if not already visible."""
-        if not is_button_visible():
-            renpy.config.overlay_screens.append("extraplus_button")
-
-    def is_button_visible():
-        """Checks if the Extra+ button is currently visible."""
-        return "extraplus_button" in renpy.config.overlay_screens
+        store.ep_tools.safe_overlay_add("extraplus_button")
+    
+    def hide_button():
+        store.ep_tools.safe_overlay_remove("extraplus_button")
 
     # --- Custom Zoom Management ---
-    def is_zoom_button_visible():
-        """Checks if the custom zoom button is visible."""
-        return "extrabutton_custom_zoom" in renpy.config.overlay_screens
-
     def show_zoom_button():
-        """Adds the custom zoom button if not already visible."""
-        if not is_zoom_button_visible():
-            renpy.config.overlay_screens.append("extrabutton_custom_zoom")
+        store.ep_tools.safe_overlay_add("extrabutton_custom_zoom")
 
     def hide_zoom_button():
-        """Removes the custom zoom button if it is visible."""
-        if is_zoom_button_visible():
-            renpy.config.overlay_screens.remove("extrabutton_custom_zoom")
-            renpy.hide_screen("extrabutton_custom_zoom")
+        store.ep_tools.safe_overlay_remove("extrabutton_custom_zoom")
 
 # Store: ep_files
 # Handles all file system interactions, like creating gifts and cleaning up old files.
@@ -258,8 +243,8 @@ init -5 python in ep_files:
             self.gift = gift
 
         def __call__(self):
-            if store.ep_files.create_gift_file(self.gift):
-                messages = [
+            if create_gift_file(self.gift):
+                messages = [ # These are already wrapped in _()
                     _("All set! The '{}' gift is ready for you.").format(self.name),
                     _("Here's a '{}' for Monika! I hope she loves it.").format(self.name),
                     _("Perfect! Your '{}' is ready for Monika.").format(self.name),
@@ -267,25 +252,25 @@ init -5 python in ep_files:
                     _("Your '{}' gift has been created!").format(self.name),
                     _("One '{}' gift, coming right up! It's ready.").format(self.name)
                 ]
-                renpy.notify(random.choice(messages))
+                store.ep_chibis.chibika_notify(random.choice(messages))
                 store.mas_checkReactions()
 
-            renpy.jump('plus_make_gift')
+            renpy.jump("plus_make_gift")
 
     # --- File creation and migration ---
     def create_gift_file(basename):
         try:
             filename = basename + ".gift"
-            filepath = os.path.join(renpy.config.basedir, 'characters', filename)
+            filepath = os.path.join(renpy.config.basedir, "characters", filename)
             with open(filepath, "w") as f:
                 pass
             return True
         except Exception as e:
-            renpy.notify(_("Oh no, I couldn't create the gift file."))
+            store.ep_chibis.chibika_notify(_("Oh no, I couldn't create the gift file."))
             return False
 
     def migrate_window_title_data():
-        if hasattr(store.persistent, 'save_window_title'):
+        if hasattr(store.persistent, "save_window_title"):
             # Only migrate if the new variable has not been customized.
             if store.persistent._save_window_title == "Monika After Story   ":
                 store.persistent._save_window_title = store.persistent.save_window_title
@@ -297,18 +282,17 @@ init -5 python in ep_files:
                 pass # Should not happen if hasattr is true, but good practice.
 
     def make_bday_oki_doki():
-        renpy.config.overlay_screens.remove("bday_oki_doki")
-        renpy.hide_screen("bday_oki_doki")
+        store.ep_tools.safe_overlay_remove("bday_oki_doki")
         try:
-            with open(os.path.join(renpy.config.basedir, 'characters', 'oki doki'), "w") as f:
+            with open(os.path.join(renpy.config.basedir, "characters", "oki doki"), 'w') as f:
                 pass
-            renpy.notify(_("Everything is ready for the surprise!"))
+            store.ep_chibis.chibika_notify(_("Everything is ready for the surprise!")) # Already correct
         except Exception as e:
-            renpy.notify("Oh no, something went wrong while preparing the decorations.")
+            store.ep_chibis.chibika_notify(_("Oh no, something went wrong while preparing the decorations."))
 
     def show_bday_screen():
         if not store.persistent._mas_bday_in_bday_mode or not store.persistent._mas_bday_visuals:
-            renpy.config.overlay_screens.append("bday_oki_doki")
+            store.ep_tools.safe_overlay_add("bday_oki_doki")
 
     def main_file_exists():
         return os.path.isfile(os.path.normcase(store.ep_tools.check_main_file))
@@ -364,14 +348,7 @@ init -5 python in ep_files:
             store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "coin_heads.png"),
             store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "coin_tails.png"),
             store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "sprite_coin.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "maxwell_cat.png"),
-            # Date Tables & Chairs
-            "mod_assets/monika/t/chair-extraplus_cafe.png",
-            "mod_assets/monika/t/table-extraplus_cafe.png",
-            "mod_assets/monika/t/table-extraplus_cafe-s.png",
-            "mod_assets/monika/t/chair-extraplus_restaurant.png",
-            "mod_assets/monika/t/table-extraplus_restaurant.png",
-            "mod_assets/monika/t/table-extraplus_restaurant-s.png",
+            store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "maxwell_cat.png")
         ]
         for asset in static_assets:
             check_file(asset, found_assets, missing_assets)
@@ -386,40 +363,55 @@ init -5 python in ep_files:
                 check_file(path, found_assets, missing_assets)
 
         # --- 3. Chibi Accessories ---
-        # NOTE: These are hardcoded based on the lists in Extra_Plus_Misc.rpy
-        primary_accessories = ['cat_ears', 'christmas_hat', 'demon_horns', 'flowers_crown', 'halo', 'heart_headband', 'hny', 'neon_cat_ears', 'party_hat', 'rabbit_ears', 'witch_hat']
-        secondary_accessories = ['black_bow_tie', 'christmas_tree', 'cloud', 'coffee', 'pumpkin', 'hearts', 'm_slice_cake', 'moustache', 'neon_blush', 'p_slice_cake', 'patch', 'speech_bubble', 'sunglasses']
+        # These lists should match the ones in Extra_Plus_Main.rpy
+        primary_accessories = ["clown_hair", "cat_ears", "christmas_hat", "demon_horns", "flowers_crown", "fox_ears", "graduation_cap", "halo", "heart_headband", "headphones", "neon_cat_ears", "hny", "party_hat", "rabbit_ears", "top_hat", "witch_hat"]
+        secondary_accessories = ["black_bow_tie", "christmas_tree", "cloud", "coffee", "pumpkin", "hearts", "m_slice_cake", "moustache", "neon_blush", "monocle", "p_slice_cake", "patch", "speech_bubble", "sunglasses"]
+        background_accessories = ["angel_wings", "balloon_decorations", "cat_tail", "fox_tail", "snowflakes"]
 
         for acc in primary_accessories:
             path = store.ep_folders._join_path(store.ep_folders.EP_CHIBI_ACC_0, "{}.png".format(acc))
             check_file(path, found_assets, missing_assets)
+
         for acc in secondary_accessories:
             path = store.ep_folders._join_path(store.ep_folders.EP_CHIBI_ACC_1, "{}.png".format(acc))
             check_file(path, found_assets, missing_assets)
 
+        # Also check background accessories in their folder
+        for acc in background_accessories:
+            path = store.ep_folders._join_path(store.ep_folders.EP_CHIBI_ACC_2, "{}.png".format(acc))
+            check_file(path, found_assets, missing_assets)
+
+
         # --- 4. Backgrounds (Manual List) ---
         background_assets = [
             # Cafe
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "cafe_day.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "cafe_rain.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "cafe-n.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "cafe_rain-n.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "cafe-ss.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "cafe_rain-ss.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "day.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "rain.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "n.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "rain-n.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "ss.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "rain-ss.png"),
             # Restaurant
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "restaurant_day.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "restaurant_rain.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "restaurant-n.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "restaurant_rain-n.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "restaurant-ss.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "restaurant_rain-ss.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "day.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "rain.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "n.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "rain-n.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "ss.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "rain-ss.png"),
             # Pool
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "pool_day.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "pool_rain.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "pool-n.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "pool_rain-n.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "pool-ss.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "pool_rain-ss.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "day.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "rain.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "n.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "rain-n.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "ss.png"),
+            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "rain-ss.png"),
+            # Tables & Chairs
+            "mod_assets/monika/t/chair-extraplus_cafe.png",
+            "mod_assets/monika/t/table-extraplus_cafe.png",
+            "mod_assets/monika/t/table-extraplus_cafe-s.png",
+            "mod_assets/monika/t/chair-extraplus_restaurant.png",
+            "mod_assets/monika/t/table-extraplus_restaurant.png",
+            "mod_assets/monika/t/table-extraplus_restaurant-s.png"
         ]
         for asset in background_assets:
             check_file(asset, found_assets, missing_assets)
@@ -438,10 +430,10 @@ init -5 python in ep_files:
             check_file(path, found_assets, missing_assets)
 
         # --- 6. Write Log File ---
-        log_path = store.ep_folders._normalize_path(os.path.join(renpy.config.basedir, 'characters', 'extra_plus_asset_log.txt'))
+        log_path = store.ep_folders._normalize_path(os.path.join(renpy.config.basedir, "characters", "extra_plus_asset_log.txt"))
         try:
             with open(log_path, 'w') as f:
-                f.write("Extra+ Asset Linter Report - {}\n".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                f.write("Extra+ Asset Linter Report - {}\n".format(datetime.datetime.now().strftime("%b %d, %Y %I:%M:%S %p")))
                 f.write("="*80 + "\n\n")
 
                 if not missing_assets:
@@ -457,10 +449,10 @@ init -5 python in ep_files:
                 for asset in found_assets:
                     f.write("FOUND: {}\n".format(asset))
 
-            renpy.notify("Asset check complete. See extra_plus_asset_log.txt in /characters.")
+            renpy.notify(_("Asset check complete. See extra_plus_asset_log.txt in /characters."))
 
         except Exception as e:
-            renpy.notify("Failed to write asset log: {}".format(e))
+            renpy.notify(_("Failed to write asset log: {}").format(e))
 
     def cleanup_old_files():
         """
@@ -517,21 +509,23 @@ init -5 python in ep_files:
 
         # --- Final Notification ---
         if files_deleted > 0 or folders_deleted > 0:
-            renpy.notify("Cleanup complete! Removed {} files and {} folders.".format(files_deleted, folders_deleted))
+            renpy.notify(_("Cleanup complete! Removed {} files and {} folders.").format(files_deleted, folders_deleted))
         else:
-            renpy.notify("No old files or folders were found to clean up.")
+            renpy.notify(_("No old files or folders were found to clean up."))
 
         if errors:
-            renpy.notify("Some errors occurred during cleanup. Please check the logs.")
+            renpy.notify(_("Some errors occurred during cleanup. Please check the logs."))
+
 
 # Store: ep_tools
 init 5 python in ep_tools:
+    import store
     import datetime
 
     # Helper function to format dates (American Format: Month Day, Year)
     def exp_fmt_date(dt):
         if dt is None:
-            return "???"
+            return _("???")
         # Example: "Sep 22, 2017"
         return dt.strftime("%b %d, %Y")
 
@@ -550,163 +544,116 @@ init 5 python in ep_tools:
             return self.date < other.date
 
     def getTimelineData():
+        """
+        Gathers, sorts, and returns a list of EPTimelineEntry objects representing
+        the player's history with Monika.
+        This function is designed to be robust and easy to maintain.
+        """
+        entries = []
+
+        def _add_event_entry(event_label, title, description, icon="7"):
+            """Helper to add an entry if its corresponding event has been seen."""
+            try:
+                ev = store.mas_getEV(event_label)
+                if ev and ev.shown_count > 0 and ev.last_seen:
+                    entries.append(EPTimelineEntry(ev.last_seen, title, description, icon))
+            except Exception as e:
+                # Log error but don't crash the timeline
+                renpy.log("Extra+: Error processing timeline event '{}': {}".format(event_label, e))
+
+        # --- Milestone Definitions ---
+        # A list of tuples to define each milestone, making it easy to add more.
+        # Format: (type, data, title, description, icon)
+        milestone_definitions = [
+            # Type 'direct_date': Uses a date directly from a persistent variable
+            ("direct_date", getattr(store.persistent, '_mas_first_kiss', None), _("First Kiss"), _("The moment our lips (almost) touched for the first time."), "7"), # Already correct from previous request
+
+            # Type 'event': Uses the last_seen date from a MAS event
+            ("event", "monika_promisering", _("Eternal Promise"), _("You gave me the promise ring. Our bond is forever."), "7"),
+            ("event", "mas_unlock_piano", _("Music for You"), _("When I added the piano so I could play for you."), "&"),
+            ("event", "mas_unlock_chess", _("Intellectual Challenge"), _("The first time we played Chess together."), "4"),
+            ("event", "mas_blazerless_intro", _("Getting Comfortable"), _("The first time you felt comfortable enough to take off your blazer."), "7"),
+            ("event", "mas_unlock_hangman", _("Word Games"), _("We started playing Hangman together."), "4"),
+            ("event", "mas_birthdate", _("My Birthday"), _("The day I told you when I was born."), "G"),
+
+            # Type 'special': Requires custom logic
+            ("special", "nickname", _("A Special Name"), _("The day you started calling me '{}'."), "w"),
+            ("special", "first_trip", _("First Adventure"), _("The first time you took me out of this room with you."), "7"),
+            ("special", "pong", _("Classic Gaming"), _("We played Pong for the first time."), "4"),
+            ("special", "contributor", _("Helping Hand"), _("The day I told you I was contributing to the code."), "g")
+        ]
+
+        # --- Anniversary Definitions ---
+        anniversary_events = [
+            ("anni_1week", _("1 Week Together")), ("anni_1month", _("1 Month Together")),
+            ("anni_3month", _("3 Months Together")), ("anni_6month", _("6 Months Together")),
+            ("anni_1", _("1st Anniversary")), ("anni_2", _("2nd Anniversary")),
+            ("anni_3", _("3rd Anniversary")), ("anni_4", _("4th Anniversary")),
+            ("anni_5", _("5th Anniversary")), ("anni_6", _("6th Anniversary")),
+            ("anni_7", _("7th Anniversary")), ("anni_8", _("8th Anniversary")),
+            ("anni_10", _("10th Anniversary")), ("anni_20", _("20th Anniversary")),
+            ("anni_50", _("50th Anniversary")), ("anni_100", _("100th Anniversary"))
+        ]
+        for ev_label, title in anniversary_events:
+            _add_event_entry(ev_label, title, _("We celebrated this special moment together."), "Z") # Already correct
+
+        # --- Processing Logic ---
         try:
-            entries = []
-
-            # 1. First Kiss
-            if store.persistent._mas_first_kiss is not None:
-                entries.append(EPTimelineEntry(
-                    store.persistent._mas_first_kiss,
-                    "First Kiss",
-                    "The moment our lips (almost) touched for the first time."
-                ))
-
-            # 2. Promise Ring
-            ev_promisering = store.mas_getEV("monika_promisering")
-            if ev_promisering and ev_promisering.shown_count > 0:
-                date_ring = ev_promisering.last_seen
-                if date_ring:
-                    entries.append(EPTimelineEntry(
-                        date_ring,
-                        "Eternal Promise",
-                        "You gave me the promise ring. Our bond is forever."
-                    ))
-
-            # 3. Special Nickname
-            # Checks if the current nickname is different from 'Monika'
-            if store.persistent._mas_monika_nickname != "Monika":
-                ev_nick = store.mas_getEV("monika_nickname")
-                if ev_nick and ev_nick.shown_count > 0:
-                    entries.append(EPTimelineEntry(
-                        ev_nick.last_seen,
-                        "A Special Name",
-                        "The day you started calling me '" + store.persistent._mas_monika_nickname + "'.",
-                        "w"
-                    ))
-
-            # 4. Piano Unlock
-            ev_piano = store.mas_getEV("mas_unlock_piano")
-            if ev_piano and ev_piano.shown_count > 0:
-                entries.append(EPTimelineEntry(
-                    ev_piano.last_seen,
-                    "Music for You",
-                    "When I brought the piano so I could play songs for you.",
-                    "&"
-                ))
-
-            # 5. Chess Unlock
-            ev_chess = store.mas_getEV("mas_unlock_chess")
-            if ev_chess and ev_chess.shown_count > 0:
-                entries.append(EPTimelineEntry(
-                    ev_chess.last_seen,
-                    "Intellectual Challenge",
-                    "The day we decided to play Chess together for the first time.",
-                    "4"
-                ))
-
-            # 6. Anniversaries
-            anni_events = [
-                ("anni_1week", "1 Week Together"),
-                ("anni_1month", "1 Month Together"),
-                ("anni_3month", "3 Months Together"),
-                ("anni_6month", "6 Months Together"),
-                ("anni_1", "1st Anniversary"),
-                ("anni_2", "2nd Anniversary"),
-                ("anni_3", "3rd Anniversary"),
-                ("anni_4", "4th Anniversary"),
-                ("anni_5", "5th Anniversary"),
-                ("anni_6", "6th Anniversary"),
-                ("anni_7", "7th Anniversary"),
-                ("anni_8", "8th Anniversary"),
-                ("anni_10", "10th Anniversary"),
-                ("anni_20", "20th Anniversary"),
-                ("anni_50", "50th Anniversary"),
-                ("anni_100" , "100th Anniversary")
-            ]
-
-            for ev_label, title in anni_events:
-                ev = store.mas_getEV(ev_label)
-                if ev and ev.shown_count > 0:
-                    entries.append(EPTimelineEntry(
-                        ev.last_seen,
-                        title,
-                        "We celebrated this special moment together.",
-                        "Z"
-                    ))
-
-            # 7. First Real Date (USB drive trip)
-            # - Using the check-in log
-            ds_log = getattr(store.persistent, "_mas_dockstat_checkin_log", [])
-            if ds_log and len(ds_log) > 0:
-                # The first entry in the log is the oldest trip
-                first_trip_date = ds_log[0][0]
-                if first_trip_date:
-                    entries.append(EPTimelineEntry(
-                        first_trip_date,
-                        "First Adventure",
-                        "The first time you took me out of this room with you."
-                    ))
-
-            # 8. Your Birthday
-            # The 'mas_birthdate' event is when you tell her for the first time.
-            ev_bday = store.mas_getEV("mas_birthdate")
-            if ev_bday and ev_bday.shown_count > 0:
-                entries.append(EPTimelineEntry(
-                    ev_bday.last_seen,
-                    "My Birthday",
-                    "The day I told you when I was born.",
-                    "G"
-                ))
-
-            # 9. Getting Comfortable (No Blazer)
-            # The 'mas_blazerless_intro' event occurs when she takes off her school uniform for the first time.
-            ev_blazer = store.mas_getEV("mas_blazerless_intro")
-            if ev_blazer and ev_blazer.shown_count > 0:
-                entries.append(EPTimelineEntry(
-                    ev_blazer.last_seen,
-                    "Getting Comfortable",
-                    "The first time you felt comfortable enough to take off your blazer."
-                ))
-
-            # 10. Game: Hangman
-            ev_hangman = store.mas_getEV("mas_unlock_hangman")
-            if ev_hangman and ev_hangman.shown_count > 0:
-                entries.append(EPTimelineEntry(
-                    ev_hangman.last_seen,
-                    "Word Games",
-                    "We started playing Hangman together.",
-                    "4"
-                ))
+            for type, data, title, description, icon in milestone_definitions:
+                if type == "direct_date" and data:
+                    entries.append(EPTimelineEntry(data, title, description, icon))
                 
-            # 11. Game: Pong
-            # FIX: We use 'store.mas_getFirstSesh()' instead of the non-existent function.
-            if store.renpy.seen_label("game_pong"):
-                # We use the start date as a safe approximation if there's no specific log.
-                pong_date = store.mas_getFirstSesh()
-                entries.append(EPTimelineEntry(
-                    pong_date,
-                    "Classic Gaming",
-                    "We played Pong for the first time.",
-                    "4"
-                ))
+                elif type == "event":
+                    _add_event_entry(data, title, description, icon)
 
-            # 12. Contributor (Easter Egg)
-            # If the player told her they helped code/create the mod.
-            if store.persistent._mas_pm_has_contributed_to_mas:
-                # We look for the date when the 'monika_contribute' talk occurred.
-                ev_contrib = store.mas_getEV("monika_contribute")
-                date_contrib = ev_contrib.last_seen if ev_contrib else datetime.date.today()
-                entries.append(EPTimelineEntry(
-                    date_contrib,
-                    "Helping Hand",
-                    "I told you that I helped contribute to your world's code.",
-                    "g"
-                ))
+                elif type == "special":
+                    if data == "nickname" and getattr(store.persistent, '_mas_monika_nickname', 'Monika') != 'Monika':
+                        ev_nick = store.mas_getEV("monika_nickname")
+                        if ev_nick and ev_nick.shown_count > 0 and ev_nick.last_seen:
+                            desc = description.format(store.persistent._mas_monika_nickname)
+                            entries.append(EPTimelineEntry(ev_nick.last_seen, title, desc, icon))
+                    
+                    elif data == "first_trip":
+                        ds_log = getattr(store.persistent, "_mas_dockstat_checkin_log", [])
+                        if ds_log and ds_log[0][0]:
+                            entries.append(EPTimelineEntry(ds_log[0][0], title, description, icon))
 
-            entries.sort()
-            return entries
-        except:
-            return []
+                    elif data == "pong" and store.renpy.seen_label("game_pong"):
+                        pong_date = store.mas_getFirstSesh()
+                        if pong_date:
+                            entries.append(EPTimelineEntry(pong_date, title, description, icon))
+
+                    elif data == "contributor" and getattr(store.persistent, '_mas_pm_has_contributed_to_mas', False):
+                        ev_contrib = store.mas_getEV("monika_contribute")
+                        date_contrib = ev_contrib.last_seen if (ev_contrib and ev_contrib.last_seen) else datetime.date.today()
+                        entries.append(EPTimelineEntry(date_contrib, title, description, icon))
+        
+        except Exception as e:
+            renpy.log("Extra+: A critical error occurred while building the timeline: {}".format(e))
+            # Return what we have so far, so the screen isn't completely empty
+            pass
+
+        entries.sort()
+        return entries
+
+    def getCurrSessionD(st, at):
+        # Get the session start time
+        start_time = store.mas_getCurrSeshStart()
+        
+        if not start_time:
+            return store.Text("00:00:00"), 1.0
+            
+        # Calculate the time difference
+        delta = datetime.datetime.now() - start_time
+        
+        total_seconds = int(delta.total_seconds())
+        hours, remainder = divmod(total_seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        
+        # Format the text
+        time_str = "{:02}:{:02}:{:02}".format(hours, minutes, seconds)
+        
+        return store.Text(time_str), 0.2
 
 # Store: ep_affection
 # Handles affection-related display logic.
@@ -731,7 +678,7 @@ init -5 python in ep_affection:
         if current_time - store.ep_tools.last_affection_notify_time >= 10:
             store.ep_tools.last_affection_notify_time = current_time
             current_affection = getCurrentAffection()
-            renpy.notify("{1} {0} {1}".format(
+            store.ep_chibis.chibika_notify("{1} {0} {1}".format(
                 int(current_affection),
                 getLevelIcon(current_affection)
             ))
@@ -789,7 +736,7 @@ init -5 python in ep_tools:
             game_phrases = [
                 _("Keep your eye on the right cup, [player]!"),
                 _("Where did it go? It's time to guess!"),
-                _("Don't look at me, I'm not going to tell you which one it is!"),
+                _("Don't look at me, I won't tell you which one it is!"),
                 _("The cups have stopped. Which one has the ball?")
             ]
         
@@ -805,12 +752,16 @@ init -5 python in ep_tools:
         store.mas_display_notif(
             store.m_name,
             game_phrases,
-            'Topic Alerts'
+            "Topic Alerts"
         )
 
     def show_boop_feedback(message, color="#ff69b4"):
         t = "boop_notif{}".format(renpy.random.randint(1, 10000))
-        renpy.show_screen("boop_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color)
+        renpy.show_screen("extra_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color, duration=1.3, trans=store.boop_feedback_trans)
+
+    def show_doki_feedback(message, color="#ff0000"):
+        t = "doki_notif{}".format(renpy.random.randint(1, 10000))
+        renpy.show_screen("extra_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color, duration=0.8, trans=store.doki_feedback_trans)
 
     def getPlayerGenderString():
         return {"M": "boyfriend", "F": "girlfriend"}.get(store.persistent.gender, "beloved")
@@ -841,7 +792,7 @@ init -5 python in ep_tools:
             and "first_session" in store.persistent.sessions
             and store.persistent.sessions["first_session"]
         ):
-            return "a wonderful time"
+            return _("a wonderful time")
 
         try:
             start_datetime = store.persistent.sessions["first_session"]
@@ -850,8 +801,8 @@ init -5 python in ep_tools:
             delta = current_date - start_date
             total_days = delta.days
 
-            if total_days < 1:
-                return "less than a day, but every second has been incredible!"
+            if total_days < 1: # This is a full sentence, better to translate it as a whole.
+                return _("less than a day, but every second has been incredible!")
 
             years = total_days // 365
             remaining_days = total_days % 365
@@ -860,22 +811,22 @@ init -5 python in ep_tools:
 
             parts = []
             if years > 0:
-                parts.append("{0} {1}".format(years, "year" if years == 1 else "years"))
+                parts.append("{0} {1}".format(years, _("year") if years == 1 else _("years")))
             if months > 0:
-                parts.append("{0} {1}".format(months, "month" if months == 1 else "months"))
+                parts.append("{0} {1}".format(months, _("month") if months == 1 else _("months")))
             if days > 0:
-                parts.append("{0} {1}".format(days, "day" if days == 1 else "days"))
+                parts.append("{0} {1}".format(days, _("day") if days == 1 else _("days")))
 
             if len(parts) > 1:
                 last_part = parts.pop()
-                return ", ".join(parts) + " and " + last_part
+                return _("{parts_str} and {last_part}").format(parts_str=", ".join(parts), last_part=last_part)
             elif parts:
                 return parts[0]
             else:
-                return "a wonderful time"
+                return _("a wonderful time")
 
         except Exception:
-            return "an unforgettable time"
+            return _("an unforgettable time")
 
     def getTotalDaysSinceInstall():
         """Return total days since first MAS session as integer."""
@@ -899,28 +850,28 @@ init -5 python in ep_tools:
         stats = {}
         if not store.persistent.sessions:
             return {
-                "The Day We Met <3": "Not yet recorded",
-                "Visits to The Spaceroom": "0",
-                "Our Time Together": "N/A",
-                "Average Time per Visit": "N/A"
+                _("The Day We Met <3"): _("Not yet recorded"),
+                _("Total Visits"): "0",
+                _("Our Time Together"): "N/A",
+                _("Avg. Visit Time"): "N/A"
             }
 
         first_session = store.persistent.sessions.get("first_session")
         total_playtime = store.persistent.sessions.get("total_playtime", datetime.timedelta())
         total_sessions = store.persistent.sessions.get("total_sessions", 0)
 
-        stats["The Day We Met <3"] = first_session.strftime("%B %d, %Y") if first_session else "Unknown"
-        stats["Visits to The Spaceroom"] = str(total_sessions)
+        stats[_("The Day We Met <3")] = first_session.strftime("%B %d, %Y") if first_session else _("Unknown")
+        stats[_("Total Visits")] = str(total_sessions)
         h, rem = divmod(total_playtime.total_seconds(), 3600)
         m, s = divmod(rem, 60)
-        stats["Our Time Together"] = "{:02.0f}h {:02.0f}m".format(h, m)
+        stats[_("Our Time Together")] = "{:02.0f}h {:02.0f}m".format(h, m)
         if total_sessions > 0:
             avg_playtime = total_playtime / total_sessions
             h_avg, rem_avg = divmod(avg_playtime.total_seconds(), 3600)
             m_avg, s_avg = divmod(rem_avg, 60)
-            stats["Average Time per Visit"] = "{:02.0f}h {:02.0f}m".format(h_avg, m_avg)
+            stats[_("Avg. Visit Time")] = "{:02.0f}h {:02.0f}m".format(h_avg, m_avg)
         else:
-            stats["Average Time per Visit"] = "N/A"
+            stats[_("Avg. Visit Time")] = "N/A"
 
         return stats
 
@@ -933,13 +884,13 @@ init -5 python in ep_tools:
             clipboard_bytes = pygame.scrap.get(pygame.scrap.SCRAP_TEXT)
 
             if clipboard_bytes:
-                clipboard_text = clipboard_bytes.decode('utf-8', 'ignore')
+                clipboard_text = clipboard_bytes.decode("utf-8", "ignore")
                 return "".join(char for char in clipboard_text if char in allowed_chars)
             else:
-                renpy.notify(_("Your clipboard is empty."))
+                renpy.notify(_("Your clipboard is empty.")) # Already correct
                 return "cancel"
         except Exception:
-            renpy.notify(_("Could not access clipboard."))
+            renpy.notify(_("Could not access clipboard.")) # Already correct
             return "cancel"
 
     # --- Dating and Label Helpers ---
@@ -954,17 +905,32 @@ init -5 python in ep_tools:
         else:
             store.mas_gainAffection(5, bypass=True)
 
-    def manage_date_location(locate=None):
+    def manage_date_location(locate=True):
         """Save or load the current room's chair, table, and background for dates."""
         if locate:
+            # Save current chair and table
             store.ep_dates.chair = store.monika_chr.tablechair.chair
             store.ep_dates.table = store.monika_chr.tablechair.table
             store.ep_dates.old_bg = store.mas_current_background
 
         else:
-            store.monika_chr.tablechair.chair = store.ep_dates.chair
-            store.monika_chr.tablechair.table = store.ep_dates.table
-            store.mas_current_background = store.ep_dates.old_bg
+            # Restaurar silla y mesa
+            if store.ep_dates.chair is not None:
+                store.monika_chr.tablechair.chair = store.ep_dates.chair
+            else:
+                store.monika_chr.tablechair.chair = "def" # MAS default value
+
+            if store.ep_dates.table is not None:
+                store.monika_chr.tablechair.table = store.ep_dates.table
+            else:
+                store.monika_chr.tablechair.table = "def" # MAS default value
+
+            # Restore background (most critical)
+            if store.ep_dates.old_bg is not None:
+                store.mas_current_background = store.ep_dates.old_bg
+            else:
+                # If old_bg is lost, force default Spaceroom to avoid crash
+                store.mas_current_background = store.mas_background_def
 
     def check_seen_label(first_time, alternate):
         """Jump to alternate if first_time has been seen."""
@@ -980,31 +946,34 @@ init -5 python in ep_chibis:
 
     # --- Chibi Management Functions ---
     def init_chibi():
-        if not is_visible():
-            renpy.config.overlay_screens.append("doki_chibi_idle")
-
-    def is_visible():
-        return "doki_chibi_idle" in renpy.config.overlay_screens
+        store.ep_tools.safe_overlay_add("doki_chibi_idle")
 
     def remove_chibi():
-        if is_visible():
-            renpy.config.overlay_screens.remove("doki_chibi_idle")
-            renpy.hide_screen("doki_chibi_idle")
+        store.ep_tools.safe_overlay_remove("doki_chibi_idle")
 
-    def add_remv_chibi():
-        if is_visible():
-            remove_chibi()
-        else:
-            init_chibi()
+    def add_remv_chibi(screen="doki_chibi_idle"):
+        # This function acts as a toggle.
+        try:
+            if screen in renpy.config.overlay_screens:
+                renpy.config.overlay_screens.remove(screen)
+                renpy.hide_screen(screen)
+            else:
+                renpy.config.overlay_screens.append(screen)
+        except: pass
 
     def reset_chibi():
         remove_chibi()
-        if not is_visible():
-            renpy.config.overlay_screens.append("doki_chibi_idle")
+        init_chibi()
 
-    def chibi_draw_accessories(st, at):
+    def draw_background_accessories(st, at):
         return LiveComposite(
-            (119, 188),
+            (188, 188),
+            (0, 0), store.MASFilterSwitch(store.ep_chibis.accessory_path_2.format(store.persistent.chibi_accessory_3_))
+        ), 5
+
+    def draw_foreground_accessories(st, at):
+        return LiveComposite(
+            (188, 188),
             (0, 0), store.MASFilterSwitch(store.ep_chibis.accessory_path_0.format(store.persistent.chibi_accessory_1_)),
             (0, 0), store.MASFilterSwitch(store.ep_chibis.accessory_path_1.format(store.persistent.chibi_accessory_2_))
         ), 5
@@ -1017,18 +986,18 @@ init -5 python in ep_chibis:
                 store.persistent.chibika_current_costume = ["sticker_up", "sticker_sleep", "sticker_baka"]
 
     class DokiAccessory():
-        def __init__(self, name, acc, category):
+        def __init__(self, name, acc, slot):
             self.name = name
             self.acc = acc
-            self.category = category
+            self.slot = slot
 
         def __call__(self):
-            if self.category == "primary":
+            if self.slot == "primary":
                 store.persistent.chibi_accessory_1_ = self.acc
-                renpy.jump("sticker_primary")
-            else:
+            elif self.slot == "secondary":
                 store.persistent.chibi_accessory_2_ = self.acc
-                renpy.jump("sticker_secondary")
+            else:
+                store.persistent.chibi_accessory_3_ = self.acc
 
     class SelectDOKI():
         def __init__(self, name, costume):
@@ -1038,12 +1007,12 @@ init -5 python in ep_chibis:
         def __call__(self):
             store.persistent.chibika_current_costume = self.costume
             store.ep_chibis.reset_chibi()
-            renpy.jump("extra_dev_mode")
+            renpy.jump("extra_chibi_main")
 
     def show_costume_menu(costumes, return_label):
         dokis_items = [SelectDOKI(name, cost) for name, cost in costumes]
         items = [(_("Nevermind"), return_label, 20)]
-        renpy.call_screen("extra_gen_list", dokis_items, store.mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+        renpy.call_screen("extra_gen_list", dokis_items, store.mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
 
     def chibi_drag(drags, drop):
         """Handle Chibika's drag and drop movement."""
@@ -1053,17 +1022,353 @@ init -5 python in ep_chibis:
         except Exception:
             # Defensive: ignore if structure isn't as expected
             pass
+    
+    def clicker():
+        """Handles the logic when the chibi is clicked repeatedly."""
+        current_char = store.persistent.chibika_current_costume[0]
+
+        # Increment counter
+        store.ep_chibis.temp_chibi_clicks += 1
+        
+        clicks = store.ep_chibis.temp_chibi_clicks
+
+        # Data-driven responses for different click thresholds
+        responses = {
+            10: { # These are all user-facing strings
+                "darling": _("Hey! That's me."),
+                "cupcake": _("What do you think you're doing?!"),
+                "cinnamon": _("Ehehe! That tickles."),
+                "teacup": _("A-ah... please..."),
+                "default": _("Hey!")
+            },
+            20: {
+                "darling": _("Stop poking me, [player]!"),
+                "cupcake": _("Stop it, baka!"),
+                "cinnamon": _("Will you give me a cookie if you stop?"),
+                "teacup": _("You're making me nervous..."),
+                "default": _("Stop it!")
+            },
+            30: {
+                "darling": _("I'm serious, [player]!"),
+                "cupcake": _("I'm going to bite your finger!"),
+                "cinnamon": _("I'm getting dizzy..."),
+                "teacup": _("I-I'm... going to go hide..."),
+                "default": _("I'm warning you!")
+            },
+            50: {
+                "darling": _("Bye-Bye!"),
+                "cupcake": _("Hmph! I'm not playing anymore!"),
+                "cinnamon": _("Waaa! I'm going to my cloud!"),
+                "teacup": _("I'm sorry... goodbye."),
+                "default": _("That's it, I'm done!")
+            }
+        }
+
+        if clicks in responses:
+            message = renpy.substitute(responses[clicks].get(current_char, responses[clicks]["default"]))
+            store.ep_chibis.chibika_notify(message,current_char)
+
+        if clicks >= 50:
+            renpy.show_screen("chibi_visual_effect", x=xpos, y=ypos)
+            store.ep_chibis.temp_chibi_anger = True
+            store.ep_chibis.remove_chibi()
+            store.ep_chibis.temp_chibi_clicks = 0 # Reset for the next time
+
+    # --- Accessory Screen Management ---
+    def set_accessory_category(category):
+        """
+        Sets the current accessory category on the screen without changing button focus.
+        """
+        try:
+            # Get the context for the current screen and set the variable
+            store.renpy.get_screen("gen_accessories_twopane_screen").scope["EP_current_acc"] = category
+            store.renpy.restart_interaction() # Refresh the screen to show changes
+        except Exception:
+            # Failsafe in case the screen is not active
+            pass
+
+    def getCurrentAccessories(category):
+        """
+        Returns the list of accessories for the given category.
+        """
+        category_map = {
+            "primary": store.ep_chibis.primary_accessories,
+            "secondary": store.ep_chibis.secondary_accessories,
+            "background": store.ep_chibis.background_accessories
+        }
+        return category_map.get(category, [])
+
+    def getCurrentRemoveAction(category):
+        """
+        Returns the 'Remove' action object for the given category.
+        """
+        remove_actions = {
+            "primary": store.ep_chibis.DokiAccessory(_("Remove"), "0nothing", "primary"),
+            "secondary": store.ep_chibis.DokiAccessory(_("Remove"), "0nothing", "secondary"),
+            "background": store.ep_chibis.DokiAccessory(_("Remove"), "0nothing", "background")
+        }
+        return remove_actions.get(category)
+
+    def chibika_notify(txt, doki="darling"):
+        """Shows a notification from Chibika."""
+        renpy.show_screen("chibika_notify", message=txt, icon=doki)
+
+# Store: ep_fridge
+# Fridge Magnet Game
+init python in ep_fridge:
+    import datetime
+    import renpy.store as store
+    import renpy.exports as renpy
+    import pygame
+    
+    EP_FM_FONT = "gui/font/RifficFree-Bold.ttf"
+
+    Color = store.Color # Import Color
+
+    # List of phrases Monika can put on the fridge
+    monika_magnet_phrases = [
+        [": 3"], ["< 3"], [": P"], ["> . <"], [": D"],
+        ["H I"], ["L O V E"], ["D O K I"], ["I L V"]
+    ]
+
+    def getCurrentColor(base_color):
+        # If it's night, darken the color.
+        if store.mas_isNightNow():
+            return base_color.shade(0.6)
+        
+        # If it's day, return the original vibrant color
+        return base_color
+
+    class Magnet:
+        # We update __init__ to accept saved data
+        def __init__(self, letter, x=0, y=0, rotation=0, hsv=None):
+            self.letter = letter
+            self.x = x
+            self.y = y
+            self.rotation = rotation
+            
+            # If we are given a saved color (HSV), we use it. Otherwise, we create a new one.
+            if hsv:
+                self.hsv = hsv
+            else:
+                hue = renpy.random.random()
+                self.hsv = (hue, 0.75, 0.95)
+            
+            # We reconstruct the Color objects from the data
+            self.base_color = Color(hsv=self.hsv)
+            self.shadow_base_color = self.base_color.shade(0.6)
+
+    class MagnetManager:
+        def __init__(self):
+            self.magnets = [
+                "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+                "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
+                "U", "V", "W", "X", "Y", "Z",
+                "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+                "?", "!", "#", "@", "&", "+", "-", "=", "~"
+            ]
+            self.top = []
+            self.bottom = []
+            self.holding = None
+            self.event_handler = EventHandler()
+            
+            # --- Monika's logic for adding magnets ---
+            today_str = str(datetime.date.today())
+            
+            # If Monika hasn't posted today, there's a chance she will.
+            if store.persistent.EP_fridge_last_monika_post != today_str:
+                # We give a 1 in 3 chance so she doesn't do it every day
+                if renpy.random.randint(1, 3) == 1:
+                    self.monika_adds_magnets()
+                    store.persistent.EP_fridge_last_monika_post = today_str
+                
+            # We load the magnets (the player's and Monika's if she just placed them)
+            self.load() 
 
 
-#==============================================================================
-# 4. MINIGAME HELPER STORES
-#==============================================================================
+        def take(self):
+            renpy.play(store.sfx_take_frigde, "sound")
+            # Get the mouse position BEFORE creating the magnet
+            mouse_pos = renpy.get_mouse_pos()
+            m = Magnet(renpy.random.choice(self.magnets))
+            m.rotation = renpy.random.randint(-15, 15)
+            # Assign the mouse position immediately
+            m.x, m.y = mouse_pos[0], mouse_pos[1]
+            self.holding = m
 
-# Store: ep_sg (Shell Game)
+        def put(self, place):
+            if self.holding:
+                renpy.play(store.sfx_place_fridge, "sound")
+                if place == "top":
+                    self.top.append(self.holding)
+                    self.holding = None
+                elif place == "bottom":
+                    self.bottom.append(self.holding)
+                    self.holding = None
+                else:
+                    self.holding = None
+                # We save every time a magnet is placed
+                self.save()
+            
+        def tick(self):
+            if self.holding:
+                pos = renpy.get_mouse_pos()
+                self.holding.x = pos[0]
+                self.holding.y = pos[1]
+                if self.event_handler.active:
+                    self.holding.rotation += self.event_handler.active
+                    if self.holding.rotation > 360:
+                        self.holding.rotation -= 360
+
+        def swap(self, place, letter):
+            # Get the mouse position for the new magnet
+            mouse_pos = renpy.get_mouse_pos()
+
+            if place == "top":
+                self.top.remove(letter)
+            else:
+                self.bottom.remove(letter)
+            self.put(place)
+            # Assign the mouse position to the magnet we are going to hold
+            letter.x, letter.y = mouse_pos[0], mouse_pos[1]
+            self.holding = letter
+            
+        def clean_magnets(self):
+            """Cleans all magnets from the fridge."""
+            self.top = []
+            self.bottom = []
+            self.save() # Save the empty state
+
+        def _check_collision(self, x, y, width, height):
+            """
+            Checks if a rectangle (a potential magnet) collides with any existing magnet.
+            Returns True if there is a collision, False otherwise.
+            """
+            # Coordinates of the new magnet
+            new_left = x - width / 2
+            new_right = x + width / 2
+            new_top = y - height / 2
+            new_bottom = y + height / 2
+
+            # We check against all existing magnets
+            all_magnets = self.top + self.bottom
+            for magnet in all_magnets:
+                # Coordinates of the existing magnet (approximate)
+                existing_left = magnet.x - width / 2
+                existing_right = magnet.x + width / 2
+                existing_top = magnet.y - height / 2
+                existing_bottom = magnet.y + height / 2
+
+                # AABB collision logic (Axis-Aligned Bounding Box)
+                if (new_left < existing_right and new_right > existing_left and
+                        new_top < existing_bottom and new_bottom > existing_top):
+                    return True # Collision detected!
+
+            return False # No collisions found
+
+        def monika_adds_magnets(self):
+            """Monika chooses a phrase and places it on the fridge."""
+            phrase_to_add = renpy.random.choice(monika_magnet_phrases)
+            magnet_width = 80 # Approximate width of each magnet
+
+            # We try to find a free spot up to 50 times
+            for _ in range(50):
+                start_x = renpy.random.randint(250, 650)
+                start_y = renpy.random.randint(50, 150)
+                is_valid_spot = True
+
+                # We check if the whole phrase fits without colliding
+                for i, word in enumerate(phrase_to_add):
+                    check_x = start_x + (i * magnet_width)
+                    if self._check_collision(check_x, start_y, magnet_width, 70):
+                        is_valid_spot = False
+                        break # If a magnet collides, this spot is not valid
+
+                # If we find a valid spot, we place the magnets and exit the loop
+                if is_valid_spot:
+                    for i, word in enumerate(phrase_to_add):
+                        new_magnet = Magnet(word, x=0, y=0)
+                        new_magnet.x = start_x + (i * magnet_width)
+                        new_magnet.y = start_y + renpy.random.randint(-10, 10) # Small vertical variation
+                        new_magnet.rotation = renpy.random.randint(-10, 10)
+                        self.top.append(new_magnet)
+                    return # We exit the monika_adds_magnets function
+
+        # --- SAVE AND LOAD SYSTEM ---
+        def save(self):
+            """Serializes Magnet objects into simple dictionaries to save them."""
+            data = {
+                "top": [],
+                "bottom": []
+            }
+            
+            for m in self.top:
+                data["top"].append({
+                    "letter": m.letter, "x": m.x, "y": m.y, 
+                    "rotation": m.rotation, "hsv": m.hsv
+                })
+                
+            for m in self.bottom:
+                data["bottom"].append({
+                    "letter": m.letter, "x": m.x, "y": m.y, 
+                    "rotation": m.rotation, "hsv": m.hsv
+                })
+                
+            store.persistent.EP_fridge_magnets_data = data
+
+        def load(self):
+            """Reconstructs the magnets from the saved data."""
+            data = store.persistent.EP_fridge_magnets_data
+            if not data:
+                return # No saved data, we start empty
+            
+            for d in data.get("top", []):
+                self.top.append(Magnet(d["letter"], d["x"], d["y"], d["rotation"], d["hsv"]))
+            for d in data.get("bottom", []):
+                self.bottom.append(Magnet(d["letter"], d["x"], d["y"], d["rotation"], d["hsv"]))
+
+    class EventHandler(renpy.Displayable):
+        def __init__(self):
+            super(renpy.Displayable, self).__init__()
+            self.active = 0
+            
+        def render(self, width, height, st, at):
+            return renpy.Render(0, 0)
+            
+        def event(self, ev, x, y, st):
+            if ev.type == pygame.KEYDOWN:
+                if ev.key == pygame.K_d:
+                    self.active = 2
+                    raise renpy.IgnoreEvent()
+                elif ev.key == pygame.K_a:
+                    self.active = -2
+                    raise renpy.IgnoreEvent()
+            elif ev.type == pygame.KEYUP:
+                if ev.key == pygame.K_d:
+                    self.active = 0
+                elif ev.key == pygame.K_a:
+                    self.active = 0
+            return None
+
+init -10 python in ep_tools:
+    # Overlay safety wrapper
+    def safe_overlay_add(screen):
+        try:
+            if screen not in renpy.config.overlay_screens:
+                renpy.config.overlay_screens.append(screen)
+        except: pass
+    
+    def safe_overlay_remove(screen):
+        try:
+            if screen in renpy.config.overlay_screens:
+                renpy.config.overlay_screens.remove(screen)
+                renpy.hide_screen(screen)
+        except: pass
+
+
 init -10 python in ep_sg:
     import store
     
     def randomize_cup_skin():
-        if store.persistent._mas_pm_cares_about_dokis:
-            return renpy.random.choice(["cup.png", "monika.png", "yuri.png", "natsuki.png", "sayori.png"])
-        return renpy.random.choice(["cup.png", "monika.png"])
+        if store.persistent._mas_pm_cares_about_dokis: return renpy.random.choice(["monika.png", "yuri.png", "natsuki.png", "sayori.png"])
+        renpy.random.choice(["cup.png", "monika.png"])

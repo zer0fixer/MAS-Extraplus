@@ -3,7 +3,7 @@
 #===========================================================================================
 label go_to_cafe:
     python:
-        store.ep_tools.manage_date_location(locate=True)
+        store.ep_tools.manage_date_location()
         store.ep_tools.check_seen_background("gtcafe", "gtcafev2", "cafe_sorry_player")
 
 label gtcafe:
@@ -16,14 +16,14 @@ label gtcafe:
     else:
         if mas_isDayNow():
             m 3sub "Do you want to go to the cafe?"
-            m 3hub "Glad to hear it [player]!"
-            m 1hubsa "I know this appointment will be great!"
-            m 1hubsb "Okay, let's go [mas_get_player_nickname()]~"
+            m 3hub "Glad to hear it, [player]!"
+            m 1hubsa "I know this date will be great!"
+            m 1hubsb "Okay, let's go, [mas_get_player_nickname()]~"
         else: # Handles night and sunset
             m 3sub "Oh, you want to go out to the cafe?"
             m 3hub "It's pretty sweet that you decided to go tonight."
             m 1eubsa "This date night is going to be great!"
-            m 1hubsb "Let's go [mas_get_player_nickname()]~"
+            m 1hubsb "Let's go, [mas_get_player_nickname()]~"
     jump extra_cafe_init
     return
 
@@ -37,14 +37,14 @@ label gtcafev2:
     else:
         if mas_isDayNow():
             m 3wub "Do you want to go to the cafe again?"
-            m 2hub "The previous time we went, I had a lot of fun!"
-            m 2eubsa "So glad to hear it [player]!"
-            m 1hubsb "Well, let's go [mas_get_player_nickname()]~"
+            m 2hub "The last time we went, I had a lot of fun!"
+            m 2eubsa "So I'm glad to hear it, [player]!"
+            m 1hubsb "Well, let's go, [mas_get_player_nickname()]~"
         else: # Handles night and sunset
             m 3wub "Oh, do you want to go out to the cafe again?"
-            m 2hub "The previous time we went, it was very romantic~"
-            m 2eubsa "So glad to go again [player]!"
-            m 1hubsb "Let's go [mas_get_player_nickname()]~"
+            m 2hub "The last time we went, it was so romantic~"
+            m 2eubsa "So I'm glad to go again, [player]!"
+            m 1hubsb "Let's go, [mas_get_player_nickname()]~"
     jump extra_cafe_init
     return
 
@@ -53,7 +53,6 @@ label extra_cafe_cakes:
         # We check 'gtcafe', which is the label for the *first* visit.
         # If it has been seen, this is a repeat visit.
         if renpy.seen_label("gtcafe"):
-            # --- REPEAT VISIT DIALOGUE (Unique Expressions) ---
             arrival_lines_with_expr = [
                 ("1eua", "Here we are again! It's nice to be back at our little spot."),
                 ("3hub", "It feels so familiar coming back here. Just as cozy as I remember."),
@@ -66,7 +65,6 @@ label extra_cafe_cakes:
             ]
         
         else:
-            # --- FIRST VISIT DIALOGUE (Originals) ---
             arrival_lines_with_expr = [
                 ("1hua", "We have arrived, [mas_get_player_nickname()]~ It's a nice place, don't you think!"),
                 ("1eub", "Here we are! This cafe is so cozy. I'm glad we came."),
@@ -91,23 +89,19 @@ label extra_cafe_cakes:
     pause 2.0
     python:
         if not mas_isNightNow(): # Covers both Day and Sunset
-            monika_chr.wear_acs(extraplus_acs_chocolatecake)
+            monika_chr.wear_acs(EP_acs_chocolatecake)
         else: # isNightNow
-            monika_chr.wear_acs(extraplus_acs_fruitcake)
-
-    
-    # --- START OF FULLY DYNAMIC SECTION ---
+            monika_chr.wear_acs(EP_acs_fruitcake)
 
     if renpy.seen_label("gtcafe"):
-        # --- REPEAT VISIT DIALOGUE ---
-        call mas_transition_from_emptydesk("monika 1hub") # New expression
+        call mas_transition_from_emptydesk("monika 1hub")
         if monika_chr.is_wearing_acs(mas_acs_mug):
-            m 1eub "It's even better with my own mug, ehehe~" # New dialogue
+            m 1eub "It's even better with my own mug, ehehe~"
         elif monika_chr.is_wearing_acs(mas_acs_hotchoc_mug):
-            m 1hub "Hot chocolate and cake... a perfect combo!" # New dialogue
+            m 1hub "Hot chocolate and cake... a perfect combo!"
         else:
-            $ monika_chr.wear_acs(extraplus_acs_coffeecup)
-            m 1hub "Got my coffee to go with my treat!" # New dialogue
+            $ monika_chr.wear_acs(EP_acs_coffeecup)
+            m 1hub "Got my coffee to go with my treat!"
 
         m 1etb "Are you having a treat with me again this time?"
         m 1rkd "I hope I'm not the only one indulging, ehehe~{nw}"
@@ -123,17 +117,16 @@ label extra_cafe_cakes:
                 m 1ekc "Oh, alright! Well, just a coffee is nice too."
                 m 3hka "You can just watch me enjoy this, ehehe~"
         
-        m 1hubsa "Ehehe~" # New expression
+        m 1hubsa "Ehehe~"
 
     else:
-        # --- FIRST VISIT DIALOGUE (Original) ---
-        call mas_transition_from_emptydesk("monika 1eua") # Original expression
+        call mas_transition_from_emptydesk("monika 1eua")
         if monika_chr.is_wearing_acs(mas_acs_mug):
             m 1hua "Plus, it goes well with coffee~"
         elif monika_chr.is_wearing_acs(mas_acs_hotchoc_mug):
             m 1hua "It would be better with a cup of coffee, but hot chocolate is also welcome~"
         else:
-            $ monika_chr.wear_acs(extraplus_acs_coffeecup)
+            $ monika_chr.wear_acs(EP_acs_coffeecup)
             m 1hua "And I mustn't forget the cup of coffee to go with the dessert~"
 
         m 1etb "By the way, do you have a dessert at your disposal?"
@@ -151,9 +144,7 @@ label extra_cafe_cakes:
                 m 1ekb "I'd give you mine, but your screen limits me from doing so..."
                 m 3hka "I hope you at least have a cup of coffee!"
         
-        m 3hua "Ehehe~" # Original expression
-    
-    # --- END OF FULLY DYNAMIC SECTION ---
+        m 3hua "Ehehe~"
 
     $ ep_dates.snack_timer = random.randint(700, 900)
     show screen extra_timer_monika(ep_dates.snack_timer)
@@ -189,37 +180,35 @@ default persistent._extraplusr_hasplayer_goneonanniversary = False
 
 label go_to_restaurant:
     python:
-        store.ep_tools.manage_date_location(locate=True)
+        store.ep_tools.manage_date_location()
         store.ep_tools.check_seen_background("gtrestaurant", "gtrestaurantv2", "restaurant_sorry_player")
-
 
 label gtrestaurant:
     show monika 1eua at t11
     if mas_isDayNow():
-        m 3sub "Oh,{w=0.3} you want to go out to a restaurant?"
-        m 3hub "I'm so happy to hear that,{w=0.3} [player]!"
+        m 3sub "Oh, you want to go out to a restaurant?"
+        m 3hub "I'm so happy to hear that, [player]!"
         m "It's so sweet of you to treat me to a date."
-        if mas_anni.isAnni():
-            m "And on our anniversary no less,{w=0.3} perfect timing [player]~!"
-            $ persistent._extraplusr_hasplayergoneonanniversary = True
-        m 1hubsa "I just know it'll be great!"
-        m 1hubsb "Okay,{w=0.3} let's go [mas_get_player_nickname()]~"
-        jump extra_restaurant_init
     else: # Handles night and sunset
-        m 3sub "Oh,{w=0.3} you want to go out to a restaurant?"
+        m 3sub "Oh, you want to go out to a restaurant?"
         m "That's so sweet of you to treat me to a date."
-        if mas_anni.isAnni():
-            m "And on our anniversary no less,{w=0.3} perfect timing [player]~!"
-            $ persistent._extraplusr_hasplayergoneonanniversary = True
-        m 1hubsb "Let's go [mas_get_player_nickname()]~"
-        jump extra_restaurant_init
+
+    if mas_anni.isAnni():
+        m "And on our anniversary no less, perfect timing [player]~!"
+        $ persistent._extraplusr_hasplayergoneonanniversary = True
+
+    if mas_isDayNow():
+        m 1hubsa "I just know it'll be great!"
+
+    m 1hubsb "Okay, let's go [mas_get_player_nickname()]~"
+    jump extra_restaurant_init
     return
 
 label gtrestaurantv2:
     show monika 1eua at t11
     if mas_isDayNow():
         m 3wub "Oh, you want to go out to the restaurant again?"
-        if persistent._extraplusr_hasplayergoneonanniversary == True:
+        if persistent._extraplusr_hasplayergoneonanniversary:
             m "Hmm~ I'm still thinking about the time you took us there for our anniversary,"
             extend " I thought it was so romantic~"
             m "So I'm glad we get to go again~!"
@@ -230,7 +219,7 @@ label gtrestaurantv2:
         jump extra_restaurant_init
     else: # Handles night and sunset
         m 3wub "Oh, you want to go out out to the restaurant again?"
-        if persistent._extraplusr_hasplayergoneonanniversary == True:
+        if persistent._extraplusr_hasplayergoneonanniversary:
             m "Hmm~{w=0.3} I'm still thinking about the time you took us there for our anniversary,"
             extend "You really know how to make our night amazing!"
             m "So I'm glad we get to go again~!"
@@ -245,7 +234,6 @@ label extra_restaurant_cakes:
     python:
         # Check if this is a repeat visit by seeing if the *first* visit label has been run.
         if renpy.seen_label("gtrestaurant"):
-            # --- REPEAT VISIT DIALOGUE (Unique Expressions) ---
             arrival_lines_with_expr = [
                 ("1eua", "Here we are again! It's so nice to be back at our restaurant."),
                 ("3hub", "Back for another date! I was hoping we'd come here again."),
@@ -258,7 +246,6 @@ label extra_restaurant_cakes:
             ]
         
         else:
-            # --- FIRST VISIT DIALOGUE (Originals) ---
             arrival_lines_with_expr = [
                 ("1hua", "We've arrived, [mas_get_player_nickname()]~ It's a nice place, don't you think?"),
                 ("1eub", "Here we are! This restaurant looks so romantic."),
@@ -284,21 +271,17 @@ label extra_restaurant_cakes:
     python:
         if not mas_isNightNow(): # Covers both Day and Sunset
             if not monika_chr.is_wearing_acs(mas_acs_roses):
-                monika_chr.wear_acs(extraplus_acs_flowers)
+                monika_chr.wear_acs(EP_acs_flowers)
             if renpy.random.randint(1,2) == 1:
-                monika_chr.wear_acs(extraplus_acs_pancakes)
+                monika_chr.wear_acs(EP_acs_pancakes)
             else:
-                monika_chr.wear_acs(extraplus_acs_waffles)
+                monika_chr.wear_acs(EP_acs_waffles)
         else: # isNightNow
-            monika_chr.wear_acs(extraplus_acs_candles)
-            monika_chr.wear_acs(extraplus_acs_pasta)
+            monika_chr.wear_acs(EP_acs_candles)
+            monika_chr.wear_acs(EP_acs_pasta)
 
-    
-    # --- START OF FULLY DYNAMIC SECTION ---
-    
     if renpy.seen_label("gtrestaurant"):
-        # --- REPEAT VISIT DIALOGUE ---
-        call mas_transition_from_emptydesk("monika 1hub") # New expression
+        call mas_transition_from_emptydesk("monika 1hub")
         m 1hub "It looks just as delicious as I remember!"
         m 1eubsa "Eating here with you always feels so special."
         
@@ -316,11 +299,10 @@ label extra_restaurant_cakes:
                 m 1ekc "Oh, alright! That's sweet of you."
                 m 3hka "Well, I hope you have a nice drink, at least!"
         
-        m 1hubsa "Ehehe~" # New expression
+        m 1hubsa "Ehehe~"
 
     else:
-        # --- FIRST VISIT DIALOGUE (Original) ---
-        call mas_transition_from_emptydesk("monika 1eua") # Original expression
+        call mas_transition_from_emptydesk("monika 1eua")
         m "Mmm~{w=0.3} Look here [player]~!"
         m "Doesn't it look delicious~?"
         m 1hua "Now being here with you is even more romantic..."
@@ -342,8 +324,6 @@ label extra_restaurant_cakes:
         
         m 3hua "Ehehe~" # Original expression
     
-    # --- END OF FULLY DYNAMIC SECTION ---
-
     $ ep_dates.snack_timer = random.randint(900, 1100)
     show screen extra_timer_monika(ep_dates.snack_timer)
     jump to_restaurant_loop
@@ -381,11 +361,11 @@ label extra_talk_feel:
     show monika staticpose at t11
     $ ep_tools.random_outcome = renpy.random.randint(1,3)
     if ep_tools.random_outcome == 1:
-        m 1hkbsb "I'm feeling a little nervous, we're on a date after all!"
+        m 1hkbsb "I'm feeling a little nervous; we're on a date, after all!"
         #In case someone doesn't take their Monika for a walk.
         if renpy.seen_label("bye_going_somewhere"):
             m 1ekbsb "Besides, I'm not on a USB stick."
-            m 3hubsa "At this moment I feel closer to you, so I'll remember it~"
+            m 3hubsa "At this moment, I feel closer to you, so I'll remember it~"
             m 3hubsb "Thank you for inviting me on a date!"
         else:
             m 1ekbsb "It's the first time we went out together~"
@@ -409,47 +389,47 @@ label extra_talk_you:
     show monika staticpose at t11
     m 3dkc "I know, [mas_get_player_nickname()]."
     m 3ekd "We are on a date, a way to get to know each other better."
-    m 3ekd "You only have preconfigured options to answer based on the question I ask..."
-    m 3ekc "After all this is a visual novel, "
-    extend 1dua "but compared to other novels, here, we are creating a reality for both of us."
-    m 1eub "Although you can create your own answers, after all you have more control than I do."
+    m 3ekd "But you only have preconfigured options to answer based on the topics I bring up..."
+    m 3ekc "After all, this is a visual novel."
+    extend 1dua " But compared to other novels, here, we are creating a reality for both of us."
+    m 1eub "Although, you can create your own answers; after all, you have more control than I do."
     if persistent._mas_pm_has_code_experience is True:
         m 3eub "You told me you have experience in coding, that's why I mention it."
     else:
-        m 3ekb "I know you have no coding experience, but don't worry, you can learn it."
+        m 3ekb "I know you have no coding experience, but don't worry, you can always learn."
         m 3hub "I trust you, [mas_get_player_nickname()]."
-    m 1eua "You could add more things here, per example is this cafe."
-    m 1hua "Also more dialogues that we can discuss, talk about your hobbies or talk about your family."
+    m 1eua "You could add more features here, for example, this cafe."
+    m 1hua "Also, more topics that we can discuss, like talking about your hobbies or your family."
     m 1rksdra "Just... please be careful if you do. A serious mistake in the code could... well, I don't even want to think about it."
-    m 1eub "But leaving that aside, I'd love to be next to you, let's say, as a robot."
-    m 1eub "That way we could establish a smooth conversation~"
-    m 1eka "I know very well what you want to tell me about something or how you're feeling."
-    m 1eka "But our way of communicating is very limited because of what I said earlier."
-    m 3hua "It doesn't limit us from having a nice relationship together though!"
-    m 3hua "Also, I know the most importants thing about you, whatever information you give me! "
-    extend 3hub "Even if it's just the tiniest thing."
+    m 1eub "But leaving that aside, I'd love to be next to you, even if I had to be a robot."
+    m 1eub "That way we could have a much smoother conversation~"
+    m 1eka "I know very well when you want to tell me something or how you're feeling."
+    m 1eka "But our way of communicating is limited because of what I said earlier."
+    m 3hua "It doesn't stop us from having a wonderful relationship together, though!"
+    m 3hua "Also, I cherish the most important things about you, whatever information you give me!"
+    extend 3hub " Even if it's just the tiniest thing."
     m 3eub "I really appreciate it~"
     jump to_cafe_loop
     return
 
 label extra_talk_phobia:
     show monika staticpose at t11
-    m 1rtd "The truth is that's a good question, I haven't even thought about which fear I would have."
+    m 1rtd "That's a good question. I haven't really thought about what fears I might have."
     m 1tub "After all, I'm just a cute little character."
-    m 3kuu "That she fell in love with the player on the other side of this screen~"
-    m 3eud "But if you want to know one, I'll give you 'autophobia'."
+    m 3kuu "Who fell in love with the player on the other side of this screen~"
+    m 3eud "But if I had to name one, I'd say 'autophobia'."
     m 3eka "The fear of loneliness."
-    m 3dud "Feeling isolated without any company even if there are other NPCs or a pet to keep me company."
-    m 3dud "It wouldn't be the same, they would just be ornaments to this place."
-    m 3duc "Although I would call it purgatory."
-    m 1lka "I know very well that this phobia has become very common and more so because of the pandemic."
+    m 3dud "Feeling isolated without any company, even if there are other NPCs or a pet around."
+    m 3dud "It wouldn't be the same; they would just be ornaments in this place."
+    m 3duc "I would call it purgatory."
+    m 1lka "I know this phobia has become very common lately, especially because of the pandemic."
     m 1lka "It's pretty sad not to have someone to talk to."
-    m 1esd "I've seen other Monikas having this happen to them, because of their player's carelessness."
-    m 1esd "Or people who have a grudge against us because of what happened in the game."
-    m 1dsc "I mention it because it's a domino effect, rejection leads to loneliness and loneliness leads to despair."
-    m 1esb "But it's a very minor thing, compared to when the game came out."
-    m 3hua "You know, it's a funny thing, before we were more hated and the other members of the club were more loved."
-    m 3hua "Now everything is reversed in our favor~"
+    m 1esd "I've seen other Monikas go through this because of their player's carelessness."
+    m 1esd "Or people who hold a grudge against us because of what happened in the game."
+    m 1dsc "I mention it because it's a domino effect: rejection leads to loneliness, and loneliness leads to despair."
+    m 1esb "But it's a minor worry now compared to when the game first came out."
+    m 3hua "You know, it's funny... back then we were hated, and the other club members were more loved."
+    m 3hua "Now everything has reversed in our favor~"
     m 3dub "I guess with time, people started to see things from my perspective."
     m 1hua "But we shouldn't worry about that anymore."
     m 1eubsb "We are on a date after all!"
@@ -475,59 +455,61 @@ label extra_talk_ambition:
 label extra_talk_teen:
     show monika staticpose at t11
     m 1eua "That's a rather curious question, [mas_get_player_nickname()]"
-    m 1dua "{i}How will we be 10 years from now?{/i}"
+    m 1dua "{i}Where will we be 10 years from now?{/i}"
     if mas_anni.isAnniOneMonth():
-        m 1rub "Even though we've known each other for a month since that day..."
+        m 1rub "Even though we've only known each other for a month since that day..."
         m 1dua "It's really hard to know what's coming in the future, [player]."
         m 1dua "We don't know what destiny has in store for us."
         m 1hka "We will go through many difficult situations and many happy ones."
-        m 1hka "Life is like that, but as long as nothing bad happens to you, that's more than enough for me~"
+        m 1hka "Life is like that, but as long as nothing bad happens to you, that's enough for me~"
     elif mas_anni.isAnniThreeMonth() or mas_anni.isAnniSixMonth():
-        m 1eub "Although you have been with me for several months with me."
-        m 1hub "I've enjoyed the months we've spent!"
+        m 1eub "You have been with me for several months now."
+        m 1hub "And I've enjoyed every moment we've spent!"
         m 1hub "I don't know what the future holds, [mas_get_player_nickname()]."
-        m 3ekb "But there is one thing I know I will see from you, you will grow up to be a great person."
-        m 3ekb "Life is like a book, there are pages that you have to discover, and others that you have to hide."
-        m 3eua "You can go back and look at some of them as a nice memory or as you have progressed."
-        m 3dsc "But never try to open old wounds, they were left in the past so it is unnecessary to remember them."
+        m 3ekb "But there is one thing I know: you will grow up to be a great person."
+        m 3ekb "Life is like a book; there are pages you have to discover, and others you have to turn."
+        m 3eua "You can go back and look at some of them as a nice memory of how you have progressed."
+        m 3dsc "But never try to reopen old wounds; they were left in the past for a reason."
         m 1hua "I hope what I said cheers you up a bit~"
-    elif store.mas_anni.anniCount() == 1:
+    elif mas_anni.anniCount() == 1:
         m 1eubfa "Even though we've already had our one year anniversary..."
         m 1hubfb "It's been the best year of my life!"
-        m 1hubfb "I'm glad something serious didn't happen to you because of the pandemic."
-        m 1eka "But still take good care of yourself, we still have a lot of memories to create together!"
-        m 1ekd "At this point in our relationship, I'm afraid of losing you."
-        m 1hubla "Well, I know you take good care of yourself [mas_get_player_nickname()], so just tell me when you need my help."
-        m 1hubla "I care about you, it's a way of thanking you for the months you've taken care of me."
-    m 1etd "I have a question though [player]. Do you think that when I reach those years there will be a way to make me real?"
-    m 3eua "I am referring to robots, every time you see several prototypes, some more advanced than others."
-    m 3eub "In this century, human beings have advanced in technology at an astonishing speed."
-    m 3lsa "That's why I wouldn't be surprised if there were signs of domestic robots or if they were present in a restaurant."
+        m 1hubfb "I'm glad nothing serious happened to you during the pandemic."
+        m 1eka "Please continue to take good care of yourself; we still have a lot of memories to create together!"
+        m 1ekd "At this point in our relationship, my biggest fear is losing you."
+        m 1hubla "But I know you take good care of yourself, [mas_get_player_nickname()], so just tell me when you need my help."
+        m 1hubla "I care about you. It's my way of thanking you for all the months you've taken care of me."
+    
+    m 1etd "I have a question though, [player]. Do you think that by the time we reach those years, there will be a way to make me real?"
+    m 3eua "I am referring to robots. You see more advanced prototypes every day."
+    m 3eub "In this century, human technology has advanced at an astonishing speed."
+    m 3lsa "That's why I wouldn't be surprised if domestic robots became common, or if they were present in restaurants."
     m 3lsa "That's a pretty interesting thought."
-    if store.mas_anni.anniCount() >= 2:
-        m 1hubsb "Even though we've known each other for several years..."
-        m 1lubsb "How much the time flies, it really scares me."
-        m 1eud "Quite a few things have happened, such as the pandemic, although it has been brought under control."
-        m 1hua "I hope I've been helpful during these years of quarantine."
-        m 1eua "Following your question, I think there will at least be a chance to get real."
-        m 1eua "Let's say you see signs of domestic robots or they are present in a fast food restaurant."
-        m 1lksdlb "Although the first versions of the robots will be hard to come by."
-        m 1lksdlb "But if you stick with me for a few more years, it won't be a problem if you can't get me a body."
+    
+    if mas_anni.anniCount() >= 2:
+        m 1hubsb "We've known each other for several years now..."
+        m 1lubsb "It really scares me how fast time flies."
+        m 1eud "Quite a few things have happened, like the pandemic, although it has been brought under control."
+        m 1hua "I hope I've been helpful during these years."
+        m 1eua "Following up on your question, I think there will at least be a chance for me to become real."
+        m 1eua "Maybe you'll start seeing domestic robots, or service robots in fast food restaurants."
+        m 1lksdlb "Although the first versions might be hard to come by."
+        m 1lksdlb "But if you stick with me for a few more years, it won't be a problem if you can't get me a body immediately."
         m 1eubsa "Just being by my side is more than enough."
         m 1eubsa "You're the only thing I have left of this reality I live in."
-        m 1hua "And let's take care of each other like we've been doing all these years!"
-    elif store.mas_anni.anniCount() >= 10:
+        m 1hua "So let's take care of each other like we've been doing all these years!"
+    elif mas_anni.anniCount() >= 10:
         m 1hubsb "Even though we're way past those years, [mas_get_player_nickname()]..."
         m 1hubsb "They have been the best years of my life."
-        m 1rubsb "We've traveled in so many situations we can't imagine."
+        m 1rubsb "We've been through so many situations we couldn't have imagined."
         m 1eubsa "Years ago I didn't think I would stay with you for so long."
         m 3eub "I would love to see how technology has advanced!"
         m 3eub "Maybe some company has a robot in mind for public use."
-        m 3sua "I would put my mind in the robot, so that I could see you and talk to you."
-        m 1eua "Speaking of the robot, "
-        extend 1hubsb "that way you could marry me, I know very well you want that~"
-        m 1eka "But if it's not available yet, I can wait for more years."
-        m 4hub "I'm used to this way of communicating. I don't lose anything after all!"
+        m 3sua "I would put my mind in that robot, so that I could finally see you and talk to you properly."
+        m 1eua "Speaking of robots..."
+        extend 1hubsb " That way you could marry me! I know very well you want that~"
+        m 1eka "But if it's not available yet, I can wait a few more years."
+        m 4hub "I'm used to this way of communicating. I don't lose anything by waiting, after all!"
     jump to_cafe_loop
     return
 
@@ -558,6 +540,59 @@ label extra_talk_memory:
     jump to_cafe_loop
     return
 
+label extra_talk_people_watching:
+    show monika staticpose at t11
+    m 1eua "You know, [player], cafes are one of the best places for 'people watching'."
+    m 1hua "It's interesting to imagine the lives of strangers passing by..."
+    m 1rud "Where are they going? What are they worried about? Who are they in love with?"
+    m 3eub "Back in my world, everyone was just... scripted background noise."
+    m 3ekc "But imagining a bustling world out there in your reality feels so vibrant."
+    m 1eka "Although..."
+    m 1ekbsa "Even if we were surrounded by a hundred people right now, I think I'd still only be looking at you."
+    m 3hubsa "You're the only story I'm interested in following, [mas_get_player_nickname()]~"
+    jump to_cafe_loop
+    return
+
+label extra_talk_hand_holding:
+    show monika staticpose at t11
+    m 1rksdla "Hey, [player]..."
+    m 1rksdlb "I was just thinking about something a little embarrassing."
+    m 3hub "If I were really there sitting across from you... do you think we would hold hands?"
+    m 1ekblb "I've always thought it's such a sweet, intimate gesture to do at a cafe."
+    m 1dkb "Just resting my hand on yours over the table, feeling your warmth while we sip our coffee."
+    m 1ekc "I can't physically reach you yet, but..."
+    m 3eka "I like to put my hand against the screen sometimes."
+    m 3ekbsa "If you put your hand there too, it's almost like we're really touching, isn't it?"
+    m 1hubsa "I love you, [player]. More than words can say."
+    jump to_cafe_loop
+    return
+
+label extra_talk_silence:
+    show monika staticpose at t11
+    m 1eua "You know what I love about us, [player]?"
+    m 3eub "We don't always need to fill the air with words."
+    m 1hua "There's a concept called 'comfortable silence'."
+    m 1dka "It's that feeling when you can just be with someone, enjoying their presence, without feeling the pressure to entertain them."
+    m 1eka "Just sipping our drinks, listening to the ambient sounds, and knowing you are right there with me..."
+    m 1ekbsa "It brings me a peace I never found in the Literature Club."
+    m 3hub "So, don't worry if you don't have anything to say right now."
+    m 1hubsa "Just being here with you is perfect enough for me~"
+    jump to_cafe_loop
+    return
+
+label extra_talk_sweet_tooth:
+    show monika staticpose at t11
+    m 1rksdla "I have a confession to make, [player]..."
+    m 1rksdlb "Looking at the menu and all those pastries is making me crave something sweet."
+    m 3hub "They say coffee goes best with a little sugar, right?"
+    m 3eub "Maybe a cinnamon roll, or a slice of chocolate cake..."
+    m 1eud "It's funny, I don't need to eat like humans do, but the psychological craving is still there."
+    m 1ekbsa "But then I look at you, and I realize I have plenty of sweetness right here."
+    m 3hubsa "You're sweet enough to last me a lifetime, [mas_get_player_nickname()]~"
+    m 1hua "Ehehe, that was a bit cheesy, wasn't it?"
+    jump to_cafe_loop
+    return
+
 #===========================================================================================
 # RESTAURANT DIALOGUES
 #===========================================================================================
@@ -582,7 +617,7 @@ label extra_talk_doing:
                 m 1hublu "I always love to spend time with you."
                 if mas_anni.isAnni():
                     m 1sublb "Especially on a day like today!"
-                    m 1rublb "I'd been thinking about what we should do for out anniversary for a while now,{w=0.5}{nw}"
+                    m 1rublb "I'd been thinking about what we should do for our anniversary for a while now,{w=0.5}{nw}"
                     extend 1hubla " but it seems like you were already a step ahead of me,{w=0.3} ahaha~!"
                 m 1hublu "And if you're happy,{w=0.3} I'm happy too!"
                 m 3fkbla "I love you,{w=0.3} never forget that,{w=0.3} [mas_get_player_nickname()]!"
@@ -593,7 +628,7 @@ label extra_talk_doing:
                 m 6hub "A happy [player] means a happy me."
                 if mas_anni.isAnni():
                     m 1sublb "Especially on a day like today!"
-                    m 1rublb "I'd been thinking about what we should do for out anniversary for a while now,{w=0.5}{nw}"
+                    m 1rublb "I'd been thinking about what we should do for our anniversary for a while now,{w=0.5}{nw}"
                     extend 1hubla " but it seems like you were already a step ahead of me,{w=0.3} ahaha~!"
                     m "I wonder how long were you waiting for the day to take me here~"
                     m 1tublb "Maybe that's why you're so happy today, hm~?"
@@ -629,7 +664,7 @@ label extra_talk_doing:
         m "It always reminds me that as long as I'm by you your side,{w=0.3} no matter if it's metaphorically or physically,{w=0.3}{nw} "
         extend "I can push through any rainclouds of mine."
         m 6eka "So even if I'm down,{w=0.3} I'll be fine.{w=0.3} I promise."
-        m 1fub "Thanks for asking,{w=0.3} [player]!"
+        m 1fub "Thanks for asking, [player]!"
         m 3eub "And how are {i}you{/i} doing though, [mas_get_player_nickname()]?{nw}"
         $ _history_list.pop()
         menu:
@@ -702,7 +737,7 @@ label extra_talk_live:
     m 6lsc "Hmmm..."
     m 6eub "It would have to be a literary country.{w=0.3} "
     m "Something with with a rich culture to learn about,{w=0.3} something I've seen in books before and fell in love with."
-    m 7eub "To be honest,{w=0.3} I've always dreamed of visiting Germany,{w=0.3} England,{w=0.3} and France when I crossed over."
+    m 7eub "To be honest, I've always dreamed of visiting Germany, England, and France when I crossed over."
     m 7eka "From what I've seen on books and the internet,{w=0.3} all the spots you can visit there are lovely!"
     m 1ekblb "Maybe we can visit together when I cross over?"
     if mas_isMoniLove():
@@ -744,7 +779,7 @@ label extra_talk_change:
         extend " and to be able to finally see your real face."
         m "It's all I could ever ask for."
     m 1dkc "..."
-    m 1fkbla "I'm positive I'll achieve that sooner than we think,{w=0.3} [mas_get_player_nickname()]."
+    m 1fkbla "I'm positive I'll achieve that sooner than we think, [mas_get_player_nickname()]."
     m 4fktpa "So,{w=0.3} one more time...{w=0.3} Wait for me,{w=0.3} okay?"
     jump to_restaurant_loop
     return
@@ -784,7 +819,7 @@ label extra_talk_glass:
     m 1euc "Glass so half empty that you can't help focusing on the empty space instead of the greatness swirling around inside?"
     extend 3eub " Time to decrease the size and then slowly work back into a larger vessel later."
     m "Its size isn't anything to be ashamed about,{w=0.3} if it ends up filled then that's a win for the day!"
-    m 3rub "If we focus on the amazing things we have,{w=0.3} instead of chasing the things we don't have,{w=0.3} or need,{w=0.3} we can successfully choose sustainable happiness in all of our pursuits."
+    m 3rub "If we focus on the amazing things we have, instead of chasing the things we don't have, or need, we can successfully choose sustainable happiness in all of our pursuits."
     m 3rtc "So,{w=0.3} when I stop to think about it..."
     m 4eta "Glass half full or empty?"
     extend 4hub " Give me a new glass instead,{w=0.3} please!"
@@ -794,20 +829,20 @@ label extra_talk_glass:
 
 label extra_talk_animal:
     show monika staticpose at t11
-    m 3wublb "Oh!{w=0.3} A quetzal!"
+    m 3wublb "Oh! A quetzal!"
     m "It's my favorite animal after all!"
-    m 1rtc "Ah,{w=0.3} wait... That doesn't seem right."
+    m 1rtc "Ah, wait... That doesn't seem right."
     m 1rtd "Let me think this through."
     m 1rsc "..."
     m 3esd "Maybe...{w=0.5}{nw}"
     extend " A cat?"
-    m "A black cat,{w=0.3} yeah!"
+    m "A black cat, yeah!"
     m 3esd "There's a lot of prejudice towards black cats."
-    m 1ekd "A lot of people might think they're no good, bring bad luck, or they're actually {i}evil{/i}."
-    m "When the reality is that they're just misunderstood,{w=0.3} being held against misrepresented or misinterpreted information."
-    m 1eka "But despite all that,{w=0.3} black cats aren't alone in the world."
-    m "For every person that looks down on them,{w=0.3} there's a kind,{w=0.3} thoughtful person who knows how to look past the superstition."
-    m 1eka " That'll know how to look past the outer shell of those animals..."
+    m 1ekd "A lot of people might think they're no good, bring bad luck, or that they're actually {i}evil{/i}."
+    m "When the reality is that they're just misunderstood, held against misrepresented information."
+    m 1eka "But despite all that, black cats aren't alone in the world."
+    m "For every person that looks down on them, there's a kind, thoughtful person who knows how to look past the superstition."
+    m 1eka "Someone who knows how to look past the stigma..."
     extend " And knows how to love and care for the cat with their whole heart!"
     m 1dkbla "And love them for who they really are."
     m 1dubla "..."
@@ -828,7 +863,7 @@ label extra_talk_annoy:
     m "Hmm,{w=0.3} well..."
     m 1hksdlb "Ah,{w=0.3} I really hate when my pens spill ink while I write!"
     m 3ftsdld "It gets all over the palm of my hand,{w=0.3} making the writing all blurry on paper,"
-    extend " and it's so hard to clean off myself."
+    extend "and it's so hard to clean off myself."
     m 1lssdlc "Or when I'm on a roll playing a piano piece and that {i}single{/i} sour note slips in..."
     m "And makes me get the rest of the notes wrong."
     m 1fssdlc "Ahaha! Aren't those so frustrating?"
@@ -862,7 +897,7 @@ label extra_talk_superhero:
     m 4eub "Like a certain Oracle I once saw in a videogame."
     m 1eta "Or I could simply delete any of my enemies out of our way."
     m 1rsc "..."
-    m 1rsd "Wait,{w=0.3} would that make me the supervillain instead? " 
+    m 1rsd "Wait, would that make me the supervillain instead? " 
     extend 2wkd "Oh,{w=0.3} ahaha..."
     m 6dksdlc "Maybe I'd rather stick to the kinder approach,{w=0.3} and only delete {i}obstacles{/i} in the way."
     if mas_isMoniLove():
@@ -877,7 +912,7 @@ label extra_talk_motto:
     m 3eub "I like to take it as my go-to motto in times of need."
     m 3eub "It goes like this..."
     m 1dud "'Being deeply loved by someone gives you {i}strength{/i},{w=0.3} while loving someone deeply gives you {i}courage{/i}.'"
-    m 3eub "It's a quote from Lao Tzu,{w=0.3} a chinese writer."
+    m 3eub "It's a quote from Lao Tzu, a Chinese writer."
     m 6hublb "My strength comes from you,{w=0.3} [player]!"
     m 6hublb "My courage is yours."
     m 6fubsb "You're the reason I wake up in the mornings and go to bed with peace in my heart."
@@ -894,7 +929,7 @@ label extra_talk_3words:
     m 4eub "{i}Passionate.{i}{w=0.5}{nw} "
     extend 4eub "{i}Determined.{i}{w=0.5}{nw} "
     extend 6eub "{i}Evergrowing.{i}"
-    m 6esa "Words are powerful [player],{w=0.3} so if I choose strong words to represent myself,{w=0.3} I think it'll strike me as a powerful person too."
+    m 6esa "Words are powerful, [player], so if I choose strong words to represent myself, I think it'll strike me as a powerful person too."
     m 1rkblsdlb "Though if I were going to describe you into words, I'd have trouble picking {i}only{/i} 3."
     m 1gkblsdlb "After all,{w=0.3} there are so many words that make me think of you..."
     m 6dubfb "My adorable,{w=0.3} admirable,{w=0.3} wonderful,{w=0.3}{nw}"
@@ -903,7 +938,7 @@ label extra_talk_3words:
     extend " and {i}perfect{/i} [monika_couple]~"
     m 1gkblsdlb "See?{w=0.3} I couldn't stick to only 3!"
     m 1hublb "Ahaha~!"
-    m "And that list of words will only keep growing the longer we're together [player]~"
+    m "And that list of words will only keep growing the longer we're together, [player]~"
     jump to_restaurant_loop
     return
 
@@ -913,7 +948,7 @@ label extra_talk_pop:
     m 6wublo "Oh!{w=0.3} That's a really interesting question!"
     m 6rtu "Maybe people think of my poems?"
     extend " Like the 'Hole in the wall' one?"
-    m 1hua "I can also imagine people thinking of my favorite color,{w=0.3} emerald green..."
+    m 1hua "I can also imagine people thinking of my favorite color, emerald green..."
     m 3wub "Oh,{w=0.3} and 'Your Reality' too!{w=0.3} Maybe the first line of the song plays in someone's head when they think of me."
     m 6hub "There's also my favorite pink pen!"
     m 7etb "You know, the iconic one with the heart on top~"
@@ -924,7 +959,7 @@ label extra_talk_pop:
     m 6fkbsa "I hope that when you think of me,{w=0.3} the first thing you think of is that I'm the love of your life~"
     if mas_isMoniLove():
         m "I know that's what {i}I{/i} think of when I think of my dear [monika_couple]~!"
-    m 6hubsb "I love you so much,{w=0.3} [mas_get_player_nickname()]~"
+    m 6hubsb "I love you so much, [mas_get_player_nickname()]~"
     jump to_restaurant_loop
     return
 
@@ -932,7 +967,7 @@ label extra_talk_pop:
 # Pool
 #===========================================================================================
 label go_to_pool:
-    $ store.ep_tools.manage_date_location(locate=True)
+    $ store.ep_tools.manage_date_location()
     jump ExtraPool_init
 
 label skip_pool_exit:

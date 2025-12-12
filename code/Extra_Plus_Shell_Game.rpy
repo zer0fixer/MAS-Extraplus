@@ -24,16 +24,16 @@ image extra_sg_ball:
         xalign 0.5 yalign 0.5
 
 init -5 python in ep_sg:
+    cup_skin = randomize_cup_skin()
     target_shuffles = 4
     ball_position = 1
     current_turn = 1
     shuffle_cups = 0
     cup_speed = 0.9 
-    difficulty = 1 #1-Easy, 2-Normal, 3-Hard, 4-Progressive
+    difficulty = 1 # 1-Easy, 2-Normal, 3-Hard, 4-Progressive
     correct_answers = 0
     comment = False
     cup_choice = None
-    cup_skin = randomize_cup_skin()
     original_cup = [0, 1, 2]
     cup_coordinates = [695, 925, 1155]
     cup_coordinates_real = [695, 925, 1155]
@@ -42,35 +42,35 @@ init -5 python in ep_sg:
         _("Well done, [player]!"),
         _("Impressive, keep it up!"),
         _("You're doing great!"),
-        _("Fantastic, [player]!"),
-        _("Keep it up!"),
+        _("Fantastic eye, [player]!"),
+        _("Nice catch!"),
         _("You're making progress!"),
         _("Bravo, [player]!"),
-        _("Outstanding, [player]!"),
-        _("Way to go, [player]!"),
-        _("Keep up the good work, [player]!"),
+        _("Outstanding!"),
+        _("Way to go!"),
+        _("Nothing gets past you, huh?"),
         _("You're doing fantastic!"),
         _("You're doing amazing!"),
     ]
     _failures = [
-        _("Oh, too bad~"),
-        _("It's not that, [player]."),
+        _("Oh, not that one~"),
+        _("That's not the one, [player]."),
         _("Try again~"),
-        _("Don't get distracted, [player]."),
-        _("Keep practicing, [player]."),
+        _("Don't let your eyes deceive you."),
+        _("Keep practicing, [player]!"),
         _("You'll get it next time!"),
-        _("Better luck next try, [player]."),
-        _("Don't give up, [player]!"),
-        _("That's not quite it, [player]."),
-        _("That wasn't the right answer, [player]."),
+        _("Better luck next round."),
+        _("Don't give up!"),
+        _("Almost!"),
+        _("That wasn't the right answer, but you're close."),
         _("Sorry, [player], that's not it."),
-        _("Not quite, try focusing a bit more!")
+        _("Keep your eyes on the cup!")
     ]
 
 label minigame_sg:
     show monika 1eub at t11
     if renpy.seen_label("minigame_sg"):
-        m 1eta "You want to play the shell game again, [player]? "
+        m 1eta "Do you want to play the Shell Game again, [player]?"
         if persistent.sg_max_score == 0:
             m 1eka "By the way, I wanted to apologize..."
             m 3lkb "I just realized there was a bug in my code that was preventing your high score from being saved correctly."
@@ -79,8 +79,8 @@ label minigame_sg:
         else:
             m 1sua "Great! Let's see if you can beat your record of [persistent.sg_max_score] correct answers in a row!"
     else:
-        m 1etb "You want to play the shell game with me, [player]? "
-        m 1sua "It's a game of skill and reflexes. I think you'll like it!"
+        m 1etb "Do you want to play the Shell Game with me, [player]?"
+        m 1sua "It's a game of observation and focus. I think you'll like it!"
         m 1eua "The rules are simple: I'll hide a ball under one of these cups and shuffle them around."
         m 1hub "You just have to guess which cup the ball is under."
         m 1eub "If you guess right, you score a point!"
@@ -89,8 +89,8 @@ label minigame_sg:
     menu:
         "Alright, what difficulty do you want to play on?{fast}"
         "Easy":
-            m 1eua "Feeling like taking it easy, [player]? "
-            extend 1hua "Alright!"
+            m 1eua "Feeling like taking it easy, [player]?"
+            extend 1hua " Alright!"
             python:
                 ep_sg.cup_speed = 0.85
                 ep_sg.difficulty = 1
@@ -199,7 +199,7 @@ label sg_loop_game:
         elif ep_sg.ball_position == move_cup_2:
             ep_sg.ball_position = move_cup_1
 
-    $ renpy.pause(ep_sg.cup_speed, hard='True')
+    $ renpy.pause(ep_sg.cup_speed, hard="True")
 
     play sound sfx_cup_shuffle
 
@@ -309,9 +309,15 @@ label shell_game_result:
     hide screen score_minigame
     python:
         new_high_score = (ep_sg.correct_answers > persistent.sg_max_score)
+        # Fix logic: current_turn starts at 1 and increments after each round.
+        # If user quits immediately, current_turn is 1 (0 played).
+        # If user plays 1 round, current_turn becomes 2.
+        rounds_played = max(0, ep_sg.current_turn - 1)
+        
         enable_esc()
         mas_MUMUDropShield()
         renpy.game.preferences.afm_enable = afm_pref
+
     hide extra_sg_ball
     show extra_sg_cup as cup_1:
         xpos ep_sg.cup_coordinates[0] ypos 250
@@ -332,25 +338,25 @@ label shell_game_result:
     hide screen extra_no_click
     show monika at t11
 
-    #The player didn't play any rounds.
-    if ep_sg.current_turn == 1 and ep_sg.correct_answers == 0:
+    # The player didn't play any rounds.
+    if rounds_played == 0:
         m 1hka "You didn't want to play after all?"
         m 1eua "That's okay, maybe you'll be in the mood next time."
         m 1dub "I'll be here waiting for you, [player]."
 
-    #The player didn't get any correct.
+    # The player didn't get any correct.
     elif ep_sg.correct_answers == 0:
         m 1eka "[player], are you feeling alright?"
-        m 1ekb "We played for [ep_sg.current_turn] rounds and you didn't get any of them right."
+        m 1ekb "We played [rounds_played] rounds and you didn't get any of them right."
         m 1etd "Were you a little distracted, maybe?"
         if ep_sg.difficulty == 4: # Dialogue for Progressive
             m 3eka "That progressive mode can be tricky at first. The speed really ramps up!"
             m 3hua "Don't worry about it, I'm sure you'll get the hang of it."
         else:
-            m 1hua "It's okay, everyone has off-days. Let's do something that cheers you up!"
+            m 1hua "It's okay, everyone has off days. Let's do something that cheers you up!"
 
-    #Perfect score!
-    elif ep_sg.correct_answers == ep_sg.current_turn:
+    # Perfect score!
+    elif ep_sg.correct_answers == rounds_played:
         m 2sub "Wow, a perfect score! You got every single one right!"
         if new_high_score:
             m 1hubsa "And it's a new high score! Congratulations, [player]! I'm so proud of you."
@@ -358,7 +364,7 @@ label shell_game_result:
             m 1hubsb "You matched your high score perfectly. Your focus is amazing!"
         m 3eub "You have some really sharp eyes, ehehe~"
 
-    #Mixed result (some correct, some failed).
+    # Mixed result (some correct, some failed).
     else:
         m 1eua "That was a good run, [player]!"
         if new_high_score:
@@ -370,18 +376,19 @@ label shell_game_result:
                 m 3hua "Keeping up with the progressive speed is tough, but you held on for a long time!"
             else:
                 m 3hub "It's just a matter of practice. I know you'll beat your record of [persistent.sg_max_score] soon!"
-
-    m 1hubsa "Well, thank you for playing with me. I had a lot of fun!"
-    if ep_sg.current_turn > 50:
-        m 3eka "And also, please rest your eyes for a bit. We played for quite a while..."
-        m 1dub "I always get concerned about your health, you know~"
+        
+        m 1hubsa "Well, thank you for playing with me. I had a lot of fun!"
+        
+        if rounds_played > 50:
+            m 3eka "And also, please rest your eyes for a bit. We played for quite a while..."
+            m 1dub "I always get concerned about your health, you know~"
 
     window hide
     python:
         if ep_sg.correct_answers > persistent.sg_max_score:
             persistent.sg_max_score = ep_sg.correct_answers
-        ep_sg.current_turn = 0
-        ep_sg.correct_answers = 0 # Reset for next session
+        ep_sg.current_turn = 1 # Reset to 1 for next session
+        ep_sg.correct_answers = 0 
         ep_sg.target_shuffles = 6
         ep_sg.shuffle_cups = 0
         

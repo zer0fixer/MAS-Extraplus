@@ -25,55 +25,55 @@ init -989 python:
             repository_name="MAS-Extraplus",
             update_dir="",
             redirected_files=(
-                "README.md"
+                "README.txt"
             )
         )
 
-    #Just in case (Android Port).
-    # Setting for 'default_zoom_level'
-    if not hasattr(store.mas_sprites, "default_zoom_level"):
-        store.mas_sprites.default_zoom_level = 1.0
-    # Fix for 'zoom_level'
-    if not hasattr(store.mas_sprites, "zoom_level"):
-        store.mas_sprites.zoom_level = 1.0
+    # #Just in case (Android Port).
+    # # Setting for 'default_zoom_level'
+    # if not hasattr(store.mas_sprites, "default_zoom_level"):
+    #     store.mas_sprites.default_zoom_level = 1.0
+    # # Fix for 'zoom_level'
+    # if not hasattr(store.mas_sprites, "zoom_level"):
+    #     store.mas_sprites.zoom_level = 1.0
 
 #===========================================================================================
 # VARIABLES
 #===========================================================================================
-init -5 python in ep_dialogues:
+init 20 python in ep_dialogues:
     _minigames = [
-        _("Choose one, [player]."),
-        _("Want a new challenge?"),
-        _("I would love to play with you~"),
-        _("What will we play today?"),
+        _("Which one should we play, [player]?"),
+        _("Up for a challenge? Ehehe~"),
+        _("I'd love to play with you~"),
+        _("What are we playing today?"),
         _("Let's have some fun!"),
-        _("Time to show off your skills!"),
-        _("Ready to play?"),
-        _("Let's see how good you are!"),
-        _("Which game do you want to try?"),
+        _("Time to show me your skills!"),
+        _("Ready to lose? Just kidding!"),
+        _("Let's see how good you really are!"),
+        _("Which game are you in the mood for?"),
         _("Shall we play a game?"),
-        _("I'm feeling lucky today, [player]."),
-        _("Are you ready for some fun?"),
+        _("I'm feeling lucky today, [player]~"),
+        _("Are you ready?"),
         _("Let's see if you can beat me!"),
-        _("Time for some friendly competition!"),
-        _("I'm up for any game you want to play."),
+        _("Time for a little friendly competition!"),
+        _("I'm up for anything, as long as it's with you."),
     ]
     _dates = [
-        _("I can't wait to see where you take me!"),
-        _("What adventures await us today?"),
-        _("I'm excited to spend time with you."),
-        _("Let's make some great memories today."),
-        _("I hope we have a wonderful time together."),
-        _("Wherever we go, it will be perfect as long as we're together."),
-        _("I'm open to any suggestion you have."),
-        _("Let's do something fun and spontaneous!"),
-        _("I'm so lucky to have you as my date!"),
-        _("I can't wait to make more memories with you today."),
-        _("I'm up for anything you want to do!"),
+        _("I can't wait to see where you're taking me!"),
+        _("Where are we going today? I'm excited!"),
+        _("I love spending quality time with you."),
+        _("Let's make some wonderful memories today."),
+        _("I just know we'll have a great time."),
+        _("As long as I'm with you, anywhere is perfect."),
+        _("I'm happy to follow your lead, [player]."),
+        _("Let's do something romantic!"),
+        _("I'm the luckiest girl to have you as my date~"),
+        _("I can't wait to make more memories with you."),
+        _("I'm up for whatever you want to do!"),
         _("Let's make this a date to remember."),
-        _("I feel like today is going to be amazing!"),
-        _("Wherever we end up, I'm happy as long as we're together."),
-        _("Let's have an unforgettable time today!")
+        _("I have a feeling today is going to be amazing!"),
+        _("It doesn't matter where we go, as long as we're together."),
+        _("Let's have an unforgettable time, [player]!")
     ]
 
 init -10 python in ep_interactions:
@@ -84,7 +84,6 @@ init -10 python in ep_interactions:
 
 init -5 python in ep_tools:
     import store
-
     player_zoom = None
     games_idle_timer = 300
     minigames_menu = []
@@ -97,11 +96,53 @@ init -5 python in ep_tools:
     pictograms_font = store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "pictograms_icons.ttf")
     affection_icons = store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "peperrito_faces.ttf")
 
+init -20 python in ep_tools:
+    import store
+    noises_submod = store.mas_submod_utils.isSubmodInstalled("Noises Submod")
+
+init 20 python in ep_files:
+    groceries_menu = [
+        store.ep_files.GiftAction(_("Coffee"), "coffee"),
+        store.ep_files.GiftAction(_("Chocolates"), "chocolates"),
+        store.ep_files.GiftAction(_("Cupcake"), "cupcake"),
+        store.ep_files.GiftAction(_("Fudge"), "fudge"),
+        store.ep_files.GiftAction(_("Hot Chocolate"), "hotchocolate"),
+        store.ep_files.GiftAction(_("Candy"), "candy"),
+        store.ep_files.GiftAction(_("Candy Canes"), "candycane"),
+        store.ep_files.GiftAction(_("Candy Corn"), "candycorn"),
+        store.ep_files.GiftAction(_("Christmas Cookies"), "christmascookies")
+    ]
+
+    objects_menu_base = [
+        store.ep_files.GiftAction(_("Promise Ring"), "promisering"),
+        store.ep_files.GiftAction(_("Roses"), "roses"),
+        store.ep_files.GiftAction(_("Quetzal Plushie"), "quetzalplushie"),
+        store.ep_files.GiftAction(_("Thermos Mug"), "justmonikathermos")
+    ]
+
+    ribbons_menu = [
+        store.ep_files.GiftAction(_("Black Ribbon"), "blackribbon"),
+        store.ep_files.GiftAction(_("Blue Ribbon"), "blueribbon"),
+        store.ep_files.GiftAction(_("Dark Purple Ribbon"), "darkpurpleribbon"),
+        store.ep_files.GiftAction(_("Emerald Ribbon"), "emeraldribbon"),
+        store.ep_files.GiftAction(_("Gray Ribbon"), "grayribbon"),
+        store.ep_files.GiftAction(_("Green Ribbon"), "greenribbon"),
+        store.ep_files.GiftAction(_("Light Purple Ribbon"), "lightpurpleribbon"),
+        store.ep_files.GiftAction(_("Peach Ribbon"), "peachribbon"),
+        store.ep_files.GiftAction(_("Pink Ribbon"), "pinkribbon"),
+        store.ep_files.GiftAction(_("Platinum Ribbon"), "platinumribbon"),
+        store.ep_files.GiftAction(_("Red Ribbon"), "redribbon"),
+        store.ep_files.GiftAction(_("Ruby Ribbon"), "rubyribbon"),
+        store.ep_files.GiftAction(_("Sapphire Ribbon"), "sapphireribbon"),
+        store.ep_files.GiftAction(_("Silver Ribbon"), "silverribbon"),
+        store.ep_files.GiftAction(_("Teal Ribbon"), "tealribbon"),
+        store.ep_files.GiftAction(_("Yellow Ribbon"), "yellowribbon")
+    ]
+
 init -5 python in ep_chibis:
     import store
-
-    xpos = 0.05
-    ypos = 345 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else 385
+    xpos = 0.025
+    ypos = 345 if store.ep_tools.noises_submod else 385
     # (Doki Folder, Base Sprite Name, Blink State, Hover State)
     blanket_monika = ("darling", "idle", "blink", "hover")
     blanket_nat = ("cupcake", "idle", "blink", "hover")
@@ -116,12 +157,59 @@ init -5 python in ep_chibis:
     sprite_path = store.ep_folders._join_path(store.ep_folders.EP_CHIBIS, "{0}", "{1}.png")
     accessory_path_0 = store.ep_folders._join_path(store.ep_folders.EP_CHIBI_ACC_0, "{}.png")
     accessory_path_1 = store.ep_folders._join_path(store.ep_folders.EP_CHIBI_ACC_1, "{}.png")
+    accessory_path_2 = store.ep_folders._join_path(store.ep_folders.EP_CHIBI_ACC_2, "{}.png")
+    temp_chibi_clicks = 0
+    temp_chibi_anger = False
+
+init 20 python in ep_chibis:
+    primary_accessories = [
+        store.ep_chibis.DokiAccessory(_("Clown Hair"), "clown_hair", "primary"),
+        store.ep_chibis.DokiAccessory(_("Cat Ears"), "cat_ears", "primary"),
+        store.ep_chibis.DokiAccessory(_("Christmas Hat"), "christmas_hat", "primary"),
+        store.ep_chibis.DokiAccessory(_("Demon Horns"), "demon_horns", "primary"),
+        store.ep_chibis.DokiAccessory(_("Flowers Crown"), "flowers_crown", "primary"),
+        store.ep_chibis.DokiAccessory(_("Fox Ears"), "fox_ears", "primary"),
+        store.ep_chibis.DokiAccessory(_("Graduation Cap"), "graduation_cap", "primary"),
+        store.ep_chibis.DokiAccessory(_("Halo"), "halo", "primary"),
+        store.ep_chibis.DokiAccessory(_("Heart Headband"), "heart_headband", "primary"),
+        store.ep_chibis.DokiAccessory(_("Headphones"), "headphones", "primary"),
+        store.ep_chibis.DokiAccessory(_("Neon Cat Ears"), "neon_cat_ears", "primary"),
+        store.ep_chibis.DokiAccessory(_("New Year's Headband"), "hny", "primary"),
+        store.ep_chibis.DokiAccessory(_("Party Hat"), "party_hat", "primary"),
+        store.ep_chibis.DokiAccessory(_("Rabbit Ears"), "rabbit_ears", "primary"),
+        store.ep_chibis.DokiAccessory(_("Top Hat"), "top_hat", "primary"),
+        store.ep_chibis.DokiAccessory(_("Witch Hat"), "witch_hat", "primary")
+    ]
+    secondary_accessories = [
+        store.ep_chibis.DokiAccessory(_("Black Bow Tie"), "black_bow_tie", "secondary"),
+        store.ep_chibis.DokiAccessory(_("Christmas Tree"), "christmas_tree", "secondary"),
+        store.ep_chibis.DokiAccessory(_("Cloud"), "cloud", "secondary"),
+        store.ep_chibis.DokiAccessory(_("Coffee"), "coffee", "secondary"),
+        store.ep_chibis.DokiAccessory(_("Halloween Pumpkin"), "pumpkin", "secondary"),
+        store.ep_chibis.DokiAccessory(_("Hearts"), "hearts", "secondary"),
+        store.ep_chibis.DokiAccessory(_("[m_name]'s Cake"), "m_slice_cake", "secondary"),
+        store.ep_chibis.DokiAccessory(_("Moustache"), "moustache", "secondary"),
+        store.ep_chibis.DokiAccessory(_("Neon Blush"), "neon_blush", "secondary"),
+        store.ep_chibis.DokiAccessory(_("Monocle"), "monocle", "secondary"),
+        store.ep_chibis.DokiAccessory(_("[player]'s Cake"), "p_slice_cake", "secondary"),
+        store.ep_chibis.DokiAccessory(_("Pirate Patch"), "patch", "secondary"),
+        store.ep_chibis.DokiAccessory(_("Speech Bubble with Heart"), "speech_bubble", "secondary"),
+        store.ep_chibis.DokiAccessory(_("Sunglasses"), "sunglasses", "secondary")
+    ]
+    background_accessories = [
+        store.ep_chibis.DokiAccessory(_("Angel Wings"), "angel_wings", "background"),
+        store.ep_chibis.DokiAccessory(_("Balloon Decorations"), "balloon_decorations", "background"),
+        store.ep_chibis.DokiAccessory(_("Cat Tail"), "cat_tail", "background"),
+        store.ep_chibis.DokiAccessory(_("Fox Tail"), "fox_tail", "background"),
+        store.ep_chibis.DokiAccessory(_("Snowflakes"), "snowflakes", "background")
+    ]
+    notify_frame = store.ep_folders._join_path(store.ep_folders.EP_OTHERS,"notify.png")
+    notify_icon = store.ep_folders._join_path(store.ep_folders.EP_OTHERS,"{}_icon.png")
 
 init -5 python in ep_dates:
     import store
-
     xpos = 0.05
-    ypos = 555 if store.mas_submod_utils.isSubmodInstalled("Noises Submod") else 595
+    ypos = 555 if store.ep_tools.noises_submod else 595
     old_bg = None
     chair = None
     table = None
@@ -136,12 +224,18 @@ init -1 python in ep_chibis:
     sayori_costumes_ = [(_("Blanket"), blanket_sayo), (_("Casual"), casual_sayo)]
     yuri_costumes_ = [(_("Blanket"), blanket_yuri), (_("Casual"), casual_yuri)]
 
+init 10 python in ep_button:
+    import store
+    zoom_ypos = 595 if store.ep_tools.noises_submod else 635
+    zoom_close_ypos = 556 if store.ep_tools.noises_submod else 596
+
 #====Chibika and friends?
 default persistent.chibika_drag_x = ep_chibis.xpos
 default persistent.chibika_drag_y = 385
 default persistent.chibika_current_costume = ep_chibis.blanket_monika
 default persistent.chibi_accessory_1_ = "0nothing"
 default persistent.chibi_accessory_2_ = "0nothing"
+default persistent.chibi_accessory_3_ = "0nothing"
 default persistent.hi_chibika = False
 default persistent.enable_drag_chibika = False
 #====Misc
@@ -149,12 +243,17 @@ default persistent.EP_dynamic_button_text = False
 default persistent.EP_button_conditions_key = None
 default persistent.EP_button_text = None
 default persistent.EP_button_last_update = None
+default persistent.EP_fridge_magnets_data = None
+default persistent.EP_fridge_last_monika_post = None
 #====SFX
-define sfx_cup_shuffle = ep_folders._join_path(ep_folders.EP_SFX, "cup_shuffle.mp3")
+define sfx_cup_shuffle = ep_folders._join_path(ep_folders.EP_SFX, "cup_shuffle.ogg")
 define sfx_coin_flip = ep_folders._join_path(ep_folders.EP_SFX, "coin_flip_sfx.ogg")
 define sfx_maxwell_theme = ep_folders._join_path(ep_folders.EP_SFX, "maxwell_theme.ogg")
 define sfx_ttt_cross = ep_folders._join_path(ep_folders.EP_SFX, "ttt_cross.ogg")
 define sfx_ttt_circle = ep_folders._join_path(ep_folders.EP_SFX, "ttt_circle.ogg")
+define sfx_take_frigde = store.ep_folders._join_path(ep_folders.EP_SFX, "take.ogg")
+define sfx_place_fridge = store.ep_folders._join_path(ep_folders.EP_SFX, "place.ogg")
+define sfx_doki_heartbeats = store.ep_folders._join_path(ep_folders.EP_SFX, "heartbeats.ogg")
 #====Windows Title
 default persistent._save_window_title = "Monika After Story   "
 
@@ -162,7 +261,7 @@ init 5 python:
     #====New Monika idle
     extra_no_learning = MASMoniIdleDisp(
         (
-            # Broken (how dared you, monster?)
+            # Broken
             MASMoniIdleExp("6ckc", duration=60, aff_range=(None, mas_aff.BROKEN), tag="broken_exps"),
             # Distressed
             MASMoniIdleExp("6rkc", duration=(5, 10), aff_range=(mas_aff.DISTRESSED, mas_aff.DISTRESSED), tag="dist_exps"),
@@ -188,7 +287,7 @@ init 5 python:
                 weight=2,
                 tag="dist_exps"
             ),
-            # Below 0 and Upset (Replaces 5tsc)
+            # Below 0 and Upset
             MASMoniIdleExp("2esc", duration=5, aff_range=(mas_aff.UPSET, mas_aff.NORMAL), conditional="mas_isBelowZero()", weight=None, repeatable=False, tag="below_zero_startup_exps"),
             MASMoniIdleExp("2esc", aff_range=(mas_aff.UPSET, mas_aff.NORMAL), conditional="mas_isBelowZero()", weight=95, tag="below_zero_exps"),
             MASMoniIdleExp("1tsc", aff_range=(mas_aff.UPSET, mas_aff.NORMAL), conditional="mas_isBelowZero()", weight=5, tag="below_zero_exps"), # Reemplazo de 5tsc
@@ -235,7 +334,7 @@ init 5 python:
                 tag="aff_exps"
             ),
             MASMoniIdleExp("1hua", aff_range=(mas_aff.AFFECTIONATE, mas_aff.AFFECTIONATE), weight=15, tag="aff_exps"),
-            # Enamored & Love (combined to avoid using pose 5)
+            # Enamored & Love
             MASMoniIdleExp("1eua", duration=5, aff_range=(mas_aff.ENAMORED, None), weight=None, repeatable=False, tag="enam_plus_startup_exps"),
             MASMoniIdleExpRngGroup(
                 [
@@ -315,14 +414,18 @@ init -5 python:
                 # During the war, only left-click has an effect
                 if button == 1:
                     if hovered_zone == mas_interactions.ZONE_EXTRA_NOSE:
-                        self.ep_boop_war_count += 1
-                        renpy.jump(ep_interactions.boopwar_loop)
+                        # Validate label exists before jumping
+                        if renpy.has_label(ep_interactions.boopwar_loop):
+                            self.ep_boop_war_count += 1
+                            renpy.jump(ep_interactions.boopwar_loop)
                     # Group disqualification zones
                     elif hovered_zone == mas_interactions.ZONE_EXTRA_HEAD:
-                        renpy.jump(ep_interactions.headpatwar_invalid)
+                        if renpy.has_label(ep_interactions.headpatwar_invalid):
+                            renpy.jump(ep_interactions.headpatwar_invalid)
                     elif hovered_zone in mas_interactions.ZONES_EXTRA_CHEEKS:
-                        self.ep_boop_war_count = 0
-                        renpy.jump(ep_interactions.cheekwar_invalid)
+                        if renpy.has_label(ep_interactions.cheekwar_invalid):
+                            self.ep_boop_war_count = 0
+                            renpy.jump(ep_interactions.cheekwar_invalid)
                 
                 # Ignore any other click (including right-click) during the war
                 return # End the function here if the war is active
@@ -425,20 +528,17 @@ init -5 python:
 #===========================================================================================
 # FUNCTIONS
 #===========================================================================================
-# NOTE: All function logic for Extra+ now lives in the ep_* stores,
-# which are defined in Extra_Plus_Misc.rpy.
-
-# This block runs late in the init phase to trigger startup functions.
 init 999 python:
     # Migrate old data structures to prevent crashes.
-    store.ep_chibis.migrate_chibi_costume_data()
-    store.ep_files.migrate_window_title_data()
+    # store.ep_chibis.migrate_chibi_costume_data()
+    # store.ep_files.migrate_window_title_data()
 
     # Set up core components and states.
+    store.ep_sg.randomize_cup_skin()
     store.ep_tools.save_title_windows()
 
     # Set up conditional UI elements.
-    if persistent.hi_chibika:
+    if persistent.hi_chibika and store.ep_files.main_file_exists():
         store.ep_chibis.init_chibi()
     else:
         store.ep_chibis.remove_chibi()
@@ -464,12 +564,12 @@ init -1 python:
             renpy.hide_screen("shell_game_minigame")
 
             if self.final_label == "sg_check_label":
-                ep_sg.cup_choice = self.index
+                store.ep_sg.cup_choice = self.index
 
             if self.index == self.check_index:
-                ep_sg.comment = True
+                store.ep_sg.comment = True
             else:
-                ep_sg.comment = False
+                store.ep_sg.comment = False
 
             renpy.jump(self.final_label)
 
@@ -480,24 +580,24 @@ init -1 python:
 init 5 python:
     global extraplus_accessories
     extraplus_accessories = [
-        ("EP_acs_chocolatecake", "chocolatecake", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("EP_acs_fruitcake", "fruitcake", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("EP_acs_emptyplate", "emptyplate", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("EP_acs_coffeecup", "coffeecup", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("EP_acs_emptycup", "emptycup", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("EP_acs_pasta", "extraplus_spaghetti", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("EP_acs_pancakes", "extraplus_pancakes", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("EP_acs_candles", "extraplus_candles", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("EP_acs_icecream", "extraplus_icecream", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("EP_acs_pudding", "extraplus_lecheflanpudding", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("EP_acs_waffles","extraplus_waffles", MASPoseMap(default="0", use_reg_for_l=True), True),
-        ("EP_acs_flowers", "extraplus_flowers", MASPoseMap(default="0", use_reg_for_l=True), True, 2),
-        ("EP_acs_remptyplate", "extraplus_remptyplate", MASPoseMap(default="0", use_reg_for_l=True), True)
+        ("EP_acs_chocolatecake", "chocolatecake", store.MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_fruitcake", "fruitcake", store.MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_emptyplate", "emptyplate", store.MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_coffeecup", "coffeecup", store.MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_emptycup", "emptycup", store.MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_pasta", "extraplus_spaghetti", store.MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_pancakes", "extraplus_pancakes", store.MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_candles", "extraplus_candles", store.MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_icecream", "extraplus_icecream", store.MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_pudding", "extraplus_lecheflanpudding", store.MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_waffles","extraplus_waffles", store.MASPoseMap(default="0", use_reg_for_l=True), True),
+        ("EP_acs_flowers", "extraplus_flowers", store.MASPoseMap(default="0", use_reg_for_l=True), True, 2),
+        ("EP_acs_remptyplate", "extraplus_remptyplate", store.MASPoseMap(default="0", use_reg_for_l=True), True)
     ]
 
     for info in extraplus_accessories:
         name = info[0]
-        acs = MASAccessory(*info)
+        acs = store.MASAccessory(*info)
         vars()[name] = acs
         store.mas_sprites.init_acs(acs)
 
@@ -525,6 +625,10 @@ image bjcard back = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_BLACK
 image bg desk_21 = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_BLACKJACK, "background.png"))
 image bj_name_plate = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_BLACKJACK, "name.png"))
 image bj_notescore = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_BLACKJACK, "score.png"))
+
+#====Fridge
+image bg extra_fm = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_FRIDGE, "fridge_background.png"))
+image extra_fm_box = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_FRIDGE, "fridge_box.png"))
 
 #====Chibi
 image chibi_blink_effect:
@@ -557,16 +661,21 @@ image chibi_hover_effect:
         MASFilterSwitch(ep_chibis.sprite_path.format(persistent.chibika_current_costume[0], persistent.chibika_current_costume[3]))
 
 image extra_chibi_base = LiveComposite(
-    (119, 188),
-    (0, 40), "chibi_blink_effect",
-    (0, 0), DynamicDisplayable(store.ep_chibis.chibi_draw_accessories)
+    (188, 188),
+    (0, 0), DynamicDisplayable(store.ep_chibis.draw_background_accessories),
+    (0, 0), "chibi_blink_effect",
+    (0, 0), DynamicDisplayable(store.ep_chibis.draw_foreground_accessories)
     )
 
 image extra_chibi_hover = LiveComposite(
-    (119, 188), 
-    (0, 40), "chibi_hover_effect",
-    (0, 0), DynamicDisplayable(store.ep_chibis.chibi_draw_accessories)
+    (188, 188),
+    (0, 0), DynamicDisplayable(store.ep_chibis.draw_background_accessories),
+    (0, 0), "chibi_hover_effect",
+    (0, 0), DynamicDisplayable(store.ep_chibis.draw_foreground_accessories)
     )
+
+image poof_effect = anim.Filmstrip(ep_folders._join_path(ep_folders.EP_OTHERS, "poof.png"), (222, 222), (3, 3), 0.09, loop=False)
+
 #====Coin
 image coin_heads = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_OTHERS, "coin_heads.png"))
 image coin_tails = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_OTHERS, "coin_tails.png"))
@@ -577,12 +686,6 @@ image coin_moni:
         "mas_isDayNow()", "sprite_coin",
         "mas_isNightNow()", "sprite_coin_n")
 
-#====Boop
-image zoneone = im.Scale("mod_assets/other/transparent.png", 30, 30)
-image zonetwo = im.Scale("mod_assets/other/transparent.png", 180, 120)
-image zonethree = im.Scale("mod_assets/other/transparent.png", 40, 40)
-image zonefour = im.Scale("mod_assets/other/transparent.png", 90, 60)
-
 #====Idle edit
 image monika staticpose = extra_no_learning
 
@@ -592,27 +695,28 @@ image maxwell_animation = anim.Filmstrip(ep_folders._join_path(ep_folders.EP_OTH
 #===========================================================================================
 # SCREEN
 #===========================================================================================
-# === Buttons ===
+#=== Buttons ===
 screen extraplus_button():
     #Displays the Extra+ button on the overlay. Handles hotkeys and button actions for opening the Extra+ menu.
     zorder 15
     style_prefix "hkb"
 
-    vbox: # Main button container
-        xpos 0.05
-        yanchor 1.0
-        ypos 50
+    if store.mas_submod_utils.current_label == "mas_piano_setupstart":
+        pass
 
-        $ buttons_text = _(store.ep_button.getDynamicButtonText())
-        if renpy.get_screen("hkb_overlay"):
-            if mas_hotkeys.talk_enabled:
-                key "a" action Function(store.ep_affection.notify_affection)
-                key "x" action Function(store.ep_button.show_menu)
-                textbutton buttons_text action Function(store.ep_button.show_menu)
-            elif mas_submod_utils.current_label == "mas_piano_setupstart":
-                text _("")
-            else:
-                textbutton buttons_text
+    elif renpy.get_screen("hkb_overlay"):
+        vbox: # Main button container
+            xpos 0.05
+            yanchor 1.0
+            ypos 50
+
+            $ buttons_text = _(store.ep_button.getDynamicButtonText())
+            textbutton buttons_text action Function(store.ep_button.show_menu) sensitive store.mas_hotkeys.talk_enabled
+
+        if store.mas_hotkeys.talk_enabled:
+            key "x" action Function(store.ep_button.show_menu)
+            key "a" action Function(store.ep_affection.notify_affection)
+
 
 screen extraplus_interactions():
     #Shows the main Extra+ interactions menu, letting the player choose between date, minigames, tools, or boop options.
@@ -625,14 +729,15 @@ screen extraplus_interactions():
 
         use extra_close_button()
         textbutton _("Dates") action Jump("extraplus_walk")
-        textbutton _("Games") action Jump("extraplus_minigames") sensitive (ep_affection.getCurrentAffection() >= 30)
+        textbutton _("Games") action Jump("extraplus_minigames") sensitive (store.ep_affection.getCurrentAffection() >= 30)
         textbutton _("Tools") action Jump("extraplus_tools")
-        textbutton _("Boop") action Jump("show_boop_screen") sensitive (ep_affection.getCurrentAffection() >= 100)
+        textbutton _("Boop") action Jump("show_boop_screen") sensitive (store.ep_affection.getCurrentAffection() >= 100)
 
-screen extra_gen_list(extra_list, extra_area, others, close=None):
+screen extra_gen_list(extra_list, extra_area, others, close=True):
     #Generates a scrollable menu from a list, used for dynamic option lists in the submod.
     zorder 50
     style_prefix "scrollable_menu"
+
     fixed:
         area extra_area
 
@@ -641,7 +746,7 @@ screen extra_gen_list(extra_list, extra_area, others, close=None):
             yanchor 0
 
             viewport:
-                id "viewport"
+                id "extra_vp"
                 yfill False
                 mousewheel True
                 vbox:
@@ -670,7 +775,7 @@ screen extra_gen_list(extra_list, extra_area, others, close=None):
 
         bar:
             style "classroom_vscrollbar"
-            value YScrollValue("viewport")
+            value YScrollValue("extra_vp")
             xalign store.mas_ui.SCROLLABLE_MENU_XALIGN
 
     if close:
@@ -688,7 +793,7 @@ screen extra_close_button(jump_action="close_extraplus"):
         key "x" action Jump(jump_action)
         textbutton _("Close") action Jump(jump_action)
 
-# === Chibis ===
+#=== Chibis ===
 screen doki_chibi_idle():
     #Displays Chibika on the screen, allowing for dragging if enabled.
     zorder 52
@@ -701,10 +806,28 @@ screen doki_chibi_idle():
                 drag_offscreen True
                 xpos persistent.chibika_drag_x
                 ypos persistent.chibika_drag_y
+
         else:
-            add "extra_chibi_base":
-                xpos ep_chibis.xpos
-                ypos ep_chibis.ypos
+            # We use a button instead of a static image
+            imagebutton:
+                idle "extra_chibi_base"
+                # hover "extra_chibi_hover" # Visual feedback (glow/change) on hover
+                xpos store.ep_chibis.xpos
+                ypos store.ep_chibis.ypos
+                action Function(store.ep_chibis.clicker) # Call the secret function
+                focus_mask True # Important: Only allows clicks on the figure, not the transparent box
+
+
+screen chibi_visual_effect(x, y):
+    zorder 60
+    
+    add "poof_effect":
+        xpos x
+        ypos y
+        xoffset -30
+        yoffset 5
+
+    timer 0.9 action Hide("chibi_visual_effect")
 
 screen sticker_customization():
     #Allows the player to customize Chibika’s appearance and behavior, including dragging, visibility, and accessories.
@@ -737,10 +860,10 @@ screen sticker_customization():
                 vbox:
                     label _("Draggable Chibi:")
                     # null height 30
-                    textbutton _("[persistent.enable_drag_chibika]") action ToggleField(store.persistent, "enable_drag_chibika")
+                    textbutton _("[persistent.enable_drag_chibika]") action ToggleField(persistent, "enable_drag_chibika")
                 vbox:
                     label _("Always on screen:")
-                    textbutton _("[persistent.hi_chibika]") action ToggleField(store.persistent, "hi_chibika")
+                    textbutton _("[persistent.hi_chibika]") action ToggleField(persistent, "hi_chibika")
                 vbox:
                     label _("Toggle Visibility:")
                     # null height 10
@@ -758,13 +881,105 @@ screen sticker_customization():
                     # null height 30
                     textbutton _("Select") action Jump("doki_change_appe")
                 vbox:
-                    label _("Head Accessories:")
-                    textbutton _("Select") action Jump("sticker_primary")
-                vbox:
-                    label _("F/B Accessories:")
-                    textbutton _("Select") action Jump("sticker_secondary")
+                    label _("Accessories:")
+                    textbutton _("Select") action Jump("chibi_accessories_menu")
 
             null height 10
+
+screen gen_accessories_twopane_screen():
+    zorder 50
+
+    # Use a screen variable to manage the current category
+    default EP_current_acc = "primary"
+
+    # Get the current accessory list and remove action from the ep_chibis store
+    python:
+        # The logic is now neatly tucked away in the ep_chibis store
+        current_accessories = store.ep_chibis.getCurrentAccessories(EP_current_acc)
+        current_remove_action = store.ep_chibis.getCurrentRemoveAction(EP_current_acc)
+
+    # Close button and return
+    vbox:
+        style_prefix "hkb"
+        xpos 0.05
+        yanchor 1.0
+        ypos 90
+
+        use extra_close_button("close_dev_extraplus")
+        textbutton _("Return") action Jump("extra_chibi_main")
+
+    # Main content area without a visible frame, like the timeline
+    hbox:
+        xalign 0.5
+        yalign 0.5
+        spacing 25
+        
+        # Left pane (categories)
+        vbox:
+            spacing 15
+            
+            label _("Categories"):
+                style "check_label"
+                xalign 0.5
+            
+            textbutton _("Head"):
+                style "twopane_scrollable_menu_special_button"
+                action Function(store.ep_chibis.set_accessory_category, "primary")
+            
+            textbutton _("Others"):
+                style "twopane_scrollable_menu_special_button"
+                action Function(store.ep_chibis.set_accessory_category, "secondary")
+
+            textbutton _("Background"):
+                style "twopane_scrollable_menu_special_button"
+                action Function(store.ep_chibis.set_accessory_category, "background")
+
+        # Right pane (accessories list)
+        frame:
+            background None
+            padding (0, 0)
+            xsize 600
+            ysize 550
+
+            vbox:
+                # --- Scrollable Area ---
+                fixed:
+                    viewport id "chibi_acs_vp":
+                        mousewheel True
+                        draggable True
+                        yfill False
+                        xsize 582 # width - scrollbar width
+                        ysize 470 # Adjusted height
+
+                        vbox:
+                            spacing 10 # Space between cards
+
+                            for item in current_accessories:
+                                textbutton item.name action Function(item) xfill True style "scrollable_menu_button"
+
+                    bar:
+                        style "classroom_vscrollbar"
+                        value YScrollValue("chibi_acs_vp")
+                        xalign 1.0
+                        yfill True
+                        xsize 18
+                        ysize 470
+
+                null height -20
+                # --- Static Remove button ---
+                textbutton current_remove_action.name action Function(current_remove_action) xfill True style "scrollable_menu_button"
+
+screen chibika_notify(message, icon):
+    zorder 100
+    style_prefix "chibika_notify"
+
+    frame at chibika_notify_appear:
+        hbox:
+            spacing 10
+            add store.ep_chibis.notify_icon.format(icon) zoom 0.5
+            text "[message]" yoffset 2
+
+    timer 4.5 action Hide("chibika_notify")
 
 # === Zoom ===
 screen extrabutton_custom_zoom():
@@ -774,15 +989,10 @@ screen extrabutton_custom_zoom():
     vbox:
         xpos 0.05
         yanchor 1.0
-        if store.mas_submod_utils.isSubmodInstalled("Noises Submod"):
-            ypos 595
-        else:
-            ypos 635
+        ypos store.ep_button.zoom_ypos
 
         if renpy.get_screen("hkb_overlay"):
-            # The button is automatically disabled (dimmed) if the 'say' dialog screen is visible.
-            # We use renpy.get_screen("say"), which is compatible with older versions of Ren'Py.
-            textbutton _("Zoom") action Show("extra_custom_zoom") sensitive not (renpy.get_screen("say") or renpy.get_screen("choice"))
+            textbutton _("Zoom") action Show("extra_custom_zoom") sensitive not (renpy.get_screen("say") or renpy.get_screen("choice") or renpy.get_screen("extra_gen_list"))
 
 screen extra_custom_zoom():
     #Provides a custom zoom slider and reset button for adjusting the game’s zoom level.
@@ -793,12 +1003,9 @@ screen extra_custom_zoom():
         background Solid("#0000007F")
 
         textbutton _("Close"):
-            if store.mas_submod_utils.isSubmodInstalled("Noises Submod"):
-                area (60, 556, 120, 35)
-            else:
-                area (60, 596, 120, 35)
+            area (60, store.ep_button.zoom_close_ypos, 120, 35)
             style "hkb_button"
-            action [SetField(ep_tools, "player_zoom", store.mas_sprites.zoom_level), Hide("extra_custom_zoom")]
+            action [SetField(store.ep_tools, "player_zoom", store.mas_sprites.zoom_level), Hide("extra_custom_zoom")]
 
         frame: # Zoom slider frame
             area (195, 450, 80, 255)
@@ -824,17 +1031,17 @@ screen shell_game_minigame():
     zorder 50
     style_prefix "hkb"
     use extra_no_click()
-    timer ep_tools.games_idle_timer action Function(store.ep_tools.show_idle_notification, context="sg") repeat True
+    timer store.ep_tools.games_idle_timer action Function(store.ep_tools.show_idle_notification, context="sg") repeat True
 
     for i in range(3):
         imagebutton:
             xanchor 0.5 yanchor 0.5
-            xpos ep_sg.cup_coordinates[i]
+            xpos store.ep_sg.cup_coordinates[i]
             ypos 250
             idle "extra_sg_cup_idle"
             hover "extra_sg_cup_hover"
             focus_mask "extra_sg_cup_hover"
-            action SGVerification(i, ep_sg.ball_position, "sg_check_label")
+            action SGVerification(i, store.ep_sg.ball_position, "sg_check_label")
     
     vbox:
         xpos 0.86
@@ -845,7 +1052,7 @@ screen shell_game_minigame():
 screen RPS_mg():
     #Shows the Rock-Paper-Scissors minigame interface, with buttons for each choice and a quit button.
     zorder 50
-    timer ep_tools.games_idle_timer action Function(store.ep_tools.show_idle_notification, context="rps") repeat True
+    timer store.ep_tools.games_idle_timer action Function(store.ep_tools.show_idle_notification, context="rps") repeat True
 
     # Monika's card back
     imagebutton idle "extra_card_back":
@@ -935,25 +1142,26 @@ screen boop_revamped():
         textbutton _("Return") action Jump("return_boop_screen")
 
 screen boop_capture_overlay(label_boop):
-
     zorder 49  # Below the UI buttons (which are at zorder 51)
-    
+
     python:
-        # NOTE: Assuming the manager is in 'store.EP_interaction_manager'
-        # and its .cz_manager is accessible
-        nose_cz = store.EP_interaction_manager.cz_manager.get( # NOQA
-            store.mas_interactions.ZONE_EXTRA_NOSE,
-            store.mas_sprites.zoom_level
+        # Define variables locally for clarity and safety
+        interaction_manager = store.EP_interaction_manager
+        nose_zone_key = store.mas_interactions.ZONE_EXTRA_NOSE
+        current_zoom = store.mas_sprites.zoom_level
+        nose_cz = interaction_manager.cz_manager.get(
+            nose_zone_key,
+            current_zoom
         )
 
+        nose_zone = None
         if nose_cz and not nose_cz.disabled:
             corners = nose_cz.corners
             if corners:
-                min_x = min(x for x, y in corners)
+                min_x = min(x for x, y in corners) # NOQA
                 min_y = min(y for x, y in corners) # NOQA
-                max_x = max(x for x, y in corners)
-                max_y = max(y for x, y in corners)
-                
+                max_x = max(x for x, y in corners) # NOQA
+                max_y = max(y for x, y in corners) # NOQA
                 nose_zone = {
                     'x': min_x,
                     'y': min_y,
@@ -968,22 +1176,16 @@ screen boop_capture_overlay(label_boop):
             ypos nose_zone['y']
             xysize (nose_zone['w'], nose_zone['h'])
             idle Solid("#00000000")  # Completely transparent
-            action Function(store.EP_interaction_manager.handle_dating_click, label_boop)
+            action Function(interaction_manager.handle_dating_click, label_boop)
 
 screen extra_boop_event(timelock, endlabel, editlabel):
     zorder 50
-    
     # Countdown timer
+    timer 15 action Function(renpy.show, "monika 2etc")
     timer timelock action Jump(endlabel)
     
     # Click capture (handles war logic automatically)
     key "mouseup_1" action Function(store.EP_interaction_manager.handle_click, button=1)
-
-screen boop_feedback_notif(msg, tag, txt_color):
-    zorder 2000
-    timer 1.3 action Hide(tag)
-    default p = renpy.get_mouse_pos()
-    text "{}".format(msg) at boop_feedback_trans pos p size 30 color txt_color outlines [ (2, "#000", 0, 0) ]
 
 screen boop_war_score_ui():
     #Displays the score counter for the boop war.
@@ -1002,9 +1204,9 @@ screen extra_dating_loop(ask, label_boop, boop_enable=False):
         use boop_capture_overlay(label_boop)
     
     vbox:
-        xpos ep_dates.xpos
+        xpos store.ep_dates.xpos
         yanchor 1.0
-        ypos ep_dates.ypos
+        ypos store.ep_dates.ypos
         
         textbutton _("Talk"):
             style "hkb_button"
@@ -1012,7 +1214,7 @@ screen extra_dating_loop(ask, label_boop, boop_enable=False):
 
 screen extra_timer_monika(time):
     #Runs a timer that sets a variable when finished, used for timed events.
-    timer time action SetField(ep_dates, "stop_snike_time", True)
+    timer time action SetField(store.ep_dates, "stop_snike_time", True)
 
 
 screen force_mouse_move():
@@ -1022,6 +1224,26 @@ screen force_mouse_move():
     timer .6 repeat True action MouseMove(x=412, y=237, duration=.3)
 
 # === Mics ===
+screen extra_feedback_notif(msg, tag, txt_color, duration=1.3, trans=boop_feedback_trans):
+    # Show a notification message at the mouse position
+    zorder 2000
+    timer duration action Hide(tag)
+    default EP_feedback_pos = (renpy.get_mouse_pos()[0] + renpy.random.randint(-30, 30), renpy.get_mouse_pos()[1] + renpy.random.randint(-30, 30))
+    
+    text "{}".format(msg) at trans pos EP_feedback_pos size 40 color txt_color outlines [ (2, "#000", 0, 0) ] font "mod_assets/font/m1_fixed.ttf"
+
+screen extra_doki_heartbeat():
+    # Show a heartbeat animation for Monika
+    zorder 2000
+    modal True
+    timer 0.9 repeat True action Function(store.ep_tools.show_doki_feedback, "*Doki*")
+
+    key "mouseup_1" action Return()
+    key "mouseup_3" action Return()
+    key "K_RETURN" action Return()
+    key "K_SPACE" action Return()
+    key "K_KP_ENTER" action Return()
+
 screen bday_oki_doki():
     #Shows a special button for Monika’s birthday event.
     zorder 150
@@ -1083,12 +1305,17 @@ screen extraplus_stats_screen():
         ymaximum 650
 
         has vbox:
-            spacing 30
+            spacing 25
             label _("Your Time with [m_name]"):
                 xalign 0.5
             vbox:
                 xfill True
-                spacing 30
+                text _("Current Visit")
+                add DynamicDisplayable(store.ep_tools.getCurrSessionD) yalign 0.5
+
+            vbox:
+                xfill True
+                spacing 25
                 python:
                     stats_data = store.ep_tools.getMasStats()
                 for stat_name, stat_value in stats_data.items():
@@ -1100,7 +1327,7 @@ screen extraplus_stats_screen():
 screen extra_timeline_screen():
     zorder 49
     
-    $ EP_timeline_data = store.ep_tools.getTimelineData()
+    default EP_timeline_data = store.ep_tools.getTimelineData()
 
     # --- Navigation Buttons (Left) ---
     vbox:
@@ -1150,7 +1377,7 @@ screen extra_timeline_screen():
                                 yalign 0.5 # This will center it in the available space
 
                         for entry in EP_timeline_data:
-                            $ date_str = ep_tools.exp_fmt_date(entry.date)
+                            $ date_str = store.ep_tools.exp_fmt_date(entry.date)
                             
                             # --- Event Card ---
                             frame:
@@ -1167,7 +1394,7 @@ screen extra_timeline_screen():
                                         spacing 10
                                         
                                         text _(entry.icon):
-                                            font ep_tools.pictograms_font
+                                            font store.ep_tools.pictograms_font
                                             size 25
                                             color "#FF69B4"
                                             yalign 0.5
@@ -1196,6 +1423,105 @@ screen extra_timeline_screen():
                     yfill True
                     xsize 18
 
+# === Fridge ===
+screen extra_fridge_magnets():
+    modal True
+    zorder 50
+    layer "master"
+
+    # We create a new instance. The manager will handle loading persistent data.
+    default EP_fridge_manager = store.ep_fridge.MagnetManager()
+    
+    # Font size
+    $ magnet_size = 70
+    
+    # Background
+    # add "extra_fm_background"
+    add EP_fridge_manager.event_handler
+    
+    # --- Drop Zones ---
+    button:
+        xysize 535, 375
+        offset 200, 20
+        background "#fff8"
+        action Function(EP_fridge_manager.put, "top")
+        
+    button:
+        xysize 535, 248
+        offset 200, 455
+        background "#fff8"
+        action Function(EP_fridge_manager.put, "bottom")
+        
+    # --- Magnet Box ---
+    button:
+        offset 870, 520 
+        add "extra_fm_box" zoom 0.70
+        background "#fff8"
+        action Function(EP_fridge_manager.take)
+
+    # --- Magnet Rendering ---
+    for i in EP_fridge_manager.top:
+        use extra_magnet_render(i, EP_fridge_manager, "top", magnet_size)
+
+    for i in EP_fridge_manager.bottom:
+        use extra_magnet_render(i, EP_fridge_manager, "bottom", magnet_size)
+
+    if EP_fridge_manager.holding:
+        use extra_magnet_render(EP_fridge_manager.holding, EP_fridge_manager, None, magnet_size)
+        timer .01 repeat True action Function(EP_fridge_manager.tick)
+
+    # Exit Button
+    vbox:
+        style_prefix "hkb"
+        xpos 0.05
+        yanchor 1.0
+        ypos 90
+        textbutton _("Clean") action Function(EP_fridge_manager.clean_magnets)
+        use extra_close_button("extra_fridge_quit")
+
+screen extra_magnet_render(item, manager, location, fsize):
+    # We calculate the dynamic colors (Day/Night) in real time
+    $ current_main_color = store.ep_fridge.getCurrentColor(item.base_color)
+    $ current_shadow_color = store.ep_fridge.getCurrentColor(item.shadow_base_color)
+
+    fixed fit_first True:
+        # --- 1. Shadow (3D Effect) ---
+        text item.letter:
+            font store.ep_fridge.EP_FM_FONT
+            size fsize
+            color current_shadow_color # Dynamic shadow
+            outlines [(2, current_shadow_color, 0, 0)]
+            at fm_text_trans(item.rotation)
+            pos item.x, item.y anchor 0.5, 0.5
+            yoffset 3 # A small offset to make the shadow look better
+        
+        # --- 2. Main Letter (Front) ---
+        if location:
+            # First, we draw the main text in its correct position
+            text item.letter:
+                font store.ep_fridge.EP_FM_FONT
+                size fsize
+                color current_main_color
+                outlines [(2, current_shadow_color, 0, 0)]
+                at fm_text_trans(item.rotation)
+                pos item.x, item.y anchor 0.5, 0.5
+            
+            # Then, we overlay a transparent button for interaction
+            button:
+                style "empty" # A style with no background or margins
+                xysize (fsize, fsize) # We make the button the size of the letter
+                pos item.x, item.y anchor 0.5, 0.5
+                action Function(manager.swap, location, item)
+        
+        else:
+            text item.letter:
+                font store.ep_fridge.EP_FM_FONT
+                size fsize
+                color current_main_color
+                outlines [(2, current_shadow_color, 0, 0)]
+                at fm_text_trans(item.rotation)
+                pos item.x, item.y anchor 0.5, 0.5
+
 screen _extra_plus_submod_settings():
     # Displays the settings pane for the Extra+ submod in the MAS settings menu.
     $ tooltip = renpy.get_screen("submods", "screens").scope["tooltip"]
@@ -1207,7 +1533,7 @@ screen _extra_plus_submod_settings():
         xmaximum 1000
 
         textbutton _("{b}Enable dynamic button text{/b}"):
-            action ToggleField(store.persistent, "EP_dynamic_button_text")
+            action ToggleField(persistent, "EP_dynamic_button_text")
             hovered tooltip.Action("If enabled, the submod button text will change based on affection, events, or time of day. If disabled, it will always say 'Extra+'.")
 
         textbutton _("{b}Check for missing files{/b}"):
@@ -1222,12 +1548,79 @@ screen _extra_plus_submod_settings():
 # TRANSFORM
 #===========================================================================================
 
+transform chibi_dissolve:
+    # Controls the fade-in and fade-out of the chibi screen.
+    on show:
+        alpha 0.0
+        linear 0.3 alpha 1.0
+    on hide:
+        linear 0.5 alpha 0.0
+
 transform boop_feedback_trans:
+    # Sparkle/shimmer effect - a beautiful flash instead of a pulsation
+    xanchor 0.5 yanchor 0.5
+    
+    # Initial setup
+    alpha 0.0
+    zoom 0.3
+    yoffset 0
+    rotate 0
+    
+    # Pop-in flash effect
     parallel:
-        ease 1.2 yoffset -150
+        # Gentle floating upward
+        easein 0.15 yoffset -15
+        easeout 1.0 yoffset -80
     parallel:
+        # Sparkle alpha - quick bright flash then graceful fade
+        linear 0.05 alpha 1.0
         pause 0.1
-        ease 1.1 alpha 0
+        linear 0.1 alpha 0.85
+        pause 0.3
+        easeout 0.6 alpha 0.0
+    parallel:
+        # Sparkle scale - quick expand with slight overshoot, then gentle settle
+        easein 0.08 zoom 1.15
+        easeout 0.12 zoom 1.0
+        pause 0.2
+        easeout 0.5 zoom 0.95
+    parallel:
+        # Subtle shimmer rotation
+        ease 0.1 rotate -3
+        ease 0.15 rotate 3
+        ease 0.2 rotate -1
+        ease 0.25 rotate 0
+
+transform doki_feedback_trans:
+    # Heartbeat pulsation effect - "lub-dub" pattern
+    xanchor 0.5 yanchor 0.5
+    alpha 1.0
+    zoom 1.0
+    
+    parallel:
+        # Gentle float upward while pulsing
+        ease 0.6 yoffset -50
+    parallel:
+        # Stay visible during heartbeats, then fade out
+        pause 0.45
+        easeout 0.15 alpha 0.0
+    parallel:
+        # Heartbeat pulse pattern: lub-dub, lub-dub
+        # First beat (lub)
+        easein 0.06 zoom 1.25
+        easeout 0.06 zoom 1.0
+        # Second beat (dub) - slightly smaller
+        pause 0.04
+        easein 0.05 zoom 1.15
+        easeout 0.07 zoom 1.0
+        # Brief rest between heartbeats
+        pause 0.12
+        # Second heartbeat cycle
+        easein 0.06 zoom 1.2
+        easeout 0.06 zoom 1.0
+        pause 0.03
+        easein 0.04 zoom 1.1
+        easeout 0.06 zoom 1.0
 
 transform hover_card:
     on idle:
@@ -1329,6 +1722,36 @@ transform score_rotate_left:
     rotate_pad True
     transform_anchor True
 
+transform fm_text_trans(r):
+    subpixel True
+    rotate_pad True 
+    rotate r
+
+transform chibika_notify_appear:
+    # Pop-in with bounce effect
+    on show:
+        alpha 0
+        zoom 0.85
+        yoffset 15
+        easein 0.35 alpha 1.0 zoom 1.05 yoffset -3
+        easeout 0.20 zoom 1.0 yoffset 0
+    on hide:
+        easein 0.35 alpha 0.5 yoffset -35
+        linear 0.30 alpha 0.0
+
+#===========================================================================================
+# STYLES
+#===========================================================================================
+
+style chibika_notify_frame is empty:
+    ypos gui.notify_ypos
+    background Frame(ep_chibis.notify_frame, gui.notify_frame_borders, tile=gui.frame_tile)
+    padding gui.notify_frame_borders.padding
+
+style chibika_notify_text is gui_text:
+    font "gui/font/Halogen.ttf"
+    size gui.notify_text_size
+
 #===========================================================================================
 # BACKGROUNG
 #===========================================================================================
@@ -1336,40 +1759,40 @@ transform score_rotate_left:
 #====Cafe
 
 #Day images
-image submod_background_cafe_day = ep_folders._join_path(ep_folders.EP_DATE_CAFE, "cafe_day.png")
-image submod_background_cafe_rain = ep_folders._join_path(ep_folders.EP_DATE_CAFE, "cafe_rain.png")
+image EP_submod_background_cafe_day = ep_folders._join_path(ep_folders.EP_DATE_CAFE, "day.png")
+image EP_submod_background_cafe_rain = ep_folders._join_path(ep_folders.EP_DATE_CAFE, "rain.png")
 
 #Night images
-image submod_background_cafe_night = ep_folders._join_path(ep_folders.EP_DATE_CAFE, "cafe-n.png")
-image submod_background_cafe_rain_night = ep_folders._join_path(ep_folders.EP_DATE_CAFE, "cafe_rain-n.png")
+image EP_submod_background_cafe_night = ep_folders._join_path(ep_folders.EP_DATE_CAFE, "n.png")
+image EP_submod_background_cafe_rain_night = ep_folders._join_path(ep_folders.EP_DATE_CAFE, "rain-n.png")
 
 #Sunset images
-image submod_background_cafe_ss = ep_folders._join_path(ep_folders.EP_DATE_CAFE, "cafe-ss.png")
-image submod_background_cafe_rain_ss = ep_folders._join_path(ep_folders.EP_DATE_CAFE, "cafe_rain-ss.png")
+image EP_submod_background_cafe_ss = ep_folders._join_path(ep_folders.EP_DATE_CAFE, "ss.png")
+image EP_submod_background_cafe_rain_ss = ep_folders._join_path(ep_folders.EP_DATE_CAFE, "rain-ss.png")
 
 init -1 python:
-    submod_background_cafe = MASFilterableBackground(
-        "submod_background_cafe",
+    EP_background_cafe = MASFilterableBackground(
+        "EP_background_cafe",
         "Cafe (Extra+)",
 
         MASFilterWeatherMap(
             day=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_cafe_day",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_cafe_rain",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_cafe_rain",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_cafe_rain",
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_cafe_day",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_cafe_rain",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_cafe_rain",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_cafe_rain",
             }),
             night=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_cafe_night",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_cafe_rain_night",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_cafe_rain_night",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_cafe_rain_night",
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_cafe_night",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_cafe_rain_night",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_cafe_rain_night",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_cafe_rain_night",
             }),
             sunset=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_cafe_ss",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_cafe_rain_ss",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_cafe_rain_ss",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_cafe_rain_ss",
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_cafe_ss",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_cafe_rain_ss",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_cafe_rain_ss",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_cafe_rain_ss",
             }),
         ),
 
@@ -1460,40 +1883,40 @@ init -2 python in mas_background:
 #====Restaurant (Updated paths)
 
 #Day images
-image submod_background_extraplus_restaurant_day = ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "restaurant_day.png")
-image submod_background_extraplus_restaurant_rain = ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "restaurant_rain.png")
+image EP_submod_background_restaurant_day = ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "day.png")
+image EP_submod_background_restaurant_rain = ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "rain.png")
 
 #Night images
-image submod_background_extraplus_restaurant_night = ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "restaurant-n.png")
-image submod_background_extraplus_restaurant_rain_night = ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "restaurant_rain-n.png")
+image EP_submod_background_restaurant_night = ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "n.png")
+image EP_submod_background_restaurant_rain_night = ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "rain-n.png")
 
 #Sunset images
-image submod_background_extraplus_restaurant_ss = ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "restaurant-ss.png")
-image submod_background_extraplus_restaurant_rain_ss = ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "restaurant_rain-ss.png")
+image EP_submod_background_restaurant_ss = ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "ss.png")
+image EP_submod_background_restaurant_rain_ss = ep_folders._join_path(ep_folders.EP_DATE_RESTAURANT, "rain-ss.png")
 
 init -1 python:
-    submod_background_restaurant = MASFilterableBackground(
-        "submod_background_restaurant",
+    EP_background_restaurant = MASFilterableBackground(
+        "EP_background_restaurant",
         "Restaurant (Extra+)",
 
         MASFilterWeatherMap(
             day=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extraplus_restaurant_day",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extraplus_restaurant_rain",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extraplus_restaurant_rain",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extraplus_restaurant_rain",
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_restaurant_day",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_restaurant_rain",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_restaurant_rain",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_restaurant_rain",
             }),
             night=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extraplus_restaurant_night",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extraplus_restaurant_rain_night",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extraplus_restaurant_rain_night",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extraplus_restaurant_rain_night",
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_restaurant_night",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_restaurant_rain_night",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_restaurant_rain_night",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_restaurant_rain_night",
             }),
             sunset=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extraplus_restaurant_ss",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extraplus_restaurant_rain_ss",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extraplus_restaurant_rain_ss",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extraplus_restaurant_rain_ss",
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_restaurant_ss",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_restaurant_rain_ss",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_restaurant_rain_ss",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_restaurant_rain_ss",
             }),
         ),
 
@@ -1585,40 +2008,40 @@ init -2 python in mas_background:
 #====Pool (Updated paths)
 
 #Day images
-image submod_background_extrapool_day = ep_folders._join_path(ep_folders.EP_DATE_POOL, "pool_day.png")
-image submod_background_extrapool_rain = ep_folders._join_path(ep_folders.EP_DATE_POOL, "pool_rain.png")
+image EP_submod_background_pool_day = ep_folders._join_path(ep_folders.EP_DATE_POOL, "day.png")
+image EP_submod_background_pool_rain = ep_folders._join_path(ep_folders.EP_DATE_POOL, "rain.png")
 
 #Night images
-image submod_background_extrapool_night = ep_folders._join_path(ep_folders.EP_DATE_POOL, "pool-n.png")
-image submod_background_extrapool_rain_night = ep_folders._join_path(ep_folders.EP_DATE_POOL, "pool_rain-n.png")
+image EP_submod_background_pool_night = ep_folders._join_path(ep_folders.EP_DATE_POOL, "n.png")
+image EP_submod_background_pool_rain_night = ep_folders._join_path(ep_folders.EP_DATE_POOL, "rain-n.png")
 
 #Sunset images
-image submod_background_extrapool_ss = ep_folders._join_path(ep_folders.EP_DATE_POOL, "pool-ss.png")
-image submod_background_extrapool_rain_ss = ep_folders._join_path(ep_folders.EP_DATE_POOL, "pool_rain-ss.png")
+image EP_submod_background_pool_ss = ep_folders._join_path(ep_folders.EP_DATE_POOL, "ss.png")
+image EP_submod_background_pool_rain_ss = ep_folders._join_path(ep_folders.EP_DATE_POOL, "rain-ss.png")
 
 init -1 python:
-    submod_background_extrapool = MASFilterableBackground(
-        "submod_background_extrapool",
+    EP_background_extrapool = MASFilterableBackground(
+        "EP_background_extrapool",
         "Pool (Extra+)",
 
         MASFilterWeatherMap(
             day=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extrapool_day",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extrapool_rain",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extrapool_rain",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extrapool_rain",
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_pool_day",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_pool_rain",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_pool_rain",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_pool_rain",
             }),
             night=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extrapool_night",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extrapool_rain_night",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extrapool_rain_night",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extrapool_rain_night",
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_pool_night",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_pool_rain_night",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_pool_rain_night",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_pool_rain_night",
             }),
             sunset=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extrapool_ss",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extrapool_rain_ss",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extrapool_rain_ss",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extrapool_rain_ss",
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_pool_ss",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_pool_rain_ss",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_pool_rain_ss",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_pool_rain_ss",
             }),
         ),
 
@@ -1709,40 +2132,40 @@ init -2 python in mas_background:
 #====Library (Updated paths)
 
 #Day images
-image submod_background_extralibrary_day = ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "library_day.png")
-image submod_background_extralibrary_rain = ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "library_rain.png")
+image EP_submod_background_library_day = ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "day.png")
+image EP_submod_background_library_rain = ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "rain.png")
 
 #Night images
-image submod_background_extralibrary_night = ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "library-n.png")
-image submod_background_extralibrary_rain_night = ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "library_rain-n.png")
+image EP_submod_background_library_night = ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "n.png")
+image EP_submod_background_library_rain_night = ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "rain-n.png")
 
 #Sunset images
-image submod_background_extralibrary_ss = ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "library-ss.png")
-image submod_background_extralibrary_rain_ss = ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "library_rain-ss.png")
+image EP_submod_background_library_ss = ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "ss.png")
+image EP_submod_background_library_rain_ss = ep_folders._join_path(ep_folders.EP_DATE_LIBRARY, "rain-ss.png")
 
 init -1 python:
-    submod_background_extralibrary = MASFilterableBackground(
-        "submod_background_extralibrary",
+    EP_background_extralibrary = MASFilterableBackground(
+        "EP_background_extralibrary",
         "Library (Extra+)",
 
         MASFilterWeatherMap(
             day=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extralibrary_day",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extralibrary_rain",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extralibrary_rain",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extralibrary_rain",
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_library_day",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_library_rain",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_library_rain",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_library_rain",
             }),
             night=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extralibrary_night",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extralibrary_rain_night",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extralibrary_rain_night",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extralibrary_rain_night",
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_library_night",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_library_rain_night",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_library_rain_night",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_library_rain_night",
             }),
             sunset=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extralibrary_ss",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extralibrary_rain_ss",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extralibrary_rain_ss",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extralibrary_rain_ss",
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_library_ss",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_library_rain_ss",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_library_rain_ss",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_library_rain_ss",
             }),
         ),
 
@@ -1833,40 +2256,40 @@ init -2 python in mas_background:
 #====Arcade (Updated paths)
 
 #Day images
-image submod_background_extra_arcade_day = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "arcade_day.png")
-image submod_background_extra_arcade_rain = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "arcade_rain.png")
+image EP_submod_background_arcade_day = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "day.png")
+image EP_submod_background_arcade_rain = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "rain.png")
 
 #Night images
-image submod_background_extra_arcade_night = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "arcade-n.png")
-image submod_background_extra_arcade_rain_night = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "arcade_rain-n.png")
+image EP_submod_background_arcade_night = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "n.png")
+image EP_submod_background_arcade_rain_night = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "rain-n.png")
 
 #Sunset images
-image submod_background_extra_arcade_ss = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "arcade-ss.png")
-image submod_background_extra_arcade_rain_ss = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "arcade_rain-ss.png")
+image EP_submod_background_arcade_ss = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "ss.png")
+image EP_submod_background_arcade_rain_ss = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "rain-ss.png")
 
 init -1 python:
-    submod_background_extra_arcade = MASFilterableBackground(
-        "submod_background_extra_arcade",
+    EP_background_extra_arcade = MASFilterableBackground(
+        "EP_background_extra_arcade",
         "Arcade (Extra+)",
 
         MASFilterWeatherMap(
             day=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extra_arcade_day",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extra_arcade_rain",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extra_arcade_rain",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extra_arcade_rain",
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_arcade_day",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_arcade_rain",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_arcade_rain",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_arcade_rain",
             }),
             night=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extra_arcade_night",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extra_arcade_rain_night",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extra_arcade_rain_night",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extra_arcade_rain_night",
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_arcade_night",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_arcade_rain_night",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_arcade_rain_night",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_arcade_rain_night",
             }),
             sunset=MASWeatherMap({
-                store.mas_weather.PRECIP_TYPE_DEF: "submod_background_extra_arcade_ss",
-                store.mas_weather.PRECIP_TYPE_RAIN: "submod_background_extra_arcade_rain_ss",
-                store.mas_weather.PRECIP_TYPE_OVERCAST: "submod_background_extra_arcade_rain_ss",
-                store.mas_weather.PRECIP_TYPE_SNOW: "submod_background_extra_arcade_rain_ss",
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_arcade_ss",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_arcade_rain_ss",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_arcade_rain_ss",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_arcade_rain_ss",
             }),
         ),
 

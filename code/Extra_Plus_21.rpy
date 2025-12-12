@@ -13,20 +13,21 @@ init -5 python in ep_bj:
     player_stand = False
     monika_stand = False
     game_quit = False
-    comment = renpy.random.choice([
+    comment = _("Playing it safe? I see. Let's see if it pays off.")
+    comments_list = [
         _("Playing it safe? I see. My turn, then!"),
-        _("You're confident with your hand. Let's see if it pays off."),
-        _("Alright, you're standing. Let's see how I do against your score."),
+        _("You're confident with your hand. Let's see if you're right."),
+        _("Alright, you're standing. Let's see how I measure up."),
         _("Okay, locking in your score. Here I go!"),
-        _("Standing with that hand? You must be feeling lucky. Let's see if your luck holds out!"),
+        _("Standing with that hand? You must be feeling lucky!"),
         _("You think that's enough to beat me? We'll see about that! Ehehe~"),
-        _("Stopping there? You're either very brave or very smart. Time for me to find out which!"),
-        _("Putting the pressure on me, huh? I like a good challenge!"),
-        _("A strategic choice. You're setting the bar for me to clear."),
+        _("Stopping there? You're either very brave or very smart. Time to find out which!"),
+        _("Putting the pressure on me, huh? I love a good challenge!"),
+        _("A strategic choice. You're setting the bar for me."),
         _("Okay, you're holding. That gives me a target to aim for."),
-        _("Alright, you're all set. I hope you've got a great score!"),
+        _("Alright, you're all set. I hope you've got a good score!"),
         _("You've made your move. Let's see what the deck has in store for me!")
-    ])
+    ]
 
     def getCardImage(suit, value):
         """
@@ -48,12 +49,10 @@ init python in ep_bj:
         def __init__(self, suit, value):
             self.suit = suit
             self.value = value
-            # self.image = "card {} {}".format(self.suit, self.value)
             self._image = None
 
         @property
         def image(self):
-            """Genera la imagen solo cuando se solicita"""
             if self._image is None:
                 self._image = getCardImage(self.suit, self.value)
             return self._image
@@ -127,8 +126,8 @@ screen blackjack_ui:
     use blackjack_stats()
     add "bj_name_plate" pos (548, 33) anchor (0, 0) zoom 0.7
     add "bj_name_plate" pos (548, 375) anchor (0, 0) zoom 0.7
-    if ep_bj.current_turn == "player":
-        timer ep_tools.games_idle_timer action Function(store.ep_tools.show_idle_notification, context="bj") repeat True
+    if store.ep_bj.current_turn == "player":
+        timer store.ep_tools.games_idle_timer action Function(store.ep_tools.show_idle_notification, context="bj") repeat True
 
     fixed:
         xalign 0.5 ypos 0.05
@@ -150,9 +149,9 @@ screen blackjack_monika():
             label _("Busted!") xalign 0.5
         elif minigame_player.total > 21:
             label _("Sorry~") xalign 0.5
-        elif ep_bj.game_quit:
+        elif store.ep_bj.game_quit:
             label _("End") xalign 0.5
-        elif ep_bj.current_turn == "monika":
+        elif store.ep_bj.current_turn == "monika":
             label _("My Turn~") xalign 0.5
         elif not all(minigame_monika.revealed):
             label _("Waiting...") xalign 0.5
@@ -178,14 +177,14 @@ screen blackjack_player():
         spacing 15
         if minigame_player.total > 21:
             label _("Busted!") xalign 0.5
-        elif ep_bj.game_quit:
+        elif store.ep_bj.game_quit:
             label _("End") xalign 0.5
-        elif ep_bj.current_turn == "player":
+        elif store.ep_bj.current_turn == "player":
             if minigame_player.total >= 17 and minigame_player.total < 21:
                 label _("Careful!") xalign 0.5
             else:
                 label _("Your Turn") xalign 0.5
-        elif ep_bj.player_stand:
+        elif store.ep_bj.player_stand:
             label _("Standing") xalign 0.5
         else:
             label _("Done") xalign 0.5
@@ -203,44 +202,48 @@ screen blackjack_player():
 screen blackjack_stats():
     style_prefix "hkb"
     add "bj_notescore" pos (5, 350) anchor (0, 0) zoom 0.6 at score_rotate_left
-    text _("[m_name]: [ep_bj.monika_wins]") style "monika_text" size 25 pos (80, 380) anchor (0, 0.5) at score_rotate_left
-    text _("[player]: [ep_bj.player_wins]") style "monika_text" size 25 pos (100, 420) anchor (0, 0.5) at score_rotate_left
+    text _("[m_name]: [store.ep_bj.monika_wins]") style "monika_text" size 25 pos (80, 380) anchor (0, 0.5) at score_rotate_left
+    text _("[player]: [store.ep_bj.player_wins]") style "monika_text" size 25 pos (100, 420) anchor (0, 0.5) at score_rotate_left
     vbox:
         xalign 0.950
         ypos 0.450
         textbutton _("Hit"):
-            action If(ep_bj.current_turn == "player" and len(minigame_player.hand) < 5, Return("hit"))
+            action If(store.ep_bj.current_turn == "player" and len(minigame_player.hand) < 5, Return("hit"))
         textbutton _("Stand"):
-            action If(ep_bj.current_turn == "player", Return("stand"))
+            action If(store.ep_bj.current_turn == "player", Return("stand"))
         textbutton _("Quit"):
-            action If(ep_bj.current_turn == "player", Return("quit"))
+            action If(store.ep_bj.current_turn == "player", Return("quit"))
 
 label blackjack_start:
     show monika 1hub at t11
     if not renpy.seen_label("bj_game_loop"):
-        m "Welcome to Blackjack, [player]! Ready to test your luck and skills?"
+        m "Welcome to our Blackjack table, [player]!"
+        m 3eub "Ready to test your luck?"
         m 3eub "Remember, the goal is to get as close to 21 as possible without going over."
-        m 3tua "Don't worry, I'll explain everything as we play. Have fun and good luck!"
+        m 3tua "Let's see if Lady Luck is on your side today. Have fun!"
     else:
         # Previous game was a tie (both had at least one win and tied)
         if persistent.blackjack_win_game[2]:
-            m 2sfa "We're tied so far! Let's see who comes out on top this time, [player]."
-            m 2stb "Are you ready to break the tie? Let's play!"
+            m 2sfa "We're tied so far!"
+            m 2stb "Let's see who comes out on top this time, [player]."
+            m "Are you ready to break the tie?"
         # Player won last session
         elif persistent.blackjack_win_game[0]:
-            m 5tub "You're the reigning champion, [player]! Let's see if you can keep your winning streak."
-            m 5tua "I'm going to give it my all this round!"
+            m 5tub "You're the reigning champion, [player]!"
+            m 5tua "Let's see if you can keep your winning streak alive."
+            m "I'm going to give it my all this round!"
         # Monika won last session
         elif persistent.blackjack_win_game[1]:
             m 1tub "I'm on a winning streak, but I know you'll try your best to take the crown, [player]!"
             m 1eub "Let's see if you can beat me this time!"
         # Didn't play last time (both were 0-0)
         elif persistent.blackjack_win_game == [False, False, False]:
-            m 1wub "We didn't get to play last time. Let's start a new game now!"
-            m 1hub "I'm excited to see how you do, [player]!"
+            m 1wub "We didn't get to play last time."
+            m 1hub "Let's start a new game now! I'm excited to see how you do."
         # Default generic greeting
         else:
-            m 1eta "Back for more Blackjack, [player]? I'm always up for a game!"
+            m 1eta "Back for more Blackjack, [player]?"
+            m "I'm always up for a game with you!"
 
     scene bg desk_21 onlayer master zorder 0
     window hide
@@ -285,12 +288,14 @@ label blackjack_start:
                             $ ep_bj.player_stand = True
                             $ ep_bj.current_turn = "monika"
                             python:
+                                ep_bj.comment = renpy.random.choice(ep_bj.comments_list)
                                 renpy.say(m, ep_bj.comment)
                         
                     elif bj_result == "stand":
                         $ ep_bj.player_stand = True
                         $ ep_bj.current_turn = "monika"
                         python:
+                            ep_bj.comment = renpy.random.choice(ep_bj.comments_list)
                             renpy.say(m, ep_bj.comment)
 
                     elif bj_result == "quit":
@@ -320,38 +325,45 @@ label blackjack_results:
     
     # Natural blackjack (21 with 2 cards) - highest priority
     if player_total == 21 and len(minigame_player.hand) == 2 and not (monika_total == 21 and len(minigame_monika.hand) == 2):
-        m "A perfect 21! You've got a real talent for this, [player]!"
+        m "Blackjack! Wow, you've got a real talent for this, [player]!"
         $ ep_bj.player_wins += 1
     
     elif monika_total == 21 and len(minigame_monika.hand) == 2 and not (player_total == 21 and len(minigame_player.hand) == 2):
-        m "Blackjack! Looks like I got lucky this time. Ehehe~"
+        m "Blackjack!"
+        m "Looks like I got lucky this time. Ehehe~"
         $ ep_bj.monika_wins += 1
     
     # Both have natural blackjack
     elif player_total == 21 and len(minigame_player.hand) == 2 and monika_total == 21 and len(minigame_monika.hand) == 2:
-        m "We both got natural blackjacks! That's a push, [player]."
+        m "We both got natural Blackjacks!"
+        m "That's a push, [player]. Amazing!"
     
     # If the player busts, they lose IMMEDIATELY (regardless of whether Monika also busts)
     elif player_total > 21:
-        m "Oh, you went over. That's a tough break. Don't worry, it happens!"
+        m "Oh, you went over."
+        m "That's a tough break. Don't worry, it happens!"
         $ ep_bj.monika_wins += 1
     
     # If Monika busts but the player doesn't, the player wins
     elif monika_total > 21:
-        m "Ah, I busted. Looks like this round goes to you. Well played!"
+        m "Ah, I went over 21."
+        m "Looks like this round is yours. Well played!"
         $ ep_bj.player_wins += 1
     
     # Tie (same score without busting)
     elif player_total == monika_total:
-        m "It's a push! We have the exact same score. We really are in sync, aren't we?"
+        m "It's a push!"
+        m "We have the exact same score. We really are in sync, aren't we?"
     
     # Normal comparison (both ≤ 21)
     else:
         if player_total > monika_total:
-            m "You win this round! Nice job staying cool under pressure."
+            m "You win this round!"
+            m "Nice job staying cool under pressure."
             $ ep_bj.player_wins += 1
         else:
-            m "Looks like my hand was just a little bit better. I win this one!"
+            m "Looks like my hand was just a little bit better."
+            m "I win this one!"
             $ ep_bj.monika_wins += 1
     
     window hide
@@ -363,20 +375,24 @@ label BJ_quit_game:
     $ ep_bj.game_quit = True
     $ ep_bj.current_turn = "monika"
     if ep_bj.player_wins > ep_bj.monika_wins:
-        m "You finished way ahead! I'm impressed, you're a natural at this."
-        m "Thanks for playing with me, I had a lot of fun. Let's do this again soon!"
+        m "You finished ahead! I'm impressed, you're a natural at this."
+        m "Thanks for playing with me, I had a lot of fun."
+        m "Let's do this again soon!"
         $ persistent.blackjack_win_game[0] = True
     elif ep_bj.player_wins < ep_bj.monika_wins:
         m "I ended up with more wins, but you put up a great fight!"
-        m "I'm sure you'll beat me next time. Thanks for playing with me, [player]!"
+        m "I'm sure you'll beat me next time."
+        m "Thanks for playing with me, [player]!"
         $ persistent.blackjack_win_game[1] = True
     elif ep_bj.player_wins == ep_bj.monika_wins and ep_bj.player_wins > 0:
-        m "Wow, we ended with a perfect tie. It seems we're evenly matched!"
-        m "That was a lot of fun. We'll have to play again sometime to find the true winner~"
+        m "Wow, a perfect tie. It seems we're evenly matched!"
+        m "That was a lot of fun."
+        m "We'll have to play again sometime to find the true winner~"
         $ persistent.blackjack_win_game[2] = True
     else:
         m "Oh, are you leaving already?"
-        m "But I understand if you're not in the mood right now. We can always play another time!"
+        m "But I understand if you're not in the mood right now."
+        m "We can always play another time!"
         $ persistent.blackjack_win_game = [False, False, False]
 
     $ enable_esc()

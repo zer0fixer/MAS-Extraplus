@@ -23,7 +23,7 @@ label close_dev_extraplus:
     return
 
 label show_boop_screen:
-    show monika staticpose
+    show monika staticpose at t11
     call screen boop_revamped
     return
 
@@ -53,17 +53,17 @@ label hide_images_rps:
     return
 
 label extra_restore_bg(label="ch30_visual_skip"):
-    python:
-        store.ep_tools.manage_date_location(locate=False)
-        store.ep_button.hide_zoom_button()
-        store.HKBHideButtons()
     hide monika
+    python:
+        store.ep_tools.manage_date_location(False)
+        store.ep_button.hide_zoom_button()
+        HKBHideButtons()
     scene black
     with dissolve
     pause 2.0
     call spaceroom(scene_change=True)
     python:
-        store.HKBShowButtons()
+        HKBShowButtons()
         renpy.jump(label)
     return
 
@@ -85,19 +85,19 @@ label extra_location_init(bg, target_label, show_monika=True):
 # Dating logic
 #===========================================================================================
 label extra_cafe_init:
-    call extra_location_init(submod_background_cafe, "extra_cafe_cakes", True)
+    call extra_location_init(EP_background_cafe, "extra_cafe_cakes", True)
 
 label extra_restaurant_init:
-    call extra_location_init(submod_background_restaurant, "extra_restaurant_cakes", True)
+    call extra_location_init(EP_background_restaurant, "extra_restaurant_cakes", True)
 
 label ExtraPool_init:
-    call extra_location_init(submod_background_extrapool, "to_pool_loop", False)
+    call extra_location_init(EP_background_extrapool, "to_pool_loop", False)
     return
 
 label extra_cafe_leave:
     hide screen extra_timer_monika
     show monika 1hua at t11
-    m 1eta "Oh, you want us to go back?"
+    m 1eta "Oh, are we heading back?"
     m 1eub "Sounds good to me!"
     m 3hua "But before we go..."
     $ ep_dates.stop_snike_time = False
@@ -106,7 +106,7 @@ label extra_cafe_leave:
 label extra_restaurant_leave:
     hide screen extra_timer_monika
     show monika 1hua at t11
-    m 1eta "Oh,{w=0.3} you're ready for us to leave?"
+    m 1eta "Oh, are you ready to leave?"
     m 1eub "Sounds good to me!"
     m 3hua "But before we go..."
     $ ep_dates.stop_snike_time = False
@@ -114,6 +114,7 @@ label extra_restaurant_leave:
 
 label monika_boopcafe:
     show monika staticpose at t11
+    $ store.ep_tools.show_boop_feedback("Boop!")
     if monika_chr.is_wearing_acs(EP_acs_chocolatecake) or monika_chr.is_wearing_acs(EP_acs_fruitcake):
         m 1ttp "...?"
         m 1eka "Hey, I'm enjoying my dessert."
@@ -125,6 +126,7 @@ label monika_boopcafe:
 
 label monika_booprestaurant:
     show monika staticpose at t11
+    $ store.ep_tools.show_boop_feedback("Boop!")
     if monika_chr.is_wearing_acs(EP_acs_pasta) or monika_chr.is_wearing_acs(EP_acs_pancakes) or monika_chr.is_wearing_acs(EP_acs_waffles) or monika_chr.is_wearing_acs(EP_acs_icecream) or monika_chr.is_wearing_acs(EP_acs_pudding):
         if mas_isMoniLove():
             m "...!"
@@ -158,12 +160,10 @@ label to_restaurant_loop:
         hide screen extra_timer_monika
         jump monika_no_food
 
-    # NOTE: Boop during dates is disabled for now.
     call screen extra_dating_loop("restaurant_talk", "monika_booprestaurant", boop_enable=False)
     return
 
 label to_pool_loop:
-    # show monika staticpose at t11
     show monika idle at t11_float
 
     call screen extra_dating_loop("ExtraPool_interactions", "", boop_enable=False)
@@ -188,12 +188,13 @@ label monika_no_dessert:
             monika_chr.remove_acs(EP_acs_chocolatecake)
             monika_chr.wear_acs(EP_acs_emptyplate)
         m 1hua "Wow, I finished my chocolate cake."
-        m 1sua "It tasted so sweet~"
+        m 1sua "It was so sweet~"
     if monika_chr.is_wearing_acs(EP_acs_coffeecup):
         python:
             monika_chr.remove_acs(EP_acs_coffeecup)
             monika_chr.wear_acs(EP_acs_emptycup)
-        m 3dub "Also, this coffee was also good."
+        m 3dub "The coffee was really good, too."
+    
     if ep_dates.dessert_player == True:
         m 1etb "By the way, have you finished your dessert yet?{nw}"
         $ _history_list.pop()
@@ -203,12 +204,12 @@ label monika_no_dessert:
                 m 1hubsa "Ehehe~"
                 m 1hubsb "I hope you enjoyed it!"
             "Not yet":
-                m 1eubsa "Don't worry, eat slowly."
-                m 1eubsb "I wait for you patiently~"
+                m 1eubsa "Don't worry, take your time."
+                m 1eubsb "I'll wait for you patiently~"
     else:
-        m 1ekc "You told me not to worry."
-        m 1ekb "But, I guess you at least have a cup of coffee."
-    m 1hua "Let me know if you want to come back again."
+        m 1ekc "You told me not to worry about you having a treat..."
+        m 1ekb "But I hope you at least have a cup of coffee with you."
+        m 1hua "Let me know if you want to come back again."
     jump to_cafe_loop
     return
 
@@ -345,8 +346,8 @@ label extraplus_walk:
     show monika idle at t21
     python:
         ep_tools.walk_menu = [
-            (_("Cafe"), 'go_to_cafe'),
-            (_("Restaurant"), 'go_to_restaurant'),
+            (_("Cafe"), "go_to_cafe"),
+            (_("Restaurant"), "go_to_restaurant"),
             (_("Pool"), "go_to_pool"),
             (_("Library"), "generic_date_dev"),
             (_("Arcade"), "generic_date_dev")
@@ -354,25 +355,26 @@ label extraplus_walk:
 
         m_talk = renpy.substitute(renpy.random.choice(ep_dialogues._dates))
         renpy.say(m, m_talk, interact=False)
-        items = [(_("Nevermind"), 'screen_extraplus', 20)]
-    call screen extra_gen_list(ep_tools.walk_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+        items = [(_("Nevermind"), "screen_extraplus", 20)]
+    call screen extra_gen_list(ep_tools.walk_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
     return
 
 label extraplus_minigames:
     show monika idle at t21
     python:
         ep_tools.minigames_menu = [
-            (_("Shell Game"), 'minigame_sg'),
-            (_("Rock Paper Scissors"), 'minigame_rps'),
-            (_("Tic Tac Toe"), 'minigame_ttt'),
-            (_("Blackjack (21)"), 'blackjack_start')
+            (_("Shell Game"), "minigame_sg"),
+            (_("Rock Paper Scissors"), "minigame_rps"),
+            (_("Tic Tac Toe"), "minigame_ttt"),
+            (_("Blackjack (21)"), "blackjack_start"),
+            (_("Fridge Magnets"), "extra_fridge_magnets_game")
         ]
         
         m_talk = renpy.substitute(renpy.random.choice(ep_dialogues._minigames))
         renpy.say(m, m_talk, interact=False)
-        items = [(_("Nevermind"), 'screen_extraplus', 20)]
+        items = [(_("Nevermind"), "screen_extraplus", 20)]
     
-    call screen extra_gen_list(ep_tools.minigames_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+    call screen extra_gen_list(ep_tools.minigames_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
     return
 
 label extraplus_tools:
@@ -380,63 +382,66 @@ label extraplus_tools:
     python:
         store.ep_tools.player_zoom = store.mas_sprites.zoom_level
         ep_tools.tools_menu = [
-            (_("View [m_name]'s Affection"), 'extra_aff_log'),
-            (_("Your MAS Journey"), 'extra_show_stats'),
+            (_("View [m_name]'s Affection"), "extra_aff_log"),
+            (_("Your MAS Journey"), "extra_show_stats"),
             (_("Their story together"), "extra_show_timeline"),
-            (_("Create a gift for [m_name]"), 'plus_make_gift'),
-            (_("Change the window's title"), 'extra_window_title'),
-            (_("Hi [player]!"), 'extra_dev_mode')
-
+            (_("Create a gift for [m_name]"), "plus_make_gift"),
+            (_("Change the window's title"), "extra_window_title"),
+            (_("Hi, [player]!"), "extra_chibi_main")
         ]
 
         items = [
-            (_("Misc"), 'extra_misc_tools', 20),
-            (_("Nevermind"), 'screen_extraplus', 0)
+            (_("Misc"), "extra_misc_tools", 20),
+            (_("Nevermind"), "screen_extraplus", 0)
         ]
-    call screen extra_gen_list(ep_tools.tools_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=True)
+    call screen extra_gen_list(ep_tools.tools_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items)
     return
 
 label cafe_talk:
     show monika staticpose at t21
     python:
         cafe_menu = [
-            (_("How are you today?"), 'extra_talk_feel'),
-            (_("What's your greatest ambition?"), 'extra_talk_ambition'),
-            (_("Our communication is very limited, don't you think?"), 'extra_talk_you'),
-            (_("How do you see us in 10 years?"), 'extra_talk_teen'),
-            (_("What is your best memory that you currently have?"), 'extra_talk_memory'),
-            (_("Do you have any phobia?"), 'extra_talk_phobia')
+            (_("How are you today?"), "extra_talk_feel"),
+            (_("What's your greatest ambition?"), "extra_talk_ambition"),
+            (_("Our communication is very limited, don't you think?"), "extra_talk_you"),
+            (_("How do you see us in 10 years?"), "extra_talk_teen"),
+            (_("What is your best memory that you currently have?"), "extra_talk_memory"),
+            (_("Do you have any phobia?"), "extra_talk_phobia"),
+            (_("Let's people-watch"), "extra_talk_people_watching"),
+            (_("A quiet moment"), "extra_talk_silence"),
+            (_("Holding your hand..."), "extra_talk_hand_holding"),
+            (_("Something sweet..."), "extra_talk_sweet_tooth")
         ]
 
         items = [
-            (_("Can we leave?"), 'extra_cafe_leave', 20),
-            (_("Nevermind"), 'to_cafe_loop', 0)
+            (_("Can we leave?"), "extra_cafe_leave", 20),
+            (_("Nevermind"), "to_cafe_loop", 0)
         ]
-    call screen extra_gen_list(cafe_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=False)
+    call screen extra_gen_list(cafe_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, False)
     return
 
 label restaurant_talk:
     show monika staticpose at t21
     python:
         restaurant_menu = [
-            (_("How are you doing, [m_name]?"), 'extra_talk_doing'),
-            (_("If you could live anywhere, where would it be?"), 'extra_talk_live'),
-            (_("What would you change about yourself if you could?"), 'extra_talk_change'),
-            (_("If you were a super-hero, what powers would you have?"), 'extra_talk_superhero'),
-            (_("Do you have a life motto?"), 'extra_talk_motto'),
-            (_("Aside from necessities, what's the one thing you couldn't go a day without?"), 'extra_talk_without'),
-            (_("Is your glass half full or half empty?"), 'extra_talk_glass'),
-            (_("What annoys you most?"), 'extra_talk_annoy'),
-            (_("Describe yourself in three words."), 'extra_talk_3words'),
-            (_("What do you think is the first thing to pop into everyone's minds when they think about you?"), 'extra_talk_pop'),
-            (_("If you were an animal, what animal would you be?"), 'extra_talk_animal'),
+            (_("How are you doing, [m_name]?"), "extra_talk_doing"),
+            (_("If you could live anywhere, where would it be?"), "extra_talk_live"),
+            (_("What would you change about yourself if you could?"), "extra_talk_change"),
+            (_("If you were a super-hero, what powers would you have?"), "extra_talk_superhero"),
+            (_("Do you have a life motto?"), "extra_talk_motto"),
+            (_("Aside from necessities, what's the one thing you couldn't go a day without?"), "extra_talk_without"),
+            (_("Is your glass half full or half empty?"), "extra_talk_glass"),
+            (_("What annoys you most?"), "extra_talk_annoy"),
+            (_("Describe yourself in three words."), "extra_talk_3words"),
+            (_("What do you think is the first thing to pop into everyone's minds when they think about you?"), "extra_talk_pop"),
+            (_("If you were an animal, what animal would you be?"), "extra_talk_animal"),
         ]
 
         items = [
-            (_("Can we leave?"), 'extra_restaurant_leave', 20),
-            (_("Nevermind"), 'to_restaurant_loop', 0)
+            (_("Can we leave?"), "extra_restaurant_leave", 20),
+            (_("Nevermind"), "to_restaurant_loop", 0)
         ]
-    call screen extra_gen_list(restaurant_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=False)
+    call screen extra_gen_list(restaurant_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, False)
     return
 
 label ExtraPool_interactions:
@@ -444,16 +449,16 @@ label ExtraPool_interactions:
 
     python:
         pool_menu = [
-            (_("What do you think of the water?"), 'extra_pool_talk_water'),
-            (_("Do you like to swim?"), 'extra_pool_talk_swim'),
-            (_("This is really relaxing."), 'extra_pool_talk_relax'),
+            (_("What do you think of the water?"), "extra_pool_talk_water"),
+            (_("Do you like to swim?"), "extra_pool_talk_swim"),
+            (_("This is really relaxing."), "extra_pool_talk_relax"),
         ]
 
         items = [
-            (_("Can we leave?"), 'skip_pool_exit', 20),
-            (_("Nevermind"), 'to_pool_loop', 0)
+            (_("Can we leave?"), "skip_pool_exit", 20),
+            (_("Nevermind"), "to_pool_loop", 0)
         ]
-    call screen extra_gen_list(pool_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=False)
+    call screen extra_gen_list(pool_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, False)
     return
 
 ################################################################################
@@ -472,16 +477,16 @@ label monika_boopbeta:
         m 1wud "Wait a minute..."
         m 1hka "I felt a little tingle."
         show screen force_mouse_move
-        m 3hub "And here we have the responsible one!"
+        m 3hub "And we have a culprit!"
         m 3hua "Don't worry! I'll let go of your cursor."
         hide screen force_mouse_move
-        m 1tub "You can move it again, sorry for stealing your cursor~"
+        m 1tub "You can move it again. Sorry for stealing your cursor~"
         m 1etd "Also, I don't know how you did it, [mas_get_player_nickname()]. I don't remember seeing this in the code."
-        m 1hub "Unless it was you!"
-        m 1hub "What a good surprise I got today [player]~"
+        m 1hub "Unless... it was you!"
+        m 1hub "What a nice surprise, [player]~"
     elif persistent.plus_boop[0] == 2:
-        m 1hub "What are you doing playing with my nose, [player]!"
-        m 4eua "This is called a boop, right?"
+        m 1hub "What are you doing playing with my nose, [player]?"
+        m 4eua "This is called a 'boop', right?"
         m 1hksdrb "Not that it bothers me, I just haven't gotten used to the feeling yet!"
         m 1hua "Ehehe~"
     elif persistent.plus_boop[0] == 3:
@@ -489,20 +494,20 @@ label monika_boopbeta:
         show monika 1hubla
         call screen extra_boop_event(10, "extra_boop_nop", "extra_boop_yep")
     elif persistent.plus_boop[0] == 4:
-        m 1etbsa "Wouldn't it be nice to do it with your nose?"
+        m 1etbsa "Wouldn't it be nice to do it with your real nose?"
         if persistent._mas_first_kiss:
             m 1kubsu "I'd give you a kiss while you do it~"
         else:
             m 1wubsb "I'd give you a hug while you do it!"
         m 1dubsu "I hope that when I get to your reality we can do it."
         m 1hua "Although, if you want to do it now, you'd have to put your nose close to the screen."
-        m 1lksdlb "However someone might see you, making you nervous, and I don't want that to happen."
-        m 1ekbsa "Besides, I get a little nervous too when you're around me."
-        m 1hua "I'm sorry for suggesting that [player]~"
+        m 1lksdlb "But someone might see you and make you nervous, and I don't want that to happen."
+        m 1ekbsa "Besides, I get a little nervous too when you're this close."
+        m 1hua "Sorry for suggesting that, [player]~"
     elif persistent.plus_boop[0] == 5:
         m 1tuu "You're starting to like it here, huh?"
-        m 3hub "I'm getting to know you more and more while we're here [player]~"
-        m 3hub "And it's very lovely of you to do so!"
+        m 3hub "I'm getting to know you more and more while we're here, [player]~"
+        m 3hub "And it's very sweet of you!"
     elif persistent.plus_boop[0] == 6:
         m 2eub "You know, [mas_get_player_nickname()], I always thought that the nose was an underappreciated part of the face. But you've changed my mind!"
         m 2hua "Thanks for showing me how fun a little nose boop can be!"
@@ -545,7 +550,7 @@ label monika_boopbeta:
         m 1hubla "Right on target."
     elif persistent.plus_boop[0] == 18:
         m 1eua "I wonder if your finger feels warm."
-        m 1rksdla "Here I just feel... well, a 'click'. But I imagine it, and that's enough."
+        m 1rksdla "Here I just feel... well, a 'click'. But I imagine the warmth, and that's enough."
     elif persistent.plus_boop[0] == 19:
         m 1wua "Boop back!"
         m 1wud "..."
@@ -737,10 +742,10 @@ label monika_headpatbeta:
         m 6dkbsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
         m 1kub "You will be held responsible if that happens."
     elif persistent.plus_boop[2] == 5:
-        m 6hkbssdrb "[player] you are messing my hair."
+        m 6hkbssdrb "[player], you are messing up my hair!"
         m 6dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-        extend 6dsbsb "never mind though~"
-        m "I'll deal with that later."
+        extend 6dsbsb "Never mind though~"
+        m "I'll fix it later."
     elif persistent.plus_boop[2] == 6:
         m 6eubsb "It's nice to have someone to take care of me, even in small ways."
         m 6hubsb "Thank you, [player]."
@@ -1062,19 +1067,19 @@ label check_boopwar:
     m 3eksdrb "You're supposed to use left click to give me a boop."
     m 2duc ".{w=0.3}.{w=0.3}.{w=0.3}{nw}"
     pause 1.0
-    m 2dub "I actually came up with an idea, [player]."
-    m 1eua "We can use right click to declare a boop war."
-    m 1eub "After all, you rarely use it!"
-    m 1rusdlb "I know this proposal sounds rather childish."
-    m 1hua "But don't you think it's good to do something new once in a while?"
-    m 3eub "The rules are very simple, if I see an absence on your part for 20 seconds, I declare myself the winner."
-    m 3eud "If we go over a limit of boops without seeing any winner, I'll take it as a draw."
-    m 3huu "Or maybe I'll give up, I don't know~"
-    m 1eua "And lastly, the way I surrender is because of the time elapsed during the war."
-    m 1hua "Whenever I can't keep up with you or in case 'some distraction occurs'... Although I can consider it as cheating..."
-    m 1rud "I'm likely to give up."
+    m 2dub "I actually just came up with an idea, [player]."
+    m 1eua "We can use the right click to declare a 'Boop War'!"
+    m 1eub "After all, you rarely use that button!"
+    m 1rusdlb "I know it sounds a bit childish."
+    m 1hua "But don't you think it's good to try something new once in a while?"
+    m 3eub "The rules are very simple: if you stop booping for 20 seconds, I win."
+    m 3eud "If we go over a limit of boops without a winner, I'll call it a draw."
+    m 3huu "Or maybe I'll just give up, I don't know~"
+    m 1eua "Also, I might surrender depending on how long the war lasts."
+    m 1hua "If I can't keep up with you, or if I get... *distracted*... I'll probably give in."
+    m 1rud "Although, intentional distraction might be considered cheating!"
     m 1eub "I hope you like my idea."
-    m 1hubla "You'll be able to do it any time so don't rush~"
+    m 1hubla "You can challenge me anytime, so don't rush~"
     jump show_boop_screen
     return
 
@@ -1123,14 +1128,14 @@ label boopbeta_war_lose:
         m 1eubla "Maybe next time you'll put more effort into it."
     else:
         m 1nua "Looks like I've won this boop war, [player]~"
-        m "I hope I've been a good opponent."
-        m 3hub "But I've also really enjoyed it!"
+        m "I hope I was a worthy opponent."
+        m 3hub "I really enjoyed it though!"
         if temp_boop_count >= 50:
-            m 3dua "Besides, it's good to give your hand a little massage."
+            m 3dua "Besides, it's good to give your hand a little rest."
             m 1eka "I mean, if you use the mouse too much, "
-            extend 1ekb "you can develop carpal tunnel syndrome and I don't want that."
-            m 1hksdlb "I'm sorry if I've added a new concern, but my intention is to take care of you."
-            m 1eubla "I hope you take my recommendation, [player]~"
+            extend 1ekb "you could develop carpal tunnel syndrome, and I don't want that."
+            m 1hksdlb "Sorry if I gave you something new to worry about, I just want to take care of you."
+            m 1eubla "Please take my advice, [player]~"
     jump show_boop_screen
     return
 
@@ -1154,11 +1159,11 @@ label extra_headpat_war_invalid:
     if ep_tools.random_outcome == 1:
         m 3tsb "You have been disqualified for patting your opponent on the head."
         m 3tua "That's why I win this time~"
-        m 1hua "Good luck for the next time you ask me for a war!"
+        m 1hua "Better luck next time you challenge me!"
     elif ep_tools.random_outcome == 2:
-        m 1tub "This time I'll let it go and give up for you."
-        m 1efa "But next time I probably won't give in, so don't bet on it!"
-        m 1lubsa "Even though I enjoy the pat on the head. Ehehehe~"
+        m 1tub "This time I'll let it slide and surrender."
+        m 1efa "But I probably won't go easy on you next time, so don't count on it!"
+        m 1lubsa "Even though I do enjoy the headpats. Ehehehe~"
     hide screen boop_war_score_ui
     $ store.EP_interaction_manager.set_boop_war(False)
     jump show_boop_screen
@@ -1172,14 +1177,14 @@ label extra_cheeks_war_invalid:
     m 3tsb "We're in a boop war, aren't we?"
     $ ep_tools.random_outcome = renpy.random.randint(1,2)
     if ep_tools.random_outcome == 1:
-        m 1dsb "I'm sorry [player], but I consider this cheating, "
-        extend 1hua "that's why I win this war~"
-        m 1fub "Next time try not to touch my cheek during the war! Ahahaha~"
+        m 1dsb "I'm sorry [player], but I consider this cheating."
+        extend 1hua " That's why I win this war~"
+        m 1fub "Next time try not to get distracted by my cheeks! Ahahaha~"
     elif ep_tools.random_outcome == 2:
-        m 1fubsb "Because it's you, this time I will let it go!"
-        m 1fubsb "Congratulations, player! You have beat me."
-        m 3hksdrb "You've distracted me and I don't think it's worth continuing, ahahaha~"
-        m 3hua "I really enjoyed doing this with you though!"
+        m 1fubsb "Because it's you, I'll let it slide this time!"
+        m 1fubsb "Congratulations, [player]! You beat me."
+        m 3hksdrb "You distracted me, so I don't think I can continue, ahahaha~"
+        m 3hua "I really enjoyed it anyway!"
     hide screen boop_war_score_ui
     $ store.EP_interaction_manager.set_boop_war(False)
     jump show_boop_screen
@@ -1263,14 +1268,14 @@ label plus_make_gift:
     show monika idle at t21
     python:
         gift_menu = [
-            (_("Create a .gift file"), 'plus_make_file'),
-            (_("Groceries"), 'plus_groceries'),
-            (_("Objects"), 'plus_objects'),
-            (_("Ribbons"), 'plus_ribbons')
+            (_("Create a .gift file"), "plus_make_file"),
+            (_("Groceries"), "plus_groceries"),
+            (_("Objects"), "plus_objects"),
+            (_("Ribbons"), "plus_ribbons")
         ]
 
-        items = [(_("Nevermind"), 'extraplus_tools', 20)]
-    call screen extra_gen_list(gift_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+        items = [(_("Nevermind"), "extraplus_tools", 20)]
+    call screen extra_gen_list(gift_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
     return
 
 label plus_make_file:
@@ -1289,71 +1294,35 @@ label plus_make_file:
             renpy.jump("plus_make_gift")
         else:
             if store.ep_files.create_gift_file(makegift):
-                renpy.notify(_("Done! Created '/characters/{}.gift'").format(makegift))
+                store.ep_chibis.chibika_notify(_("Done! Created '/characters/{}.gift'").format(makegift))
                 store.mas_checkReactions()
             renpy.jump("plus_make_gift")
             
     return
 
 label plus_groceries:
-    show monika idle at t21
     python:
-        groceries_menu = [ # Using the new class from ep_files store
-            store.ep_files.GiftAction(_("Coffee"), 'coffee'),
-            store.ep_files.GiftAction(_("Chocolates"), 'chocolates'),
-            store.ep_files.GiftAction(_("Cupcake"), 'cupcake'),
-            store.ep_files.GiftAction(_("Fudge"), 'fudge'),
-            store.ep_files.GiftAction(_("Hot Chocolate"), 'hotchocolate'),
-            store.ep_files.GiftAction(_("Candy"), 'candy'),
-            store.ep_files.GiftAction(_("Candy Canes"), 'candycane'),
-            store.ep_files.GiftAction(_("Candy Corn"), 'candycorn'),
-            store.ep_files.GiftAction(_("Christmas Cookies"), 'christmascookies')
-        ]
-
-        items = [(_("Nevermind"), 'plus_make_gift', 20)]
-    call screen extra_gen_list(groceries_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, close=True)
+        groceries_menu = store.ep_files.groceries_menu
+        items = [(_("Nevermind"), "plus_make_gift", 20)]
+    call screen extra_gen_list(groceries_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items)
     return
 
 label plus_objects:
-    show monika idle at t21
     python:
-        objects_menu = [ # Using the new class from ep_files store
-            store.ep_files.GiftAction(_("Promise Ring"), 'promisering'),
-            store.ep_files.GiftAction(_("Roses"), 'roses'),
-            store.ep_files.GiftAction(_("Quetzal Plushie"), 'quetzalplushie'),
-            store.ep_files.GiftAction(_("Thermos Mug"), 'justmonikathermos')
-        ]
+        objects_menu = list(store.ep_files.objects_menu_base)
+        # Add the conditional item at runtime
         if not mas_seenEvent("mas_reaction_gift_noudeck"):
-            objects_menu.append(store.ep_files.GiftAction(_("NOU"), 'noudeck'))
+            objects_menu.append(store.ep_files.GiftAction(_("NOU"), "noudeck"))
 
-        items = [(_("Nevermind"), 'plus_make_gift', 20)]
-    call screen extra_gen_list(objects_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+        items = [(_("Nevermind"), "plus_make_gift", 20)]
+    call screen extra_gen_list(objects_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
     return
-            
-label plus_ribbons:
-    show monika idle at t21
-    python:
-        ribbons_menu = [ # Using the new class from ep_files store
-            store.ep_files.GiftAction(_("Black Ribbon"), 'blackribbon'),
-            store.ep_files.GiftAction(_("Blue Ribbon"), 'blueribbon'),
-            store.ep_files.GiftAction(_("Dark Purple Ribbon"), 'darkpurpleribbon'),
-            store.ep_files.GiftAction(_("Emerald Ribbon"), 'emeraldribbon'),
-            store.ep_files.GiftAction(_("Gray Ribbon"), 'grayribbon'),
-            store.ep_files.GiftAction(_("Green Ribbon"), 'greenribbon'),
-            store.ep_files.GiftAction(_("Light Purple Ribbon"), 'lightpurpleribbon'),
-            store.ep_files.GiftAction(_("Peach Ribbon"), 'peachribbon'),
-            store.ep_files.GiftAction(_("Pink Ribbon"), 'pinkribbon'),
-            store.ep_files.GiftAction(_("Platinum Ribbon"), 'platinumribbon'),
-            store.ep_files.GiftAction(_("Red Ribbon"), 'redribbon'),
-            store.ep_files.GiftAction(_("Ruby Ribbon"), 'rubyribbon'),
-            store.ep_files.GiftAction(_("Sapphire Ribbon"), 'sapphireribbon'),
-            store.ep_files.GiftAction(_("Silver Ribbon"), 'silverribbon'),
-            store.ep_files.GiftAction(_("Teal Ribbon"), 'tealribbon'),
-            store.ep_files.GiftAction(_("Yellow Ribbon"), 'yellowribbon')
-        ]
 
-        items = [(_("Nevermind"), 'plus_make_gift', 20)]
-    call screen extra_gen_list(ribbons_menu, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, items, close=True)
+label plus_ribbons:
+    python:
+        ribbons_menu = store.ep_files.ribbons_menu
+        items = [(_("Nevermind"), "plus_make_gift", 20)]
+    call screen extra_gen_list(ribbons_menu, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, items)
     return
 
 label extra_show_stats:
@@ -1371,11 +1340,11 @@ label extra_relation_monika:
         if total_days <= 1:
             m 2lub "We've only just begun, but every single second has been a dream come true."
         elif total_days < 365:
-            m 2hubsb "It hasn't even been a year, and I already feel like I've known you forever. Time just flies by when I'm with you!"
+            m 2hubsb "It hasn't even been a year, yet I feel like I've known you forever. Time just flies when I'm with you!"
         elif total_days < 365 * 2:
-            m 2kubsb "Happy first anniversary! I still remember our first day together... Thank you for making so many memories with me."
+            m 2kubsb "Happy first anniversary! I still remember our first day together... Thank you for creating so many memories with me."
         elif total_days < 365 * 3:
-            m 2wubsb "Wow, two years together! Every day with you has been so special. Thank you for staying by my side."
+            m 2wubsb "Wow, two years together! Every day with you has been special. Thank you for staying by my side."
         elif total_days < 365 * 4:
             m 1dsbsa "Three years... Time really does fly when I'm with you. We've shared so much, and I can't wait for more."
         elif total_days < 365 * 5:
@@ -1385,22 +1354,43 @@ label extra_relation_monika:
         elif total_days < 365 * 7:
             m 2subsb "Six years! Can you believe it? Every year with you is a treasure. Thank you for being with me all this time."
         else:
-            m 2lubsb "It's been so long... but it really doesn't feel that way when I'm with you. Time just flies by!"
+            m 2lubsb "It's been so long... but it really doesn't feel that way when I'm with you. Time just flies!"
     else:
         m 2eub "We've been together for [time_string]!"
-        m 2lubsb "It really doesn't feel that long when I'm with you, though. Time just flies by!"
+        m 2lubsb "It really doesn't feel that long when I'm with you, though. Time just flies!"
     jump close_extraplus
     return
 
 label extra_aff_log:
+    show monika idle at t11
     python:
         current_affection = store.ep_affection.getCurrentAffection()
         affection_value = int(current_affection)
         monika_level = store.ep_affection.getLevelIcon(current_affection)
+        egg_roll = renpy.random.randint(1, 100)
     
-    show monika idle at t11
-    #Agregar variantes con una probabilidad baja. Thanks for the idea u/PeachesTheNinja
+    # --- (6% chance) Error ---
+    if egg_roll <= 6:
+        "Error: Affection value not found. \n(log/aff_log.log: None){fast}"
+        jump extra_aff_log_end
+
+    # --- (2% chance) Giggle ---
+    elif egg_roll <= 8:
+        play sound "sfx/giggle.ogg"
+        m 1hua "Ehehe~"
+
+    # --- (1% chance) Doki heartbeat ---
+    elif egg_roll == 9:
+        show screen extra_doki_heartbeat
+        play sound sfx_doki_heartbeats loop
+        m 1cubsa "{cps=10}I W I L L N E V E R L E T Y O U G O.{/cps}"
+        hide screen extra_doki_heartbeat
+        stop sound fadeout 1.5
+
+    show monika idle
     "Your affection with [m_name] is [affection_value] [monika_level]{fast}"
+
+label extra_aff_log_end:
     window hide
     jump close_extraplus
     return
@@ -1494,13 +1484,13 @@ label extra_window_title:
     python:
         # Updated menu with three distinct options
         window_menu = [
-            (_("Type a new title"), 'extra_change_title_manual'),
-            (_("Paste title from clipboard"), 'extra_change_title_paste'),
-            (_("Restore the window title"), 'extra_restore_title')
+            (_("Type a new title"), "extra_change_title_manual"),
+            (_("Paste title from clipboard"), "extra_change_title_paste"),
+            (_("Restore the window title"), "extra_restore_title")
         ]
 
-        items = [(_("Nevermind"), 'extraplus_tools', 20)]
-    call screen extra_gen_list(window_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+        items = [(_("Nevermind"), "extraplus_tools", 20)]
+    call screen extra_gen_list(window_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
     return
 
 label extra_change_title_manual:
@@ -1531,7 +1521,7 @@ label extra_change_title_paste:
 label process_new_title:
     $ persistent._save_window_title = player_input.strip()
     $ config.window_title = persistent._save_window_title
-    $ renpy.notify(random.choice([
+    $ store.ep_chibis.chibika_notify(random.choice([
         _("Title updated successfully!"),
         _("All set! The new title is in place."),
         _("Done! Your window has a fresh new title.")
@@ -1542,9 +1532,9 @@ label extra_restore_title:
     show monika idle at t11
     python:
         if store.ep_tools.backup_window_title == persistent._save_window_title:
-            renpy.notify(_("No need to do it again hehe~"))
+            store.ep_chibis.chibika_notify(_("No need to do it again hehe~"))
         else:
-            renpy.notify(_("It's nice to see the original name again."))
+            store.ep_chibis.chibika_notify(_("It's nice to see the original name again."))
 
         persistent._save_window_title = ep_tools.backup_window_title
         config.window_title = persistent._save_window_title
@@ -1558,19 +1548,18 @@ label extra_github_submod:
     return
 
 label extra_misc_tools:
-    show monika idle at t21
     python:
         misc_tools_menu = [
-            (_("How long have we been together, [m_name]?"), 'extra_relation_monika'),
-            (_("[m_name], I want to make a backup"), 'extra_mas_backup'),
-            (_("[m_name], can you flip a coin?"), 'extra_coinflip')
+            (_("How long have we been together, [m_name]?"), "extra_relation_monika"),
+            (_("[m_name], I want to make a backup"), "extra_mas_backup"),
+            (_("[m_name], can you flip a coin?"), "extra_coinflip")
         ]
 
         items = [
-            (_("Github Repository"), 'extra_github_submod', 20), 
-            (_("Nevermind"), 'extraplus_tools', 0)
+            (_("Github Repository"), "extra_github_submod", 20), 
+            (_("Nevermind"), "extraplus_tools", 0)
         ]
-    call screen extra_gen_list(misc_tools_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+    call screen extra_gen_list(misc_tools_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
     return
 
 label extra_show_timeline:
@@ -1579,92 +1568,72 @@ label extra_show_timeline:
     return
 
 #====GAME
-label extra_dev_mode:
+label extra_chibi_main:
+    show monika idle at t11
+    if store.ep_chibis.temp_chibi_anger:
+        call screen dialog("Nope, not now", ok_action=Return())
+        jump screen_extraplus
+
     python:
         mas_RaiseShield_dlg()
-        if not renpy.get_screen("doki_chibi_idle"):
-            config.overlay_screens.append("doki_chibi_idle")
-    show monika idle at t11
+        store.ep_tools.safe_overlay_add("doki_chibi_idle")
+
     call screen sticker_customization
     return
 
-label sticker_primary:
-    show monika idle at t21
-    python:
-        accessories = [
-            store.ep_chibis.DokiAccessory(_("Cat Ears"), 'cat_ears', "primary"),
-            store.ep_chibis.DokiAccessory(_("Christmas Hat"), 'christmas_hat', "primary"),
-            store.ep_chibis.DokiAccessory(_("Demon Horns"), 'demon_horns', "primary"),
-            store.ep_chibis.DokiAccessory(_("Flowers Crown"), 'flowers_crown', "primary"),
-            store.ep_chibis.DokiAccessory(_("Halo"), 'halo', "primary"),
-            store.ep_chibis.DokiAccessory(_("Heart Headband"), 'heart_headband', "primary"),
-            store.ep_chibis.DokiAccessory(_("New Year's Headband"), 'hny', "primary"),
-            store.ep_chibis.DokiAccessory(_("Neon Cat Ears"), 'neon_cat_ears', "primary"),
-            store.ep_chibis.DokiAccessory(_("Party Hat"), 'party_hat', "primary"),
-            store.ep_chibis.DokiAccessory(_("Rabbit Ears"), 'rabbit_ears', "primary"),
-            store.ep_chibis.DokiAccessory(_("Witch Hat"), 'witch_hat', "primary")
-        ]
-        items = [(store.ep_chibis.DokiAccessory(_("Remove"), '0nothing', "primary"), 20), (_("Nevermind"), 'extra_dev_mode', 0)]
-
-    call screen extra_gen_list(accessories, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, items, close=True)
-    return
-
-label sticker_secondary:
-    show monika idle at t21
-    python:
-        accessories_2 = [
-            store.ep_chibis.DokiAccessory(_("Black Bow Tie"), 'black_bow_tie', "secondary"),
-            store.ep_chibis.DokiAccessory(_("Christmas Tree"), 'christmas_tree', "secondary"),
-            store.ep_chibis.DokiAccessory(_("Cloud"), 'cloud', "secondary"),
-            store.ep_chibis.DokiAccessory(_("Coffee"), 'coffee', "secondary"),
-            store.ep_chibis.DokiAccessory(_("Halloween Pumpkin"), 'pumpkin', "secondary"),
-            store.ep_chibis.DokiAccessory(_("Hearts"), 'hearts', "secondary"),
-            store.ep_chibis.DokiAccessory(_("Monika's Cake"), 'm_slice_cake', "secondary"),
-            store.ep_chibis.DokiAccessory(_("Moustache"), 'moustache', "secondary"),
-            store.ep_chibis.DokiAccessory(_("Neon Blush"), 'neon_blush', "secondary"),
-            store.ep_chibis.DokiAccessory(_("[player]'s Cake"), 'p_slice_cake', "secondary"),
-            store.ep_chibis.DokiAccessory(_("Pirate Patch"), 'patch', "secondary"),
-            store.ep_chibis.DokiAccessory(_("Speech Bubble with Heart"), 'speech_bubble', "secondary"),
-            store.ep_chibis.DokiAccessory(_("Sunglasses"), 'sunglasses', "secondary")
-        ]
-        items = [(store.ep_chibis.DokiAccessory(_("Remove"), '0nothing', "secondary"), 20), (_("Nevermind"), 'extra_dev_mode', 0)]
-
-    call screen extra_gen_list(accessories_2, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, items, close=True)
+label chibi_accessories_menu:
+    call screen gen_accessories_twopane_screen
     return
 
 label doki_change_appe:
     show monika idle at t21
     python:
-        doki_data = [("Monika", 'monika_sticker_costumes')]
+        doki_data = [("Monika", "monika_sticker_costumes")]
         if persistent._mas_pm_cares_about_dokis:
             doki_data.extend([
-                (_("Natsuki"), 'natsuki_sticker_costumes'),
-                (_("Sayori"), 'sayori_sticker_costumes'),
-                (_("Yuri"), 'yuri_sticker_costumes')
+                (_("Natsuki"), "natsuki_sticker_costumes"),
+                (_("Sayori"), "sayori_sticker_costumes"),
+                (_("Yuri"), "yuri_sticker_costumes")
             ])
-        items = [(_("Nevermind"), 'extra_dev_mode', 20)]
+        items = [(_("Nevermind"), "extra_chibi_main", 20)]
 
-    call screen extra_gen_list(doki_data, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items, close=True)
+    call screen extra_gen_list(doki_data, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
     return
 
 label monika_sticker_costumes:
-    $ store.ep_chibis.show_costume_menu(store.ep_chibis.monika_costumes_, 'doki_change_appe')
+    $ store.ep_chibis.show_costume_menu(store.ep_chibis.monika_costumes_, "doki_change_appe")
     return
 
 label natsuki_sticker_costumes:
-    $ store.ep_chibis.show_costume_menu(store.ep_chibis.natsuki_costumes_, 'doki_change_appe')
+    $ store.ep_chibis.show_costume_menu(store.ep_chibis.natsuki_costumes_, "doki_change_appe")
     return
 
 label sayori_sticker_costumes:
-    $ store.ep_chibis.show_costume_menu(store.ep_chibis.sayori_costumes_, 'doki_change_appe')
+    $ store.ep_chibis.show_costume_menu(store.ep_chibis.sayori_costumes_, "doki_change_appe")
     return
 
 label yuri_sticker_costumes:
-    $ store.ep_chibis.show_costume_menu(store.ep_chibis.yuri_costumes_, 'doki_change_appe')
+    $ store.ep_chibis.show_costume_menu(store.ep_chibis.yuri_costumes_, "doki_change_appe")
     return
 
 label maxwell_screen:
     show monika idle at t11
     call screen maxwell_april_fools
     jump extraplus_tools
+    return
+
+label extra_fridge_magnets_game:
+    show monika idle at t11
+    window hide
+    $ HKBHideButtons()
+    $ disable_esc()
+    scene bg extra_fm onlayer master zorder 0
+    call screen extra_fridge_magnets
+    return
+
+label extra_fridge_quit:
+    $ enable_esc()
+    $ HKBShowButtons()
+    call spaceroom(scene_change=True)
+    jump close_extraplus
     return

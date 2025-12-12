@@ -121,22 +121,18 @@ label minigame_rps:
         m 1hua "Rock, Paper, Scissors, [player]! Ready to try your luck?"
         m 1eua "It's a simple game of chance, but sometimes those are the most fun."
         m 1eub "Let's see who fate favors today. Good luck!"
-
     # If the player won the last game
     elif persistent.psr_result_game[0]:
         m 3eub "Ready for a rematch, [player]? I've been thinking about my strategy. Ehehe~"
         m 3hua "I won't make it so easy for you to win this time!"
-
     # If Monika won the last game
     elif persistent.psr_result_game[1]:
         m 1hub "So, are you ready to challenge the champion again?"
         m 1hua "I hope you're ready! I plan on keeping my winning streak."
-
     # If the last game was a tie
     elif persistent.psr_result_game[2]:
         m 1eua "Let's play again! We have to break that tie from last time."
         m 1tua "It feels like we're perfectly in sync. Let's see if that's still true!"
-
     # Default greeting for subsequent plays
     else:
         m 1hua "Ready for another round of Rock, Paper, Scissors, [player]?"
@@ -152,7 +148,10 @@ label minigame_rps:
     return
 
 label rps_loop:
-    $ store.persistent.rps_player_history.append(ep_rps.your_choice)
+    # Limit history to last 100 moves to prevent save file bloat
+    $ persistent.rps_player_history.append(ep_rps.your_choice)
+    if len(persistent.rps_player_history) > 100:
+        $ persistent.rps_player_history = persistent.rps_player_history[-100:]
     $ monika_choice_val = ep_rps.getMonikaChoice()
     $ renpy.restart_interaction()
     $ player_choice = ep_rps.choices[ep_rps.your_choice - 1]
@@ -194,28 +193,28 @@ label rps_loop:
     if monika_choice.value == player_choice.value:
         # Tie
         if player_choice.value == 1: # Rock
-            m 3hub "A rock against another rock, ahahaha~"
-            m 1hua "It is a tie."
+            m 3hub "Rock against rock! Ahaha~"
+            m 1hua "It's a tie."
         elif player_choice.value == 2: # Paper
             m 1eub "We both chose paper!"
-            m 1tua "We're in a tie and you should stop reading my mind [mas_get_player_nickname()]~"
+            m 1tua "We're tied! You should stop reading my mind, [mas_get_player_nickname()]~"
             m 1hub "Ahahahaha~"
         elif player_choice.value == 3: # Scissors
-            m 2hkb "Two scissors equals a tie, [player]!"
-            m 2hub "Although it's funny that you thought the same thing, ehehehe~"
+            m 2hkb "Two pairs of scissors make a tie, [player]!"
+            m 2hub "It's funny that we thought of the same thing, ehehehe~"
 
     elif player_choice.beats == monika_choice.value:
         # Player wins
         $ ep_rps.player_wins += 1
         if player_choice.value == 1: # Rock vs Scissors
-            m 1hksdrb "The rock breaks the scissors."
+            m 1hksdrb "Rock breaks scissors."
             m 1hua "You beat me, [player]!"
         elif player_choice.value == 2: # Paper vs Rock
-            m 1lkb "The paper wraps the rock."
+            m 1lkb "Paper covers rock."
             m 1lub "You win, [player]."
         elif player_choice.value == 3: # Scissors vs Paper
-            m 1hssdrb "The scissors cuts the paper."
-            m 1eua "I award you the victory!"
+            m 1hssdrb "Scissors cuts paper."
+            m 1eua "Victory is yours!"
 
     else:
         # Monika wins
@@ -224,10 +223,10 @@ label rps_loop:
             m 1mub "Say goodbye to your scissors, [player]~"
             m "You couldn't beat me! Ahahaha~"
         elif monika_choice.value == 2: # Paper vs Rock (Player)
-            m 1dub "The paper wraps the rock."
-            m 1tub "So sorry, [player], you have lost!"
+            m 1dub "Paper covers rock."
+            m 1tub "So sorry [player], you lost this one!"
         elif monika_choice.value == 3: # Scissors vs Paper (Player)
-            m 3eub "The scissors cut the paper."
+            m 3eub "Scissors cuts paper."
             m 3hua "Sorry [player], you lost."
 
     hide monika_choice_display
@@ -281,18 +280,18 @@ label rps_result:
     #Tie
     if ep_rps.moni_wins == ep_rps.player_wins:
         if ep_rps.moni_wins == 0 and ep_rps.player_wins == 0:
-            m 1etd "Don't you want to play rock-paper-scissors?"
-            m 1eka "I thought he wanted to play with me for a while..."
-            m 3hua "But don't worry, I know you have changed your mind and are not in the mood to play."
-            m 3hub "So I hope we can play another time!"
+            m 1etd "Don't you want to play?"
+            m 1eka "I thought you wanted to play with me for a while..."
+            m 3hua "But don't worry, I understand if you changed your mind."
+            m 3hub "I hope we can play another time!"
             python:
                 ep_rps.moni_wins = 0
                 ep_rps.player_wins = 0
         else:
             m 1sua "Wow, it's a tie."
-            m 1tua "It's because we are such a couple that our minds are one!"
+            m 1tua "It must be because we're so in sync!"
             m 1hub "Ehehe~"
-            m 3hua "But we have to break the tie, [player]."
+            m 3hua "But we have to break the tie eventually, [player]."
             m 3hub "We will see who wins next time, good luck!"
             $ persistent.psr_result_game[2] = True
 
@@ -300,17 +299,17 @@ label rps_result:
     elif ep_rps.moni_wins > ep_rps.player_wins:
         m 3eub "This time I won, [player]~"
         m 3hub "You put up a good fight."
-        m 3eub "I've had some luck."
+        m 3eub "I guess I got lucky."
         m 3eubsa "But don't feel bad, what matters most to me is that we both have fun."
-        m 1hub "Next time I know you will beat me, I trust you!"
+        m 1hub "I know you'll beat me next time, I believe in you!"
         $ persistent.psr_result_game[1] = True
 
     #Player wins
     elif ep_rps.moni_wins < ep_rps.player_wins:
         m 1hub "You beat me [player], congratulations."
         m 1hub "I'm proud of you~"
-        m 2tub "But I warn you that next time I will try to read your mind."
-        m 2hub "I'm likely to win!"
+        m 2tub "But be warned, next time I'll try to read your mind."
+        m 2hub "I might just win!"
         m 2hua "So be careful when we play again."
         m 2hua "Ehehe~"
         $ persistent.psr_result_game[0] = True
