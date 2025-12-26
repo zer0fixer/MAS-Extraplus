@@ -2343,6 +2343,9 @@ label extra_relation_monika:
     $ total_days = store.ep_tools.getTotalDaysSinceInstall()
     
     if not renpy.seen_label("checkpoint_relation_monika"):
+        # Mark as seen so next time we go to the shorter dialogue
+        $ renpy.mark_label_seen("checkpoint_relation_monika")
+        
         m 2eub "You know, if you count it all up, it seems we've been together for [time_string]!"
         if total_days <= 1:
             m 2lub "We've only just begun, but every single second has been a dream come true."
@@ -2363,12 +2366,10 @@ label extra_relation_monika:
         else:
             m 2lubsb "It's been so long... but it really doesn't feel that way when I'm with you. Time just flies!"
         jump close_extraplus
-        return
 
 label checkpoint_relation_monika:
-    if renpy.seen_label("checkpoint_relation_monika"):
-        m 2eub "We've been together for [time_string]!"
-        m 2lubsb "It really doesn't feel that long when I'm with you, though. Time just flies!"
+    m 2eub "We've been together for [time_string]!"
+    m 2lubsb "It really doesn't feel that long when I'm with you, though. Time just flies!"
     jump close_extraplus
     return
 

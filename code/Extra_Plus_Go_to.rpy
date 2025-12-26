@@ -1300,8 +1300,6 @@ label extra_comment_library:
     m 3ekbsa "Just being near you, surrounded by the smell of old books... it was perfect."
     m 1hubfa "I'll be looking forward to our next literary adventure~"
     $ mas_DropShield_dlg()
-    $ mas_ILY()
-    
     jump ch30_visual_skip
     return
 
@@ -1540,10 +1538,11 @@ label library_quiet_time:
     # Show Monika in reading pose
     show monika reading at t11 zorder MAS_MONIKA_Z
 
-    # 2. SILENCE LOOP
+    # 2. SILENCE LOOP - Wait for user click using screen
     label .quiet_loop:
         
-        pause
+        # Use a screen with invisible button to wait for click (works in vanilla mode)
+        call screen library_quiet_click
         
         # 3. CALCULATION
         python:

@@ -185,7 +185,7 @@ label minigame_poem:
         m 1tub "I wonder what kind of poem you'll create for me~"
 
 label checkpoint_minigame_poem:
-    if renpy.seen_label("checkpoint_minigame_poem"):
+    if renpy.seen_label("minigame_poem_classic"):
         if is_new_day:
             # New day greeting
             m 1hua "Ready to pick some words with me today, [player]?"

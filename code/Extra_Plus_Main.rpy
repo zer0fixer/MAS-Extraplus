@@ -1309,6 +1309,14 @@ screen extra_no_click():
         idle "mod_assets/other/transparent.png"
         action NullAction()
 
+screen library_quiet_click():
+    zorder 100
+    # Full screen invisible button - click anywhere to continue
+    button:
+        xysize (config.screen_width, config.screen_height)
+        action Return()
+        background None
+
 screen score_minigame(game=None):
     #Shows the current score for a minigame (RPS or Shell Game) with player and opponent stats.
     key "h" action NullAction()
