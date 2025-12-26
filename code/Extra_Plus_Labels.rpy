@@ -115,8 +115,8 @@ label extra_cafe_leave:
     hide screen extra_timer_monika
     show monika 1eta at t11
     m 1eta "Oh?{w=0.3} Are we finishing our coffee break already?"
-    m 2rksdla "I was just getting comfortable with the smell of roasted beans..."
-    m 2eka "It feels so cozy to just sit here and watch the world go by with you."
+    m 1rksdla "I was just getting comfortable with the smell of roasted beans..."
+    m 1eka "It feels so cozy to just sit here and watch the world go by with you."
     m 1hua "But I'm happy to go wherever you are."
     m 1eua "Let's head back to our own private space~"
     $ ep_dates.stop_snike_time = False
@@ -128,7 +128,7 @@ label extra_restaurant_leave:
     show monika 1eta at t11
     m 1eta "Oh?{w=0.3} Are we ready to end our dinner date?"
     m 1hub "I agree that the dinner was lovely, but..."
-    m 3eua "The best part was definitely your company."
+    m 1eua "The best part was definitely your company."
     m 1eka "A romantic evening like this is exactly what I needed."
     m 1hua "Let's go home, [player]. I'm all yours."
     $ ep_dates.stop_snike_time = False

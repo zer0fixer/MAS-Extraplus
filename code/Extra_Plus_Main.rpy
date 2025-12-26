@@ -1380,28 +1380,35 @@ screen boop_capture_overlay(label_boop):
 
     python:
         # Define variables locally for clarity and safety
-        interaction_manager = store.EP_interaction_manager
-        nose_zone_key = store.mas_interactions.ZONE_EXTRA_NOSE
-        current_zoom = store.mas_sprites.zoom_level
-        nose_cz = interaction_manager.cz_manager.get(
-            nose_zone_key,
-            current_zoom
-        )
-
+        # Use try/except for compatibility with older MAS versions
         nose_zone = None
-        if nose_cz and not nose_cz.disabled:
-            corners = nose_cz.corners
-            if corners:
-                min_x = min(x for x, y in corners) # NOQA
-                min_y = min(y for x, y in corners) # NOQA
-                max_x = max(x for x, y in corners) # NOQA
-                max_y = max(y for x, y in corners) # NOQA
-                nose_zone = {
-                    'x': min_x,
-                    'y': min_y,
-                    'w': max_x - min_x,
-                    'h': max_y - min_y
-                }
+        try:
+            interaction_manager = store.EP_interaction_manager
+            # Check if zones are enabled (disabled on older MAS versions)
+            if interaction_manager._zones_enabled and interaction_manager.cz_manager:
+                nose_zone_key = store.mas_interactions.ZONE_EXTRA_NOSE
+                current_zoom = store.mas_sprites.zoom_level
+                nose_cz = interaction_manager.cz_manager.get(
+                    nose_zone_key,
+                    current_zoom
+                )
+
+                if nose_cz and not nose_cz.disabled:
+                    corners = nose_cz.corners
+                    if corners:
+                        min_x = min(x for x, y in corners) # NOQA
+                        min_y = min(y for x, y in corners) # NOQA
+                        max_x = max(x for x, y in corners) # NOQA
+                        max_y = max(y for x, y in corners) # NOQA
+                        nose_zone = {
+                            'x': min_x,
+                            'y': min_y,
+                            'w': max_x - min_x,
+                            'h': max_y - min_y
+                        }
+        except (AttributeError, TypeError):
+            # Older MAS version - zones not available
+            pass
 
     # Render invisible imagebutton only over the nose
     if nose_zone:
