@@ -15,7 +15,7 @@ default persistent._ep_last_poem_style = "none"  # mood of last poem
 init python in ep_poems:
     import random
     import store
-    
+
     # Poem word class for Monika-focused poem game
     # Using __slots__ for memory efficiency with many word objects
     class EPPoemWord(object):
@@ -178,8 +178,6 @@ label minigame_poem:
     
     # GREETING LOGIC (Classic Mode specific)
     if not renpy.seen_label("checkpoint_minigame_poem"):
-        # First time ever
-        m 1eub "Let's write a poem together, [player]!"
         m 3eua "It's like the old days in the Literature Club, but just for us."
         m 1hua "I'll show you some words, and you pick the ones that speak to you."
         m 1tub "I wonder what kind of poem you'll create for me~"
@@ -205,11 +203,11 @@ label checkpoint_minigame_poem:
                 m 1eka "I hope you're feeling a bit brighter now, [player]."
                 m 1hua "Let's put some happy feelings into words together."
             else:
-                m 1eua "Want to write another poem together?"
+                m 1eua "Want to write another poem for me?"
                 m 1hua "I always enjoy seeing your creativity~"
         else:
             # Fallback
-            m 1eua "Ready to write a poem with me, [player]?"
+            m 1eua "Ready to write a poem, [player]?"
     
     m 1hub "Let's see which words call to you~"
     
@@ -569,7 +567,7 @@ label minigame_poem_classic:
     # Milestone Check (Every 5 poems)
     if persistent._ep_poems_written >= 5 and persistent._ep_poems_written % 5 == 0:
         m 1hua "By the way..."
-        m 1eua "We've written [persistent._ep_poems_written] poems together now."
+        m 1eua "You've written [persistent._ep_poems_written] poems for me now."
         m 1hubsa "I really treasure these little library dates with you, [player]~"
     
     m 1hua "Thanks for writing with me!"

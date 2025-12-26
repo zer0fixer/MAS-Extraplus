@@ -508,9 +508,9 @@ label extra_library_interactions:
 
     python:
         library_menu = [
-            (_("Let's write a poem together!"), "minigame_poem"),
+            (_("I want to write a poem"), "minigame_poem"),
             (_("I want to write something for you"), "minigame_poem_free"),
-            (_("Read something to me, Monika."), "library_reading_session"),
+            (renpy.substitute(_("Read something to me, [m_name].")), "library_reading_session"),
             (_("Let's just enjoy the silence."), "library_quiet_time"),
             (_("Just talk to me."), "library_talk_topic"),
             (_("My poem collection"), "library_poem_history"),

@@ -1348,7 +1348,7 @@ label library_reading_session:
         m 1eka "You know, [player]..."
         m 3eua "I think I've read through all the bookmarks I planned for today."
         m 1hua "My voice needs a little rest from reading aloud."
-        m 1ekbsa "But I'd be happy to just sit here with you, or maybe we can write another poem together?"
+        m 1ekbsa "But I'd be happy to just sit here with you, or maybe you'd like to write another poem?"
         jump to_library_loop
         return
 
