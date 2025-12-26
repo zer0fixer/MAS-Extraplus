@@ -46,6 +46,8 @@ init python in ep_bj:
     import store
 
     class BJ_Card(object):
+        __slots__ = ['suit', 'value', '_image']
+        
         def __init__(self, suit, value):
             self.suit = suit
             self.value = value
@@ -53,6 +55,8 @@ init python in ep_bj:
 
         @property
         def image(self):
+            # Lazy loading: Only generate the image when first accessed.
+            # This is intentional to avoid loading all 52 card images at once.
             if self._image is None:
                 self._image = getCardImage(self.suit, self.value)
             return self._image
@@ -121,6 +125,7 @@ init python in ep_bj:
 
 screen blackjack_ui:
     key "h" action NullAction()
+    key "H" action NullAction()
     key "mouseup_3" action NullAction()
     zorder 25
     use blackjack_stats()
@@ -216,12 +221,14 @@ screen blackjack_stats():
 
 label blackjack_start:
     show monika 1hub at t11
-    if not renpy.seen_label("bj_game_loop"):
+    if not renpy.seen_label("checkpoint_blackjack") and not renpy.seen_label("blackjack_results"):
         m "Welcome to our Blackjack table, [player]!"
         m 3eub "Ready to test your luck?"
         m 3eub "Remember, the goal is to get as close to 21 as possible without going over."
         m 3tua "Let's see if Lady Luck is on your side today. Have fun!"
-    else:
+
+label checkpoint_blackjack:
+    if renpy.seen_label("blackjack_results"):
         # Previous game was a tie (both had at least one win and tied)
         if persistent.blackjack_win_game[2]:
             m 2sfa "We're tied so far!"
@@ -249,6 +256,9 @@ label blackjack_start:
     window hide
     $ HKBHideButtons()
     $ disable_esc()
+    # Disable chibi dragging during minigame
+    $ ep_bj.saved_drag_state = persistent.enable_drag_chibika
+    $ persistent.enable_drag_chibika = False
     $ minigame_deck = ep_bj.BJ_Deck()
     $ minigame_player = ep_bj.BJ_Player(player)
     $ minigame_monika = ep_bj.BJ_Monika(m_name)
@@ -269,7 +279,6 @@ label blackjack_start:
             $ minigame_player.draw_card(minigame_deck)
             $ minigame_monika.draw_card(minigame_deck, reveal=False)
             
-            # Verificar blackjack inmediato
             if (minigame_player.total == 21 and len(minigame_player.hand) == 2) or (minigame_monika.total == 21 and len(minigame_monika.hand) == 2):
                 jump bj_game_loop
 
@@ -397,6 +406,8 @@ label BJ_quit_game:
 
     $ enable_esc()
     $ HKBShowButtons()
+    # Restore chibi dragging state
+    $ persistent.enable_drag_chibika = ep_bj.saved_drag_state
     window hide
     hide screen blackjack_ui
     $ ep_bj.monika_wins = 0

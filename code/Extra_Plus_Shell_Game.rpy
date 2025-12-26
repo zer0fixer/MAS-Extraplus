@@ -23,6 +23,30 @@ image extra_sg_ball:
         "extra_ball"
         xalign 0.5 yalign 0.5
 
+screen shell_game_minigame():
+    #Displays the shell game minigame interface, letting the player pick a cup and quit the game.
+    zorder 50
+    style_prefix "hkb"
+    use extra_no_click()
+    timer store.ep_tools.games_idle_timer action Function(store.ep_tools.show_idle_notification, context="sg") repeat True
+
+    # Buttons must follow the REAL cup positions after shuffling
+    for i in range(3):
+        imagebutton:
+            xanchor 0.5 yanchor 0.5
+            xpos store.ep_sg.cup_coordinates[i]
+            ypos 250
+            idle "extra_sg_cup_idle"
+            hover "extra_sg_cup_hover"
+            focus_mask "extra_sg_cup_hover"
+            action SGVerification(i, store.ep_sg.ball_position, "sg_check_label")
+    
+    vbox:
+        xpos 0.86
+        yanchor 1.0
+        ypos 0.950
+        textbutton _("Quit") action [Hide("shell_game_minigame"), Jump("shell_game_result")]
+
 init -5 python in ep_sg:
     cup_skin = randomize_cup_skin()
     target_shuffles = 4
@@ -69,7 +93,15 @@ init -5 python in ep_sg:
 
 label minigame_sg:
     show monika 1eub at t11
-    if renpy.seen_label("minigame_sg"):
+    if not renpy.seen_label("checkpoint_minigame_sg") and not renpy.seen_label("shell_game_result"):
+        m 1etb "Do you want to play the Shell Game with me, [player]?"
+        m 1sua "It's a game of observation and focus. I think you'll like it!"
+        m 1eua "The rules are simple: I'll hide a ball under one of these cups and shuffle them around."
+        m 1hub "You just have to guess which cup the ball is under."
+        m 1eub "If you guess right, you score a point!"
+
+label checkpoint_minigame_sg:
+    if renpy.seen_label("shell_game_result"):
         m 1eta "Do you want to play the Shell Game again, [player]?"
         if persistent.sg_max_score == 0:
             m 1eka "By the way, I wanted to apologize..."
@@ -78,12 +110,6 @@ label minigame_sg:
             m "Good luck setting a new high score!"
         else:
             m 1sua "Great! Let's see if you can beat your record of [persistent.sg_max_score] correct answers in a row!"
-    else:
-        m 1etb "Do you want to play the Shell Game with me, [player]?"
-        m 1sua "It's a game of observation and focus. I think you'll like it!"
-        m 1eua "The rules are simple: I'll hide a ball under one of these cups and shuffle them around."
-        m 1hub "You just have to guess which cup the ball is under."
-        m 1eub "If you guess right, you score a point!"
 
     m 1hua "Alright, what difficulty do you want to play on?{nw}"
     menu:
@@ -119,6 +145,9 @@ label minigame_sg:
 
     python:
         store.ep_button.hide_zoom_button()
+        # Disable chibi dragging during minigame
+        ep_sg.saved_drag_state = persistent.enable_drag_chibika
+        persistent.enable_drag_chibika = False
         # Reset stats for a new game session
         ep_sg.current_turn = 1
         ep_sg.correct_answers = 0
@@ -176,6 +205,9 @@ label sg_init_game:
         ep_sg.original_cup[0] = 0
         ep_sg.original_cup[1] = 1
         ep_sg.original_cup[2] = 2
+        
+        # Initialize cup identity tracking
+        ep_sg.cup_index_real = [0, 1, 2]
 
         ep_sg.ball_position = 1
         disable_esc()
@@ -190,14 +222,21 @@ label sg_loop_game:
     python:
         move_cup_1, move_cup_2 = renpy.random.sample(range(3), 2)
 
+        # Swap visual positions
         temp_cup_position = ep_sg.cup_coordinates_real[move_cup_2]
         ep_sg.cup_coordinates_real[move_cup_2] = ep_sg.cup_coordinates_real[move_cup_1]
         ep_sg.cup_coordinates_real[move_cup_1] = temp_cup_position
 
-        if ep_sg.ball_position == move_cup_1:
-            ep_sg.ball_position = move_cup_2
-        elif ep_sg.ball_position == move_cup_2:
-            ep_sg.ball_position = move_cup_1
+        # Swap cup identities
+        temp_cup_index = ep_sg.cup_index_real[move_cup_2]
+        ep_sg.cup_index_real[move_cup_2] = ep_sg.cup_index_real[move_cup_1]
+        ep_sg.cup_index_real[move_cup_1] = temp_cup_index
+
+        # FIX: Update ball position based on cup identities
+        if ep_sg.cup_index_real[move_cup_1] == ep_sg.ball_position:
+            ep_sg.ball_position = ep_sg.cup_index_real[move_cup_2]
+        elif ep_sg.cup_index_real[move_cup_2] == ep_sg.ball_position:
+            ep_sg.ball_position = ep_sg.cup_index_real[move_cup_1]
 
     $ renpy.pause(ep_sg.cup_speed, hard="True")
 
@@ -271,6 +310,8 @@ label sg_check_label:
         ep_sg.current_turn += 1
         ep_sg.shuffle_cups = 0
         ep_sg.ball_position = 1
+        # Reset cup identity tracking
+        ep_sg.cup_index_real = [0, 1, 2]
         if ep_sg.difficulty == 4 and ep_sg.current_turn % 6 == 0:
             ep_sg.cup_speed = max(0.15, ep_sg.cup_speed - 0.05)
             ep_sg.target_shuffles += 1
@@ -388,9 +429,25 @@ label shell_game_result:
         if ep_sg.correct_answers > persistent.sg_max_score:
             persistent.sg_max_score = ep_sg.correct_answers
         ep_sg.current_turn = 1 # Reset to 1 for next session
-        ep_sg.correct_answers = 0 
-        ep_sg.target_shuffles = 6
+        ep_sg.correct_answers = 0
         ep_sg.shuffle_cups = 0
+        # Reset speed and shuffles based on difficulty (not hardcoded)
+        # This ensures next game starts with correct values for the difficulty
+        if ep_sg.difficulty == 1:  # Easy
+            ep_sg.cup_speed = 0.85
+            ep_sg.target_shuffles = 4
+        elif ep_sg.difficulty == 2:  # Normal
+            ep_sg.cup_speed = 0.5
+            ep_sg.target_shuffles = 6
+        elif ep_sg.difficulty == 3:  # Hard
+            ep_sg.cup_speed = 0.25
+            ep_sg.target_shuffles = 8
+        elif ep_sg.difficulty == 4:  # Progressive
+            ep_sg.cup_speed = 0.7
+            ep_sg.target_shuffles = 3
+        
+        # Restore chibi dragging state
+        persistent.enable_drag_chibika = ep_sg.saved_drag_state
         
     jump close_extraplus
     return

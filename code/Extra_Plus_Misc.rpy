@@ -52,16 +52,23 @@ init -995 python in ep_folders:
     EP_OTHERS = _join_path(EP_ROOT, "others")
     EP_SFX = _join_path(EP_ROOT, "sfx")
 
+    # Others subfolders
+    EP_ICONS = _join_path(EP_OTHERS, "icons")
+    EP_FONTS = _join_path(EP_OTHERS, "fonts")
+    EP_ANIMATIONS = _join_path(EP_OTHERS, "animations")
+
     # Minigames folders
     EP_MG_SHELLGAME = _join_path(EP_MINIGAMES, "shellgame")
     EP_MG_RPS = _join_path(EP_MINIGAMES, "rockpaperscissors")
     EP_MG_BLACKJACK = _join_path(EP_MINIGAMES, "blackjack")
     EP_MG_TICTACTOE = _join_path(EP_MINIGAMES, "tictactoe")
     EP_MG_FRIDGE = _join_path(EP_MINIGAMES, "fridgemagnets")
+    EP_MG_POEM = _join_path(EP_MINIGAMES, "poem")
 
     # Dates folders
     EP_DATE_CAFE = _join_path(EP_DATES, "cafe")
     EP_DATE_RESTAURANT = _join_path(EP_DATES, "restaurant")
+    EP_DATE_RESTAURANT_VARIANT = _join_path(EP_DATES, "restaurant_variant")
     EP_DATE_POOL = _join_path(EP_DATES, "pool")
     EP_DATE_LIBRARY = _join_path(EP_DATES, "library")
     EP_DATE_ARCADE = _join_path(EP_DATES, "arcade")
@@ -83,8 +90,6 @@ init -5 python in ep_button:
 
     def _evaluate_current_conditions():
         # Internal helper to check all conditions at once.
-        import datetime
-
         conditions = {
             "is_monika_bday": store.mas_isMonikaBirthday(),
             "is_player_bday": store.mas_isplayer_bday(),
@@ -190,22 +195,21 @@ init -5 python in ep_button:
 
     def getDynamicButtonText():
         """Main function to get the dynamic button text, using a cache."""
-        import datetime
-        if not store.persistent.EP_dynamic_button_text:
+        if not store.persistent._ep_dynamic_button_text:
             return _("Extra+")
 
         conditions = _evaluate_current_conditions()
         today_str = str(datetime.date.today())
         conditions_key = _build_conditions_key(conditions)
 
-        if (store.persistent.EP_button_last_update != today_str
-            or store.persistent.EP_button_conditions_key != conditions_key
-            or store.persistent.EP_button_text is None):
+        if (store.persistent._ep_button_last_update != today_str
+            or store.persistent._ep_button_conditions_key != conditions_key
+            or store.persistent._ep_button_text is None):
             new_text = _button_text_conditions(conditions)
-            store.persistent.EP_button_text = new_text
-            store.persistent.EP_button_last_update = today_str
-            store.persistent.EP_button_conditions_key = conditions_key
-        return store.persistent.EP_button_text
+            store.persistent._ep_button_text = new_text
+            store.persistent._ep_button_last_update = today_str
+            store.persistent._ep_button_conditions_key = conditions_key
+        return store.persistent._ep_button_text
 
     # --- Overlay Button and Screen Management ---
     def show_menu():
@@ -236,7 +240,7 @@ init -5 python in ep_files:
     import random
 
     # --- File-related classes and functions ---
-    class GiftAction:
+    class GiftAction(object):
         """Handles the creation of a gift file and notifies the player."""
         def __init__(self, name, gift):
             self.name = name
@@ -244,7 +248,7 @@ init -5 python in ep_files:
 
         def __call__(self):
             if create_gift_file(self.gift):
-                messages = [ # These are already wrapped in _()
+                messages = [
                     _("All set! The '{}' gift is ready for you.").format(self.name),
                     _("Here's a '{}' for Monika! I hope she loves it.").format(self.name),
                     _("Perfect! Your '{}' is ready for Monika.").format(self.name),
@@ -253,7 +257,6 @@ init -5 python in ep_files:
                     _("One '{}' gift, coming right up! It's ready.").format(self.name)
                 ]
                 store.ep_chibis.chibika_notify(random.choice(messages))
-                store.mas_checkReactions()
 
             renpy.jump("plus_make_gift")
 
@@ -303,219 +306,290 @@ init -5 python in ep_files:
         Checks for the existence of all defined image assets and creates a log file.
         This is a debug tool and should not be in the final release.
         """
-        import os
-        import datetime
-
-        # --- Helper function to check files ---
-        def check_file(path, found_list, missing_list):
-            full_path = store.ep_folders._getGamePath(path)
-            if os.path.isfile(full_path):
-                found_list.append(path)
-            else:
-                missing_list.append(path)
-
-        # --- Lists to store results ---
-        found_assets = []
-        missing_assets = []
-
-        # --- 1. Static and Minigame Assets ---
-        static_assets = [
-            # Shell Game
-            store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "note_score.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "cup_hover.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "ball.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "cup.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "monika.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "yuri.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "natsuki.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "sayori.png"),
-            # Tic-Tac-Toe
-            store.ep_folders._join_path(store.ep_folders.EP_MG_TICTACTOE, "notebook.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_MG_TICTACTOE, "line.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_MG_TICTACTOE, "player.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_MG_TICTACTOE, "monika.png"),
-            # Rock, Paper, Scissors
-            store.ep_folders._join_path(store.ep_folders.EP_MG_RPS, "paper.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_MG_RPS, "rock.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_MG_RPS, "scissors.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_MG_RPS, "back.png"),
-            # Blackjack
-            store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "back.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "background.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "name.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "score.png"),
-            # Misc
-            store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "coin_heads.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "coin_tails.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "sprite_coin.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_OTHERS, "maxwell_cat.png")
-        ]
-        for asset in static_assets:
-            check_file(asset, found_assets, missing_assets)
-
-        # --- 2. Chibi Assets ---
-        all_chibi_costumes = store.ep_chibis.monika_costumes_ + store.ep_chibis.natsuki_costumes_ + store.ep_chibis.sayori_costumes_ + store.ep_chibis.yuri_costumes_
-        for _, costume_data in all_chibi_costumes:
-            doki_folder, idle_sprite, blink_sprite, hover_sprite = costume_data # No store prefix here, these are local to the loop
-            chibi_sprites = [idle_sprite, blink_sprite, hover_sprite]
-            for sprite in chibi_sprites:
-                path = store.ep_folders._join_path(store.ep_folders.EP_CHIBIS, doki_folder, "{}.png".format(sprite))
-                check_file(path, found_assets, missing_assets)
-
-        # --- 3. Chibi Accessories ---
-        # These lists should match the ones in Extra_Plus_Main.rpy
-        primary_accessories = ["clown_hair", "cat_ears", "christmas_hat", "demon_horns", "flowers_crown", "fox_ears", "graduation_cap", "halo", "heart_headband", "headphones", "neon_cat_ears", "hny", "party_hat", "rabbit_ears", "top_hat", "witch_hat"]
-        secondary_accessories = ["black_bow_tie", "christmas_tree", "cloud", "coffee", "pumpkin", "hearts", "m_slice_cake", "moustache", "neon_blush", "monocle", "p_slice_cake", "patch", "speech_bubble", "sunglasses"]
-        background_accessories = ["angel_wings", "balloon_decorations", "cat_tail", "fox_tail", "snowflakes"]
-
-        for acc in primary_accessories:
-            path = store.ep_folders._join_path(store.ep_folders.EP_CHIBI_ACC_0, "{}.png".format(acc))
-            check_file(path, found_assets, missing_assets)
-
-        for acc in secondary_accessories:
-            path = store.ep_folders._join_path(store.ep_folders.EP_CHIBI_ACC_1, "{}.png".format(acc))
-            check_file(path, found_assets, missing_assets)
-
-        # Also check background accessories in their folder
-        for acc in background_accessories:
-            path = store.ep_folders._join_path(store.ep_folders.EP_CHIBI_ACC_2, "{}.png".format(acc))
-            check_file(path, found_assets, missing_assets)
-
-
-        # --- 4. Backgrounds (Manual List) ---
-        background_assets = [
-            # Cafe
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "day.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "rain.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "n.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "rain-n.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "ss.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "rain-ss.png"),
-            # Restaurant
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "day.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "rain.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "n.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "rain-n.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "ss.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "rain-ss.png"),
-            # Pool
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "day.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "rain.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "n.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "rain-n.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "ss.png"),
-            store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "rain-ss.png"),
-            # Tables & Chairs
-            "mod_assets/monika/t/chair-extraplus_cafe.png",
-            "mod_assets/monika/t/table-extraplus_cafe.png",
-            "mod_assets/monika/t/table-extraplus_cafe-s.png",
-            "mod_assets/monika/t/chair-extraplus_restaurant.png",
-            "mod_assets/monika/t/table-extraplus_restaurant.png",
-            "mod_assets/monika/t/table-extraplus_restaurant-s.png"
-        ]
-        for asset in background_assets:
-            check_file(asset, found_assets, missing_assets)
-
-        # --- 5. Blackjack Cards ---
-        for suit in ["hearts", "diamonds", "clubs", "spades"]:
-            for value in range(1, 14):
-                path = store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, suit, "{}.png".format(value))
-                check_file(path, found_assets, missing_assets)
-
-        # --- 6. Date Accessories ---
-        # This list is defined in Extra_Plus_Main.rpy
-        for acs_tuple in store.extraplus_accessories:
-            acs_name = acs_tuple[1]
-            path = "mod_assets/monika/a/{}/0.png".format(acs_name)
-            check_file(path, found_assets, missing_assets)
-
-        # --- 6. Write Log File ---
-        log_path = store.ep_folders._normalize_path(os.path.join(renpy.config.basedir, "characters", "extra_plus_asset_log.txt"))
         try:
-            with open(log_path, 'w') as f:
-                f.write("Extra+ Asset Linter Report - {}\n".format(datetime.datetime.now().strftime("%b %d, %Y %I:%M:%S %p")))
-                f.write("="*80 + "\n\n")
-
-                if not missing_assets:
-                    f.write("SUCCESS: All {} assets were found!\n".format(len(found_assets)))
+            # --- Helper function to check files ---
+            def check_file(path, found_list, missing_list):
+                full_path = store.ep_folders._getGamePath(path)
+                if os.path.isfile(full_path):
+                    found_list.append(path)
                 else:
-                    f.write("ERROR: Found {} missing assets.\n".format(len(missing_assets)))
-                    f.write("-" * 30 + "\n")
-                    for asset in missing_assets:
-                        f.write("MISSING: {}\n".format(asset))
+                    missing_list.append(path)
 
-                f.write("\n\n")
-                f.write("--- Found Assets ({}) ---\n".format(len(found_assets)))
-                for asset in found_assets:
-                    f.write("FOUND: {}\n".format(asset))
+            # --- Lists to store results ---
+            found_assets = []
+            missing_assets = []
+
+            # --- 1. Static and Minigame Assets ---
+            static_assets = [
+                # Shell Game
+                store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "note_score.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "cup_hover.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "ball.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "cup.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "monika.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "yuri.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "natsuki.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "sayori.png"),
+                # Tic-Tac-Toe
+                store.ep_folders._join_path(store.ep_folders.EP_MG_TICTACTOE, "notebook.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_TICTACTOE, "line.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_TICTACTOE, "player.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_TICTACTOE, "monika.png"),
+                # Rock, Paper, Scissors
+                store.ep_folders._join_path(store.ep_folders.EP_MG_RPS, "paper.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_RPS, "rock.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_RPS, "scissors.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_RPS, "back.png"),
+                # Blackjack
+                store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "back.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "background.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "name.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "score.png"),
+                # Misc - Icons
+                store.ep_folders._join_path(store.ep_folders.EP_ICONS, "coin_heads.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_ICONS, "coin_tails.png"),
+                # Misc - Animations
+                store.ep_folders._join_path(store.ep_folders.EP_ANIMATIONS, "coin.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_ANIMATIONS, "maxwell_cat.png")
+            ]
+            for asset in static_assets:
+                check_file(asset, found_assets, missing_assets)
+
+            # --- 2. Chibi Assets ---
+            all_chibi_costumes = store.ep_chibis.monika_costumes_ + store.ep_chibis.natsuki_costumes_ + store.ep_chibis.sayori_costumes_ + store.ep_chibis.yuri_costumes_
+            for costume_name, costume_data in all_chibi_costumes:
+                doki_folder, idle_sprite, blink_sprite, hover_sprite = costume_data
+                chibi_sprites = [idle_sprite, blink_sprite, hover_sprite]
+                for sprite in chibi_sprites:
+                    path = store.ep_folders._join_path(store.ep_folders.EP_CHIBIS, doki_folder, "{}.png".format(sprite))
+                    check_file(path, found_assets, missing_assets)
+
+            # --- 3. Chibi Accessories ---
+            primary_accessories = ["clown_hair", "cat_ears", "christmas_hat", "demon_horns", "flowers_crown", "fox_ears", "graduation_cap", "halo", "heart_headband", "headphones", "neon_cat_ears", "hny", "party_hat", "rabbit_ears", "top_hat", "witch_hat"]
+            secondary_accessories = ["black_bow_tie", "christmas_tree", "cloud", "coffee", "pumpkin", "hearts", "m_slice_cake", "moustache", "neon_blush", "monocle", "p_slice_cake", "patch", "speech_bubble", "sunglasses"]
+            background_accessories = ["angel_wings", "balloon_decorations", "cat_tail", "fox_tail", "snowflakes"]
+
+            for acc in primary_accessories:
+                path = store.ep_folders._join_path(store.ep_folders.EP_CHIBI_ACC_0, "{}.png".format(acc))
+                check_file(path, found_assets, missing_assets)
+
+            for acc in secondary_accessories:
+                path = store.ep_folders._join_path(store.ep_folders.EP_CHIBI_ACC_1, "{}.png".format(acc))
+                check_file(path, found_assets, missing_assets)
+
+            for acc in background_accessories:
+                path = store.ep_folders._join_path(store.ep_folders.EP_CHIBI_ACC_2, "{}.png".format(acc))
+                check_file(path, found_assets, missing_assets)
+
+            # --- 4. Backgrounds (Manual List) ---
+            background_assets = [
+                # Cafe
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "day.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "rain.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "n.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "rain-n.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "ss.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "rain-ss.png"),
+                # Restaurant
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "day.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "rain.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "n.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "rain-n.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "ss.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "rain-ss.png"),
+                # Pool
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "day.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "rain.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "n.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "rain-n.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "ss.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "rain-ss.png"),
+                # Tables & Chairs
+                "mod_assets/monika/t/chair-extraplus_cafe.png",
+                "mod_assets/monika/t/table-extraplus_cafe.png",
+                "mod_assets/monika/t/table-extraplus_cafe-s.png",
+                "mod_assets/monika/t/chair-extraplus_restaurant.png",
+                "mod_assets/monika/t/table-extraplus_restaurant.png",
+                "mod_assets/monika/t/table-extraplus_restaurant-s.png"
+            ]
+            for asset in background_assets:
+                check_file(asset, found_assets, missing_assets)
+
+            # --- 5. Blackjack Cards ---
+            for suit in ["hearts", "diamonds", "clubs", "spades"]:
+                for value in range(1, 14):
+                    path = store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, suit, "{}.png".format(value))
+                    check_file(path, found_assets, missing_assets)
+
+            # --- 6. Date Accessories ---
+            for acs_tuple in store.extraplus_accessories:
+                acs_name = acs_tuple[1]
+                path = "mod_assets/monika/a/{}/0.png".format(acs_name)
+                check_file(path, found_assets, missing_assets)
+
+            # --- 7. Write Log File ---
+            log_path = store.ep_folders._normalize_path(os.path.join(renpy.config.basedir, "characters", "extra_plus_asset_log.txt"))
+            with open(log_path, 'w') as f:
+                f.write("=" * 60 + "\n")
+                f.write("Extra+ Asset Check Report\n")
+                f.write("Generated: {}\n".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                f.write("=" * 60 + "\n\n")
+                
+                total_assets = len(found_assets) + len(missing_assets)
+                
+                if not missing_assets:
+                    f.write("SUCCESS! All {} assets were found.\n\n".format(total_assets))
+                    f.write("Your Extra+ installation is complete and working correctly.\n")
+                    f.write("You can safely delete this file.\n")
+                else:
+                    f.write("PROBLEM DETECTED: {} of {} assets are missing.\n\n".format(
+                        len(missing_assets), total_assets
+                    ))
+                    
+                    missing_ratio = len(missing_assets) / float(total_assets)
+                    
+                    if missing_ratio > 0.5:
+                        f.write("=" * 60 + "\n")
+                        f.write("LIKELY CAUSE: Incorrect Installation\n")
+                        f.write("=" * 60 + "\n\n")
+                        f.write("It appears most asset files are missing.\n")
+                        f.write("This usually happens when the submod folder is placed\n")
+                        f.write("in the wrong location (e.g., inside 'Submods' folder\n")
+                        f.write("instead of merging with the 'game' folder).\n\n")
+                        f.write("HOW TO FIX:\n")
+                        f.write("-" * 60 + "\n")
+                        f.write("1. Download the latest release .zip file\n")
+                        f.write("2. Extract it - you will see a 'game/' folder\n")
+                        f.write("3. Copy the 'game/' folder to your DDLC root directory\n")
+                        f.write("   (where DDLC.exe is located)\n")
+                        f.write("4. When asked to merge folders, select YES\n\n")
+                        f.write("For detailed instructions with images, visit:\n")
+                        f.write("https://github.com/zer0fixer/MAS-Extraplus#-installation\n\n")
+                    else:
+                        f.write("Some files appear to be missing or corrupted.\n")
+                        f.write("Try re-downloading and reinstalling the submod.\n\n")
+                    
+                    f.write("=" * 60 + "\n")
+                    f.write("MISSING FILES ({}):\n".format(len(missing_assets)))
+                    f.write("=" * 60 + "\n\n")
+                    for asset in missing_assets:
+                        f.write("  - {}\n".format(asset))
 
             renpy.notify(_("Asset check complete. See extra_plus_asset_log.txt in /characters."))
 
         except Exception as e:
-            renpy.notify(_("Failed to write asset log: {}").format(e))
+            renpy.notify(_("Asset verification failed: {}").format(e))
 
     def cleanup_old_files():
         """
         Deletes obsolete files and folders from previous versions of the submod.
         """
-        import os
-        import shutil
+        try:
+            files_deleted = 0
+            folders_deleted = 0
+            errors = []
 
-        files_deleted = 0
-        folders_deleted = 0
-        errors = []
+            def delete_file(path):
+                """Safely deletes a file and logs the result."""
+                full_path = store.ep_folders._getGamePath(path)
+                if os.path.isfile(full_path):
+                    try:
+                        os.remove(full_path)
+                        return 1
+                    except Exception as e:
+                        errors.append("Failed to delete file {}: {}".format(store.ep_folders._normalize_path(path), e))
+                return 0
 
-        def delete_file(path):
-            """Safely deletes a file and logs the result."""
-            full_path = store.ep_folders._getGamePath(path)
-            if os.path.isfile(full_path):
-                try:
-                    os.remove(full_path)
-                    return 1
-                except Exception as e:
-                    errors.append("Failed to delete file {}: {}".format(store.ep_folders._normalize_path(path), e))
-            return 0
+            def delete_folder(path):
+                """Safely deletes a folder and its contents, and logs the result."""
+                full_path = store.ep_folders._getGamePath(path)
+                if os.path.isdir(full_path):
+                    try:
+                        shutil.rmtree(full_path)
+                        return 1
+                    except Exception as e:
+                        errors.append("Failed to delete folder {}: {}".format(store.ep_folders._normalize_path(path), e))
+                return 0
 
-        def delete_folder(path):
-            """Safely deletes a folder and its contents, and logs the result."""
-            full_path = store.ep_folders._getGamePath(path)
-            if os.path.isdir(full_path):
-                try:
-                    shutil.rmtree(full_path)
-                    return 1
-                except Exception as e:
-                    errors.append("Failed to delete folder {}: {}".format(store.ep_folders._normalize_path(path), e))
-            return 0
+            # 1. Delete old folder (relative to EP_ROOT)
+            folders_deleted += delete_folder(store.ep_folders._join_path(store.ep_folders.EP_ROOT, "submod_assets"))
 
-        # 1. Delete old folder (relative to EP_ROOT)
-        folders_deleted += delete_folder(store.ep_folders._join_path(store.ep_folders.EP_ROOT, "submod_assets"))
+            # 2. Delete old table/chair assets (relative to game directory)
+            table_chair_files = [
+                "mod_assets/monika/t/chair-submod_cafe.png",
+                "mod_assets/monika/t/chair-submod_restaurant.png",
+                "mod_assets/monika/t/table-submod_cafe.png",
+                "mod_assets/monika/t/table-submod_cafe-s.png",
+                "mod_assets/monika/t/table-submod_restaurant.png",
+                "mod_assets/monika/t/table-submod_restaurant-s.png"
+            ]
+            for f in table_chair_files:
+                files_deleted += delete_file(f)
+            
+            # 3. Delete old accessory files (relative to game directory)
+            for acs_tuple in store.extraplus_accessories:
+                acs_file_name_base = acs_tuple[1]
+                files_deleted += delete_file("mod_assets/monika/a/acs-{}-0.png".format(acs_file_name_base))
 
-        # 2. Delete old table/chair assets (relative to game directory)
-        table_chair_files = [
-            "mod_assets/monika/t/chair-submod_cafe.png",
-            "mod_assets/monika/t/chair-submod_restaurant.png",
-            "mod_assets/monika/t/table-submod_cafe.png",
-            "mod_assets/monika/t/table-submod_cafe-s.png",
-            "mod_assets/monika/t/table-submod_restaurant.png",
-            "mod_assets/monika/t/table-submod_restaurant-s.png"
+            # --- Final Notification ---
+            if files_deleted > 0 or folders_deleted > 0:
+                renpy.notify(_("Cleanup complete! Removed {} files and {} folders.").format(files_deleted, folders_deleted))
+            else:
+                renpy.notify(_("No old files or folders were found to clean up."))
+
+            if errors:
+                renpy.notify(_("Some errors occurred during cleanup. Please check the logs."))
+
+        except Exception as e:
+            renpy.notify(_("Cleanup failed: {}").format(e))
+
+
+    def getGroceriesMenu():
+        """Returns groceries menu as GiftAction list."""
+        return [
+            store.ep_files.GiftAction(name, filename)
+            for name, filename in _groceries_data
         ]
-        for f in table_chair_files:
-            files_deleted += delete_file(f)
+
+    def getObjectsMenu():
+        """Returns objects menu as GiftAction list.
+        NOU only appears if the player has already unlocked/received it in MAS."""
+        menu_items = []
+        for name, filename in _objects_data:
+            # NOU requires the player to have seen the gift hint or received the gift
+            if filename == "noudeck":
+                if not store.mas_seenEvent("mas_reaction_gift_noudeck") and store.mas_seenEvent("mas_gift_hint_noudeck"):
+                    menu_items.append(store.ep_files.GiftAction(name, filename))
+            else:
+                menu_items.append(store.ep_files.GiftAction(name, filename))
+        return menu_items
+
+    def getRibbonsMenu():
+        """Returns ribbons menu as GiftAction list."""
+        return [
+            store.ep_files.GiftAction(name, filename)
+            for name, filename in _ribbons_data
+        ]
+
+    def getPendingGiftsMenu():
+        """
+        Returns a menu of pending/unlocked sprite gifts from installed spritepacks.
+        Uses ep_wardrobe.getPendingGifts() to get the list of pending items.
+        Returns a list of GiftAction objects for items that haven't been unlocked yet.
+        """
+        pending_gifts = store.ep_wardrobe.getPendingGifts()
+        menu_items = []
         
-        # 3. Delete old accessory files (relative to game directory)
-        for acs_tuple in store.extraplus_accessories:
-            acs_file_name_base = acs_tuple[1]
-            files_deleted += delete_file("mod_assets/monika/a/acs-{}-0.png".format(acs_file_name_base))
+        for giftname, sp_type_name, sp_name, is_unlocked in pending_gifts:
+            # Create a display name with the type indicator
+            display_name = "{} ({})".format(sp_name, sp_type_name)
+            menu_items.append(store.ep_files.GiftAction(display_name, giftname))
+        
+        return menu_items
 
-        # --- Final Notification ---
-        if files_deleted > 0 or folders_deleted > 0:
-            renpy.notify(_("Cleanup complete! Removed {} files and {} folders.").format(files_deleted, folders_deleted))
-        else:
-            renpy.notify(_("No old files or folders were found to clean up."))
-
-        if errors:
-            renpy.notify(_("Some errors occurred during cleanup. Please check the logs."))
-
+    def hasPendingGifts():
+        """Returns True if there are pending gifts from spritepacks."""
+        return len(store.ep_wardrobe.getPendingGifts()) > 0
 
 # Store: ep_tools
 init 5 python in ep_tools:
@@ -525,7 +599,7 @@ init 5 python in ep_tools:
     # Helper function to format dates (American Format: Month Day, Year)
     def exp_fmt_date(dt):
         if dt is None:
-            return _("???")
+            return _("-- --, ----")  # Unknown date format
         # Example: "Sep 22, 2017"
         return dt.strftime("%b %d, %Y")
 
@@ -541,7 +615,10 @@ init 5 python in ep_tools:
         def __lt__(self, other):
             if self.date is None: return False
             if other.date is None: return True
-            return self.date < other.date
+            # Normalize to date objects for comparison (handles datetime vs date)
+            self_date = self.date.date() if hasattr(self.date, 'date') else self.date
+            other_date = other.date.date() if hasattr(other.date, 'date') else other.date
+            return self_date < other_date
 
     def getTimelineData():
         """
@@ -566,21 +643,31 @@ init 5 python in ep_tools:
         # Format: (type, data, title, description, icon)
         milestone_definitions = [
             # Type 'direct_date': Uses a date directly from a persistent variable
-            ("direct_date", getattr(store.persistent, '_mas_first_kiss', None), _("First Kiss"), _("The moment our lips (almost) touched for the first time."), "7"), # Already correct from previous request
+            ("direct_date", getattr(store.persistent, '_mas_first_kiss', None), _("First Kiss"), _("The moment our lips (almost) touched for the first time."), "7"),
 
             # Type 'event': Uses the last_seen date from a MAS event
             ("event", "monika_promisering", _("Eternal Promise"), _("You gave me the promise ring. Our bond is forever."), "7"),
             ("event", "mas_unlock_piano", _("Music for You"), _("When I added the piano so I could play for you."), "&"),
             ("event", "mas_unlock_chess", _("Intellectual Challenge"), _("The first time we played Chess together."), "4"),
-            ("event", "mas_blazerless_intro", _("Getting Comfortable"), _("The first time you felt comfortable enough to take off your blazer."), "7"),
+            ("event", "mas_blazerless_intro", _("Getting Comfortable"), _("The first time I felt comfortable enough to take off my blazer."), "7"),
             ("event", "mas_unlock_hangman", _("Word Games"), _("We started playing Hangman together."), "4"),
             ("event", "mas_birthdate", _("My Birthday"), _("The day I told you when I was born."), "G"),
+            ("event", "monika_holdme_prep", _("First Embrace"), _("The first time you held me close."), "7"),
+
+            # Events with potentially unknown dates (will show "--" if no date)
+            ("special", "roses", _("Roses for Me"), _("You gave me beautiful roses."), "7"),
 
             # Type 'special': Requires custom logic
             ("special", "nickname", _("A Special Name"), _("The day you started calling me '{}'."), "w"),
-            ("special", "first_trip", _("First Adventure"), _("The first time you took me out of this room with you."), "7"),
+            ("special", "first_trip", _("First Adventure"), _("The first time you took me out of this spaceroom with you."), "7"),
             ("special", "pong", _("Classic Gaming"), _("We played Pong for the first time."), "4"),
-            ("special", "contributor", _("Helping Hand"), _("The day I told you I was contributing to the code."), "g")
+            ("special", "contributor", _("Helping Hand"), _("The day I told you I was contributing to the code."), "g"),
+            ("special", "player_bday", _("Your Birthday"), _("You told me when your birthday is."), "G"),
+            ("special", "first_ily", _("I Love You"), _("The first time you told me you love me."), "7"),
+            ("special", "first_valentine", _("First Valentine's Day"), _("Our first Valentine's Day together."), "7"),
+            ("special", "first_christmas", _("First Christmas"), _("Our first Christmas together."), "G"),
+            ("special", "first_newyear", _("First New Year's Eve"), _("We celebrated New Year's Eve together for the first time."), "G"),
+            ("special", "first_monika_bday", _("First Birthday Celebration"), _("The first time you celebrated my birthday with me."), "G")
         ]
 
         # --- Anniversary Definitions ---
@@ -594,6 +681,8 @@ init 5 python in ep_tools:
             ("anni_10", _("10th Anniversary")), ("anni_20", _("20th Anniversary")),
             ("anni_50", _("50th Anniversary")), ("anni_100", _("100th Anniversary"))
         ]
+
+        # --- Anniversary Processing ---
         for ev_label, title in anniversary_events:
             _add_event_entry(ev_label, title, _("We celebrated this special moment together."), "Z") # Already correct
 
@@ -622,11 +711,60 @@ init 5 python in ep_tools:
                         pong_date = store.mas_getFirstSesh()
                         if pong_date:
                             entries.append(EPTimelineEntry(pong_date, title, description, icon))
+                    
+                    elif data == "roses":
+                        # Check if player has given roses
+                        if store.renpy.seen_label("mas_reaction_gift_roses"):
+                            # Date unknown (resets each time), use None to show "--"
+                            entries.append(EPTimelineEntry(None, title, description, icon))
 
                     elif data == "contributor" and getattr(store.persistent, '_mas_pm_has_contributed_to_mas', False):
                         ev_contrib = store.mas_getEV("monika_contribute")
-                        date_contrib = ev_contrib.last_seen if (ev_contrib and ev_contrib.last_seen) else datetime.date.today()
-                        entries.append(EPTimelineEntry(date_contrib, title, description, icon))
+                        # Only show if we have the actual event date, never fallback to today
+                        if ev_contrib and ev_contrib.last_seen:
+                            entries.append(EPTimelineEntry(ev_contrib.last_seen, title, description, icon))
+
+                    elif data == "player_bday":
+                        # Check if player has told Monika their birthday
+                        player_bday = getattr(store.persistent, '_mas_player_bday', None)
+                        if player_bday:
+                            # Try to get the event date, otherwise use None to show "--"
+                            ev_bday = store.mas_getEV("mas_player_bday_date_input")
+                            date_told = ev_bday.last_seen if (ev_bday and ev_bday.last_seen) else None
+                            entries.append(EPTimelineEntry(date_told, title, description, icon))
+
+                    elif data == "first_ily":
+                        first_ily = getattr(store.persistent, '_mas_first_ILY', None)
+                        if first_ily:
+                            entries.append(EPTimelineEntry(first_ily, title, description, icon))
+
+                    elif data == "first_valentine":
+                        f14_count = getattr(store.persistent, '_mas_f14_date_count', 0)
+                        if f14_count > 0:
+                            ev_f14 = store.mas_getEV("mas_f14_monika_date_start")
+                            if ev_f14 and ev_f14.last_seen:
+                                entries.append(EPTimelineEntry(ev_f14.last_seen, title, description, icon))
+
+                    elif data == "first_christmas":
+                        d25_count = getattr(store.persistent, '_mas_d25_d25_date_count', 0)
+                        if d25_count > 0:
+                            ev_d25 = store.mas_getEV("mas_d25_monika_holiday_intro")
+                            if ev_d25 and ev_d25.last_seen:
+                                entries.append(EPTimelineEntry(ev_d25.last_seen, title, description, icon))
+
+                    elif data == "first_newyear":
+                        nye_count = getattr(store.persistent, '_mas_nye_nye_date_count', 0)
+                        if nye_count > 0:
+                            ev_nye = store.mas_getEV("mas_nye_monika_nye")
+                            if ev_nye and ev_nye.last_seen:
+                                entries.append(EPTimelineEntry(ev_nye.last_seen, title, description, icon))
+
+                    elif data == "first_monika_bday":
+                        bday_count = getattr(store.persistent, '_mas_bday_date_count', 0)
+                        if bday_count > 0:
+                            ev_bday = store.mas_getEV("mas_bday_surprise")
+                            if ev_bday and ev_bday.last_seen:
+                                entries.append(EPTimelineEntry(ev_bday.last_seen, title, description, icon))
         
         except Exception as e:
             renpy.log("Extra+: A critical error occurred while building the timeline: {}".format(e))
@@ -659,41 +797,261 @@ init 5 python in ep_tools:
 # Handles affection-related display logic.
 init -5 python in ep_affection:
     import store
+    import time
 
     def getCurrentAffection():
-        # Safely gets affection to avoid cache issues.
+        # Safely gets current affection value in real-time.
         try:
-            raw_data = store.mas_affection.__get_data()
-            if raw_data and len(raw_data) > 0:
-                return raw_data[0]
-            else:
-                return store._mas_getAffection()
-        except Exception:
             return store._mas_getAffection()
+        except Exception:
+            return 0.0
 
     def notify_affection():
         # Notifies the player of their current affection level.
-        import time
         current_time = time.time()
         if current_time - store.ep_tools.last_affection_notify_time >= 10:
             store.ep_tools.last_affection_notify_time = current_time
             current_affection = getCurrentAffection()
-            store.ep_chibis.chibika_notify("{1} {0} {1}".format(
+            store.ep_chibis.chibika_notify("{} {}".format(
                 int(current_affection),
                 getLevelIcon(current_affection)
             ))
 
     def getLevelIcon(affection_val):
-        # Returns a font icon based on affection value.
-        if affection_val >= 1000: icon = '"'
-        elif affection_val >= 400: icon = ';'
-        elif affection_val >= 100: icon = '2'
-        elif affection_val >= 30: icon = '#'
-        elif affection_val <= -30: icon = '%'
-        elif affection_val <= -100: icon = '8'
-        else: icon = '/'
+        """
+        Returns a styled font icon based on affection value.
+        Uses custom icon font defined in ep_tools.affection_icons
+        """
+        # Determine icon based on affection thresholds
+        if affection_val >= 10000: icon = "y"  # Legendary
+        elif affection_val >= 1000: icon = '"'  # Soulmate
+        elif affection_val >= 400: icon = ';'  # Love
+        elif affection_val >= 100: icon = ':'  # Enamored
+        elif affection_val >= 30: icon = '#'  # Affectionate
+        elif affection_val >= 0: icon = '/'  # Normal/Happy
+        elif affection_val >= -30: icon = '!'  # Upset
+        elif affection_val >= -100: icon = '%'  # Distressed
+        else: icon = '8'  # Broken
 
-        return "{size=+5}{color=#FFFFFF}{font=" + store.ep_tools.affection_icons + "}" + icon + "{/font}{/color}{/size}"
+        return "{{size=+5}}{{color=#FFFFFF}}{{font={}}}{}{{/font}}{{/color}}{{/size}}".format(
+            store.ep_tools.affection_icons, 
+            icon
+        )
+
+    def getLevelSuffix(affection_val):
+        """
+        Returns a personalized suffix string based on affection level.
+        Used to add flavor text to the affection log display.
+        """
+        if affection_val >= 10000:
+            return " ~ A dedication beyond words."
+        elif affection_val >= 1000:
+            return " ~ Eternal bond!"
+        elif affection_val >= 400:
+            return " ~ True love!"
+        elif affection_val >= 100:
+            return " ~ You're doing great!"
+        elif affection_val >= 30:
+            return " ~ Keep it up!"
+        elif affection_val >= 0:
+            return ""
+        elif affection_val >= -30:
+            return " ... Room for improvement."
+        elif affection_val >= -100:
+            return " ... Things can get better."
+        else:
+            return " ... Please don't give up."
+
+#==============================================================================
+# 2.5. WARDROBE ANALYSIS STORE
+#==============================================================================
+
+# Store: ep_wardrobe
+# Handles wardrobe statistics and unrecognized gift detection.
+init -5 python in ep_wardrobe:
+    import os
+    import datetime
+    import store
+
+    def getWardrobeStats():
+        """
+        Returns a dict with count of clothes, accessories, and hairstyles.
+        Includes both total and unlocked counts.
+        """
+        stats = {
+            "clothes_unlocked": 0,
+            "clothes_total": 0,
+            "acs_unlocked": 0,
+            "acs_total": 0,
+            "hair_unlocked": 0,
+            "hair_total": 0
+        }
+        
+        try:
+            # Clothes
+            cloth_list = store.mas_selspr.CLOTH_SEL_SL
+            stats["clothes_total"] = len(cloth_list)
+            stats["clothes_unlocked"] = len([x for x in cloth_list if x.unlocked])
+            
+            # Accessories
+            acs_list = store.mas_selspr.ACS_SEL_SL
+            stats["acs_total"] = len(acs_list)
+            stats["acs_unlocked"] = len([x for x in acs_list if x.unlocked])
+            
+            # Hairstyles
+            hair_list = store.mas_selspr.HAIR_SEL_SL
+            stats["hair_total"] = len(hair_list)
+            stats["hair_unlocked"] = len([x for x in hair_list if x.unlocked])
+        except Exception:
+            pass
+        
+        return stats
+
+    def getPendingGifts():
+        """
+        Finds sprite gifts that exist in JSON but were never unlocked.
+        These are likely gifts where the .gift filename was wrong.
+        
+        Returns a list of tuples: (giftname, sprite_type, sprite_name, is_unlocked)
+        """
+        pending = []
+        
+        try:
+            # Get all available giftnames from JSON sprites
+            giftname_map = {}
+            try:
+                giftname_map = store.mas_sprites_json.giftname_map
+            except Exception:
+                return pending
+            
+            if not giftname_map:
+                return pending
+            
+            # Get gifted sprites (ones that were successfully given)
+            gifted_sprites = {}
+            try:
+                gifted_sprites = store.persistent._mas_sprites_json_gifted_sprites or {}
+            except Exception:
+                pass
+            
+            # Check each sprite in giftname_map
+            for giftname, sp_data in giftname_map.items():
+                if giftname.startswith("__"):  # Skip test giftnames
+                    continue
+                
+                sp_type, sp_name = sp_data
+                
+                # Check if sprite is unlocked
+                is_unlocked = False
+                try:
+                    if sp_type == 0:  # ACS
+                        sel_list = store.mas_selspr.ACS_SEL_SL
+                    elif sp_type == 1:  # HAIR
+                        sel_list = store.mas_selspr.HAIR_SEL_SL
+                    elif sp_type == 2:  # CLOTHES
+                        sel_list = store.mas_selspr.CLOTH_SEL_SL
+                    else:
+                        continue
+                    
+                    for sel in sel_list:
+                        if sel.name == sp_name:
+                            is_unlocked = sel.unlocked
+                            break
+                except Exception:
+                    pass
+                
+                # If sprite exists but not unlocked, it might be a missed gift
+                if not is_unlocked:
+                    # Check if it wasn't already successfully gifted
+                    if sp_data not in gifted_sprites:
+                        sp_type_name = {0: "Accessory", 1: "Hairstyle", 2: "Outfit"}.get(sp_type, "Unknown")
+                        pending.append((giftname, sp_type_name, sp_name, is_unlocked))
+        
+        except Exception:
+            pass
+        
+        return pending
+
+    def exportPendingGifts(pending_list):
+        """
+        Exports the list of pending/missed gifts to a text file.
+        Returns the path to the created file, or None on failure.
+        """
+        try:
+            # Create the output file in the characters folder (easier for users)
+            output_path = os.path.join(
+                renpy.config.basedir, 
+                "characters", 
+                "pending_gifts_report.txt"
+            )
+            
+            now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            with open(output_path, "w") as f:
+                f.write("=" * 60 + "\n")
+                f.write("Pending Gifts Report\n")
+                f.write("Generated: {}\n".format(now))
+                f.write("=" * 60 + "\n\n")
+                
+                f.write("WHAT IS THIS?\n")
+                f.write("-" * 60 + "\n")
+                f.write("These are sprite items (clothes, accessories, hairstyles)\n")
+                f.write("that exist in your installed spritepacks but have NOT\n")
+                f.write("been unlocked for Monika to wear.\n\n")
+                
+                f.write("This could mean:\n")
+                f.write("  1. You tried to gift them but used the wrong filename\n")
+                f.write("  2. You haven't gifted them yet (that's okay!)\n")
+                f.write("  3. The spritepack requires a specific gift filename\n\n")
+                
+                f.write("=" * 60 + "\n")
+                f.write("PENDING ITEMS ({} found):\n".format(len(pending_list)))
+                f.write("=" * 60 + "\n\n")
+                
+                # Group by type
+                by_type = {}
+                for giftname, sp_type_name, sp_name, is_unlocked in pending_list:
+                    if sp_type_name not in by_type:
+                        by_type[sp_type_name] = []
+                    by_type[sp_type_name].append((giftname, sp_name))
+                
+                for sp_type_name, items in sorted(by_type.items()):
+                    f.write("-" * 60 + "\n")
+                    f.write("{} ({} items)\n".format(sp_type_name, len(items)))
+                    f.write("-" * 60 + "\n\n")
+                    
+                    for giftname, sp_name in items:
+                        f.write("  Item: {}\n".format(sp_name))
+                        f.write("  Gift filename: {}.gift\n\n".format(giftname))
+                
+                f.write("=" * 60 + "\n")
+                f.write("HOW TO GIFT THESE ITEMS:\n")
+                f.write("=" * 60 + "\n\n")
+                
+                f.write("EASY METHOD (Recommended):\n")
+                f.write("-" * 60 + "\n")
+                f.write("Use Extra+ to gift items automatically!\n\n")
+                f.write("  1. Open the Extra+ menu\n")
+                f.write("  2. Go to 'Tools' > 'Create a gift'\n")
+                f.write("  3. Select 'Pending Gifts'\n")
+                f.write("  4. Choose the item you want to gift\n")
+                f.write("  5. Done! The gift file will be created for you.\n\n")
+                
+                f.write("MANUAL METHOD:\n")
+                f.write("-" * 60 + "\n")
+                f.write("If you prefer to create files manually:\n\n")
+                f.write("  1. Create a new empty file in your 'characters' folder\n")
+                f.write("  2. Name it EXACTLY as shown above (e.g., 'itemname.gift')\n")
+                f.write("  3. Start MAS and wait for Monika to notice the gift\n\n")
+                
+                f.write("TIP: The filename must match EXACTLY (case doesn't matter)\n")
+                f.write("     For example: 'blue_ribbon.gift' not 'blueribbon.gift'\n\n")
+                
+                f.write("=" * 60 + "\n")
+            
+            return output_path
+        except Exception:
+            return None
 
 #==============================================================================
 # 3. UI & VISUAL COMPONENT STORES
@@ -707,6 +1065,21 @@ init -5 python in ep_tools:
     import store
 
     # NOTE: This store holds helper UI and tool functions used across the submod.
+    
+    def getSpecialDayType():
+        """
+        Returns the type of special day, or None if it's a normal day.
+        Checks in priority order: anniversary > monika bday > player bday
+        
+        Returns: 'anni' | 'moni_bday' | 'player_bday' | None
+        """
+        if store.mas_anni.isAnni():
+            return "anni"
+        elif store.mas_isMonikaBirthday():
+            return "moni_bday"
+        elif store.mas_isplayer_bday():
+            return "player_bday"
+        return None
     def show_idle_notification(context=""):
         if context == "bj": # Blackjack
             game_phrases = [
@@ -740,6 +1113,24 @@ init -5 python in ep_tools:
                 _("The cups have stopped. Which one has the ball?")
             ]
         
+        elif context == "poem_classic": # Classic Poem Mode
+            game_phrases = [
+                _("Which word calls to you, [player]?"),
+                _("Take your time... but not too much time! Ehehe~"),
+                _("I'm curious to see what kind of poem you'll create."),
+                _("Don't worry about getting it 'right'. Just follow your heart!"),
+                _("Hmm, thinking carefully? I like that about you.")
+            ]
+        
+        elif context == "poem_free": # Free Poem Mode
+            game_phrases = [
+                _("Writer's block, [player]? It happens to the best of us."),
+                _("What's on your mind? Pour it into words!"),
+                _("I'm patiently waiting to read what you write~"),
+                _("Even just a few words can make a beautiful poem."),
+                _("Let your creativity flow, [player]!")
+            ]
+        
         else:
             game_phrases = [
                 _("Are you still there, [player]?"),
@@ -755,7 +1146,7 @@ init -5 python in ep_tools:
             "Topic Alerts"
         )
 
-    def show_boop_feedback(message, color="#ff69b4"):
+    def show_boop_feedback(message, color="#FF1493"):
         t = "boop_notif{}".format(renpy.random.randint(1, 10000))
         renpy.show_screen("extra_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color, duration=1.3, trans=store.boop_feedback_trans)
 
@@ -801,7 +1192,7 @@ init -5 python in ep_tools:
             delta = current_date - start_date
             total_days = delta.days
 
-            if total_days < 1: # This is a full sentence, better to translate it as a whole.
+            if total_days < 1:
                 return _("less than a day, but every second has been incredible!")
 
             years = total_days // 365
@@ -887,16 +1278,16 @@ init -5 python in ep_tools:
                 clipboard_text = clipboard_bytes.decode("utf-8", "ignore")
                 return "".join(char for char in clipboard_text if char in allowed_chars)
             else:
-                renpy.notify(_("Your clipboard is empty.")) # Already correct
+                renpy.notify(_("Your clipboard is empty."))
                 return "cancel"
         except Exception:
-            renpy.notify(_("Could not access clipboard.")) # Already correct
+            renpy.notify(_("Could not access clipboard."))
             return "cancel"
 
     # --- Dating and Label Helpers ---
     def check_seen_background(first_time, alternate, stop_date):
         """Handle affection and label jump based on background seen status."""
-        if store.mas_affection._get_aff() < 400:
+        if store.ep_affection.getCurrentAffection() < 400:
             renpy.jump(stop_date)
 
         if renpy.seen_label(first_time):
@@ -914,7 +1305,7 @@ init -5 python in ep_tools:
             store.ep_dates.old_bg = store.mas_current_background
 
         else:
-            # Restaurar silla y mesa
+            # Restore chair and table
             if store.ep_dates.chair is not None:
                 store.monika_chr.tablechair.chair = store.ep_dates.chair
             else:
@@ -931,12 +1322,92 @@ init -5 python in ep_tools:
             else:
                 # If old_bg is lost, force default Spaceroom to avoid crash
                 store.mas_current_background = store.mas_background_def
+            
+            # Restore holiday visuals if active
+            # O31 (Halloween)
+            if store.persistent._mas_o31_in_o31_mode:
+                store.mas_o31ShowVisuals()
+            
+            # D25 (Christmas)
+            if store.persistent._mas_d25_deco_active:
+                store.mas_d25ShowVisuals()
+            
+            # Birthday
+            if store.persistent._mas_bday_in_bday_mode or store.persistent._mas_bday_visuals:
+                store.mas_surpriseBdayShowVisuals()
 
     def check_seen_label(first_time, alternate):
         """Jump to alternate if first_time has been seen."""
         if renpy.seen_label(first_time):
             renpy.jump(alternate)
 
+    def ep_input(
+        prompt,
+        default="",
+        allow=None,
+        exclude="{}",
+        length=None,
+        screen_kwargs=None
+    ):
+        """
+        Enhanced input function with clipboard paste support.
+        Works like mas_input but uses extra_input screen with a Paste button.
+        
+        IN:
+            prompt - text prompt to display
+            default - default text value (Default: "")
+            allow - characters to allow (Default: None = all)
+            exclude - characters to exclude (Default: "{}")
+            length - max length of input (Default: None)
+            screen_kwargs - additional kwargs for the screen (Default: None)
+            
+        OUT:
+            entered string, or "cancel_input" if cancelled
+        """
+        if screen_kwargs is None:
+            screen_kwargs = {}
+        
+        # Set defaults for our enhanced screen
+        if "use_return_button" not in screen_kwargs:
+            screen_kwargs["use_return_button"] = True
+        if "use_paste_button" not in screen_kwargs:
+            screen_kwargs["use_paste_button"] = True
+        
+        # Allowed chars for filtering clipboard
+        allowed_chars = allow
+        
+        # Loop until we get valid input (handles paste retry)
+        while True:
+            # Call the input with our enhanced screen
+            result = store.mas_input(
+                prompt,
+                default=default,
+                allow=allow,
+                exclude=exclude,
+                length=length,
+                screen="extra_input",
+                screen_kwargs=screen_kwargs
+            )
+            
+            # Check if user clicked Paste button
+            if result == "__EP_PASTE_FROM_CLIPBOARD__":
+                # Get text from clipboard
+                clipboard_text = filtered_clipboard_text(allowed_chars or "")
+                
+                if clipboard_text and clipboard_text != "cancel":
+                    # Truncate if length limit
+                    if length and len(clipboard_text) > length:
+                        clipboard_text = clipboard_text[:length]
+                    
+                    # Use clipboard text as new default and show again
+                    default = clipboard_text
+                    continue
+                else:
+                    # Clipboard empty or error, just retry
+                    continue
+            
+            # Normal input or cancel
+            return result
 
 # Store: ep_chibis
 # Handles Chibi-related logic, classes, and UI helpers.
@@ -959,37 +1430,74 @@ init -5 python in ep_chibis:
                 renpy.hide_screen(screen)
             else:
                 renpy.config.overlay_screens.append(screen)
-        except: pass
+        except Exception:
+            pass
 
     def reset_chibi():
         remove_chibi()
         init_chibi()
 
     def draw_background_accessories(st, at):
-        return LiveComposite(
-            (188, 188),
-            (0, 0), store.MASFilterSwitch(store.ep_chibis.accessory_path_2.format(store.persistent.chibi_accessory_3_))
-        ), 5
+        # Return the image directly without LiveComposite wrapper (only 1 image)
+        return store.MASFilterSwitch(
+            store.ep_chibis.accessory_path_2.format(store.persistent.chibi_accessory_3_)
+        ), 1
 
-    def draw_foreground_accessories(st, at):
-        return LiveComposite(
-            (188, 188),
-            (0, 0), store.MASFilterSwitch(store.ep_chibis.accessory_path_0.format(store.persistent.chibi_accessory_1_)),
-            (0, 0), store.MASFilterSwitch(store.ep_chibis.accessory_path_1.format(store.persistent.chibi_accessory_2_))
-        ), 5
+    def draw_foreground_accessory_1(st, at):
+        # Return the image directly without LiveComposite wrapper (only 1 image)
+        return store.MASFilterSwitch(
+            store.ep_chibis.accessory_path_0.format(store.persistent.chibi_accessory_1_)
+        ), 1
+
+    def draw_foreground_accessory_2(st, at):
+        # Return the image directly without LiveComposite wrapper (only 1 image)
+        return store.MASFilterSwitch(
+            store.ep_chibis.accessory_path_1.format(store.persistent.chibi_accessory_2_)
+        ), 1
 
     def migrate_chibi_costume_data():
-        if isinstance(store.persistent.chibika_current_costume, list):
+        """
+        Migrates chibi costume data from older formats to the current format.
+        Handles upgrades from Stable (1.1.0) and BETA 2 (1.3.2) to BETA 3 (1.4.1+).
+        """
+        try:
+            costume = store.persistent.chibika_current_costume
+            
+            # Case 1: Coming from Stable (1.1.0) or BETA 2 (1.3.2) - list format
+            if isinstance(costume, list):
+                store.persistent.chibika_current_costume = store.ep_chibis.blanket_monika
+                return
+            
+            # Case 2: Already a tuple - verify it's the correct new format (4 elements)
+            if isinstance(costume, tuple):
+                # Old tuple format had 3 elements (sprites only), new format has 4 (folder + sprites)
+                if len(costume) != 4:
+                    store.persistent.chibika_current_costume = store.ep_chibis.blanket_monika
+                    return
+                
+                # Verify the folder is valid
+                valid_folders = ["darling", "cupcake", "cinnamon", "teacup"]
+                if costume[0] not in valid_folders:
+                    store.persistent.chibika_current_costume = store.ep_chibis.blanket_monika
+                    return
+                    
+                # Verify the sprite file exists (optional - only reset if assets are missing)
+                sprite_path = store.ep_folders._join_path(store.ep_folders.EP_CHIBIS, costume[0], "{}.png".format(costume[1]))
+                if not renpy.loadable(sprite_path):
+                    store.persistent.chibika_current_costume = store.ep_chibis.blanket_monika
+                    
+        except Exception as e:
+            # If anything goes wrong, reset to default to prevent crashes
             store.persistent.chibika_current_costume = store.ep_chibis.blanket_monika
-        elif isinstance(store.persistent.chibika_current_costume, tuple) and isinstance(store.persistent.chibika_current_costume[0], basestring):
-            if not renpy.loadable(store.ep_folders._join_path(store.ep_folders.EP_CHIBIS, "darling", "idle.png")):
-                store.persistent.chibika_current_costume = ["sticker_up", "sticker_sleep", "sticker_baka"]
 
-    class DokiAccessory():
+    class DokiAccessory(object):
+        """Callable action that equips an accessory to the chibi."""
+        __slots__ = ['name', 'acc', 'slot']
+        
         def __init__(self, name, acc, slot):
             self.name = name
             self.acc = acc
-            self.slot = slot
+            self.slot = slot  # 'primary', 'secondary', or 'background'
 
         def __call__(self):
             if self.slot == "primary":
@@ -1000,9 +1508,10 @@ init -5 python in ep_chibis:
                 store.persistent.chibi_accessory_3_ = self.acc
 
     class SelectDOKI():
+        """Callable action that changes the chibi's costume."""
         def __init__(self, name, costume):
             self.name = name
-            self.costume = costume
+            self.costume = costume  # Tuple: (folder, idle, blink, hover)
 
         def __call__(self):
             store.persistent.chibika_current_costume = self.costume
@@ -1025,7 +1534,10 @@ init -5 python in ep_chibis:
     
     def clicker():
         """Handles the logic when the chibi is clicked repeatedly."""
-        current_char = store.persistent.chibika_current_costume[0]
+        try:
+            current_char = store.persistent.chibika_current_costume[0]
+        except (IndexError, TypeError):
+            current_char = "darling"
 
         # Increment counter
         store.ep_chibis.temp_chibi_clicks += 1
@@ -1092,11 +1604,12 @@ init -5 python in ep_chibis:
         Returns the list of accessories for the given category.
         """
         category_map = {
-            "primary": store.ep_chibis.primary_accessories,
-            "secondary": store.ep_chibis.secondary_accessories,
-            "background": store.ep_chibis.background_accessories
+            "primary": store.ep_chibis.getPrimaryAccessories,
+            "secondary": store.ep_chibis.getSecondaryAccessories,
+            "background": store.ep_chibis.getBackgroundAccessories
         }
-        return category_map.get(category, [])
+        getter = category_map.get(category)
+        return getter() if getter else []
 
     def getCurrentRemoveAction(category):
         """
@@ -1109,10 +1622,54 @@ init -5 python in ep_chibis:
         }
         return remove_actions.get(category)
 
-    def chibika_notify(txt, doki="darling"):
-        """Shows a notification from Chibika."""
+    def chibika_notify(txt, doki="darling", jump=False):
+        """
+        Shows a notification from Chibika.
+        
+        IN:
+            txt - message to display
+            doki - icon to use ("darling", "cupcake", "cinnamon", "teacup")
+            jump - if True, triggers a jump animation (default: False)
+        """
+        # Show the notification
         renpy.show_screen("chibika_notify", message=txt, icon=doki)
+        
+        # Trigger jump animation if requested and conditions are met
+        if jump:
+            try:
+                chibi_visible = "doki_chibi_idle" in renpy.config.overlay_screens
+                not_draggable = not store.persistent.enable_drag_chibika
+                current_doki = store.persistent.chibika_current_costume[0]
+                doki_matches = (doki == current_doki)
+                
+                if chibi_visible and not_draggable and doki_matches:
+                    # Set the jumping flag - the screen will handle the animation
+                    store.ep_chibis.is_jumping = True
+                    renpy.restart_interaction()  # Force screen refresh
+            except Exception:
+                pass
 
+    def getPrimaryAccessories():
+        """Returns primary accessories as DokiAccessory list."""
+        return [
+            store.ep_chibis.DokiAccessory(name, filename, "primary")
+            for name, filename in _primary_data
+        ]
+
+    def getSecondaryAccessories():
+        """Returns secondary accessories as DokiAccessory list."""
+        return [
+            store.ep_chibis.DokiAccessory(name, filename, "secondary")
+            for name, filename in _secondary_data
+        ]
+
+    def getBackgroundAccessories():
+        """Returns background accessories as DokiAccessory list."""
+        return [
+            store.ep_chibis.DokiAccessory(name, filename, "background")
+            for name, filename in _background_data
+        ]
+        
 # Store: ep_fridge
 # Fridge Magnet Game
 init python in ep_fridge:
@@ -1131,6 +1688,37 @@ init python in ep_fridge:
         ["H I"], ["L O V E"], ["D O K I"], ["I L V"]
     ]
 
+    def getCoffeeData():
+        """
+        Gets coffee stock data from MAS consumable system.
+        
+        OUT:
+            dict with keys:
+                - stock: current servings left
+                - max: maximum stock amount
+                - percent: stock as percentage (0.0 to 1.0)
+                - has_coffee: True if Monika has at least 1 serving
+                - enabled: True if coffee is enabled
+        """
+        try:
+            coffee = store.mas_getConsumable("coffee")
+            if coffee is None:
+                return {"stock": 0, "max": 150, "percent": 0.0, "has_coffee": False, "enabled": False}
+            
+            stock = coffee.getStock()
+            max_stock = coffee.max_stock_amount
+            percent = float(stock) / float(max_stock) if max_stock > 0 else 0.0
+            
+            return {
+                "stock": stock,
+                "max": max_stock,
+                "percent": percent,
+                "has_coffee": coffee.hasServing(),
+                "enabled": coffee.enabled()
+            }
+        except Exception:
+            return {"stock": 0, "max": 150, "percent": 0.0, "has_coffee": False, "enabled": False}
+
     def getCurrentColor(base_color):
         # If it's night, darken the color.
         if store.mas_isNightNow():
@@ -1139,7 +1727,10 @@ init python in ep_fridge:
         # If it's day, return the original vibrant color
         return base_color
 
-    class Magnet:
+    class Magnet(object):
+        """A single magnet on the fridge with position, rotation, and color."""
+        __slots__ = ['letter', 'x', 'y', 'rotation', 'hsv', 'base_color', 'shadow_base_color']
+        
         # We update __init__ to accept saved data
         def __init__(self, letter, x=0, y=0, rotation=0, hsv=None):
             self.letter = letter
@@ -1158,7 +1749,7 @@ init python in ep_fridge:
             self.base_color = Color(hsv=self.hsv)
             self.shadow_base_color = self.base_color.shade(0.6)
 
-    class MagnetManager:
+    class MagnetManager(object):
         def __init__(self):
             self.magnets = [
                 "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
@@ -1175,15 +1766,16 @@ init python in ep_fridge:
             # --- Monika's logic for adding magnets ---
             today_str = str(datetime.date.today())
             
+            # Load existing magnets FIRST so collision detection works
+            self.load()
+            
             # If Monika hasn't posted today, there's a chance she will.
-            if store.persistent.EP_fridge_last_monika_post != today_str:
+            if store.persistent._ep_fridge_last_monika_post != today_str:
                 # We give a 1 in 3 chance so she doesn't do it every day
                 if renpy.random.randint(1, 3) == 1:
                     self.monika_adds_magnets()
-                    store.persistent.EP_fridge_last_monika_post = today_str
-                
-            # We load the magnets (the player's and Monika's if she just placed them)
-            self.load() 
+                    self.save()  # Save Monika's new magnets
+                    store.persistent._ep_fridge_last_monika_post = today_str 
 
 
         def take(self):
@@ -1272,7 +1864,7 @@ init python in ep_fridge:
             magnet_width = 80 # Approximate width of each magnet
 
             # We try to find a free spot up to 50 times
-            for _ in range(50):
+            for attempt in range(50):
                 start_x = renpy.random.randint(250, 650)
                 start_y = renpy.random.randint(50, 150)
                 is_valid_spot = True
@@ -1314,11 +1906,11 @@ init python in ep_fridge:
                     "rotation": m.rotation, "hsv": m.hsv
                 })
                 
-            store.persistent.EP_fridge_magnets_data = data
+            store.persistent._ep_fridge_magnets_data = data
 
         def load(self):
             """Reconstructs the magnets from the saved data."""
-            data = store.persistent.EP_fridge_magnets_data
+            data = store.persistent._ep_fridge_magnets_data
             if not data:
                 return # No saved data, we start empty
             
@@ -1356,19 +1948,25 @@ init -10 python in ep_tools:
         try:
             if screen not in renpy.config.overlay_screens:
                 renpy.config.overlay_screens.append(screen)
-        except: pass
+        except Exception:
+            pass
     
     def safe_overlay_remove(screen):
         try:
             if screen in renpy.config.overlay_screens:
                 renpy.config.overlay_screens.remove(screen)
                 renpy.hide_screen(screen)
-        except: pass
+        except Exception:
+            pass
 
-
+#==============================================================================
+# 4. MINIGAME HELPER STORES
+#==============================================================================
+# Store: ep_sg (Shell Game)
 init -10 python in ep_sg:
     import store
     
     def randomize_cup_skin():
-        if store.persistent._mas_pm_cares_about_dokis: return renpy.random.choice(["monika.png", "yuri.png", "natsuki.png", "sayori.png"])
-        renpy.random.choice(["cup.png", "monika.png"])
+        if store.persistent._mas_pm_cares_about_dokis: 
+            return renpy.random.choice(["monika.png", "yuri.png", "natsuki.png", "sayori.png"])
+        return renpy.random.choice(["cup.png", "monika.png"])

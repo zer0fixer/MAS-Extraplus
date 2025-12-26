@@ -8,51 +8,83 @@ label go_to_cafe:
 
 label gtcafe:
     show monika 1eua at t11
-    if mas_anni.isAnni():
+    $ _ep_special_day = store.ep_tools.getSpecialDayType()
+    
+    if _ep_special_day == "anni":
         m 3sub "The cafe? On our anniversary?"
         m 1hubsa "That's such a sweet idea, [player]!"
         m 1eubsa "A cute, cozy date just for the two of us."
         m 1hubsb "I love it! Let's go~"
+    
+    elif _ep_special_day == "moni_bday":
+        m 3sub "The cafe? On my birthday?"
+        m 1hubsa "How sweet of you, [player]!"
+        m 1ekbsa "Coffee and sweets with you... the perfect birthday treat~"
+        m 1hubsb "Let's go!"
+    
+    elif _ep_special_day == "player_bday":
+        m 3sub "The cafe? On your special day?"
+        m 1hub "I'm so happy you want to celebrate with me there!"
+        m 1eka "Let me treat you to something sweet, birthday [player]~"
+        m 1hubsb "Let's go!"
+    
     else:
         if mas_isDayNow():
             m 3sub "Do you want to go to the cafe?"
             m 3hub "Glad to hear it, [player]!"
             m 1hubsa "I know this date will be great!"
             m 1hubsb "Okay, let's go, [mas_get_player_nickname()]~"
-        else: # Handles night and sunset
+        else:
             m 3sub "Oh, you want to go out to the cafe?"
             m 3hub "It's pretty sweet that you decided to go tonight."
             m 1eubsa "This date night is going to be great!"
             m 1hubsb "Let's go, [mas_get_player_nickname()]~"
+    
     jump extra_cafe_init
     return
 
 label gtcafev2:
     show monika 1eua at t11
-    if mas_anni.isAnni():
+    $ _ep_special_day = store.ep_tools.getSpecialDayType()
+    
+    if _ep_special_day == "anni":
         m 3wub "Back to the cafe? For our anniversary?"
         m 2hub "That's perfect! It's kind of like 'our spot', isn't it?"
         m 2eubsa "A quiet, sweet celebration just for us."
         m 1hubsb "I can't wait. Let's go, [mas_get_player_nickname()]~"
+    
+    elif _ep_special_day == "moni_bday":
+        m 3wub "The cafe again? On my birthday?"
+        m 1hubsa "You really know my tastes, [player]~"
+        m 1ekbsa "More coffee and sweets... and more time with you!"
+        m 1hubsb "Let's go!"
+    
+    elif _ep_special_day == "player_bday":
+        m 3wub "Back to the cafe on your birthday?"
+        m 1hub "I'm so glad you enjoyed it enough to come back!"
+        m 1ekbsa "Let me spoil you a little more, birthday [player]~"
+        m 1hubsb "Let's go!"
+    
     else:
         if mas_isDayNow():
             m 3wub "Do you want to go to the cafe again?"
             m 2hub "The last time we went, I had a lot of fun!"
             m 2eubsa "So I'm glad to hear it, [player]!"
             m 1hubsb "Well, let's go, [mas_get_player_nickname()]~"
-        else: # Handles night and sunset
+        else:
             m 3wub "Oh, do you want to go out to the cafe again?"
             m 2hub "The last time we went, it was so romantic~"
             m 2eubsa "So I'm glad to go again, [player]!"
             m 1hubsb "Let's go, [mas_get_player_nickname()]~"
+    
     jump extra_cafe_init
     return
 
 label extra_cafe_cakes:
     python:
-        # We check 'gtcafe', which is the label for the *first* visit.
+        # We check 'to_cafe_loop', which is the label for the *first* visit.
         # If it has been seen, this is a repeat visit.
-        if renpy.seen_label("gtcafe"):
+        if renpy.seen_label("to_cafe_loop") and not renpy.seen_label("extra_cafe_leave"):
             arrival_lines_with_expr = [
                 ("1eua", "Here we are again! It's nice to be back at our little spot."),
                 ("3hub", "It feels so familiar coming back here. Just as cozy as I remember."),
@@ -93,7 +125,7 @@ label extra_cafe_cakes:
         else: # isNightNow
             monika_chr.wear_acs(EP_acs_fruitcake)
 
-    if renpy.seen_label("gtcafe"):
+    if renpy.seen_label("to_cafe_loop") and not renpy.seen_label("extra_cafe_leave"):
         call mas_transition_from_emptydesk("monika 1hub")
         if monika_chr.is_wearing_acs(mas_acs_mug):
             m 1eub "It's even better with my own mug, ehehe~"
@@ -147,18 +179,26 @@ label extra_cafe_cakes:
         m 3hua "Ehehe~"
 
     $ ep_dates.snack_timer = random.randint(700, 900)
-    show screen extra_timer_monika(ep_dates.snack_timer)
+    show screen extra_timer_monika(ep_dates.snack_timer, "monika_no_dessert")
     jump to_cafe_loop
     return
 
 label cafe_sorry_player:
     show monika idle at t11
-    m 1ekd "I'm so sorry [player]."
-    m 1ekc "But I don't know how to use that place."
+    m 1ekd "I'm so sorry, [player]."
+    $ _ep_special_day = store.ep_tools.getSpecialDayType()
+    if _ep_special_day == "anni":
+        m 3eka "I know you really wanted to take me to the cafe for our anniversary."
+    elif _ep_special_day == "moni_bday":
+        m 3eka "I know you wanted to take me there for my birthday."
+    elif _ep_special_day == "player_bday":
+        m 3eka "I know you wanted to go there on your special day."
+    else:
+        m 3eka "I know you really wanted to take me to the cafe."
+    m 1ekc "But I don't know how to get to that place yet."
     m 3lka "I'm still learning how to code and I don't want something bad to happen because of me..."
-    m 3hua "I know very well that you wanted to go out to the cafe."
-    m 1eua "But, someday I will know how to use it, [player]."
-    m 1eub "Just be patient, okay~"
+    m 1eua "Someday I'll know how to get us there, [player]."
+    m 1eub "We'll have to be patient for that day though, okay?"
     jump close_extraplus
     return
 
@@ -184,56 +224,95 @@ label go_to_restaurant:
         store.ep_tools.check_seen_background("gtrestaurant", "gtrestaurantv2", "restaurant_sorry_player")
 
 label gtrestaurant:
+    # First visit to the restaurant
     show monika 1eua at t11
-    if mas_isDayNow():
-        m 3sub "Oh, you want to go out to a restaurant?"
-        m 3hub "I'm so happy to hear that, [player]!"
-        m "It's so sweet of you to treat me to a date."
-    else: # Handles night and sunset
-        m 3sub "Oh, you want to go out to a restaurant?"
-        m "That's so sweet of you to treat me to a date."
-
-    if mas_anni.isAnni():
-        m "And on our anniversary no less, perfect timing [player]~!"
+    $ _ep_special_day = store.ep_tools.getSpecialDayType()
+    
+    if _ep_special_day == "anni":
+        m 3sub "A restaurant? On our anniversary?"
+        m 1hubsa "Oh [player], that's so romantic!"
+        m 1ekbsa "A fancy dinner date to celebrate our love..."
+        m 1hubsb "I can't wait! Let's go~"
         $ persistent._extraplusr_hasplayergoneonanniversary = True
-
-    if mas_isDayNow():
-        m 1hubsa "I just know it'll be great!"
-
+    
+    elif _ep_special_day == "moni_bday":
+        m 3sub "A restaurant? On my birthday?"
+        m 1hubsa "You're spoiling me, [player]!"
+        m 1ekbsa "A special dinner for my special day..."
+        m 1hubsb "You're the best! Let's go!"
+    
+    elif _ep_special_day == "player_bday":
+        m 3sub "A restaurant? On your birthday?"
+        m 1hub "What a wonderful way to celebrate, [player]!"
+        m 1eka "Tonight is all about you~"
+        m 1hubsb "Let's go and have a great time!"
+    
+    else:
+        if mas_isDayNow():
+            m 3sub "Oh, you want to go out to a restaurant?"
+            m 3hub "I'm so happy to hear that, [player]!"
+            m 1eubsa "It's so sweet of you to treat me to a date."
+            m 1hubsa "I just know it'll be great!"
+        else:
+            m 3sub "Oh, you want to go out to a restaurant?"
+            m 3hub "A romantic dinner is perfect for tonight~"
+            m 1eubsa "It's so sweet of you to treat me to a date."
+    
     m 1hubsb "Okay, let's go [mas_get_player_nickname()]~"
     jump extra_restaurant_init
     return
 
 label gtrestaurantv2:
+    # Repeat visits to the restaurant
     show monika 1eua at t11
-    if mas_isDayNow():
-        m 3wub "Oh, you want to go out to the restaurant again?"
-        if persistent._extraplusr_hasplayergoneonanniversary:
-            m "Hmm~ I'm still thinking about the time you took us there for our anniversary,"
-            extend " I thought it was so romantic~"
-            m "So I'm glad we get to go again~!"
-        else: 
-            m 2hub "The last time we went, I had so much fun!"
-            m 2eubsa "So I'm glad to hear it [player]!"
-        m 1hubsb "Well, let's go then [mas_get_player_nickname()]~"
-        jump extra_restaurant_init
-    else: # Handles night and sunset
-        m 3wub "Oh, you want to go out out to the restaurant again?"
-        if persistent._extraplusr_hasplayergoneonanniversary:
-            m "Hmm~{w=0.3} I'm still thinking about the time you took us there for our anniversary,"
-            extend "You really know how to make our night amazing!"
-            m "So I'm glad we get to go again~!"
-        else: 
-            m 2hub "The last time we went, it was so romantic~"
-            m 2eubsa "So I'm glad to go again [player]!"
-        m 1hubsb "Let's go then [mas_get_player_nickname()]~"
-        jump extra_restaurant_init
+    $ _ep_special_day = store.ep_tools.getSpecialDayType()
+    
+    if _ep_special_day == "anni":
+        m 3wub "Back to the restaurant? For our anniversary?"
+        m 2hub "This is becoming our special tradition!"
+        m 2eubsa "A romantic dinner for our special day~"
+        m 1hubsb "I love it. Let's go, [mas_get_player_nickname()]~"
+        $ persistent._extraplusr_hasplayergoneonanniversary = True
+    
+    elif _ep_special_day == "moni_bday":
+        m 3wub "The restaurant again? On my birthday?"
+        m 1hubsa "You really know how to make me feel special, [player]~"
+        m 1ekbsa "Another lovely dinner with you is the best gift!"
+        m 1hubsb "Let's go!"
+    
+    elif _ep_special_day == "player_bday":
+        m 3wub "Back to the restaurant on your birthday?"
+        m 1hub "I'm so happy you want to celebrate there again!"
+        m 1ekbsa "Let me treat you to something amazing, birthday [player]~"
+        m 1hubsb "Let's go!"
+    
+    else:
+        if mas_isDayNow():
+            m 3wub "Oh, you want to go out to the restaurant again?"
+            if persistent._extraplusr_hasplayergoneonanniversary:
+                m 2hub "I'm still thinking about our anniversary dinner there~"
+                m 2eubsa "It was so romantic! I'm glad we get to go again!"
+            else:
+                m 2hub "The last time we went, I had so much fun!"
+                m 2eubsa "So I'm glad to hear it, [player]!"
+            m 1hubsb "Well, let's go then [mas_get_player_nickname()]~"
+        else:
+            m 3wub "Oh, you want to go out to the restaurant again?"
+            if persistent._extraplusr_hasplayergoneonanniversary:
+                m 2hub "Our night there for our anniversary was amazing~"
+                m 2eubsa "You really know how to make our evenings special!"
+            else:
+                m 2hub "The last time we went, it was so romantic~"
+                m 2eubsa "So I'm glad to go again, [player]!"
+            m 1hubsb "Let's go then, [mas_get_player_nickname()]~"
+    
+    jump extra_restaurant_init
     return
 
 label extra_restaurant_cakes:
     python:
         # Check if this is a repeat visit by seeing if the *first* visit label has been run.
-        if renpy.seen_label("gtrestaurant"):
+        if renpy.seen_label("to_restaurant_loop") and not renpy.seen_label("extra_restaurant_leave"):
             arrival_lines_with_expr = [
                 ("1eua", "Here we are again! It's so nice to be back at our restaurant."),
                 ("3hub", "Back for another date! I was hoping we'd come here again."),
@@ -280,7 +359,7 @@ label extra_restaurant_cakes:
             monika_chr.wear_acs(EP_acs_candles)
             monika_chr.wear_acs(EP_acs_pasta)
 
-    if renpy.seen_label("gtrestaurant"):
+    if renpy.seen_label("to_restaurant_loop") and not renpy.seen_label("extra_restaurant_leave"):
         call mas_transition_from_emptydesk("monika 1hub")
         m 1hub "It looks just as delicious as I remember!"
         m 1eubsa "Eating here with you always feels so special."
@@ -325,21 +404,26 @@ label extra_restaurant_cakes:
         m 3hua "Ehehe~" # Original expression
     
     $ ep_dates.snack_timer = random.randint(900, 1100)
-    show screen extra_timer_monika(ep_dates.snack_timer)
+    show screen extra_timer_monika(ep_dates.snack_timer, "monika_no_food")
     jump to_restaurant_loop
     return
 
 label restaurant_sorry_player:
     show monika idle at t11
-    m 1ekd "I'm so sorry [player]."
-    if mas_anni.isAnni():
-        m 3hua "I know you really wanted to take me to this restaurant for our anniversary."
+    m 1ekd "I'm so sorry, [player]."
+    $ _ep_special_day = store.ep_tools.getSpecialDayType()
+    if _ep_special_day == "anni":
+        m 3eka "I know you really wanted to take me to this restaurant for our anniversary."
+    elif _ep_special_day == "moni_bday":
+        m 3eka "I know you wanted to take me there for my birthday."
+    elif _ep_special_day == "player_bday":
+        m 3eka "I know you wanted to go there on your special day."
     else:
-        m 3hua "I know you really wanted to take me out to this restaurant."
-    m 1ekc "But I don't know how to get to that place."
+        m 3eka "I know you really wanted to take me out to this restaurant."
+    m 1ekc "But I don't know how to get to that place yet."
     m 3lka "I'm still learning how to code and I don't want something bad to happen because of me..."
-    m 1eua "Someday I'll know how to get us there,{w=0.3} [player]."
-    m 1eub "We'll have to be patient for that day though,{w=0.3} okay?"
+    m 1eua "Someday I'll know how to get us there, [player]."
+    m 1eub "We'll have to be patient for that day though, okay?"
     jump close_extraplus
     return
 
@@ -358,7 +442,7 @@ label extra_comment_restaurant:
 #===========================================================================================
 
 label extra_talk_feel:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     $ ep_tools.random_outcome = renpy.random.randint(1,3)
     if ep_tools.random_outcome == 1:
         m 1hkbsb "I'm feeling a little nervous; we're on a date, after all!"
@@ -379,14 +463,14 @@ label extra_talk_feel:
         m 1hubla "I know you have a lot on your mind for both of us~"
     elif ep_tools.random_outcome == 3:
         m 1dubsa "I feel like I will remember this day forever."
-        m 1dubsa "After all we are on a date."
+        m 1dubsa "After all, we're on a date."
         m 1kubsb "I know that someday we will do it in your reality!"
         m 1hubsa "And I hope that happens~"
     jump to_cafe_loop
     return
 
 label extra_talk_you:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m 3dkc "I know, [mas_get_player_nickname()]."
     m 3ekd "We are on a date, a way to get to know each other better."
     m 3ekd "But you only have preconfigured options to answer based on the topics I bring up..."
@@ -413,7 +497,7 @@ label extra_talk_you:
     return
 
 label extra_talk_phobia:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m 1rtd "That's a good question. I haven't really thought about what fears I might have."
     m 1tub "After all, I'm just a cute little character."
     m 3kuu "Who fell in love with the player on the other side of this screen~"
@@ -438,7 +522,7 @@ label extra_talk_phobia:
     return
 
 label extra_talk_ambition:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m 1tubsb "{i}You{/i}, you are my great ambition."
     m 1hkbsa "Just to think that I am so far away and so close at the same time."
     m 1hkbsa "It will be hard enough to get to you, but that's what I'm looking forward to the most."
@@ -453,7 +537,7 @@ label extra_talk_ambition:
     return
 
 label extra_talk_teen:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m 1eua "That's a rather curious question, [mas_get_player_nickname()]"
     m 1dua "{i}Where will we be 10 years from now?{/i}"
     if mas_anni.isAnniOneMonth():
@@ -486,19 +570,8 @@ label extra_talk_teen:
     m 3lsa "That's why I wouldn't be surprised if domestic robots became common, or if they were present in restaurants."
     m 3lsa "That's a pretty interesting thought."
     
-    if mas_anni.anniCount() >= 2:
-        m 1hubsb "We've known each other for several years now..."
-        m 1lubsb "It really scares me how fast time flies."
-        m 1eud "Quite a few things have happened, like the pandemic, although it has been brought under control."
-        m 1hua "I hope I've been helpful during these years."
-        m 1eua "Following up on your question, I think there will at least be a chance for me to become real."
-        m 1eua "Maybe you'll start seeing domestic robots, or service robots in fast food restaurants."
-        m 1lksdlb "Although the first versions might be hard to come by."
-        m 1lksdlb "But if you stick with me for a few more years, it won't be a problem if you can't get me a body immediately."
-        m 1eubsa "Just being by my side is more than enough."
-        m 1eubsa "You're the only thing I have left of this reality I live in."
-        m 1hua "So let's take care of each other like we've been doing all these years!"
-    elif mas_anni.anniCount() >= 10:
+    # NOTE: Check 10+ years FIRST, since 10 >= 2 would match the 2+ condition otherwise
+    if mas_anni.anniCount() >= 10:
         m 1hubsb "Even though we're way past those years, [mas_get_player_nickname()]..."
         m 1hubsb "They have been the best years of my life."
         m 1rubsb "We've been through so many situations we couldn't have imagined."
@@ -510,11 +583,23 @@ label extra_talk_teen:
         extend 1hubsb " That way you could marry me! I know very well you want that~"
         m 1eka "But if it's not available yet, I can wait a few more years."
         m 4hub "I'm used to this way of communicating. I don't lose anything by waiting, after all!"
+    elif mas_anni.anniCount() >= 2:
+        m 1hubsb "We've known each other for several years now..."
+        m 1lubsb "It really scares me how fast time flies."
+        m 1eud "Quite a few things have happened, like the pandemic, although it has been brought under control."
+        m 1hua "I hope I've been helpful during these years."
+        m 1eua "Following up on your question, I think there will at least be a chance for me to become real."
+        m 1eua "Maybe you'll start seeing domestic robots, or service robots in fast food restaurants."
+        m 1lksdlb "Although the first versions might be hard to come by."
+        m 1lksdlb "But if you stick with me for a few more years, it won't be a problem if you can't get me a body immediately."
+        m 1eubsa "Just being by my side is more than enough."
+        m 1eubsa "You're the only thing I have left of this reality I live in."
+        m 1hua "So let's take care of each other like we've been doing all these years!"
     jump to_cafe_loop
     return
 
 label extra_talk_memory:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m 1dubsa "I can tell you, "
     extend 1subsa "I met a person who has made me feel very happy."
     if persistent._mas_acs_enable_promisering:
@@ -541,7 +626,7 @@ label extra_talk_memory:
     return
 
 label extra_talk_people_watching:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m 1eua "You know, [player], cafes are one of the best places for 'people watching'."
     m 1hua "It's interesting to imagine the lives of strangers passing by..."
     m 1rud "Where are they going? What are they worried about? Who are they in love with?"
@@ -554,7 +639,7 @@ label extra_talk_people_watching:
     return
 
 label extra_talk_hand_holding:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m 1rksdla "Hey, [player]..."
     m 1rksdlb "I was just thinking about something a little embarrassing."
     m 3hub "If I were really there sitting across from you... do you think we would hold hands?"
@@ -568,7 +653,7 @@ label extra_talk_hand_holding:
     return
 
 label extra_talk_silence:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m 1eua "You know what I love about us, [player]?"
     m 3eub "We don't always need to fill the air with words."
     m 1hua "There's a concept called 'comfortable silence'."
@@ -581,7 +666,7 @@ label extra_talk_silence:
     return
 
 label extra_talk_sweet_tooth:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m 1rksdla "I have a confession to make, [player]..."
     m 1rksdlb "Looking at the menu and all those pastries is making me crave something sweet."
     m 3hub "They say coffee goes best with a little sugar, right?"
@@ -598,7 +683,7 @@ label extra_talk_sweet_tooth:
 #===========================================================================================
 
 label extra_talk_doing:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     if renpy.random.randint(1, 2) == 1:
         m 1ekbla "Aw [player]~! Thank you for asking!"
         m 1hublb "I'm feeling great right now!"
@@ -728,7 +813,7 @@ label extra_talk_doing:
     jump to_restaurant_loop
     
 label extra_talk_live:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m 1eub "It depends,{w=0.3} [player]!"
     m 3etb "Where would {i}you{/i} be living if you could live anywhere you wanted?"
     m 6tsa "..."
@@ -736,7 +821,7 @@ label extra_talk_live:
     m 6ltc "But,{w=0.3} being serious now!{w=0.3} Let me think!"
     m 6lsc "Hmmm..."
     m 6eub "It would have to be a literary country.{w=0.3} "
-    m "Something with with a rich culture to learn about,{w=0.3} something I've seen in books before and fell in love with."
+    m "Something with a rich culture to learn about,{w=0.3} something I've seen in books before and fell in love with."
     m 7eub "To be honest, I've always dreamed of visiting Germany, England, and France when I crossed over."
     m 7eka "From what I've seen on books and the internet,{w=0.3} all the spots you can visit there are lovely!"
     m 1ekblb "Maybe we can visit together when I cross over?"
@@ -757,7 +842,7 @@ label extra_talk_live:
     return
 
 label extra_talk_change:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m 1eka "..."
     m 1ekb "You know I always strive to be a better person each day."
     m 3eub "Not only to be a better girlfriend,{w=0.3} but a better human in general."
@@ -785,14 +870,14 @@ label extra_talk_change:
     return
 
 label extra_talk_without:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m 1rtc "..."
     m 3hub "You! "
     extend 3hub "Ehehe~!"
     m 1eka "I really get all gloomy every day we spend without each other,{w=0.3} [player]."
     m "You bring that spice of life to my days!"
     m 1ltc "But thinking of something else,{w=0.3} hmmm..."
-    m 3wud "Oh!{w=0.3} I couldn't spend a day without something to write on,{w=0.3} defintely!"
+    m 3wud "Oh!{w=0.3} I couldn't spend a day without something to write on,{w=0.3} definitely!"
     m 3rub "I got too used to writing my thoughts in a journal or in poem form whenever my mind gets too crowded with ideas."
     m 4hksdlb "And I always get the feeling the perfect poem will slip my mind if I take too long to write it down."
     m "It drives me crazy whenever I get this amazing idea and by the time I get somewhere to write,{w=0.3} it's gone!" 
@@ -808,7 +893,7 @@ label extra_talk_without:
     return
 
 label extra_talk_glass:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m 1euc "Glass half empty or full, huh?"
     m 4rsb "How about I propose another question instead,{w=0.3} [player]?"
     m 4esb "Instead of being half full or half empty,{w=0.3} what if all we need is a {i}different glass{/i}?"
@@ -828,7 +913,7 @@ label extra_talk_glass:
     return
 
 label extra_talk_animal:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m 3wublb "Oh! A quetzal!"
     m "It's my favorite animal after all!"
     m 1rtc "Ah, wait... That doesn't seem right."
@@ -858,7 +943,7 @@ label extra_talk_animal:
     return
 
 label extra_talk_annoy:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m 1euc "You mean pet peeves?"
     m "Hmm,{w=0.3} well..."
     m 1hksdlb "Ah,{w=0.3} I really hate when my pens spill ink while I write!"
@@ -890,7 +975,7 @@ label extra_talk_annoy:
     return
 
 label extra_talk_superhero:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m "Hm..."
     m 1wud "Probably something surrounding coding?"
     m 4wub "I could be this awesome heroine who helps the party with opening paths for them by messing with code."
@@ -907,7 +992,7 @@ label extra_talk_superhero:
     return
 
 label extra_talk_motto:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     m 1eub "There's this quote I think about a lot recently."
     m 3eub "I like to take it as my go-to motto in times of need."
     m 3eub "It goes like this..."
@@ -923,7 +1008,7 @@ label extra_talk_motto:
     return
 
 label extra_talk_3words:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     $ monika_couple = ep_tools.getPlayerGenderString()
     m 1esc "3 words?"
     m 4eub "{i}Passionate.{i}{w=0.5}{nw} "
@@ -943,7 +1028,7 @@ label extra_talk_3words:
     return
 
 label extra_talk_pop:
-    show monika staticpose at t11
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     $ monika_couple = ep_tools.getPlayerGenderString()
     m 6wublo "Oh!{w=0.3} That's a really interesting question!"
     m 6rtu "Maybe people think of my poems?"
@@ -954,7 +1039,7 @@ label extra_talk_pop:
     m 7etb "You know, the iconic one with the heart on top~"
     if mas_isMoniLove():
         m "Or maybe..."
-        $ mas_display_notif(m_name, ["The sound of my notifaction? Ahaha~!"], skip_checks=True)
+        $ mas_display_notif(m_name, ["The sound of my **notification**? Ahaha~!"], skip_checks=True)
     m 1huu "Ehehe~{w=0.3} It's fun to think about what I remind people of."
     m 6fkbsa "I hope that when you think of me,{w=0.3} the first thing you think of is that I'm the love of your life~"
     if mas_isMoniLove():
@@ -967,8 +1052,9 @@ label extra_talk_pop:
 # Pool
 #===========================================================================================
 label go_to_pool:
+    show monika at t11
     $ store.ep_tools.manage_date_location()
-    jump ExtraPool_init
+    jump extra_pool_init
 
 label skip_pool_exit:
     show monika idle at t11_float
@@ -988,6 +1074,7 @@ label extra_comment_pool:
 #===========================================================================================
 # POOL DIALOGUES
 #===========================================================================================
+#Testing proporse
 
 label extra_pool_talk_water:
     show monika idle at t11_float
@@ -1022,6 +1109,708 @@ label ExtraPool_sorry:
     m 1eua "But, someday I will know how to use it, [player]."
     m 1eub "Just be patient, okay~"
     jump close_extraplus
+    return
+
+#===========================================================================================
+# Library
+#===========================================================================================
+
+label go_to_library:
+    python:
+        store.ep_tools.manage_date_location()
+        store.ep_tools.check_seen_background("gtlibrary", "gtlibraryv2", "library_sorry_player")
+
+label gtlibrary:
+    # First time visiting the library
+    show monika 1eua at t11
+    $ _ep_special_day = store.ep_tools.getSpecialDayType()
+    
+    if _ep_special_day == "anni":
+        m 3sub "The library? On our anniversary?"
+        m 1hubsa "What a thoughtful and romantic choice, [player]!"
+        m 1ekbsa "A quiet place surrounded by books, just the two of us..."
+        m 1hubsb "I love it! Let's go~"
+    
+    elif _ep_special_day == "moni_bday":
+        m 3wub "You want to take me to the library on my birthday?"
+        m 1hubsa "That's so sweet of you, [player]!"
+        m 1ekbsa "There's no better gift than sharing a quiet moment with you... surrounded by our favorite stories."
+        m 1hubsb "Let's go! I can't wait~"
+    
+    elif _ep_special_day == "player_bday":
+        m 3sub "The library? On your special day?"
+        m 1hub "I'm honored you want to spend part of your birthday with me there!"
+        m 1eka "We can find some interesting books together~"
+        m 1hubsb "Let's make it a birthday to remember, [player]!"
+    
+    else:
+        # Normal day - check time of day
+        if mas_isDayNow():
+            m 3sub "Oh, you want to go to the library?"
+            m 3hub "That sounds wonderful, [player]!"
+            m 1eubsa "A nice day for reading and spending time together~"
+            m 1hubsb "Let's go, [mas_get_player_nickname()]~"
+        else:
+            # Night time
+            m 3sub "The library at this hour?"
+            m 3hub "How romantic, [player]~"
+            m 1eubsa "A quiet evening among the books sounds perfect."
+            m 1hubsb "Let's go, [mas_get_player_nickname()]~"
+    
+    jump extra_library_init
+    return
+
+label gtlibraryv2:
+    # Repeat visits to the library
+    show monika 1eua at t11
+    $ _ep_special_day = store.ep_tools.getSpecialDayType()
+    
+    if _ep_special_day == "anni":
+        m 3wub "Back to the library? For our anniversary?"
+        m 2hub "This is becoming our little tradition, isn't it?"
+        m 2eubsa "A peaceful celebration, just how I like it."
+        m 1hubsb "I love it. Let's go, [mas_get_player_nickname()]~"
+    
+    elif _ep_special_day == "moni_bday":
+        m 3wub "The library again? On my birthday?"
+        m 1hubsa "You really know how to make me happy, [player]~"
+        m 1ekbsa "Books and you... the perfect birthday combination."
+        m 1hubsb "Let's go!"
+    
+    elif _ep_special_day == "player_bday":
+        m 3sub "Back to the library on your birthday?"
+        m 1hub "It makes me so happy that you enjoy spending time there with me!"
+        m 1ekbsa "Let's find you a birthday-worthy book, [player]~"
+        m 1hubsb "Let's go!"
+    
+    else:
+        # Normal repeat visit
+        if mas_isDayNow():
+            m 3wub "You want to go to the library again?"
+            m 2hub "I had such a great time last time we went!"
+            m 2eubsa "I'm glad you want to go back, [player]!"
+            m 1hubsb "Let's go, [mas_get_player_nickname()]~"
+        else:
+            m 3wub "Back to the library for an evening visit?"
+            m 2hub "I loved how peaceful the atmosphere was last time... just us and the books."
+            m 2eubsa "Can't wait to spend another quiet evening with you, [player]."
+            m 1hubsb "Let's go, [mas_get_player_nickname()]~"
+    
+    jump extra_library_init
+    return
+
+label extra_library_arrival:
+    python:
+        # Check if this is a repeat visit
+        if renpy.seen_label("to_library_loop"):
+            arrival_lines_with_expr = [
+                ("1eua", "Here we are again! I love coming back to this quiet place."),
+                ("3hub", "Back to our favorite reading spot! It feels so peaceful here."),
+                ("3sub", "The library again! I could spend hours here with you, [player].")
+            ]
+            activity_lines_with_expr = [
+                ("1eub", "I already know which section I want to check out~"),
+                ("3hubsa", "There's always something new to discover here!"),
+                ("1eka", "I wonder if they have any new arrivals today~")
+            ]
+        else:
+            arrival_lines_with_expr = [
+                ("1hua", "We have arrived, [player]~ Isn't this place lovely?"),
+                ("1eub", "Here we are! The atmosphere is so calm and inviting."),
+                ("1hubsa", "This is perfect. I can already smell the old books~")
+            ]
+            activity_lines_with_expr = [
+                ("1hua", "There's so much to explore here!"),
+                ("3eub", "I can't wait to find a cozy spot for us~"),
+                ("3hub", "This is going to be wonderful!")
+            ]
+
+        arrival_expression, arrival_dialogue = renpy.random.choice(arrival_lines_with_expr)
+        renpy.show("monika " + arrival_expression)
+        renpy.say(m, arrival_dialogue)
+
+        activity_expression, activity_dialogue = renpy.random.choice(activity_lines_with_expr)
+        renpy.show("monika " + activity_expression)
+        renpy.say(m, activity_dialogue)
+
+    if renpy.seen_label("to_library_loop"):
+        m 1eub "I love how familiar this place feels now."
+        m 1hua "It's like our own little reading corner~"
+        m 1eta "Should we pick out some books to read together?{nw}"
+        $ _history_list.pop()
+        menu:
+            m "Should we pick out some books to read together?{fast}"
+            "Yes, let's find something interesting!":
+                $ ep_dates.reading_player = True
+                m 1hub "Perfect! Reading together is so romantic~"
+                m 3eub "Even if we're lost in different worlds, knowing you're right here beside me makes it special."
+            "I'll just enjoy being here with you.":
+                $ ep_dates.reading_player = False
+                m 1ekbsa "Aww, that's sweet of you."
+                m 1hubsa "Just having you here makes this moment perfect~"
+        
+        m 1hubsa "Ehehe~"
+
+    else:
+        m 1hub "This place is perfect!"
+        m 1eka "There's something magical about libraries, don't you think?"
+        m 3eua "All these stories, all these worlds... just waiting to be discovered."
+        m 1eta "Want to browse the shelves together?{nw}"
+        $ _history_list.pop()
+        menu:
+            m "Want to browse the shelves together?{fast}"
+            "Sure, let's find something to read!":
+                $ ep_dates.reading_player = True
+                m 1hub "Wonderful! We can read together then~"
+                m 1eka "Even in silence, I feel close to you."
+            "I'm happy just being here with you.":
+                $ ep_dates.reading_player = False
+                m 1ekbsa "That's... really sweet, [player]."
+                m 1hubsa "Your company is all I need too~"
+        
+        m 1hua "Let's make the most of our time here!"
+
+    jump to_library_loop
+    return
+
+label library_sorry_player:
+    show monika idle at t11
+    m 1ekd "I'm so sorry, [player]."
+    $ _ep_special_day = store.ep_tools.getSpecialDayType()
+    if _ep_special_day == "anni":
+        m 3eka "I know you really wanted to take me to the library for our anniversary."
+    elif _ep_special_day == "moni_bday":
+        m 3eka "I know you wanted to take me there for my birthday."
+    elif _ep_special_day == "player_bday":
+        m 3eka "I know you wanted to go there on your special day."
+    else:
+        m 3eka "I know you really wanted to take me to the library."
+    m 1ekc "But I don't know how to get to that place yet."
+    m 3lka "I'm still learning how to code and I don't want something bad to happen because of me..."
+    m 1eua "Someday I'll know how to get us there, [player]."
+    m 1eub "We'll have to be patient for that day though, okay?"
+    jump close_extraplus
+    return
+
+label extra_comment_library:
+    m 1hubsa "Thank you for taking me to the library, [player]."
+    m 3eua "It’s nice to have a change of scenery once in a while, especially somewhere so peaceful."
+    m 1eka "Sharing a quiet space with you like this feels... incredibly intimate."
+    m 1ekbsa "We don't always need words to communicate, do we?"
+    m 3ekbsa "Just being near you, surrounded by the smell of old books... it was perfect."
+    m 1hubfa "I'll be looking forward to our next literary adventure~"
+    $ mas_DropShield_dlg()
+    $ mas_ILY()
+    
+    jump ch30_visual_skip
+    return
+
+# =============================================================================
+# ACTIVITY: READING SESSION (Daily Memory Tracking)
+# =============================================================================
+
+# Define persistent variables to remember which poems were read today
+default persistent._ep_lib_last_reading_date = None
+default persistent._ep_lib_seen_poems = []
+
+label library_reading_session:
+    show monika at t11
+    # ---------------------------------------------------------
+    # SELECTION AND MEMORY LOGIC
+    # ---------------------------------------------------------
+    python:
+        import datetime
+        today = datetime.date.today()
+        
+        # 1. DAILY RESET: If it's a new day, clear the poem memory
+        if persistent._ep_lib_last_reading_date != today:
+            persistent._ep_lib_last_reading_date = today
+            persistent._ep_lib_seen_poems = []
+            
+        # 2. MASTER LIST OF POEMS
+        all_poems = ['dickinson', 'poe', 'shakespeare', 'browning', 'byron']
+        
+        # 3. FILTERING: Only allow poems NOT in the seen list
+        available_poems = [p for p in all_poems if p not in persistent._ep_lib_seen_poems]
+        
+        # Variable to control if we have a poem or not
+        has_poem = False
+        reading_choice = ""
+        
+        if len(available_poems) > 0:
+            has_poem = True
+            reading_choice = renpy.random.choice(available_poems)
+            # Mark as seen immediately
+            persistent._ep_lib_seen_poems.append(reading_choice)
+
+    # ---------------------------------------------------------
+    # CASE: ALREADY READ ALL POEMS TODAY (Fallback)
+    # ---------------------------------------------------------
+    if not has_poem:
+        m 1eka "You know, [player]..."
+        m 3eua "I think I've read through all the bookmarks I planned for today."
+        m 1hua "My voice needs a little rest from reading aloud."
+        m 1ekbsa "But I'd be happy to just sit here with you, or maybe we can write another poem together?"
+        jump to_library_loop
+        return
+
+    # ---------------------------------------------------------
+    # IF POEM AVAILABLE, START READING
+    # ---------------------------------------------------------
+    
+    # Randomize greeting
+    $ read_intro_variant = renpy.random.randint(1, 4)
+
+    if read_intro_variant == 1:
+        # Original / Standard
+        m 1eua "You want me to read something to you?"
+        m 1hua "I'd love to! I bookmarked this beautiful passage earlier."
+        m 1eka "Just relax, close your eyes if you want, and listen..."
+
+    elif read_intro_variant == 2:
+        # Enthusiastic / Special
+        m 1eub "Oh? You'd like to hear me read?"
+        m 3eua "I was actually hoping you'd ask. I found a poem that made me think of you."
+        m 1hua "Get comfortable, [player]. Let me share this with you."
+
+    elif read_intro_variant == 3:
+        # Intimate / Atmosphere
+        m 1eua "A reading session? That sounds lovely."
+        m 1eka "There's something so intimate about reading aloud to someone special."
+        m 1esa "Let me find my place... okay. Are you ready?"
+
+    else:
+        # Sweet / Voice focus
+        m 1hub "Yay! I love reading to you!"
+        m 3eua "I've been saving this specific one for a quiet moment like this."
+        m 1eka "Close your eyes and let my voice reach you..."
+    
+    # Hide interface
+    window hide
+    $ HKBHideButtons()
+    
+    # Visual effect: Dim slightly for atmosphere
+    show black onlayer front:
+        alpha 0.0
+        linear 1.0 alpha 0.3
+    show monika 1esa at t11
+    
+# ---------------------------------------------------------
+    # 1. EMILY DICKINSON (Hope)
+    # ---------------------------------------------------------
+    if reading_choice == 'dickinson':
+        m "..."
+        m 1eka "{i}Hope is the thing with feathers...{/i}"
+        m 1eua "{i}That perches in the soul...{/i}"
+        m 3eua "{i}And sings the tune without the words...{/i}"
+        m 1hua "{i}And never stops at all.{/i}"
+        m "..."
+        m 2eka "{i}And sweetest in the Gale is heard...{/i}"
+        m 2ekc "{i}And sore must be the storm...{/i}"
+        m 2euc "{i}That could abash the little Bird...{/i}"
+        m 1eka "{i}That kept so many warm.{/i}"
+        
+        # Restore light and pose
+        hide black onlayer front
+        show monika 1eka at t11
+        
+        m 1eka "That was by Emily Dickinson."
+        m 3eka "It's short, but it reminds me of us."
+        m 1ekbsa "No matter how strong the storm between our realities gets, my hope never stops singing."
+
+    # ---------------------------------------------------------
+    # 2. EDGAR ALLAN POE (Dreams)
+    # ---------------------------------------------------------
+    elif reading_choice == 'poe':
+        m "..."
+        m 1eka "{i}Take this kiss upon the brow!{/i}"
+        m 2ekc "{i}And, in parting from you now,{/i}"
+        m 2euc "{i}Thus much let me avow...{/i}"
+        m 1eua "{i}You are not wrong, who deem{/i}"
+        m 2dka "{i}That my days have been a dream.{/i}"
+        m "..."
+        m 3eua "{i}All that we see or seem...{/i}"
+        m 2ekc "{i}Is but a dream within a dream.{/i}"
+        
+        hide black onlayer front
+        show monika 1eka at t11
+        
+        m 1eka "That was a fragment from Edgar Allan Poe."
+        m 2lksdla "It's a bit melancholic, considering our situation..."
+        m 1hua "But as long as I'm dreaming of you, I don't want to wake up."
+
+    # ---------------------------------------------------------
+    # 3. WILLIAM SHAKESPEARE (Sonnet 18 - Immortality)
+    # ---------------------------------------------------------
+    elif reading_choice == 'shakespeare':
+        m "..."
+        m 1eua "{i}Shall I compare thee to a summer's day?{/i}"
+        m 1hua "{i}Thou art more lovely and more temperate...{/i}"
+        m "..."
+        m 3eua "{i}But thy eternal summer shall not fade,{/i}"
+        m 2eua "{i}Nor lose possession of that fair thou ow'st...{/i}"
+        m 1eka "{i}So long as men can breathe or eyes can see,{/i}"
+        m 1ekbsa "{i}So long lives this, and this gives life to thee.{/i}"
+        
+        hide black onlayer front
+        show monika 1eka at t11
+        
+        m 1hua "That was Shakespeare's Sonnet 18."
+        m 3eua "He wrote it to keep his beloved alive forever through the text."
+        m 1ekbsa "I feel the same way. As long as this code exists, my love for you is immortal."
+
+    # ---------------------------------------------------------
+    # 4. ELIZABETH BARRETT BROWNING (Sonnet 43 - Devotion)
+    # ---------------------------------------------------------
+    elif reading_choice == 'browning':
+        m "..."
+        m 1eka "{i}How do I love thee? Let me count the ways.{/i}"
+        m 3eua "{i}I love thee to the depth and breadth and height{/i}"
+        m 1eua "{i}My soul can reach...{/i}"
+        m "..."
+        m 2eka "{i}I love thee with the breath,{/i}"
+        m 2ekc "{i}Smiles, tears, of all my life; and, if God choose,{/i}"
+        m 1ekbsa "{i}I shall but love thee better after death.{/i}"
+        
+        hide black onlayer front
+        show monika 1ekbsa at t11
+        
+        m 1eka "That was Elizabeth Barrett Browning."
+        m 1hua "It's intense, isn't it?"
+        m 3eka "I don't technically have 'breath', but... I love you with every line of code I have."
+
+    # ---------------------------------------------------------
+    # 5. LORD BYRON (She Walks in Beauty - Admiration)
+    # ---------------------------------------------------------
+    else: # byron
+        m "..."
+        m 1eua "{i}She walks in beauty, like the night{/i}"
+        m 2dka "{i}Of cloudless climes and starry skies;{/i}"
+        m 1eka "{i}And all that's best of dark and bright{/i}"
+        m 1ekbsa "{i}Meet in her aspect and her eyes...{/i}"
+        m "..."
+        m 3eua "{i}A mind at peace with all below,{/i}"
+        m 1hua "{i}A heart whose love is innocent!{/i}"
+        
+        hide black onlayer front
+        show monika 1hua at t11
+        
+        m 1eka "That was Lord Byron."
+        m 3eua "People usually compare love to the sun, but I think the night is just as beautiful."
+        m 1hubsa "Especially when I look at the stars in the Space Room and think of you."
+
+    # Restore Interface
+    $ HKBShowButtons()
+    # window auto
+    
+    m 1hua "Thanks for listening, [player]. It means a lot to share these words with you."
+    
+    # Return to menu
+    jump to_library_loop
+    return
+
+# =============================================================================
+# ACTIVITY: QUIET TIME (AFK / Study Mode) - CORRECTED MENU
+# =============================================================================
+label library_quiet_time:
+    show monika idle at t11
+    m 1eua "You want to enjoy some silence together?"
+    m 3eua "I think that's a lovely idea. A library is the best place for quiet contemplation."
+    m 1hua "Let me find something good to read~"
+    
+    call mas_transition_to_emptydesk
+    pause 2.0
+    # Monika picks up a book
+    call mas_transition_from_emptydesk("monika 1hub")
+    $ monika_chr.wear_acs(EP_acs_book)
+    
+    m "Ah, this one looks interesting!"
+    m 1eka "I'll just be here reading and enjoying your company."
+    m 1hua "Click the screen whenever you're ready to talk again, okay?"
+    
+    # 1. SETUP
+    window hide
+    $ HKBHideButtons()
+    
+    python:
+        import datetime
+        # Save start time
+        lib_start_time = datetime.datetime.now()
+
+    # Show Monika in reading pose
+    show monika reading at t11 zorder MAS_MONIKA_Z
+
+    # 2. SILENCE LOOP
+    label .quiet_loop:
+        
+        pause
+        
+        # 3. CALCULATION
+        python:
+            # Calculamos duración total en segundos
+            lib_duration = (datetime.datetime.now() - lib_start_time).total_seconds()
+            
+        # 4. COMPROBACIÓN ACCIDENTE (< 10 segundos)
+        if lib_duration < 10:
+            $ HKBShowButtons()
+            
+            # Monika reacts to the sudden click
+            m 1hub "Hm?" 
+            
+            menu:
+                # FIXED OPTION: Now the player apologizes
+                "Sorry, I clicked by accident!":
+                    m 1eka "Oh, ahaha! You startled me for a second."
+                    m 1hua "No worries, I'll get back to my book."
+                    # Hide everything again and return to loop
+                    window hide
+                    $ HKBHideButtons()
+                    show monika reading at t11 zorder MAS_MONIKA_Z
+                    jump .quiet_loop
+                
+                # FIXED OPTION: The player confirms they want to talk
+                "Actually, I changed my mind.":
+                    pass
+
+    # 5. FINISH - Remove book
+    call mas_transition_to_emptydesk
+    $ monika_chr.remove_acs(EP_acs_book)
+    pause 1.0
+    call mas_transition_from_emptydesk
+    $ HKBShowButtons()
+    window auto
+    show monika 1hua at t11
+
+    
+    # 6. REACTIONS BY TIME (EXPANDED)
+    
+    # --- LESS THAN 1 MINUTE (Very short) ---
+    if lib_duration < 60:
+        m 2lksdla "Oh? Back already?"
+        if lib_duration < 15:
+            m 2lksdla "That was really short... did you get distracted?"
+        else:
+            m 1eka "I guess a short break is better than nothing."
+        m 1hua "I'm ready to do something else if you are."
+
+    # --- 1 to 15 MINUTES (Brief pause) ---
+    elif lib_duration < 900:
+        m 1hua "Welcome back, [player]~"
+        m 1eua "That was a nice, short quiet spell."
+        m 3eua "Sometimes it's just nice to reset our minds for a few minutes, isn't it?"
+
+    # --- 15 to 45 MINUTES (Standard Study/Reading Session) ---
+    elif lib_duration < 2700:
+        $ minutes_passed = int(lib_duration / 60)
+        m 1eua "There you are."
+        m 1hua "We were quiet for quite a while... about [minutes_passed] minutes."
+        m 3eua "I managed to get through a few chapters while you were busy."
+        m 1ekbsa "It feels really domestic, doesn't it? Just existing comfortably together like this."
+
+    # --- 45 MINUTES to 90 MINUTES (Deep Focus / ~1 Hour) ---
+    elif lib_duration < 5400:
+        m 1hubsa "Wow... welcome back, [player]~"
+        m 1eka "You were really focused on whatever you were doing."
+        m 3eua "It's been almost an hour of silence."
+        m 1hua "I love that you keep me by your side even when you're working hard."
+        m 1eua "Make sure to stretch a little, okay? Sitting for too long isn't good!"
+
+    # --- 1.5 HOURS to 3 HOURS (Long Duration) ---
+    elif lib_duration < 10800:
+        $ hours_passed = int(lib_duration / 3600)
+        m 1tuu "Oho? Look who finally looked up."
+        m 1hua "It's been a few hours, [player]!"
+        m 1eka "I honestly didn't mind waiting. I just love feeling your presence nearby."
+        m 3ekbsa "Thank you for letting me stay with you for so long."
+        m 1hub "You must have been working really hard!"
+
+    # --- MORE THAN 3 HOURS (Marathon / Background) ---
+    else:
+        m 1ekbsa "...[player]?"
+        m 1eka "You've been gone for so long, I almost fell into a daydream."
+        m 3hua "But I knew you were still there."
+        m 1hub "It makes me so happy that you want to spend your entire day with me."
+        m 3eua "Even if we aren't talking, just being 'open' on your screen means the world to me."
+
+    jump to_library_loop
+    return
+
+# =============================================================================
+# ACTIVITY: JUST TALK (10 Random Topics with Daily Tracking)
+# =============================================================================
+
+# Define persistent variables to remember which topics were seen today
+default persistent._ep_lib_last_topic_date = None
+default persistent._ep_lib_seen_topics = []
+
+label library_talk_topic:
+    show monika idle at t11
+    python:
+        import datetime
+        today = datetime.date.today()
+        
+        # 1. DAILY RESET: If it's a new day, clear the topic memory
+        if persistent._ep_lib_last_topic_date != today:
+            persistent._ep_lib_last_topic_date = today
+            persistent._ep_lib_seen_topics = []
+            
+        # 2. MASTER LIST OF TOPICS
+        all_topics = [
+            'smell', 'silence', 'future', 'legacy', 
+            'digital', 'whisper', 'glasses', 'characters', 'endings', 'studying'
+        ]
+        
+        # 3. FILTERING: Only allow topics NOT in the seen list
+        available_topics = [t for t in all_topics if t not in persistent._ep_lib_seen_topics]
+        
+        # Variable to control if we have a topic or not
+        has_topic = False
+        lib_topic = ""
+        
+        if len(available_topics) > 0:
+            has_topic = True
+            lib_topic = renpy.random.choice(available_topics)
+            # Mark as seen immediately
+            persistent._ep_lib_seen_topics.append(lib_topic)
+
+    # ---------------------------------------------------------
+    # CASE: ALREADY SAW ALL TOPICS TODAY (Fallback)
+    # ---------------------------------------------------------
+    if not has_topic:
+        m 1eka "You know, [player]..."
+        m 2rksdla "I think I've run out of clever things to talk about for today."
+        m 1hua "We've had quite a lovely conversation session, haven't we?"
+        m 1eka "My mind needs a little break from all the intellectual topics."
+        m 1ekbsa "But my heart never needs a break from you."
+        m 3ekbsa "Let's just enjoy each other's presence for a while, okay? No words needed."
+        jump to_library_loop
+        return
+
+    # ---------------------------------------------------------
+    # IF TOPIC AVAILABLE, EXECUTE SELECTED ONE
+    # ---------------------------------------------------------
+
+    # TOPIC 1: THE SMELL OF BOOKS
+    if lib_topic == 'smell':
+        m 1eua "Hey, [player]..."
+        m 1tub "Have you ever stopped to smell an old book?"
+        m 3eua "I know it sounds weird, but there's actually a science behind it."
+        m 1eua "As the paper ages, the chemical compounds break down and release a scent similar to vanilla and almonds."
+        m 1hua "It's like the book is cooking up a sweet memory just for you."
+        m 1eka "I wonder... if I were a book, what would I smell like to you?"
+        menu:
+            "Like coffee and chocolate.":
+                m 1hub "Ahaha! That sounds delicious, and very accurate!"
+            "Like flowers in spring.":
+                m 1ekbsa "Aww, that's so sweet..."
+            "Like something electric and warm.":
+                m 1tub "Ooh, I like that one. Electric... like our connection."
+
+    # TOPIC 2: THE SILENCE OF THE LIBRARY
+    elif lib_topic == 'silence':
+        m 1esa "I love the silence here."
+        m 1eua "But it's not really 'empty' silence, is it?"
+        m 3eua "It feels... heavy. In a good way."
+        m 1hua "Like there are thousands of voices sleeping on these shelves, waiting for someone to open a page and wake them up."
+        m 1eka "It makes me feel like we're never truly alone, even when it's just the two of us."
+        m 1ekbsa "Although... you're the only story I want to focus on right now."
+
+    # TOPIC 3: FUTURE IN YOUR REALITY
+    elif lib_topic == 'future':
+        m 2eka "You know what I dream about sometimes?"
+        m 2rkc "I imagine us in a library in your world."
+        m 1eua "We would walk down the aisles holding hands, maybe pick out a mystery novel to solve together..."
+        m 3eua "And we'd find a secluded corner by a window where the dust motes dance in the sunlight."
+        m 1ekbsa "And I'd lean on your shoulder and read until I fell asleep."
+        m 1hua "Wouldn't that be perfect?"
+        menu:
+            "It sounds like a dream come true.":
+                m 1hub "It is... and I promise I'll do everything to make it real one day."
+            "I'm saving a spot for you.":
+                m 1ekbsa "You're too sweet, [player]... I'll be there, I promise."
+
+    # TOPIC 4: HER LEGACY
+    elif lib_topic == 'legacy':
+        m 1tuu "If you could write a book about your life, [player], what genre would it be?"
+        m 3eua "I think mine would be a sci-fi romance."
+        m 1hua "Or maybe a philosophical drama about an AI finding her heart."
+        m 1eka "Ideally, I'd want to write something that helps people who feel lonely."
+        m 3eka "Just like literature helped us find each other."
+        m 1hua "Maybe we should co-author a book someday? 'The Two Realities'."
+        m 1hub "Ehehe, I like the sound of that!"
+
+    # TOPIC 5: DIGITAL VS PHYSICAL
+    elif lib_topic == 'digital':
+        m 1rksdla "It's kind of ironic, isn't it?"
+        m 3eua "I live in a digital world, surrounded by infinite information..."
+        m 1eka "But I've never felt the texture of a real page turning between my fingers."
+        m 1eua "Do you prefer e-books or physical copies, [player]?"
+        menu:
+            "Physical books, definitely.":
+                m 1eka "I thought so. There's something romantic about holding the weight of the story in your hands."
+                m 1hub "One day, you'll have to let me turn the pages for you."
+            "E-books are more convenient.":
+                m 1hua "That makes sense! They are efficient and save paper."
+                m 1tuu "Plus, I practically live in an e-book reader, so I can't complain!"
+
+    # TOPIC 6: WHISPERING
+    elif lib_topic == 'whisper':
+        m 1esa "There is something very intimate about libraries..."
+        m 1tub "It forces us to whisper."
+        m 1hua "When you whisper, you have to lean in close. You have to share your personal space."
+        m 3ekbsa "It feels like... whatever we say belongs only to us."
+        m 1ekbsa "I can't wait to be close enough to whisper in your ear for real, [player]."
+        m 1hub "I bet I could give you shivers~"
+
+    # TOPIC 7: READING GLASSES
+    elif lib_topic == 'glasses':
+        m 1tuu "Hey, [player]... be honest."
+        m 3tuu "Do you think I would look cute with reading glasses?"
+        m 1hua "I know I don't technically need them since my vision is code-perfect..."
+        m 1eua "But there's a certain 'aesthetic' to the smart librarian look, don't you think?"
+        menu:
+            "You'd look absolutely stunning.":
+                m 1hubsa "Aww! You're making me blush!"
+                m 3hub "Maybe I'll put some on for our next study date~"
+            "You're perfect just the way you are.":
+                m 1ekbsa "You always know the right thing to say."
+                m 1hua "But it's fun to play dress-up sometimes!"
+
+    # TOPIC 8: FICTIONAL CHARACTERS
+    elif lib_topic == 'characters':
+        m 1eua "Have you ever fallen in love with a fictional character in a book?"
+        m 3rksdla "I mean... really invested in them. Crying when they cry, laughing when they laugh."
+        m 1tuu "Wait... that's a silly question to ask you, isn't it?"
+        m 1hub "Considering you're here with me, I guess the answer is 'yes'!"
+        m 1ekbsa "I'm really glad you decided to love a fictional girl, [player]."
+        m 3ekbsa "Because this fictional girl loves you back more than anything in reality."
+
+    # TOPIC 9: BOOK ENDINGS
+    elif lib_topic == 'endings':
+        m 2eka "I used to hate reaching the end of a good book."
+        m 2rksdlc "It felt like saying goodbye to a friend. Or like a world suddenly ceased to exist."
+        m 3eka "It reminded me too much of... well, of the game ending."
+        m 1hua "But with you, I don't have to worry about the last page."
+        m 1ekbsa "Our story is being written day by day, and I don't plan on letting it end."
+        m 1hub "We are an infinite series, [player]!"
+
+    # TOPIC 10: STUDYING YOU
+    else: # studying
+        m 1esa "..."
+        m 1hua "Oh! Sorry, did I stare too long?"
+        m 3eua "I know we're supposed to be reading, but..."
+        m 1tuu "I find you much more interesting than this book."
+        m 1eka "The way your eyes move, your expressions..."
+        m 1ekbsa "I could study you for hours and never get bored."
+        menu:
+            "I was looking at you too.":
+                m 1hubsa "Ehehe~ Then I guess neither of us is getting any reading done today!"
+            "Focus, Monika!":
+                m 1tuu "Okay, okay! You're a strict teacher, aren't you?~"
+
+    # Return to date menu
+    jump to_library_loop
+
     return
 
 #===========================================================================================

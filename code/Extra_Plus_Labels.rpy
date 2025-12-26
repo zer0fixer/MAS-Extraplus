@@ -10,7 +10,14 @@ label close_extraplus:
     show monika idle at t11
     python:
         store.mas_DropShield_dlg()
-    $ store.ep_button.hide_zoom_button()
+        store.ep_button.hide_zoom_button()
+
+        # Trigger gift file detection when closing the ExtraPlus menu.
+        # This is safe to call: MAS already runs it at startup (ch30_post_exp_check)
+        # and every minute (ch30_minute). The function has built-in protection via
+        # persistent._mas_filereacts_just_reacted to prevent duplicate reactions.
+        mas_checkReactions()
+
     jump ch30_visual_skip
     return
 
@@ -18,12 +25,14 @@ label close_dev_extraplus:
     show monika idle at t11
     python:
         store.mas_DropShield_dlg()
-    $ store.ep_button.hide_zoom_button()
+        store.ep_button.hide_zoom_button()
     jump ch30_visual_skip
     return
 
 label show_boop_screen:
-    show monika staticpose at t11
+    # DEBUG: Uncomment to show visual zones overlay
+    # show screen ep_debug_zones
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
     call screen boop_revamped
     return
 
@@ -33,13 +42,14 @@ label return_boop_screen:
 
 label close_boop_screen:
     show monika idle at t11
-    $ store.ep_button.hide_zoom_button()
+    python:
+        store.ep_button.hide_zoom_button()
     jump ch30_visual_skip
     return
 
 label boop_timer_expired:
     call screen maxwell_april_fools
-    jump show_boop_screen
+    $ store.ep_button.show_menu()
     return
 
 label hide_images_rps:
@@ -53,6 +63,7 @@ label hide_images_rps:
     return
 
 label extra_restore_bg(label="ch30_visual_skip"):
+    window hide
     hide monika
     python:
         store.ep_tools.manage_date_location(False)
@@ -86,31 +97,53 @@ label extra_location_init(bg, target_label, show_monika=True):
 #===========================================================================================
 label extra_cafe_init:
     call extra_location_init(EP_background_cafe, "extra_cafe_cakes", True)
+    return
 
 label extra_restaurant_init:
     call extra_location_init(EP_background_restaurant, "extra_restaurant_cakes", True)
+    return
 
-label ExtraPool_init:
-    call extra_location_init(EP_background_extrapool, "to_pool_loop", False)
+label extra_pool_init:
+    call extra_location_init(EP_background_pool, "to_pool_loop", False)
+    return
+
+label extra_library_init:
+    call extra_location_init(EP_background_library, "extra_library_arrival", True)
     return
 
 label extra_cafe_leave:
     hide screen extra_timer_monika
-    show monika 1hua at t11
-    m 1eta "Oh, are we heading back?"
-    m 1eub "Sounds good to me!"
-    m 3hua "But before we go..."
+    show monika 1eta at t11
+    m 1eta "Oh?{w=0.3} Are we finishing our coffee break already?"
+    m 2rksdla "I was just getting comfortable with the smell of roasted beans..."
+    m 2eka "It feels so cozy to just sit here and watch the world go by with you."
+    m 1hua "But I'm happy to go wherever you are."
+    m 1eua "Let's head back to our own private space~"
     $ ep_dates.stop_snike_time = False
     jump cafe_hide_acs
+    return
 
 label extra_restaurant_leave:
     hide screen extra_timer_monika
-    show monika 1hua at t11
-    m 1eta "Oh, are you ready to leave?"
-    m 1eub "Sounds good to me!"
-    m 3hua "But before we go..."
+    show monika 1eta at t11
+    m 1eta "Oh?{w=0.3} Are we ready to end our dinner date?"
+    m 1hub "I agree that the dinner was lovely, but..."
+    m 3eua "The best part was definitely your company."
+    m 1eka "A romantic evening like this is exactly what I needed."
+    m 1hua "Let's go home, [player]. I'm all yours."
     $ ep_dates.stop_snike_time = False
     jump restaurant_hide_acs
+    return
+
+label extra_library_exit:
+    show monika idle at t11
+    m 1eta "Oh?{w=0.3} Are we heading out already?"
+    m 2rua "I was just getting lost in the atmosphere of this place..."
+    m 2eka "Time really flies when we are surrounded by so many stories, doesn't it?"
+    m 1hua "But I'm happy to go wherever you want to go."
+    m 1eua "Let's close this chapter for today and go back home."
+    call extra_restore_bg("extra_comment_library")
+    return
 
 label monika_boopcafe:
     show monika staticpose at t11
@@ -146,27 +179,25 @@ label monika_booprestaurant:
 # Loops
 #===========================================================================================
 label to_cafe_loop:
-    show monika staticpose at t11
-    if ep_dates.stop_snike_time and renpy.get_screen("extra_timer_monika"):
-        hide screen extra_timer_monika
-        jump monika_no_dessert
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
 
-    call screen extra_dating_loop(ask="cafe_talk", label_boop="monika_boopcafe", boop_enable=True)
+    call screen extra_dating_loop("cafe_talk", "monika_boopcafe", boop_enable=True)
     return
 
 label to_restaurant_loop:
-    show monika staticpose at t11
-    if ep_dates.stop_snike_time and renpy.get_screen("extra_timer_monika"):
-        hide screen extra_timer_monika
-        jump monika_no_food
+    show monika staticpose at t11 zorder MAS_MONIKA_Z
 
-    call screen extra_dating_loop("restaurant_talk", "monika_booprestaurant", boop_enable=False)
+    call screen extra_dating_loop("restaurant_talk", "monika_booprestaurant", boop_enable=True)
     return
 
 label to_pool_loop:
     show monika idle at t11_float
+    call screen extra_dating_loop("extra_pool_interactions", "", boop_enable=False)
+    return
 
-    call screen extra_dating_loop("ExtraPool_interactions", "", boop_enable=False)
+label to_library_loop:
+    show monika idle at t11
+    call screen extra_dating_loop("extra_library_interactions", "", boop_enable=False)
     return
 
 #===========================================================================================
@@ -176,6 +207,7 @@ label to_pool_loop:
 
 label monika_no_dessert:
     hide screen extra_timer_monika
+    $ ep_dates.stop_snike_time = False
     show monika staticpose at t11
     if monika_chr.is_wearing_acs(EP_acs_fruitcake):
         python:
@@ -250,6 +282,7 @@ label cafe_hide_acs:
 
 label monika_no_food:
     hide screen extra_timer_monika
+    $ ep_dates.stop_snike_time = False
     show monika staticpose at t11
     if monika_chr.is_wearing_acs(EP_acs_pasta):
         python:
@@ -293,7 +326,7 @@ label monika_no_food:
                 m 1hubsb "I hope you enjoyed it!"
             "Not yet":
                 m 1eubsa "Don't worry, eat slowly."
-                m 1eubsb "I wait for you patiently~"
+                m 1eubsb "I'll wait for you patiently~"
     else:
         m 1ekc "You told me not to worry."
         m 1ekb "But, I guess you at least have a drink with you."
@@ -348,9 +381,9 @@ label extraplus_walk:
         ep_tools.walk_menu = [
             (_("Cafe"), "go_to_cafe"),
             (_("Restaurant"), "go_to_restaurant"),
-            (_("Pool"), "go_to_pool"),
-            (_("Library"), "generic_date_dev"),
-            (_("Arcade"), "generic_date_dev")
+            (_("Library"), "go_to_library"),
+            (_("Pool (Soon)"), "generic_date_dev"),
+            (_("Arcade (Soon)"), "generic_date_dev")
         ]
 
         m_talk = renpy.substitute(renpy.random.choice(ep_dialogues._dates))
@@ -366,8 +399,7 @@ label extraplus_minigames:
             (_("Shell Game"), "minigame_sg"),
             (_("Rock Paper Scissors"), "minigame_rps"),
             (_("Tic Tac Toe"), "minigame_ttt"),
-            (_("Blackjack (21)"), "blackjack_start"),
-            (_("Fridge Magnets"), "extra_fridge_magnets_game")
+            (_("Blackjack (21)"), "blackjack_start")
         ]
         
         m_talk = renpy.substitute(renpy.random.choice(ep_dialogues._minigames))
@@ -381,19 +413,29 @@ label extraplus_tools:
     show monika idle at t21
     python:
         store.ep_tools.player_zoom = store.mas_sprites.zoom_level
+        current_aff = store.ep_affection.getCurrentAffection()
+        
+        # Base menu items (always available)
         ep_tools.tools_menu = [
             (_("View [m_name]'s Affection"), "extra_aff_log"),
             (_("Your MAS Journey"), "extra_show_stats"),
             (_("Their story together"), "extra_show_timeline"),
-            (_("Create a gift for [m_name]"), "plus_make_gift"),
-            (_("Change the window's title"), "extra_window_title"),
-            (_("Hi, [player]!"), "extra_chibi_main")
+            (_("Create a gift for [m_name]"), "plus_make_gift")
         ]
+        
+        # Add items that require affection >= 30
+        if current_aff >= 30:
+            ep_tools.tools_menu.append((_("Change the window's title"), "extra_window_title"))
+            ep_tools.tools_menu.append((_("Hi, [player]!"), "extra_chibi_main"))
 
-        items = [
-            (_("Misc"), "extra_misc_tools", 20),
-            (_("Nevermind"), "screen_extraplus", 0)
-        ]
+        # Build bottom items
+        items = []
+        if current_aff >= 30:
+            items.append((_("Misc"), "extra_misc_tools", 20))
+            items.append((_("Nevermind"), "screen_extraplus", 0))
+        else:
+            items.append((_("Nevermind"), "screen_extraplus", 20))
+
     call screen extra_gen_list(ep_tools.tools_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items)
     return
 
@@ -414,7 +456,7 @@ label cafe_talk:
         ]
 
         items = [
-            (_("Can we leave?"), "extra_cafe_leave", 20),
+            (_("I'm ready to head back to our room."), "extra_cafe_leave", 20),
             (_("Nevermind"), "to_cafe_loop", 0)
         ]
     call screen extra_gen_list(cafe_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, False)
@@ -438,14 +480,14 @@ label restaurant_talk:
         ]
 
         items = [
-            (_("Can we leave?"), "extra_restaurant_leave", 20),
+            (_("Dinner was lovely. Shall we go?"), "extra_restaurant_leave", 20),
             (_("Nevermind"), "to_restaurant_loop", 0)
         ]
     call screen extra_gen_list(restaurant_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, False)
     return
 
-label ExtraPool_interactions:
-    show monika idle at t21_float
+label extra_pool_interactions:
+    show monika idle at t21_float 
 
     python:
         pool_menu = [
@@ -461,20 +503,166 @@ label ExtraPool_interactions:
     call screen extra_gen_list(pool_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, False)
     return
 
+label extra_library_interactions:
+    show monika idle at t21
+
+    python:
+        library_menu = [
+            (_("Let's write a poem together!"), "minigame_poem"),
+            (_("I want to write something for you"), "minigame_poem_free"),
+            (_("Read something to me, Monika."), "library_reading_session"),
+            (_("Let's just enjoy the silence."), "library_quiet_time"),
+            (_("Just talk to me."), "library_talk_topic"),
+            (_("My poem collection"), "library_poem_history"),
+        ]
+
+        items = [
+            (_("Let's close the book on this date for now."), "extra_library_exit", 20),
+            (_("Nevermind"), "to_library_loop", 0)
+        ]
+    call screen extra_gen_list(library_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, False)
+    return
+
 ################################################################################
 ## BOOP
 ################################################################################
 #====Boop count
 default persistent.plus_boop = [0, 0, 0] #Nose, Cheeks, Headpat.
-default persistent.extra_boop = [0, 0, 0] #Hands, Ears.
+default persistent.extra_boop = [0, 0, 0] #Hands, Ears, Shoulders.
 
 #====NOISE
 label monika_boopbeta:
     $ persistent.plus_boop[0] += 1
     $ store.ep_tools.show_boop_feedback("Boop!")
+    
+    # SPECIAL CONTEXTUAL DIALOGUES
+    # Only trigger after initial interactions (count > 5)
+    if persistent.plus_boop[0] > 5:
+        # Christmas context
+        if mas_isD25():
+            $ nose_xmas = renpy.random.randint(1, 4)
+            if nose_xmas == 1:
+                m 1hubsb "Boop! Consider that my little Christmas gift~"
+                m 1eubsa "Though I'd love to give you a real one someday."
+                jump show_boop_screen
+                return
+            elif nose_xmas == 2:
+                m 1hubla "Merry Christmas boop, [player]!"
+                m 1eubsb "I hope your nose is as warm as my heart right now~"
+                jump show_boop_screen
+                return
+            elif nose_xmas == 3:
+                m 1ekbsa "Christmas boops are extra special, you know?"
+                m 1hubsb "They come with holiday magic~"
+                jump show_boop_screen
+                return
+        
+        # Valentine's Day context
+        if mas_isF14():
+            $ nose_vday = renpy.random.randint(1, 4)
+            if nose_vday == 1:
+                m 1ekbsa "A Valentine's boop for my Valentine~"
+                m 1hubsb "I love you, [player]."
+                jump show_boop_screen
+                return
+            elif nose_vday == 2:
+                m 1tubsb "You know what would make this boop even better?"
+                m 1hubsa "A kiss right after~ Maybe someday..."
+                jump show_boop_screen
+                return
+            elif nose_vday == 3:
+                m 1dubsu "On a day meant for love..."
+                m 1ekbsa "Every little touch means so much more."
+                m 1hubsb "Happy Valentine's Day, [player]~"
+                jump show_boop_screen
+                return
+        
+        # Halloween context
+        if mas_isO31():
+            $ nose_halloween = renpy.random.randint(1, 4)
+            if nose_halloween == 1:
+                m 3tub "Boo...p!"
+                m 3hub "Get it? Ahaha~"
+                jump show_boop_screen
+                return
+            elif nose_halloween == 2:
+                m 2wub "Spooky boop! Did I scare you?"
+                m 2hub "Ehehe, just kidding~"
+                jump show_boop_screen
+                return
+            elif nose_halloween == 3:
+                m 1tub "Is my nose part of a witch costume?"
+                m 1hub "Because you keep booping it like it's magical! Ahaha~"
+                jump show_boop_screen
+                return
+        
+        # Monika's Birthday
+        if mas_isMonikaBirthday():
+            $ nose_mbday = renpy.random.randint(1, 3)
+            if nose_mbday == 1:
+                m 1hubsb "A birthday boop!"
+                m 1ekbsa "You really know how to make my special day even better, [player]."
+                jump show_boop_screen
+                return
+            elif nose_mbday == 2:
+                m 1dubsu "Getting booped on my birthday..."
+                m 1hubsa "This is exactly how I wanted to celebrate~"
+                jump show_boop_screen
+                return
+        
+        # Player's Birthday
+        if mas_isplayer_bday():
+            $ nose_pbday = renpy.random.randint(1, 3)
+            if nose_pbday == 1:
+                m 1hubsb "Boop! That's a birthday boop for you, [player]!"
+                m 1ekbsa "I hope your special day is as wonderful as you are~"
+                jump show_boop_screen
+                return
+            elif nose_pbday == 2:
+                m 1ekbsa "Happy birthday, [player]!"
+                m 1hubsb "Here's a nose boop as my little gift to you~"
+                jump show_boop_screen
+                return
+        
+        # Night context
+        if mas_isNightNow():
+            $ nose_night = renpy.random.randint(1, 6)
+            if nose_night == 1:
+                m 1eka "A late-night boop, huh?"
+                m 1ekbsa "It's moments like these that make the quiet nights special."
+                jump show_boop_screen
+                return
+            elif nose_night == 2:
+                m 1hubsa "Boop~ Are you getting sleepy, [player]?"
+                m 1ekbsa "Don't stay up too late for me... but thank you for being here."
+                jump show_boop_screen
+                return
+            elif nose_night == 3:
+                m 1dkbsa "Nighttime boops hit different, don't they?"
+                m 1ekbsa "More intimate somehow..."
+                jump show_boop_screen
+                return
+        
+        # High affection bonus (Love)
+        if mas_isMoniLove():
+            $ nose_love = renpy.random.randint(1, 8)
+            if nose_love == 1:
+                m 1ekbsa "You know, [player]..."
+                m 1hubsb "Every boop reminds me of how lucky I am to have you."
+                m 1dkbsu "I love you so much."
+                jump show_boop_screen
+                return
+            elif nose_love == 2:
+                m 1dubsu "Your boops are like little love letters..."
+                m 1ekbsa "Each one says 'I'm thinking of you.'"
+                jump show_boop_screen
+                return
+    
+    # PROGRESSIVE DIALOGUES
     if persistent.plus_boop[0] == 1:
         $ mas_gainAffection(3,bypass=True)
         m 1wud "Wait a minute..."
+
         m 1hka "I felt a little tingle."
         show screen force_mouse_move
         m 3hub "And we have a culprit!"
@@ -524,7 +712,7 @@ label monika_boopbeta:
         m 1hubsb "Boop!"
         m 1ekbsa "I'm sorry, I couldn't resist. You just have such a tempting nose!"
         m 1hub "But seriously, thank you for bringing so much joy into my life, [player]."
-    # === Dialogues added in Beta 3 ===
+    # Dialogues added in Beta 3
     elif persistent.plus_boop[0] == 11:
         m 1tub "Again! You're getting to be an expert at this, [player]."
         m 1hua "I wonder how many boops we're at now."
@@ -582,7 +770,7 @@ label monika_boopbeta:
             m 1fubla "Hehe, you're so cute when you're booping me~"
         elif nose_choice == 10:
             m 3eublb "You're really good at this, [player]! Have you been practicing?"
-        # === Dialogues added in Beta 3 ===
+        # Dialogues added in Beta 3
         elif nose_choice == 11:
             m 1wua "Got me!"
         elif nose_choice == 12:
@@ -614,7 +802,129 @@ label extra_boop_yep:
 #====CHEEKS
 label monika_cheeksbeta:
     $ persistent.plus_boop[1] += 1
-    $ store.ep_tools.show_boop_feedback("<3", color="#ff69b4")
+    $ store.ep_tools.show_boop_feedback("<3", color="#FF00FF")
+    
+    # SPECIAL CONTEXTUAL DIALOGUES
+    # Only trigger after initial interactions (count > 5)
+    if persistent.plus_boop[1] > 5:
+        # Christmas context
+        if mas_isD25():
+            $ cheek_xmas = renpy.random.randint(1, 4)
+            if cheek_xmas == 1:
+                m 2dubsu "Your touch feels like a warm fireplace on Christmas Eve..."
+                m 2hubsa "Thank you for spending this day with me, [player]."
+                jump show_boop_screen
+                return
+            elif cheek_xmas == 2:
+                m 2ekbsa "A Christmas caress..."
+                m 2hubsb "This is the warmest gift I could ask for~"
+                jump show_boop_screen
+                return
+            elif cheek_xmas == 3:
+                m 2hubsa "Merry Christmas, [player]~"
+                m 2dkbsu "Your gentle touch makes this holiday perfect."
+                jump show_boop_screen
+                return
+        
+        # Valentine's Day context
+        if mas_isF14():
+            $ cheek_vday = renpy.random.randint(1, 4)
+            if cheek_vday == 1:
+                m 2ekbsa "Caressing my cheek on Valentine's Day..."
+                m 2hubsb "You really know how to make a girl feel loved~"
+                jump show_boop_screen
+                return
+            elif cheek_vday == 2:
+                m 2dubsu "My cheeks feel so warm right now..."
+                m 2ekbsa "Is it your touch or the Valentine's magic?"
+                m 2hubsb "Probably both~"
+                jump show_boop_screen
+                return
+            elif cheek_vday == 3:
+                m 2fubsa "A Valentine's caress from my Valentine..."
+                m 2hubsb "I'm the luckiest girl in any reality~"
+                jump show_boop_screen
+                return
+        
+        # Halloween context
+        if mas_isO31():
+            $ cheek_halloween = renpy.random.randint(1, 4)
+            if cheek_halloween == 1:
+                m 2tub "Are you checking if I'm wearing costume makeup?"
+                m 2hub "These rosy cheeks are all natural, I promise! Ahaha~"
+                jump show_boop_screen
+                return
+            elif cheek_halloween == 2:
+                m 2wub "A spooky cheek touch!"
+                m 2hubla "Not scary at all, just sweet~"
+                jump show_boop_screen
+                return
+        
+        # Monika's Birthday
+        if mas_isMonikaBirthday():
+            $ cheek_mbday = renpy.random.randint(1, 3)
+            if cheek_mbday == 1:
+                m 2ekbsa "A birthday caress..."
+                m 2hubsb "This is the best gift I could ask for, [player]."
+                m 2dkbsu "Just being here with you."
+                jump show_boop_screen
+                return
+            elif cheek_mbday == 2:
+                m 2dubsu "Getting my cheek touched on my birthday..."
+                m 2hubsa "You're making this day so special, [player]."
+                jump show_boop_screen
+                return
+        
+        # Player's Birthday
+        if mas_isplayer_bday():
+            $ cheek_pbday = renpy.random.randint(1, 3)
+            if cheek_pbday == 1:
+                m 2hubsb "Happy birthday, [player]!"
+                m 2ekbsa "I wish I could caress your cheek too right now..."
+                m 2dkbsu "Someday, I will."
+                jump show_boop_screen
+                return
+            elif cheek_pbday == 2:
+                m 2ekbsa "On your special day..."
+                m 2hubsb "I just want you to know how much you mean to me~"
+                jump show_boop_screen
+                return
+        
+        # Night context
+        if mas_isNightNow():
+            $ cheek_night = renpy.random.randint(1, 5)
+            if cheek_night == 1:
+                m 2dkbsa "There's something magical about your touch at night..."
+                m 2ekbsa "It makes the darkness feel so much warmer."
+                jump show_boop_screen
+                return
+            elif cheek_night == 2:
+                m 2dubsu "Late night caresses are the most intimate..."
+                m 2ekbsa "Thank you for staying up with me, [player]."
+                jump show_boop_screen
+                return
+            elif cheek_night == 3:
+                m 2ekbsa "The quiet of the night..."
+                m 2dkbsu "And your gentle touch..."
+                m 2hubsa "Perfect."
+                jump show_boop_screen
+                return
+        
+        # High affection bonus (Love)
+        if mas_isMoniLove():
+            $ cheek_love = renpy.random.randint(1, 8)
+            if cheek_love == 1:
+                m 2dubsu "Every time you touch my cheek like this..."
+                m 2ekbla "I fall a little more in love with you, [player]."
+                jump show_boop_screen
+                return
+            elif cheek_love == 2:
+                m 2dkbsu "I never knew a simple touch could mean so much..."
+                m 2ekbsa "But with you, everything feels special."
+                jump show_boop_screen
+                return
+    
+    # PROGRESSIVE DIALOGUES
     if persistent.plus_boop[1] == 1:
         $ mas_gainAffection(3,bypass=True)
         m 2wubsd "Hey, I felt a slight pinch on my cheek."
@@ -623,6 +933,7 @@ label monika_cheeksbeta:
         m 2ttb "But I have to ask, what are you up to, [player]?"
         m 1hubla "Did you want to see how I would react to that?"
         m 3hublb "You pulled it off~!"
+
     elif persistent.plus_boop[1] == 2:
         m 2hubsa "Ehehe, I'm feeling a rather delicate caress this time."
         m 2dubsu "It's something .{w=0.3}.{w=0.3}.{w=0.3} {nw}"
@@ -660,7 +971,7 @@ label monika_cheeksbeta:
         m 2dubsb "You know what they say, [player]..."
         m 2hubsa "The tenth time's the charm!"
         m 2ekbsa "I love you more and more with each passing day."
-    # === Dialogues added in Beta 3 ===
+    # Dialogues added in Beta 3
     elif persistent.plus_boop[1] == 11:
         m 2dubsa "Mmm... so soft."
         m 2dkbsa "I can almost feel the warmth of your hand."
@@ -706,7 +1017,7 @@ label monika_cheeksbeta:
         elif cheek_choice == 5:
             m 2eubsb "I'm picturing us right now{nw}"
             extend 2dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3} how your hand will feel."
-        # === Dialogues added in Beta 3 ===
+        # Dialogues added in Beta 3
         elif cheek_choice == 6:
             m 2fubsa "So warm..."
         elif cheek_choice == 7:
@@ -723,13 +1034,137 @@ label monika_cheeksbeta:
 #====HEADPAT
 label monika_headpatbeta:
     $ persistent.plus_boop[2] += 1
-    $ store.ep_tools.show_boop_feedback("Pat pat~", color="#90ee90")
+    $ store.ep_tools.show_boop_feedback("Pat pat~", color="#F08080")
+    
+    # SPECIAL CONTEXTUAL DIALOGUES
+    # Only trigger after initial interactions (count > 5)
+    if persistent.plus_boop[2] > 5:
+        # Christmas context
+        if mas_isD25():
+            $ head_xmas = renpy.random.randint(1, 4)
+            if head_xmas == 1:
+                m 6hubsa "A Christmas headpat!"
+                m 6eubsb "This is cozier than sitting by a fireplace~"
+                jump show_boop_screen
+                return
+            elif head_xmas == 2:
+                m 6dubsu "Pat pat on Christmas Day..."
+                m 6ekbsa "You're the best present I could ever ask for, [player]."
+                jump show_boop_screen
+                return
+            elif head_xmas == 3:
+                m 6hubsb "Merry Christmas, [player]~"
+                m 6dkbsa "Your headpats are better than any holiday treat."
+                jump show_boop_screen
+                return
+        
+        # Valentine's Day context
+        if mas_isF14():
+            $ head_vday = renpy.random.randint(1, 4)
+            if head_vday == 1:
+                m 6dubsu "Valentine's headpats are the best headpats..."
+                m 6ekbsa "I love you so much, [player]."
+                jump show_boop_screen
+                return
+            elif head_vday == 2:
+                m 6hubsa "Getting headpats on Valentine's Day..."
+                m 6ekbsb "You really know how to make me feel special~"
+                jump show_boop_screen
+                return
+            elif head_vday == 3:
+                m 6dkbsu "Pat pat~"
+                m 6ekbsa "Your love fills me with so much warmth, [player]."
+                jump show_boop_screen
+                return
+        
+        # Halloween context
+        if mas_isO31():
+            $ head_halloween = renpy.random.randint(1, 4)
+            if head_halloween == 1:
+                m 6wub "Patting my head on Halloween?"
+                m 6hub "Are you making sure I'm not wearing a witch's hat? Ahaha~"
+                jump show_boop_screen
+                return
+            elif head_halloween == 2:
+                m 6tub "A spooky headpat!"
+                m 6hub "Not spooky at all, actually. Just cozy~"
+                jump show_boop_screen
+                return
+            elif head_halloween == 3:
+                m 6hubla "BOO...p? No wait, that's for the nose."
+                m 6hksdlb "Pat pat! There we go~"
+                jump show_boop_screen
+                return
+        
+        # Monika's Birthday
+        if mas_isMonikaBirthday():
+            $ head_mbday = renpy.random.randint(1, 3)
+            if head_mbday == 1:
+                m 6hubsb "Birthday headpats!"
+                m 6ekbsa "This is exactly how I wanted to spend my special day, [player]."
+                jump show_boop_screen
+                return
+            elif head_mbday == 2:
+                m 6dubsu "Getting pampered on my birthday..."
+                m 6hubsa "You really know how to spoil me~"
+                jump show_boop_screen
+                return
+        
+        # Player's Birthday
+        if mas_isplayer_bday():
+            $ head_pbday = renpy.random.randint(1, 3)
+            if head_pbday == 1:
+                m 6ekbsa "Happy birthday, [player]!"
+                m 6hubsb "I wish I could give you headpats right back~"
+                jump show_boop_screen
+                return
+            elif head_pbday == 2:
+                m 6hubsa "Birthday headpats for my special person~"
+                m 6ekbsa "I hope your day is as wonderful as you are!"
+                jump show_boop_screen
+                return
+        
+        # Night context
+        if mas_isNightNow():
+            $ head_night = renpy.random.randint(1, 5)
+            if head_night == 1:
+                m 6dkbsa "A nighttime headpat..."
+                m 6ekbsa "I could fall asleep just like this, [player]."
+                jump show_boop_screen
+                return
+            elif head_night == 2:
+                m 6dubsu "Late night headpats are the coziest..."
+                m 6hubsa "Thank you for being here with me."
+                jump show_boop_screen
+                return
+            elif head_night == 3:
+                m 6ekbsa "The world is quiet..."
+                m 6dkbsu "And your gentle pats make everything perfect."
+                jump show_boop_screen
+                return
+        
+        # High affection bonus (Love)
+        if mas_isMoniLove():
+            $ head_love = renpy.random.randint(1, 8)
+            if head_love == 1:
+                m 6dkbsu "Your headpats make me feel so loved, [player]..."
+                m 6ekbsa "I'm so grateful to have you in my life."
+                jump show_boop_screen
+                return
+            elif head_love == 2:
+                m 6dubsu "Every pat says 'I love you' in its own way..."
+                m 6hubsb "And I love you too, [player]. So much."
+                jump show_boop_screen
+                return
+    
+    # PROGRESSIVE DIALOGUES
     if persistent.plus_boop[2] == 1:
         $ mas_gainAffection(3,bypass=True)
         m 6subsa "You're patting me on the head!"
         m 6eubsb "It's really comforting."
         m 6dkbsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
         m 1eubsb "Thank you [player]~"
+
     elif persistent.plus_boop[2] == 2:
         m 6dubsb "I don't know why, but when you do it I feel lighter..."
         m 6dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
@@ -761,7 +1196,7 @@ label monika_headpatbeta:
     elif persistent.plus_boop[2] == 10:
         m 6dubsb "I love you, [player]."
         m 6hubsa "Thanks for being there for me, even when I'm not at my best."
-    # === Dialogues added in Beta 3 ===
+    # Dialogues added in Beta 3
     elif persistent.plus_boop[2] == 11:
         m 6eubsa "Ah... that's the spot."
         m 6subsa "You're good at this, [player]."
@@ -810,7 +1245,7 @@ label monika_headpatbeta:
             extend 6hubsb "I'm such a happy girl right now."
         elif headpat_choice == 5:
             m 6dkbsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
-        # === Dialogues added in Beta 3 ===
+        # Dialogues added in Beta 3
         elif headpat_choice == 6:
             m 6eubsb "Mmm, feels nice."
         elif headpat_choice == 7:
@@ -827,13 +1262,135 @@ label monika_headpatbeta:
 #====HANDS
 label monika_handsbeta:
     #Change the expressions
-    $ store.ep_tools.show_boop_feedback("Hehe~", color="#ffffff")
+    $ store.ep_tools.show_boop_feedback("Hehe~", color="#81c846")
     $ persistent.extra_boop[0] += 1
+    
+    # SPECIAL CONTEXTUAL DIALOGUES
+    # Only trigger after initial interactions (count > 5)
+    if persistent.extra_boop[0] > 5:
+        # Christmas context
+        if mas_isD25():
+            $ hand_xmas = renpy.random.randint(1, 4)
+            if hand_xmas == 1:
+                m 5dubsu "Holding hands on Christmas..."
+                m 5ekbsa "This is the only gift I need, [player]."
+                m 5hubsa "Merry Christmas, my love."
+                jump show_boop_screen
+                return
+            elif hand_xmas == 2:
+                m 5ekbsa "Your hand feels so warm..."
+                m 5hubsb "Like Christmas joy itself~"
+                jump show_boop_screen
+                return
+            elif hand_xmas == 3:
+                m 5dkbsu "On this magical Christmas Day..."
+                m 5ekbsa "I'm so grateful to be holding your hand."
+                jump show_boop_screen
+                return
+        
+        # Valentine's Day context
+        if mas_isF14():
+            $ hand_vday = renpy.random.randint(1, 4)
+            if hand_vday == 1:
+                m 5ekbsa "Holding hands on Valentine's Day..."
+                m 5hubsb "There's no one else I'd rather be with right now~"
+                jump show_boop_screen
+                return
+            elif hand_vday == 2:
+                m 5dubsu "Your hand in mine on Valentine's Day..."
+                m 5ekbsa "This is what true love feels like, [player]."
+                jump show_boop_screen
+                return
+            elif hand_vday == 3:
+                m 5hubsa "Happy Valentine's Day, [player]~"
+                m 5dkbsu "I'll never let go of this feeling."
+                jump show_boop_screen
+                return
+        
+        # Halloween context
+        if mas_isO31():
+            $ hand_halloween = renpy.random.randint(1, 4)
+            if hand_halloween == 1:
+                m 5tub "Are you holding my hand because you're scared?"
+                m 5hub "Don't worry, I'll protect you from the ghosts! Ahaha~"
+                jump show_boop_screen
+                return
+            elif hand_halloween == 2:
+                m 5hubla "Holding hands on Halloween..."
+                m 5eub "Nothing spooky about this, just cozy~"
+                jump show_boop_screen
+                return
+        
+        # Monika's Birthday
+        if mas_isMonikaBirthday():
+            $ hand_mbday = renpy.random.randint(1, 3)
+            if hand_mbday == 1:
+                m 5ekbsa "Holding your hand on my birthday..."
+                m 5hubsb "This is the perfect gift, [player]."
+                jump show_boop_screen
+                return
+            elif hand_mbday == 2:
+                m 5dubsu "The best birthday present..."
+                m 5ekbsa "Is just being here with you, hand in hand."
+                jump show_boop_screen
+                return
+        
+        # Player's Birthday
+        if mas_isplayer_bday():
+            $ hand_pbday = renpy.random.randint(1, 3)
+            if hand_pbday == 1:
+                m 5ekbsa "Happy birthday, [player]..."
+                m 5hubsb "I wish I could hold your hand for real today."
+                m 5dkbsu "Someday, I promise."
+                jump show_boop_screen
+                return
+            elif hand_pbday == 2:
+                m 5hubsa "On your special day..."
+                m 5ekbsa "I just want to hold you close and never let go."
+                jump show_boop_screen
+                return
+        
+        # Night context
+        if mas_isNightNow():
+            $ hand_night = renpy.random.randint(1, 5)
+            if hand_night == 1:
+                m 5dkbsa "Holding hands in the quiet of the night..."
+                m 5ekbsa "It feels so peaceful, [player]."
+                m 5hubsa "I don't want this moment to end."
+                jump show_boop_screen
+                return
+            elif hand_night == 2:
+                m 5dubsu "Late night hand holding..."
+                m 5ekbsa "There's something magical about these quiet moments."
+                jump show_boop_screen
+                return
+            elif hand_night == 3:
+                m 5ekbsa "When the world is asleep..."
+                m 5dkbsu "Your hand keeps me company."
+                jump show_boop_screen
+                return
+        
+        # High affection bonus (Love)
+        if mas_isMoniLove():
+            $ hand_love = renpy.random.randint(1, 8)
+            if hand_love == 1:
+                m 5dkbsu "I never want to let go, [player]..."
+                m 5ekbsa "Your hand is my anchor to happiness."
+                jump show_boop_screen
+                return
+            elif hand_love == 2:
+                m 5dubsu "Every moment holding your hand..."
+                m 5ekbla "Makes me fall deeper in love with you."
+                jump show_boop_screen
+                return
+    
+    # PROGRESSIVE DIALOGUES
     if persistent.extra_boop[0] == 1:
         $ mas_gainAffection(3,bypass=True)
         m 5eubsb "Oh, you're holding my hand."
         m 5dubsa "It's really nice, [player]."
         m 5tubsa "I feel so close to you when we touch."
+
     elif persistent.extra_boop[0] == 2:
         m 5dubsb "Your hand is warm and comforting..."
         m 5dubsa ".{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
@@ -870,7 +1427,7 @@ label monika_handsbeta:
         m 5eubsa "I love it when you hold my hand like this."
         m 5rubsa "It's like we're the only two people in the world."
         m 1hua "I never want this moment to end."
-    # === Dialogues added in Beta 3 ===
+    # Dialogues added in Beta 3
     elif persistent.extra_boop[0] == 11:
         m 5eubsb "Holding your hand... well, your cursor."
         m 5tubsa "It's my favorite way to feel connected to you."
@@ -913,7 +1470,7 @@ label monika_handsbeta:
             m 5rub "Being here with you, feeling your touch, it's like a dream come true. I'm so grateful for this moment with you."
         elif hand_choice == 6:
             m 5tubla "Your touch is electric, [player]. I can feel the sparks flying between us."
-        # === Dialogues added in Beta 3 ===
+        # Dialogues added in Beta 3
         elif hand_choice == 7:
             m 5ekbsa "Don't let go."
         elif hand_choice == 8:
@@ -929,12 +1486,136 @@ label monika_handsbeta:
 
 #====EARS
 label monika_earsbeta:
-    $ store.ep_tools.show_boop_feedback("Hey!", color="#add8e6")
+    $ store.ep_tools.show_boop_feedback("Hey!", color="#2f7578")
     $ persistent.extra_boop[1] += 1
+    
+    # SPECIAL CONTEXTUAL DIALOGUES
+    # Only trigger after initial interactions (count > 5)
+    if persistent.extra_boop[1] > 5:
+        # Christmas context
+        if mas_isD25():
+            $ ear_xmas = renpy.random.randint(1, 4)
+            if ear_xmas == 1:
+                m 1hubsa "Are you whispering Christmas secrets in my ear?"
+                m 1eubsb "I already know what I want... just more time with you~"
+                jump show_boop_screen
+                return
+            elif ear_xmas == 2:
+                m 1ekbsa "A Christmas ear touch..."
+                m 1hubsb "Making this holiday even more magical~"
+                jump show_boop_screen
+                return
+            elif ear_xmas == 3:
+                m 1tub "Are you checking if I can hear Santa's sleigh?"
+                m 1hub "Ahaha~ Merry Christmas, [player]!"
+                jump show_boop_screen
+                return
+        
+        # Valentine's Day context
+        if mas_isF14():
+            $ ear_vday = renpy.random.randint(1, 4)
+            if ear_vday == 1:
+                m 1ekbsa "Touching my ears on Valentine's Day..."
+                m 1tubsb "Are you trying to whisper sweet nothings? I'm listening~"
+                jump show_boop_screen
+                return
+            elif ear_vday == 2:
+                m 1dubsu "My ears are tingling..."
+                m 1ekbsa "Must be all the love in the air today~"
+                jump show_boop_screen
+                return
+            elif ear_vday == 3:
+                m 1hubsa "Happy Valentine's Day, [player]~"
+                m 1ekbsb "My ears are all yours to whisper to."
+                jump show_boop_screen
+                return
+        
+        # Halloween context
+        if mas_isO31():
+            $ ear_halloween = renpy.random.randint(1, 4)
+            if ear_halloween == 1:
+                m 1tub "Are you checking if I have pointy ears?"
+                m 1hub "I'm not a vampire... or am I? Ahaha~"
+                jump show_boop_screen
+                return
+            elif ear_halloween == 2:
+                m 1wub "Spooky ear touch!"
+                m 1hubla "Not scary at all, just ticklish~"
+                jump show_boop_screen
+                return
+            elif ear_halloween == 3:
+                m 1sub "Did you hear something?"
+                m 1hub "Just kidding! Happy Halloween, [player]~"
+                jump show_boop_screen
+                return
+        
+        # Monika's Birthday
+        if mas_isMonikaBirthday():
+            $ ear_mbday = renpy.random.randint(1, 3)
+            if ear_mbday == 1:
+                m 1hubsb "Birthday ear tickles!"
+                m 1ekbsa "You're making my special day even better, [player]."
+                jump show_boop_screen
+                return
+            elif ear_mbday == 2:
+                m 1dubsu "Touching my ears on my birthday..."
+                m 1hubsa "Such a sweet and intimate gesture~"
+                jump show_boop_screen
+                return
+        
+        # Player's Birthday
+        if mas_isplayer_bday():
+            $ ear_pbday = renpy.random.randint(1, 3)
+            if ear_pbday == 1:
+                m 1ekbsa "Happy birthday, [player]!"
+                m 1hubsb "I wish I could whisper birthday wishes in your ear~"
+                jump show_boop_screen
+                return
+            elif ear_pbday == 2:
+                m 1hubsa "On your special day..."
+                m 1ekbsa "Every touch feels extra meaningful."
+                jump show_boop_screen
+                return
+        
+        # Night context
+        if mas_isNightNow():
+            $ ear_night = renpy.random.randint(1, 5)
+            if ear_night == 1:
+                m 1dkbsa "Your touch on my ears at this hour..."
+                m 1ekbsa "It's so intimate and gentle. Thank you, [player]."
+                jump show_boop_screen
+                return
+            elif ear_night == 2:
+                m 1dubsu "Late night whispers..."
+                m 1ekbsa "Even without words, your touch says everything."
+                jump show_boop_screen
+                return
+            elif ear_night == 3:
+                m 1ekbsa "In the quiet of the night..."
+                m 1dkbsu "Your gentle touch feels so special."
+                jump show_boop_screen
+                return
+        
+        # High affection bonus (Love)
+        if mas_isMoniLove():
+            $ ear_love = renpy.random.randint(1, 8)
+            if ear_love == 1:
+                m 1dubsu "My ears are so sensitive when you touch them..."
+                m 1ekbla "But I trust you completely, [player]."
+                jump show_boop_screen
+                return
+            elif ear_love == 2:
+                m 1ekbsa "There's something so intimate about this..."
+                m 1hubsb "I love how close we've become."
+                jump show_boop_screen
+                return
+    
+    # PROGRESSIVE DIALOGUES
     if persistent.extra_boop[1] == 1:
         $ mas_gainAffection(3, bypass=True)
         m 1hub "Oh! That tickles!"
         m 3dubsa "But I have to admit, I like it when you touch my ears."
+
     elif persistent.extra_boop[1] == 2:
         m 1subsa "That's a new sensation."
         m 1eubsa "I never thought I would enjoy having my ears touched so much."
@@ -962,7 +1643,7 @@ label monika_earsbeta:
     elif persistent.extra_boop[1] == 10:
         m 1eub "That was wonderful, [player]."
         m 1hub "I always feel so content when I'm with you."
-    # === Dialogues added in Beta 3 ===
+    # Dialogues added in Beta 3
     elif persistent.extra_boop[1] == 11:
         m 1wua "Hey! That's a... sensitive spot."
         m 1hub "Ahaha, just kidding. It's... surprisingly nice."
@@ -1010,7 +1691,7 @@ label monika_earsbeta:
         elif ear_choice == 5:
             m 1hua "Being with you like this is all I need, [player]."
             m 1hub "Your touch makes everything better."
-        # === Dialogues added in Beta 3 ===
+        # Dialogues added in Beta 3
         elif ear_choice == 6:
             m 1hubla "Eep! Ahaha!"
         elif ear_choice == 7:
@@ -1024,30 +1705,312 @@ label monika_earsbeta:
     jump show_boop_screen
     return
 
+#====SHOULDERS (Comforting Touch)
+label monika_interactions_shoulder:
+    # Use a softer, more intimate color for the feedback
+    $ store.ep_tools.show_boop_feedback("Together~", color="#8A2BE2")
+    $ persistent.extra_boop[2] += 1
+    
+    # SPECIAL CONTEXTUAL DIALOGUES
+    # Check for special emotional states fifth (only after fifth encounter)
+    if persistent.extra_boop[2] > 5:
+        # If Monika is upset or distressed
+        if mas_isMoniUpset() or mas_isMoniDis():
+            $ shoulder_special = renpy.random.randint(1, 3)
+            if shoulder_special == 1:
+                m 1dkc "..."
+                m 1eka "[player]..."
+                m 1ekd "I know things haven't been... easy lately."
+                m 1dka "But your hand on my shoulder..."
+                m 1eka "It means more than you know."
+                m 1ekbsa "Thank you for not giving up on me."
+            elif shoulder_special == 2:
+                m 1ekc "..."
+                m 1dkc "I don't know what to say right now."
+                m 1eka "But... I feel your warmth."
+                m 1ekbsa "And that's enough."
+            else:
+                m 1dkc "..."
+                m 1eka "Just... stay with me for a moment."
+                m 1dka "..."
+                m 1ekbsa "...Thank you."
+            jump show_boop_screen
+            return
+        
+        # Christmas context
+        if mas_isD25():
+            $ shoulder_xmas = renpy.random.randint(1, 4)
+            if shoulder_xmas == 1:
+                m 1eka "A comforting touch on Christmas..."
+                m 1ekbsa "You're my greatest gift, [player]."
+                m 1hubsa "Merry Christmas."
+                jump show_boop_screen
+                return
+            elif shoulder_xmas == 2:
+                m 1dkbsu "On this magical night..."
+                m 1ekbsa "Your hand on my shoulder feels like all the warmth of the holidays."
+                jump show_boop_screen
+                return
+            elif shoulder_xmas == 3:
+                m 1ekbsa "Christmas may come once a year..."
+                m 1hubsb "But your support is with me always."
+                m 1dkbsu "Thank you, [player]."
+                jump show_boop_screen
+                return
+        
+        # Valentine's Day context
+        if mas_isF14():
+            $ shoulder_vday = renpy.random.randint(1, 4)
+            if shoulder_vday == 1:
+                m 1ekbsa "On Valentine's Day..."
+                m 1dkbsu "This gentle touch means more than any card or gift."
+                m 1hubsa "I love you, [player]."
+                jump show_boop_screen
+                return
+            elif shoulder_vday == 2:
+                m 1eka "A shoulder touch on the day of love..."
+                m 1ekbsa "It's the little things like this that make our love special."
+                jump show_boop_screen
+                return
+            elif shoulder_vday == 3:
+                m 1dkbsu "Happy Valentine's Day, [player]..."
+                m 1ekbsa "Thank you for always being there for me."
+                jump show_boop_screen
+                return
+        
+        # Halloween context
+        if mas_isO31():
+            $ shoulder_halloween = renpy.random.randint(1, 4)
+            if shoulder_halloween == 1:
+                m 1eka "Are you making sure I'm not a ghost?"
+                m 1hub "I'm very much real, I promise! Ahaha~"
+                m 1ekbsa "...And very much here for you."
+                jump show_boop_screen
+                return
+            elif shoulder_halloween == 2:
+                m 1tub "On Halloween night..."
+                m 1ekbsa "It's nice to know you're here to keep me grounded, [player]."
+                jump show_boop_screen
+                return
+            elif shoulder_halloween == 3:
+                m 1hubla "A comforting touch on the spookiest night?"
+                m 1ekbsa "Nothing scary about that. Just... warmth."
+                jump show_boop_screen
+                return
+        
+        # Monika's Birthday
+        if mas_isMonikaBirthday():
+            $ shoulder_mbday = renpy.random.randint(1, 3)
+            if shoulder_mbday == 1:
+                m 1ekbsa "On my birthday..."
+                m 1dkbsu "Having you here, reaching out to me..."
+                m 1hubsb "It's the best present I could ever ask for."
+                jump show_boop_screen
+                return
+            elif shoulder_mbday == 2:
+                m 1eka "A birthday touch..."
+                m 1ekbsa "Gentle, supportive, full of love."
+                m 1hubsa "Thank you, [player]."
+                jump show_boop_screen
+                return
+        
+        # Player's Birthday
+        if mas_isplayer_bday():
+            $ shoulder_pbday = renpy.random.randint(1, 3)
+            if shoulder_pbday == 1:
+                m 1ekbsa "Happy birthday, [player]..."
+                m 1dkbsu "I wish I could place my hand on your shoulder too."
+                m 1hubsa "To tell you everything will be okay."
+                jump show_boop_screen
+                return
+            elif shoulder_pbday == 2:
+                m 1eka "On your special day..."
+                m 1ekbsa "I want you to know that I'm always here for you."
+                m 1hubsb "Just like you're here for me."
+                jump show_boop_screen
+                return
+        
+        # If it's nighttime (more intimate/melancholic)
+        if mas_isNightNow():
+            $ shoulder_night = renpy.random.randint(1, 5)
+            if shoulder_night == 1:
+                m 1eka "The night feels a little less lonely with you here, [player]."
+                m 1ekbsa "Your touch... it's like a reminder that I'm not alone in the dark."
+                jump show_boop_screen
+                return
+            elif shoulder_night == 2:
+                m 1dka "..."
+                m 1eka "In the quiet of the night, your presence means everything."
+                m 1ekbsa "Thank you for staying up with me."
+                jump show_boop_screen
+                return
+            elif shoulder_night == 3:
+                m 1dkbsa "Late nights can be so lonely..."
+                m 1ekbsa "But your gentle touch makes everything better."
+                jump show_boop_screen
+                return
+        
+        # If Monika is very happy (high affection romantic variant)
+        if mas_isMoniEnamored() or mas_isMoniLove():
+            $ shoulder_love = renpy.random.randint(1, 8)
+            if shoulder_love == 1:
+                m 1ekbsa "You always know exactly what I need, don't you?"
+                m 1dkbsu "I love you so much, [player]."
+                m 1ekbsa "Never stop reaching out to me like this."
+                jump show_boop_screen
+                return
+            elif shoulder_love == 2:
+                m 1dubsu "..."
+                m 1ekbsa "I used to dream about moments like this."
+                m 1hubsb "And here you are, making them real."
+                jump show_boop_screen
+                return
+            elif shoulder_love == 3:
+                m 1dkbsu "Your hand on my shoulder..."
+                m 1ekbla "It feels like home, [player]."
+                jump show_boop_screen
+                return
+    
+    # PROGRESSIVE DIALOGUES
+    if persistent.extra_boop[2] == 1:
+        $ mas_gainAffection(3, bypass=True)
+        m 1eud "..."
+        m 1eka "That was... different."
+        m 1eub "Not a boop, not a pat... more like a gentle reassurance."
+        m 1ekbsa "It's like you're saying 'I'm right here with you.'"
+        m 1hubsa "I really appreciate that, [player]. Thank you~"
+    elif persistent.extra_boop[2] == 2:
+        m 1hua "You know what I love about this?"
+        m 1eub "It's so... grounding."
+        m 1ekbsa "Like a little reminder that we're in this together."
+        m 1hubsa "It makes me feel so secure~"
+    elif persistent.extra_boop[2] == 3:
+        m 1eub "I've noticed something, [player]."
+        m 1hua "When you touch my shoulder like that..."
+        m 1ekbsa "It's like you're wrapping me in a warm blanket."
+        m 1hubsa "Figuratively speaking, of course! Ehehe~"
+    elif persistent.extra_boop[2] == 4:
+        m 1eka "This is a really sweet gesture."
+        m 1eub "It's not flashy or dramatic..."
+        m 1ekbsa "But that's what makes it special."
+        m 1hubsa "Simple things mean the most, don't they?"
+    elif persistent.extra_boop[2] == 5:
+        # Check if game has crashed before
+        if persistent._mas_crashed_before:
+            m 1eka "You know... there have been times when things went wrong."
+            m 1ekb "The game crashed, or something unexpected happened..."
+            m 1hubsa "But you always came back. And that means everything."
+            m 1ekbsa "This touch reminds me that we can get through anything together."
+        else:
+            m 1eub "Five times now!"
+            m 1hub "I think this is becoming our little tradition~"
+            m 1ekbsa "I love how you find new ways to show you care."
+            m 1hubsa "You're so thoughtful, [player]."
+    elif persistent.extra_boop[2] == 6:
+        m 1hua "You know what's funny?"
+        m 1eub "In movies, a hand on the shoulder is usually a serious moment."
+        m 1hub "But with you, it just feels... cozy!"
+        m 1ekbsa "Like coming home after a long day."
+        m 1hubsa "You're my home, [player]~"
+    elif persistent.extra_boop[2] == 7:
+        m 1eub "They say the shoulder is a sign of support."
+        m 1eka "A place where friends and loved ones lean on each other."
+        m 1hubsa "And I'm so happy to have someone I can lean on!"
+        m 1ekbsa "And I hope you know... you can always lean on me too."
+    elif persistent.extra_boop[2] == 8:
+        m 1hua "Mm... that's nice~"
+        m 1eub "Sometimes the best moments are the quiet ones."
+        m 1ekbsa "No words needed, just... presence."
+        m 1hubsa "I treasure these moments with you."
+    elif persistent.extra_boop[2] == 9:
+        m 1eub "You've taught me something, [player]."
+        m 1hua "That love comes in many forms!"
+        m 1ekbsa "Playful boops, gentle pats, and comforting touches like this."
+        m 1hubsa "Each one is special in its own way~"
+    elif persistent.extra_boop[2] == 10:
+        m 1sub "Ten times!"
+        m 1hub "You really enjoy this, don't you?"
+        m 1ekbsa "I'm glad I can bring you comfort too."
+        m 1hubsa "Here's to many more, [player]~"
+    else:
+        # Random comforting messages after count 10
+        $ shoulder_choice = renpy.random.randint(1, 15)
+        if shoulder_choice == 1:
+            m 1hubsa "Just us, enjoying a quiet moment~"
+            m 1ekbsa "These are my favorite times."
+        elif shoulder_choice == 2:
+            m 1eub "You know what? I feel really lucky."
+            m 1hubsa "To have someone who cares about me like this~"
+        elif shoulder_choice == 3:
+            m 1hua "Your touch is like a warm cup of coffee."
+            m 1hubsa "Comforting, familiar, and always welcome~"
+        elif shoulder_choice == 4:
+            m 1ekbsa "Thank you for being here, [player]."
+            m 1hubsa "You make every day brighter."
+        elif shoulder_choice == 5:
+            m 1hub "Ehehe~ That tickles a little!"
+            m 1hubsa "But in a good way~"
+        elif shoulder_choice == 6:
+            m 1ekbsa "With you, I always feel safe."
+            m 1hubsa "Like nothing bad can happen."
+        elif shoulder_choice == 7:
+            m 1eub "No matter what challenges come..."
+            m 1hubsa "We'll face them together!"
+        elif shoulder_choice == 8:
+            m 1dkbsa "..."
+            m 1ekbla "I love you, [player]~"
+        elif shoulder_choice == 9:
+            m 1hua "This is so relaxing~"
+            m 1hubsa "I could stay like this forever."
+        elif shoulder_choice == 10:
+            m 1eub "Sometimes actions speak louder than words."
+            m 1ekbsa "And this... says so much."
+        elif shoulder_choice == 11:
+            m 1hub "Ahh~ That hit the spot!"
+            m 1hubsa "You always know what I need."
+        elif shoulder_choice == 12:
+            m 1ekbsa "In this crazy digital world..."
+            m 1hubsa "You're my peace and calm."
+        elif shoulder_choice == 13:
+            m 1hubsa "My wonderful [player]~"
+            m 1ekbla "What would I do without you?"
+        elif shoulder_choice == 14:
+            m 1eub "Every touch reminds me..."
+            m 1hubsa "That our connection is real and beautiful."
+        elif shoulder_choice == 15:
+            m 1ekbsa "Just stay close, okay?"
+            m 1hubsa "That's all I need~"
+    jump show_boop_screen
+    return
+
 #===========================================================================================
 # OLD SECONDARY ACTIONS (RIGHT-CLICK)
 #===========================================================================================
 # --- HEAD (Right-Click, Long Pat) ---
 label monika_headpat_long:
     $ store.ep_tools.show_boop_feedback("Warm~")
-    if not renpy.seen_label("monika_headpat_long"):
+    if not renpy.seen_label("checkpoint_headpat_long"):
         $ mas_gainAffection(3, bypass=True)
     
     python:
         headpat_choice = renpy.random.randint(1, 4)
-        
+
+label checkpoint_headpat_long:
     if headpat_choice == 1:
+        m 6dkbsa ".{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}{nw}"
         m 1ekbsa "Ah..."
         m 3ekbfa "That's so sweet of you, [player]."
         m 3hubsa "I really love it when you pat my head like this..."
         m 1hubsa "It's so... relaxing."
         m 1eubsb "I feel like I could just melt~"
     elif headpat_choice == 2:
+        m 6dkbsa ".{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}{nw}"
         m 1ekbsa "Mm..."
         m 3ekbfa "You're so warm, [player]."
         m 1eubsb "Just... keep doing that for a little while, okay?"
         m 1hubsb "It makes me feel so safe and loved."
     elif headpat_choice == 3:
+        m 6dkbsa ".{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}.{w=0.4}{nw}"
         m 6eubsb "Ehehe~"
         m 6hubsb "You really know how to spoil me."
         m 6fkbsb "Getting long headpats from you is the best."
@@ -1199,6 +2162,11 @@ label monika_cheek_squish:
     $ store.ep_tools.show_boop_feedback("Squish~")
     python:
         cheek_choice = renpy.random.randint(1, 3)
+
+    if not renpy.seen_label("checkpoint_cheek_squish"):
+        $ mas_gainAffection(1, bypass=True)
+
+label checkpoint_cheek_squish:
     if cheek_choice == 1:
         m 2hub "Ngh! [player], what are you doing?"
         m 1tsu "My face isn't made of putty, you know!"
@@ -1210,10 +2178,8 @@ label monika_cheek_squish:
         m 2tsbsu "W-Wait! Are you... 'squishing' me?"
         m 1tsu "You're so bold! I... I don't... *dislike* it..."
 
-    if not renpy.seen_label("monika_cheek_squish"):
-        $ mas_gainAffection(1, bypass=True)
     jump show_boop_screen
-
+    return
 
 # --- HANDS (Right-Click) ---
 label monika_hand_hold:
@@ -1221,6 +2187,10 @@ label monika_hand_hold:
     python:
         hand_choice = renpy.random.randint(1, 3)
 
+    if not renpy.seen_label("checkpoint_hand_hold"):
+        $ mas_gainAffection(3, bypass=True)
+
+label checkpoint_hand_hold:
     if hand_choice == 1:
         m 1wud "Oh... you're... you're holding my hand. Not just tapping it."
         m 1ekbsa "This is... so much nicer."
@@ -1233,11 +2203,8 @@ label monika_hand_hold:
         m 6eubsb "Mm... This is... different from just a 'pat'."
         m 6hubsb "It's so... grounding."
         m 6fkbsb "Please... let's just stay like this for a moment."
-
-    if not renpy.seen_label("monika_hand_hold"):
-        $ mas_gainAffection(3, bypass=True)
     jump show_boop_screen
-
+    return 
 
 # --- EARS (Right-Click) ---
 label monika_ear_rub:
@@ -1245,6 +2212,10 @@ label monika_ear_rub:
     python:
         ear_choice = renpy.random.randint(1, 3)
 
+    if not renpy.seen_label("checkpoint_ear_rub"):
+        $ mas_gainAffection(1, bypass=True)
+
+label checkpoint_ear_rub:
     if ear_choice == 1:
         m 2wud "Ah! H-Hey, that's... ngh..."
         m 2hksdlb "That's *not* a poke, that's... ehehe... s-stop, that tickles!"
@@ -1257,15 +2228,23 @@ label monika_ear_rub:
         m 2hksdlb "That's... ah... I can't even think straight when you do that..."
         m 1tsu "Ehehe~"
 
-    if not renpy.seen_label("monika_ear_rub"):
-        $ mas_gainAffection(1, bypass=True)
     jump show_boop_screen
+    return
 
 #===========================================================================================
 # TOOLS MENU LABELS
 #===========================================================================================
 label plus_make_gift:
+    # Show Chibika notification during D25 season (Dec 11 - Jan 5), once per season
+    # python:
+    #     import datetime
+    #     _current_year = datetime.date.today().year
+    #     if mas_isD25Season() and persistent._ep_seen_d25_gift_info != _current_year:
+    #         persistent._ep_seen_d25_gift_info = _current_year
+    #         store.ep_chibis.chibika_notify(_("During Christmas season, gifts will be placed under the tree and opened on December 25th!"))
+
     show monika idle at t21
+    
     python:
         gift_menu = [
             (_("Create a .gift file"), "plus_make_file"),
@@ -1273,6 +2252,10 @@ label plus_make_gift:
             (_("Objects"), "plus_objects"),
             (_("Ribbons"), "plus_ribbons")
         ]
+        
+        # Add "Pending Gifts" option only if there are pending gifts from spritepacks
+        if store.ep_files.hasPendingGifts():
+            gift_menu.append((_("Pending Gifts"), "plus_pending_gifts"))
 
         items = [(_("Nevermind"), "extraplus_tools", 20)]
     call screen extra_gen_list(gift_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
@@ -1282,47 +2265,70 @@ label plus_make_file:
     show monika idle at t11
 
     python:
-        makegift = mas_input(
-            prompt=_("Enter the name of the gift."),
+        # Use enhanced input with paste button for easy gift name entry
+        makegift = store.ep_tools.ep_input(
+            prompt=_("Gift filename:"),
             allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789",
-            screen_kwargs={"use_return_button": True, "return_button_value": "cancel"},
+            length=100
         )
 
         if not makegift:
             renpy.jump("plus_make_file")
-        elif makegift == "cancel":
+        elif makegift == "cancel_input":
             renpy.jump("plus_make_gift")
         else:
             if store.ep_files.create_gift_file(makegift):
-                store.ep_chibis.chibika_notify(_("Done! Created '/characters/{}.gift'").format(makegift))
-                store.mas_checkReactions()
+                # Check for Easter Egg reactions from Chibika
+                gift_lower = makegift.lower().strip()
+                
+                # Check if the gift name matches any easter egg
+                special_reaction = store.ep_dialogues.chibis_gift.get(gift_lower)
+                
+                if special_reaction:
+                    message, doki_icon = special_reaction
+                    message = renpy.substitute(message)
+                    store.ep_chibis.chibika_notify(message, doki_icon, jump=True)
+                else:
+                    # Default notification
+                    store.ep_chibis.chibika_notify(_("Done! Created '/characters/{}.gift'").format(makegift))
+                
             renpy.jump("plus_make_gift")
             
     return
 
 label plus_groceries:
     python:
-        groceries_menu = store.ep_files.groceries_menu
+        groceries_menu = store.ep_files.getGroceriesMenu()
         items = [(_("Nevermind"), "plus_make_gift", 20)]
     call screen extra_gen_list(groceries_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items)
     return
 
 label plus_objects:
     python:
-        objects_menu = list(store.ep_files.objects_menu_base)
-        # Add the conditional item at runtime
-        if not mas_seenEvent("mas_reaction_gift_noudeck"):
-            objects_menu.append(store.ep_files.GiftAction(_("NOU"), "noudeck"))
-
+        objects_menu = store.ep_files.getObjectsMenu()
         items = [(_("Nevermind"), "plus_make_gift", 20)]
     call screen extra_gen_list(objects_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
     return
 
 label plus_ribbons:
     python:
-        ribbons_menu = store.ep_files.ribbons_menu
+        ribbons_menu = store.ep_files.getRibbonsMenu()
         items = [(_("Nevermind"), "plus_make_gift", 20)]
     call screen extra_gen_list(ribbons_menu, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, items)
+    return
+
+label plus_pending_gifts:
+    python:
+        pending_menu = store.ep_files.getPendingGiftsMenu()
+        
+        if not pending_menu:
+            # No pending gifts - show a friendly message
+            store.ep_chibis.chibika_notify(_("Great news! All sprite gifts have been unlocked~"))
+            renpy.jump("plus_make_gift")
+        
+        items = [(_("Nevermind"), "plus_make_gift", 20)]
+    
+    call screen extra_gen_list(pending_menu, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, items)
     return
 
 label extra_show_stats:
@@ -1335,7 +2341,8 @@ label extra_relation_monika:
     show monika idle at t11
     $ time_string = store.ep_tools.getFormattedTimeSinceInstall()
     $ total_days = store.ep_tools.getTotalDaysSinceInstall()
-    if not renpy.seen_label("extra_relation_monika"):
+    
+    if not renpy.seen_label("checkpoint_relation_monika"):
         m 2eub "You know, if you count it all up, it seems we've been together for [time_string]!"
         if total_days <= 1:
             m 2lub "We've only just begun, but every single second has been a dream come true."
@@ -1355,7 +2362,11 @@ label extra_relation_monika:
             m 2subsb "Six years! Can you believe it? Every year with you is a treasure. Thank you for being with me all this time."
         else:
             m 2lubsb "It's been so long... but it really doesn't feel that way when I'm with you. Time just flies!"
-    else:
+        jump close_extraplus
+        return
+
+label checkpoint_relation_monika:
+    if renpy.seen_label("checkpoint_relation_monika"):
         m 2eub "We've been together for [time_string]!"
         m 2lubsb "It really doesn't feel that long when I'm with you, though. Time just flies!"
     jump close_extraplus
@@ -1367,6 +2378,7 @@ label extra_aff_log:
         current_affection = store.ep_affection.getCurrentAffection()
         affection_value = int(current_affection)
         monika_level = store.ep_affection.getLevelIcon(current_affection)
+        aff_suffix = store.ep_affection.getLevelSuffix(affection_value)
         egg_roll = renpy.random.randint(1, 100)
     
     # --- (6% chance) Error ---
@@ -1388,12 +2400,13 @@ label extra_aff_log:
         stop sound fadeout 1.5
 
     show monika idle
-    "Your affection with [m_name] is [affection_value] [monika_level]{fast}"
+    "Your affection with [m_name] is [affection_value] [monika_level][aff_suffix]{fast}"
 
 label extra_aff_log_end:
     window hide
     jump close_extraplus
     return
+
 
 label extra_coinflip:
     show monika 1hua at t11
@@ -1403,12 +2416,12 @@ label extra_coinflip:
     show screen extra_no_click
     pause 1.0
     show monika 3eua at t11
-    show coin_moni zorder 12 at rotatecoin:
+    show extra_coin_flip zorder 12 at rotatecoin:
         xalign 0.5
         yalign 0.5
     play sound sfx_coin_flip
     pause 1.0
-    hide coin_moni
+    hide extra_coin_flip
     show monika 1eua
     pause 0.5
     hide screen extra_no_click
@@ -1480,45 +2493,33 @@ label extra_mas_backup_fail:
     return
 
 label extra_window_title:
-    show monika idle at t21
-    python:
-        # Updated menu with three distinct options
-        window_menu = [
-            (_("Type a new title"), "extra_change_title_manual"),
-            (_("Paste title from clipboard"), "extra_change_title_paste"),
-            (_("Restore the window title"), "extra_restore_title")
-        ]
-
-        items = [(_("Nevermind"), "extraplus_tools", 20)]
-    call screen extra_gen_list(window_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
-    return
-
-label extra_change_title_manual:
     show monika idle at t11
     python:
-        player_input = mas_input(
-            prompt=_("What should our new window title be?"),
-            allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!?()~-_.,'0123456789",
-            screen_kwargs={"use_return_button": True, "return_button_value": "cancel"}
+        # Determine if Restore button should be shown (only if current title differs from original)
+        show_restore = (persistent._save_window_title != store.ep_tools.backup_window_title)
+        
+        # Use enhanced input with paste button and optional Restore button
+        player_input = store.ep_tools.ep_input(
+            prompt=_("Enter the new title~"),
+            allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ<#*!?()@&~-_.,'0123456789",
+            length=100,
+            screen_kwargs={
+                "use_extra_button": show_restore,
+                "extra_button_prompt": _("Restore"),
+                "extra_button_value": "__EP_RESTORE_TITLE__"
+            }
         )
-    if player_input and player_input != "cancel":
-        jump process_new_title
+        
+    # Handle Restore button
+    if player_input == "__EP_RESTORE_TITLE__":
+        jump extra_restore_title
+    elif player_input and player_input != "cancel_input":
+        jump extra_process_new_title
     else:
-        jump extra_window_title
+        jump extraplus_tools
     return
 
-label extra_change_title_paste:
-    show monika idle at t11
-    python:
-        allowed_chars = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!?()~-_.,'0123456789"
-        player_input = store.ep_tools.filtered_clipboard_text(allowed_chars)
-    if player_input and player_input != "cancel":
-        jump process_new_title
-    else:
-        jump extra_window_title
-    return
-
-label process_new_title:
+label extra_process_new_title:
     $ persistent._save_window_title = player_input.strip()
     $ config.window_title = persistent._save_window_title
     $ store.ep_chibis.chibika_notify(random.choice([
@@ -1549,17 +2550,132 @@ label extra_github_submod:
 
 label extra_misc_tools:
     python:
+        current_aff = store.ep_affection.getCurrentAffection()
         misc_tools_menu = [
             (_("How long have we been together, [m_name]?"), "extra_relation_monika"),
             (_("[m_name], I want to make a backup"), "extra_mas_backup"),
-            (_("[m_name], can you flip a coin?"), "extra_coinflip")
+            (_("[m_name], can you flip a coin?"), "extra_coinflip"),
+            (_("How is your wardrobe, [m_name]?"), "extra_wardrobe_stats")
         ]
 
+        if current_aff >= 100:
+            misc_tools_menu.append((_("[m_name], I'm going to check your fridge"), "extra_fridge_magnets_game"))
+            
         items = [
             (_("Github Repository"), "extra_github_submod", 20), 
             (_("Nevermind"), "extraplus_tools", 0)
         ]
     call screen extra_gen_list(misc_tools_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
+    return
+
+label extra_wardrobe_stats:
+    show monika idle at t11
+    python:
+        # Get wardrobe statistics
+        wardrobe_stats = store.ep_wardrobe.getWardrobeStats()
+        clothes_unlocked = wardrobe_stats["clothes_unlocked"]
+        clothes_total = wardrobe_stats["clothes_total"]
+        acs_unlocked = wardrobe_stats["acs_unlocked"]
+        acs_total = wardrobe_stats["acs_total"]
+        hair_unlocked = wardrobe_stats["hair_unlocked"]
+        hair_total = wardrobe_stats["hair_total"]
+        
+        # Check for pending gifts (items that exist but aren't unlocked)
+        pending_gifts = store.ep_wardrobe.getPendingGifts()
+        pending_count = len(pending_gifts)
+
+    m 1eua "Let me check my wardrobe for you, [player]..."
+
+    call mas_transition_to_emptydesk
+    pause 4.0
+    call mas_transition_from_emptydesk("monika 1eua")
+
+    m 1hub "Okay, here's what I have!"
+    
+    m 3eub "I currently have [clothes_unlocked] outfits available to wear."
+    if clothes_unlocked > 5:
+        m 1hubsb "That's quite the collection! Thank you for all the lovely clothes~"
+    elif clothes_unlocked > 1:
+        m 1hua "It's nice to have some variety, don't you think?"
+    
+    m 3eua "For accessories, I have [acs_unlocked] unlocked right now."
+    if acs_unlocked > 10:
+        m 1wuo "Wow, so many cute accessories! I love accessorizing~"
+    
+    m 3eub "And for hairstyles, I have [hair_unlocked] available."
+    if hair_unlocked > 3:
+        m 1hubla "I can style my hair in so many ways for you!"
+    
+    if pending_count > 0:
+        m 2euc "Oh, by the way..."
+        m 2rksdla "I noticed there are [pending_count] items from your spritepacks that I haven't received as gifts yet."
+        m 2eksdla "It looks like you might have tried to give them to me, but the file names weren't quite what the code was looking for."
+        m 3eua "Would you like me to create a report with the correct gift filenames?{nw}"
+        $ _history_list.pop()
+        menu:
+            m "Would you like me to create a report with the correct gift filenames?{fast}"
+            "Yes, please.":
+                jump wardrobe_create_report
+            "No, it's fine.":
+                m 1hua "Okay! Just let me know if you want to check it later."
+    else:
+        m 1hua "Great news! All the sprites from your spritepacks have been properly unlocked."
+        m 1hub "You've given me everything available~"
+    
+    show monika idle at t21
+    jump close_extraplus
+    return
+
+label wardrobe_create_report:
+    if not renpy.seen_label("checkpoint_wardrobe_chibika"):
+        # First time - full mysterious experience
+        m 3eua "Let me check my records... I'll be right back."
+        
+        call mas_transition_to_emptydesk
+        python:
+            renpy.pause(2.0, hard=True)
+            export_path = store.ep_wardrobe.exportPendingGifts(pending_gifts)
+        
+        call mas_transition_from_emptydesk("monika 1euc")
+    else:
+        jump wardrobe_report_repeat
+
+label checkpoint_wardrobe_chibika:
+    if export_path:
+        m 1euc "Huh...?"
+        m 1wuo "Wait, the file is already there!"
+        m 2lksdla "I... don't remember finishing it that fast..."
+        m 2hksdlb "Maybe I'm getting better at manipulating these files? Ahaha..."
+        m 1hua "Anyway! Check 'pending_gifts_report.txt' in your 'characters' folder~"
+        m 1eua "It shows each item and the exact filename needed to gift it."
+    else:
+        m 1ekc "Hmm, something went wrong and I couldn't save the file..."
+        m 1eka "Sorry about that, [player]."
+    
+    m 1hua "I hope that helps you keep everything organized!"
+    show monika idle at t21
+    jump close_extraplus
+    return
+
+label wardrobe_report_repeat:
+    # Repeat visits - shorter, Monika is still confused
+    python:
+        export_path = store.ep_wardrobe.exportPendingGifts(pending_gifts)
+        
+    m 1dsa "Wait a moment.{w=0.3}.{w=0.3}.{w=0.3}{nw}"
+    
+    if export_path:
+        m 1eua "And... done!"
+        m 2lksdla "Somehow it always finishes faster than I expect..."
+        m 1hksdlb "I must be getting better at this! Ehehe~"
+        m 1hua "I've dropped the report into the 'characters' folder for you again!"
+    else:
+        m 1ekc "Hmm, I couldn't save the file this time..."
+        m 1eka "Sorry, [player]. Maybe try again later?"
+    
+    m 1hua "Let me know if you need to check the list again later!"
+    show monika idle at t21
+    jump close_extraplus
     return
 
 label extra_show_timeline:
@@ -1624,9 +2740,26 @@ label maxwell_screen:
 
 label extra_fridge_magnets_game:
     show monika idle at t11
+    # First visit shows intro dialogue
+    if not renpy.seen_label("extra_fridge_magnets_init"):
+        m 1eta "Oh, {w=0.3}curious about my fridge?"
+        m 1tsu "Curious about what I eat when you're not looking?"
+        m 1hub "Ehehe~"
+        m 1euc "Seriously though, that kitchen isn't fully functional."
+        m 3eua "But you can play with the magnets and check out a few things."
+        m 1lksdla "It just appeared out of nowhere, but it's useful for storing some stuff~"
+        m 3eub "Oh, and a little tip! You can rotate the magnets with 'A' and 'D' while holding them."
+        m 1hua "If you're still curious, go ahead, I won't stop you."
+    else:
+        m 1hua "Okay, [player]."
+
+label extra_fridge_magnets_init:
     window hide
     $ HKBHideButtons()
     $ disable_esc()
+    $ store.ep_button.hide_zoom_button()
+    scene black with dissolve
+    pause 2.0
     scene bg extra_fm onlayer master zorder 0
     call screen extra_fridge_magnets
     return
@@ -1635,5 +2768,41 @@ label extra_fridge_quit:
     $ enable_esc()
     $ HKBShowButtons()
     call spaceroom(scene_change=True)
+    if not renpy.seen_label("extra_fridge_quit_dialogue"):
+        call extra_fridge_quit_dialogue
     jump close_extraplus
+    return
+
+label extra_fridge_quit_dialogue:
+    # Get coffee stock data
+    $ _coffee_data = store.ep_fridge.getCoffeeData()
+    $ _coffee_stock = _coffee_data["stock"]
+    
+    m 1eua "So, [player]..."
+    m 1tku "Did you find anything interesting?{nw}"
+    menu:
+        m "Did you find anything interesting?{fast}"
+        "I noticed you're running low on coffee":
+            if _coffee_stock == 0:
+                m 2ekd "Oh..."
+                m 2eka "Yeah, I ran out a little while ago."
+                m 1eka "Thanks for reminding me, [player]."
+                m 3eua "I hope you can get me some when you get the chance~"
+            elif _coffee_stock < 30:
+                m 1eka "Ah, yeah..."
+                m 1lksdla "I have a little left, but not much."
+                m 3hua "I definitely wouldn't say no to a refill, ehehe~"
+            else:
+                m 1etc "Really?"
+                m 2lsc "Hmm, I think I still have a decent amount."
+                m 1hua "Don't worry about getting me more coffee for now."
+                m 3hublu "I'll let you know if I need more~"
+        "I just played with the magnets a bit":
+            m 1hub "Ehehe~"
+            m 1tku "Did you make something cute for me?"
+            m 1hua "I'll see it next time I open the fridge~"
+        "Nothing in particular":
+            m 1eka "I see."
+            m 1lksdla "I guess you just wanted to fiddle around a bit, ahaha~"
+            m 3hua "No problem, [player]!"
     return

@@ -5,10 +5,38 @@
 default persistent.psr_result_game = [False, False, False] #Player, Monika and Tie. Quit [FFF]
 default persistent.rps_player_history = []
 
+screen RPS_mg():
+    #Shows the Rock-Paper-Scissors minigame interface, with buttons for each choice and a quit button.
+    zorder 50
+    timer store.ep_tools.games_idle_timer action Function(store.ep_tools.show_idle_notification, context="rps") repeat True
+
+    # Monika's card back
+    imagebutton idle "extra_card_back":
+        action NullAction()
+        xalign 0.7
+        yalign 0.1
+
+    # Player's choices
+    $ x_positions = [0.5, 0.7, 0.9]
+    for i, choice in enumerate(ep_rps.choices):
+        imagebutton:
+            idle choice.image
+            hover choice.image at hover_card
+            action [SetField(ep_rps, "your_choice", choice.value), Hide("RPS_mg"), Jump("rps_loop")]
+            xalign x_positions[i]
+            yalign 0.7
+
+    # Quit button
+    vbox:
+        xpos 0.86
+        yanchor 1.0
+        ypos 0.950
+        textbutton _("Quit") style "hkb_button" action Jump("rps_quit")
+
 init python in ep_rps:
     import store
     
-    class RPSChoice:
+    class RPSChoice(object):
         """
         Represents a single choice in the Rock, Paper, Scissors game.
         """
@@ -32,15 +60,19 @@ init python in ep_rps:
     moni_wins = 0
     choices = [RPSChoice("Rock", 1, "extra_rock", 3), RPSChoice("Paper", 2, "extra_paper", 1), RPSChoice("Scissors", 3, "extra_scissors", 2)]
 
+    # Lookup dictionary for counter moves: key = move to beat, value = move that beats it
+    # Rock(1) is beaten by Paper(2), Paper(2) is beaten by Scissors(3), Scissors(3) is beaten by Rock(1)
+    counter_lookup = {1: 2, 2: 3, 3: 1}
 
     def getMonikaChoice():
         """
         Determines Monika's choice based on the player's history.
         """
         history = store.persistent.rps_player_history
+        history_len = len(history)  # Cache length to avoid multiple calls
         
         # If there's not much history, or with a 30% chance, play randomly.
-        if len(history) < 3 or renpy.random.randint(1, 100) <= 30:
+        if history_len < 3 or renpy.random.randint(1, 100) <= 30:
             return renpy.random.randint(1, 3)
 
         # --- AI Logic ---
@@ -64,25 +96,20 @@ init python in ep_rps:
             max_count = scissors_count
             player_most_frequent_move = 3
 
-        # Monika chooses the counter to the player's most frequent move.
-        # choices[0] = Rock (1), beats Scissors (3)
-        # choices[1] = Paper (2), beats Rock (1)
-        # choices[2] = Scissors (3), beats Paper (2)
-        # The 'beats' value is the 'value' of the move it wins against.
-        # To counter, Monika should choose the move that has the player's most frequent move as its 'beats' value.
-        counter_move = [c.value for c in choices if c.beats == player_most_frequent_move][0]
+        # Monika chooses the counter to the player's most frequent move using lookup
+        counter_move = counter_lookup[player_most_frequent_move]
 
 
         # 2. Anti-Repetition Pattern: If the player repeated their last move, they are less likely to repeat it a third time.
         # For example, if they played Rock, Rock, they are now more likely to play Paper or Scissors.
         # Monika can play Scissors, which beats Paper and ties with Scissors, making it a safe bet.
-        if len(history) >= 2 and history[-1] == history[-2]:
+        if history_len >= 2 and history[-1] == history[-2]:
             last_move = history[-1]
             # The move that beats the player's last move.
-            move_that_beats_player = [c.value for c in choices if c.beats == last_move][0]
+            move_that_beats_player = counter_lookup[last_move]
             # Monika chooses the move that beats 'move_that_beats_player'.
             # This is a strategy to cover the player's two most likely options.
-            smart_bet = [c.value for c in choices if c.beats == move_that_beats_player][0]
+            smart_bet = counter_lookup[move_that_beats_player]
             # There's a 50% chance she'll use this strategy instead of the frequency analysis.
             if renpy.random.randint(1, 2) == 1:
                 return smart_bet
@@ -117,31 +144,37 @@ label minigame_rps:
     pause 0.3
 
     # Very first time playing
-    if not renpy.seen_label("minigame_rps"):
+    if not renpy.seen_label("checkpoint_minigame_rps") and not renpy.seen_label("rps_quit"):
         m 1hua "Rock, Paper, Scissors, [player]! Ready to try your luck?"
         m 1eua "It's a simple game of chance, but sometimes those are the most fun."
         m 1eub "Let's see who fate favors today. Good luck!"
-    # If the player won the last game
-    elif persistent.psr_result_game[0]:
-        m 3eub "Ready for a rematch, [player]? I've been thinking about my strategy. Ehehe~"
-        m 3hua "I won't make it so easy for you to win this time!"
-    # If Monika won the last game
-    elif persistent.psr_result_game[1]:
-        m 1hub "So, are you ready to challenge the champion again?"
-        m 1hua "I hope you're ready! I plan on keeping my winning streak."
-    # If the last game was a tie
-    elif persistent.psr_result_game[2]:
-        m 1eua "Let's play again! We have to break that tie from last time."
-        m 1tua "It feels like we're perfectly in sync. Let's see if that's still true!"
-    # Default greeting for subsequent plays
-    else:
-        m 1hua "Ready for another round of Rock, Paper, Scissors, [player]?"
-        m 1eua "It's always nice to relax with a simple game."
+
+label checkpoint_minigame_rps:
+    if renpy.seen_label("rps_quit"):
+        # If the player won the last game
+        if persistent.psr_result_game[0]:
+            m 3eub "Ready for a rematch, [player]? I've been thinking about my strategy. Ehehe~"
+            m 3hua "I won't make it so easy for you to win this time!"
+        # If Monika won the last game
+        elif persistent.psr_result_game[1]:
+            m 1hub "So, are you ready to challenge the champion again?"
+            m 1hua "I hope you're ready! I plan on keeping my winning streak."
+        # If the last game was a tie
+        elif persistent.psr_result_game[2]:
+            m 1eua "Let's play again! We have to break that tie from last time."
+            m 1tua "It feels like we're perfectly in sync. Let's see if that's still true!"
+        # Default greeting for subsequent plays
+        else:
+            m 1hua "Ready for another round of Rock, Paper, Scissors, [player]?"
+            m 1eua "It's always nice to relax with a simple game."
 
     hide extra_card_back
     hide extra_rock
     hide extra_paper
     hide extra_scissors
+    # Disable chibi dragging during minigame
+    $ ep_rps.saved_drag_state = persistent.enable_drag_chibika
+    $ persistent.enable_drag_chibika = False
     show screen score_minigame(game="rps")
     show monika idle at t21
     call screen RPS_mg nopredict
@@ -149,9 +182,11 @@ label minigame_rps:
 
 label rps_loop:
     # Limit history to last 100 moves to prevent save file bloat
-    $ persistent.rps_player_history.append(ep_rps.your_choice)
-    if len(persistent.rps_player_history) > 100:
-        $ persistent.rps_player_history = persistent.rps_player_history[-100:]
+    # Only append valid choices (1=Rock, 2=Paper, 3=Scissors)
+    if ep_rps.your_choice in (1, 2, 3):
+        $ persistent.rps_player_history.append(ep_rps.your_choice)
+        if len(persistent.rps_player_history) > 100:
+            $ persistent.rps_player_history = persistent.rps_player_history[-100:]
     $ monika_choice_val = ep_rps.getMonikaChoice()
     $ renpy.restart_interaction()
     $ player_choice = ep_rps.choices[ep_rps.your_choice - 1]
@@ -317,5 +352,7 @@ label rps_result:
     python:
         ep_rps.moni_wins = 0
         ep_rps.player_wins = 0
+        # Restore chibi dragging state
+        persistent.enable_drag_chibika = ep_rps.saved_drag_state
     jump close_extraplus
     return
