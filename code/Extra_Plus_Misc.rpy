@@ -345,11 +345,23 @@ init -5 python in ep_files:
                 store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "background.png"),
                 store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "name.png"),
                 store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "score.png"),
+                # Fridge Magnets
+                store.ep_folders._join_path(store.ep_folders.EP_MG_FRIDGE, "background.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_FRIDGE, "box.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_FRIDGE, "coffee_bag.png"),
+                # Poem Game
+                store.ep_folders._join_path(store.ep_folders.EP_MG_POEM, "background.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_POEM, "notebook.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_POEM, "paper.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_MG_POEM, "bloc.png"),
                 # Misc - Icons
                 store.ep_folders._join_path(store.ep_folders.EP_ICONS, "coin_heads.png"),
                 store.ep_folders._join_path(store.ep_folders.EP_ICONS, "coin_tails.png"),
                 # Misc - Animations
                 store.ep_folders._join_path(store.ep_folders.EP_ANIMATIONS, "coin.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_ANIMATIONS, "coin-n.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_ANIMATIONS, "poof.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_ANIMATIONS, "poof-n.png"),
                 store.ep_folders._join_path(store.ep_folders.EP_ANIMATIONS, "maxwell_cat.png")
             ]
             for asset in static_assets:
@@ -381,7 +393,7 @@ init -5 python in ep_files:
                 path = store.ep_folders._join_path(store.ep_folders.EP_CHIBI_ACC_2, "{}.png".format(acc))
                 check_file(path, found_assets, missing_assets)
 
-            # --- 4. Backgrounds (Manual List) ---
+            # --- 4. Backgrounds (Date Locations) ---
             background_assets = [
                 # Cafe
                 store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "day.png"),
@@ -404,13 +416,26 @@ init -5 python in ep_files:
                 store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "rain-n.png"),
                 store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "ss.png"),
                 store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "rain-ss.png"),
+                # Library
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_LIBRARY, "day.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_LIBRARY, "rain.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_LIBRARY, "n.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_LIBRARY, "rain-n.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_LIBRARY, "ss.png"),
+                store.ep_folders._join_path(store.ep_folders.EP_DATE_LIBRARY, "rain-ss.png"),
                 # Tables & Chairs
                 "mod_assets/monika/t/chair-extraplus_cafe.png",
                 "mod_assets/monika/t/table-extraplus_cafe.png",
                 "mod_assets/monika/t/table-extraplus_cafe-s.png",
                 "mod_assets/monika/t/chair-extraplus_restaurant.png",
                 "mod_assets/monika/t/table-extraplus_restaurant.png",
-                "mod_assets/monika/t/table-extraplus_restaurant-s.png"
+                "mod_assets/monika/t/table-extraplus_restaurant-s.png",
+                "mod_assets/monika/t/chair-extraplus_pool.png",
+                "mod_assets/monika/t/table-extraplus_pool.png",
+                "mod_assets/monika/t/table-extraplus_pool-s.png",
+                "mod_assets/monika/t/chair-extraplus_library.png",
+                "mod_assets/monika/t/table-extraplus_library.png",
+                "mod_assets/monika/t/table-extraplus_library-s.png"
             ]
             for asset in background_assets:
                 check_file(asset, found_assets, missing_assets)
