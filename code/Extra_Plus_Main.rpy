@@ -340,6 +340,7 @@ default persistent._ep_button_text = None
 default persistent._ep_button_last_update = None
 default persistent._ep_fridge_magnets_data = None
 default persistent._ep_fridge_last_monika_post = None
+default persistent._ep_relation_seen = False
 #====SFX
 define sfx_cup_shuffle = ep_folders._join_path(ep_folders.EP_SFX, "cup_shuffle.ogg")
 define sfx_coin_flip = ep_folders._join_path(ep_folders.EP_SFX, "coin_flip_sfx.ogg")

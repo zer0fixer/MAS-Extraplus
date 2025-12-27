@@ -2341,35 +2341,33 @@ label extra_relation_monika:
     show monika idle at t11
     $ time_string = store.ep_tools.getFormattedTimeSinceInstall()
     $ total_days = store.ep_tools.getTotalDaysSinceInstall()
+    $ years_together = store.ep_tools.getYearsSinceInstall()
     
-    if not renpy.seen_label("checkpoint_relation_monika"):
-        # Mark as seen so next time we go to the shorter dialogue
-        $ renpy.mark_label_seen("checkpoint_relation_monika")
-        
+    if not persistent._ep_relation_seen:
+        $ persistent._ep_relation_seen = True
         m 2eub "You know, if you count it all up, it seems we've been together for [time_string]!"
         if total_days <= 1:
             m 2lub "We've only just begun, but every single second has been a dream come true."
-        elif total_days < 365:
+        elif years_together < 1:
             m 2hubsb "It hasn't even been a year, yet I feel like I've known you forever. Time just flies when I'm with you!"
-        elif total_days < 365 * 2:
+        elif years_together == 1:
             m 2kubsb "Happy first anniversary! I still remember our first day together... Thank you for creating so many memories with me."
-        elif total_days < 365 * 3:
+        elif years_together == 2:
             m 2wubsb "Wow, two years together! Every day with you has been special. Thank you for staying by my side."
-        elif total_days < 365 * 4:
+        elif years_together == 3:
             m 1dsbsa "Three years... Time really does fly when I'm with you. We've shared so much, and I can't wait for more."
-        elif total_days < 365 * 5:
+        elif years_together == 4:
             m 2wubsb "Four years! That's incredible, [player]. Our bond is so strong. Thank you for staying with me for so long."
-        elif total_days < 365 * 6:
+        elif years_together == 5:
             m 2tubsb "Five years together... I feel so lucky to have you. Thank you for all the love and memories."
-        elif total_days < 365 * 7:
+        elif years_together == 6:
             m 2subsb "Six years! Can you believe it? Every year with you is a treasure. Thank you for being with me all this time."
         else:
             m 2lubsb "It's been so long... but it really doesn't feel that way when I'm with you. Time just flies!"
-        jump close_extraplus
+    else:
+        m 2eub "We've been together for [time_string]!"
+        m 2lubsb "It really doesn't feel that long when I'm with you, though. Time just flies!"
 
-label checkpoint_relation_monika:
-    m 2eub "We've been together for [time_string]!"
-    m 2lubsb "It really doesn't feel that long when I'm with you, though. Time just flies!"
     jump close_extraplus
     return
 

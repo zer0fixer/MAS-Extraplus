@@ -1220,10 +1220,26 @@ init -5 python in ep_tools:
             if total_days < 1:
                 return _("less than a day, but every second has been incredible!")
 
-            years = total_days // 365
-            remaining_days = total_days % 365
-            months = remaining_days // 30
-            days = remaining_days % 30
+            # Calculate years, months, days accounting for leap years
+            # by comparing actual dates instead of using fixed 365 days
+            years = current_date.year - start_date.year
+            months = current_date.month - start_date.month
+            days = current_date.day - start_date.day
+
+            # Adjust for negative days (borrow from month)
+            if days < 0:
+                months -= 1
+                # Get days in previous month
+                prev_month = current_date.month - 1 if current_date.month > 1 else 12
+                prev_year = current_date.year if current_date.month > 1 else current_date.year - 1
+                import calendar
+                days_in_prev_month = calendar.monthrange(prev_year, prev_month)[1]
+                days += days_in_prev_month
+
+            # Adjust for negative months (borrow from year)
+            if months < 0:
+                years -= 1
+                months += 12
 
             parts = []
             if years > 0:
@@ -1258,6 +1274,30 @@ init -5 python in ep_tools:
             current_date = datetime.date.today()
             delta = current_date - start_date
             return delta.days
+        except Exception:
+            return 0
+
+    def getYearsSinceInstall():
+        """Return completed years since first MAS session, accounting for leap years."""
+        if not (store.persistent.sessions
+            and "first_session" in store.persistent.sessions
+            and store.persistent.sessions["first_session"]
+        ):
+            return 0
+
+        try:
+            start_datetime = store.persistent.sessions["first_session"]
+            start_date = start_datetime.date()
+            current_date = datetime.date.today()
+
+            # Calculate actual years by comparing dates
+            years = current_date.year - start_date.year
+
+            # Subtract a year if we haven't reached the anniversary date yet
+            if (current_date.month, current_date.day) < (start_date.month, start_date.day):
+                years -= 1
+
+            return max(0, years)
         except Exception:
             return 0
 
