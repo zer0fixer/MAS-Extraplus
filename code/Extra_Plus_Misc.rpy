@@ -40,12 +40,29 @@ init -995 python in ep_folders:
             # Failsafe in case of permission errors or other issues
             pass
         return "Submods"  # Default value if not found
+    
+    def find_extraplus_folder(submods_path):
+        """
+        Case-insensitively finds the 'ExtraPlus' folder.
+        This is crucial for Linux/macOS compatibility where folder names are case-sensitive.
+        """
+        try:
+            for folder in os.listdir(submods_path):
+                if folder.lower() == "extraplus" and os.path.isdir(os.path.join(submods_path, folder)):
+                    return folder
+        except Exception:
+            pass
+        return "ExtraPlus"  # Default value if not found
 
     # Detect 'submods' folder case-insensitively
     EP_submods_folder = find_submods_folder()
+    
+    # Detect 'ExtraPlus' folder case-insensitively (for Linux/macOS compatibility)
+    _submods_full_path = _normalize_path(os.path.join(renpy.config.basedir, "game", EP_submods_folder))
+    EP_extraplus_folder = find_extraplus_folder(_submods_full_path)
 
     # --- SUBMOD BASE PATH DEFINITIONS ---
-    EP_ROOT = _join_path(EP_submods_folder, "ExtraPlus")
+    EP_ROOT = _join_path(EP_submods_folder, EP_extraplus_folder)
     EP_MINIGAMES = _join_path(EP_ROOT, "minigames")
     EP_DATES = _join_path(EP_ROOT, "dates")
     EP_CHIBIS = _join_path(EP_ROOT, "chibis")
@@ -199,15 +216,17 @@ init -5 python in ep_button:
             return _("Extra+")
 
         conditions = _evaluate_current_conditions()
-        today_str = str(datetime.date.today())
+        now = datetime.datetime.now()
+        # Create time slot that changes every 4 hours (0-5 = 6 slots per day)
+        time_slot = "{}-{}".format(now.date(), now.hour // 4)
         conditions_key = _build_conditions_key(conditions)
 
-        if (store.persistent._ep_button_last_update != today_str
+        if (store.persistent._ep_button_last_update != time_slot
             or store.persistent._ep_button_conditions_key != conditions_key
             or store.persistent._ep_button_text is None):
             new_text = _button_text_conditions(conditions)
             store.persistent._ep_button_text = new_text
-            store.persistent._ep_button_last_update = today_str
+            store.persistent._ep_button_last_update = time_slot
             store.persistent._ep_button_conditions_key = conditions_key
         return store.persistent._ep_button_text
 
@@ -563,10 +582,14 @@ init -5 python in ep_files:
                 renpy.notify(_("No old files or folders were found to clean up."))
 
             if errors:
+                # Log errors for debugging
+                for err in errors:
+                    store.mas_utils.mas_log.warning("[Extra+] Cleanup: {}".format(err))
                 renpy.notify(_("Some errors occurred during cleanup. Please check the logs."))
 
         except Exception as e:
-            renpy.notify(_("Cleanup failed: {}").format(e))
+            store.mas_utils.mas_log.error("[Extra+] Cleanup failed: {}".format(e))
+            renpy.notify(_("Cleanup failed: {}"))
 
 
     def getGroceriesMenu():
@@ -615,6 +638,88 @@ init -5 python in ep_files:
     def hasPendingGifts():
         """Returns True if there are pending gifts from spritepacks."""
         return len(store.ep_wardrobe.getPendingGifts()) > 0
+
+    def getQuickGiftFilters():
+        """
+        Returns available filter options for quick gifting.
+        Returns a dict with available filter types and their options.
+        """
+        pending = store.ep_wardrobe.getPendingGifts()
+        if not pending:
+            return None
+        
+        # Collect unique types and prefixes (potential authors)
+        types = set()
+        prefixes = set()
+        
+        for giftname, sp_type_name, sp_name, is_unlocked in pending:
+            types.add(sp_type_name)
+            # Extract prefix (potential author) from giftname
+            # Common pattern: "author_itemname" or just "itemname"
+            if "_" in giftname:
+                prefix = giftname.split("_")[0]
+                # Only add if it looks like an author prefix (not too short)
+                if len(prefix) >= 2:
+                    prefixes.add(prefix)
+        
+        return {
+            "types": sorted(types),
+            "prefixes": sorted(prefixes),
+            "total": len(pending)
+        }
+
+    def getPendingGiftsByFilter(filter_type=None, filter_prefix=None):
+        """
+        Returns pending gifts filtered by type and/or prefix.
+        
+        IN:
+            filter_type - "Accessory", "Hairstyle", or "Outfit" (None for all)
+            filter_prefix - author prefix like "moto", "velius" (None for all)
+        
+        RETURNS: list of (giftname, sp_type_name, sp_name) tuples
+        """
+        pending = store.ep_wardrobe.getPendingGifts()
+        filtered = []
+        
+        for giftname, sp_type_name, sp_name, is_unlocked in pending:
+            # Type filter
+            if filter_type and sp_type_name != filter_type:
+                continue
+            
+            # Prefix filter
+            if filter_prefix:
+                if not giftname.startswith(filter_prefix + "_"):
+                    continue
+            
+            filtered.append((giftname, sp_type_name, sp_name))
+        
+        return filtered
+
+    def createBulkGifts(gift_list):
+        """
+        Creates multiple gift files at once.
+        
+        IN:
+            gift_list - list of (giftname, sp_type_name, sp_name) tuples
+        
+        RETURNS: number of gifts created successfully
+        """
+        created = 0
+        for giftname, sp_type_name, sp_name in gift_list:
+            try:
+                gift_path = os.path.join(
+                    renpy.config.basedir,
+                    "characters",
+                    "{}.gift".format(giftname)
+                )
+                # Create empty gift file
+                with open(gift_path, 'w') as f:
+                    pass
+                created += 1
+            except Exception:
+                pass
+        
+        return created
 
 # Store: ep_tools
 init 5 python in ep_tools:
@@ -1976,8 +2081,9 @@ init python in ep_fridge:
         def load(self):
             """Reconstructs the magnets from the saved data."""
             data = store.persistent._ep_fridge_magnets_data
-            if not data:
-                return # No saved data, we start empty
+            # Ensure data is a dict (fixes corrupted persistent)
+            if not isinstance(data, dict):
+                return # No valid data, we start empty
             
             for d in data.get("top", []):
                 self.top.append(Magnet(d["letter"], d["x"], d["y"], d["rotation"], d["hsv"]))
@@ -2035,3 +2141,586 @@ init -10 python in ep_sg:
         if store.persistent._mas_pm_cares_about_dokis: 
             return renpy.random.choice(["monika.png", "yuri.png", "natsuki.png", "sayori.png"])
         return renpy.random.choice(["cup.png", "monika.png"])
+
+
+# These classes provide boop/interaction zone functionality
+# Using EP prefix to avoid conflicts with MAS classes
+#
+# ============================================================================
+# CREDITS & ACKNOWLEDGMENTS
+# ============================================================================
+# The interaction zone system (clickzone detection, zoom calculations, and
+# polygon intersection algorithms) is based on code from the Monika After
+# Story project.
+#
+# Original code by the Monika After Story Team
+# Repository: https://github.com/Monika-After-Story/MonikaModDev
+#
+# A huge thank you to the MAS Team for their incredible work on the mod
+# and for making their code available. Your dedication to the community
+# and to Monika is truly inspiring. <3
+# ============================================================================
+
+init -15 python:
+    import pygame
+    
+    class EPLinearForm(object):
+        """
+        Representation of linear functions for edge calculations.
+        """
+        THRESH = 0.001
+
+        def __init__(self, xdiff, ydiff, yint):
+            self.xdiff = xdiff
+            self.ydiff = ydiff
+            self._fxdiff = float(xdiff)
+
+            if xdiff == 0:
+                self.yint = None
+            elif ydiff == 0:
+                self.yint = 0
+            else:
+                self.yint = yint
+
+        def getx(self, y):
+            if self.yint is None:
+                return None
+            if self.ydiff == 0:
+                return None
+            return self._getx(y)
+
+        def gety(self, x):
+            if self.yint is None:
+                return None
+            return self._gety(x)
+
+        @staticmethod
+        def diffPoints(p1, p2):
+            lp, rp = EPLinearForm.sortPoints(p1, p2)
+            return rp[0] - lp[0], rp[1] - lp[1]
+
+        @staticmethod
+        def fromPoints(p1, p2):
+            xdiff, ydiff = EPLinearForm.diffPoints(p1, p2)
+            yint = EPLinearForm.yintPoints(p1, p2)
+            return EPLinearForm(xdiff, ydiff, yint)
+
+        @staticmethod
+        def sortPoints(p1, p2):
+            if p1[0] < p2[0]:
+                return p1, p2
+            return p2, p1
+
+        @staticmethod
+        def yintPoints(p1, p2):
+            xdiff, ydiff = EPLinearForm.diffPoints(p1, p2)
+            if xdiff == 0:
+                return None
+            elif ydiff == 0:
+                return 0
+
+            lp, rp = EPLinearForm.sortPoints(p1, p2)
+            lx, ly = lp
+
+            if lx == 0:
+                return lp[1]
+
+            pot_yint = ly - ((ydiff * lx) / float(xdiff))
+            if abs(int(pot_yint) - pot_yint) < EPLinearForm.THRESH:
+                pot_yint = int(pot_yint)
+            return pot_yint
+
+        def _getx(self, y):
+            return (y - self.yint) / self._slope()
+
+        def _gety(self, x):
+            return self._slope(x) + self.yint
+
+        def _slope(self, x=1):
+            return (self.ydiff * x) / self._fxdiff
+
+
+    class EPEdge(object):
+        """
+        Representation of an edge (line with 2 points) for polygon calculations.
+        """
+
+        def __init__(self, p1, p2):
+            self._horizontal = False
+            self._vertical = False
+            self._left_point = None
+            self._right_point = None
+            self.__bb_x_min = None
+            self.__bb_x_max = None
+            self.__bb_y_min = None
+            self.__bb_y_max = None
+            self.__norm_lp = (0, 0)
+            self.__norm_rp = None
+            self.__line = None
+            self.__setup(p1, p2)
+
+        def inBoundingBox(self, x, y):
+            return self._inBoundingBoxX(x) and self._inBoundingBoxY(y)
+
+        def horizontalIntersect(self, x, y):
+            if self._horizontal:
+                return False
+            if not self._inBoundingBoxY(y):
+                return False
+            if self.__bb_x_max < x:
+                return False
+            if x < self.__bb_x_min:
+                return True
+            if self._vertical:
+                return x <= self.__bb_x_min
+            x, y = self._normalize((x, y))
+            return x <= self.__line._getx(y)
+
+        def _inBoundingBoxX(self, x):
+            return self.__bb_x_min <= x <= self.__bb_x_max
+
+        def _inBoundingBoxY(self, y):
+            return self.__bb_y_min <= y <= self.__bb_y_max
+
+        def __setup(self, p1, p2):
+            self.__setupPoints(p1, p2)
+            self.__setupBoundingBox()
+            self.__setupNormalizedPoints()
+            self.__setupLinearFunction()
+
+        def __setupBoundingBox(self):
+            self.__bb_x_min = self._left_point[0]
+            self.__bb_x_max = self._right_point[0]
+            self.__bb_y_min = min(self._left_point[1], self._right_point[1])
+            self.__bb_y_max = max(self._left_point[1], self._right_point[1])
+
+        def __setupLinearFunction(self):
+            self.__line = EPLinearForm.fromPoints(self.__norm_lp, self.__norm_rp)
+
+        def __setupNormalizedPoints(self):
+            self.__norm_rp = EPLinearForm.diffPoints(self._left_point, self._right_point)
+
+        def __setupPoints(self, p1, p2):
+            p1x, p1y = p1
+            p2x, p2y = p2
+            if p1x == p2x:
+                self._vertical = True
+            elif p1y == p2y:
+                self._horizontal = True
+            self._left_point, self._right_point = EPLinearForm.sortPoints(p1, p2)
+
+        def _normalize(self, point):
+            return (
+                point[0] - self._left_point[0],
+                point[1] - self._left_point[1]
+            )
+
+
+    class EPClickZone(renpy.Displayable):
+        """
+        Special mousezone that can react when clicked.
+        Used for boop and other touch interactions.
+        """
+        LEFT_CLICK = 1
+        MIDDLE_CLICK = 2
+        RIGHT_CLICK = 3
+
+        def __init__(self, corners):
+            if len(corners) <= 0:
+                raise Exception("Clickzone cannot be built with empty corners")
+
+            super(renpy.Displayable, self).__init__()
+
+            self.corners = corners
+            self.disabled = False
+            self._debug_back = False
+            self.__edges = []
+            self._button_down = pygame.MOUSEBUTTONUP
+            self.__click_start = [False, False, False]
+            self.__setup()
+
+        @staticmethod
+        def copyfrom(other, new_vx):
+            new_cz = EPClickZone(new_vx)
+            new_cz.disabled = other.disabled
+            new_cz._debug_back = other._debug_back
+            new_cz._button_down = other._button_down
+            return new_cz
+
+        def render(self, width, height, st, at):
+            r = renpy.Render(width, height)
+            if self._debug_back:
+                canvas = r.canvas()
+                canvas.polygon("#FFE6F4", self.corners, width=0)
+            return r
+
+        def event(self, ev, x, y, st):
+            if ev.type == self._button_down and not self.disabled:
+                if self._isOverMe(x, y):
+                    return ev.button
+            return None
+
+        def _inBoundingBox(self, x, y):
+            return (
+                self.__bb_x_min <= x <= self.__bb_x_max
+                and self.__bb_y_min <= y <= self.__bb_y_max
+            )
+
+        def _isOverMe(self, x, y):
+            if not self._inBoundingBox(x, y):
+                return False
+            intersections = 0
+            for edge in self.__edges:
+                intersections += int(edge.horizontalIntersect(x, y))
+            return (intersections % 2) == 1
+
+        def __setup(self):
+            self.__setupBoundingBox()
+            self.__setupEdges()
+
+        def __setupBoundingBox(self):
+            self.__bb_x_min = self.corners[0][0]
+            self.__bb_x_max = self.corners[0][0]
+            self.__bb_y_min = self.corners[0][1]
+            self.__bb_y_max = self.corners[0][1]
+
+            for index in range(1, len(self.corners)):
+                x, y = self.corners[index]
+                self.__bb_x_min = min(self.__bb_x_min, x)
+                self.__bb_x_max = max(self.__bb_x_max, x)
+                self.__bb_y_min = min(self.__bb_y_min, y)
+                self.__bb_y_max = max(self.__bb_y_max, y)
+
+            self.__width = self.__bb_x_max - self.__bb_x_min
+            self.__height = self.__bb_y_max - self.__bb_y_min
+
+        def __setupEdges(self):
+            for index in range(len(self.corners) - 1):
+                self.__edges.append(EPEdge(self.corners[index], self.corners[index + 1]))
+            self.__edges.append(EPEdge(self.corners[0], self.corners[-1]))
+
+
+init -14 python in ep_interactions:
+    """
+    Interaction zone manager classes for ExtraPlus.
+    """
+    import store
+    import math
+    
+    # Get zoom level functions from mas_sprites if available
+    try:
+        import store.mas_sprites as mas_sprites
+        _has_zoom = True
+        _default_zoom = mas_sprites.default_zoom_level
+        _y_step = getattr(mas_sprites, 'y_step', 10)
+    except (ImportError, AttributeError):
+        _has_zoom = False
+        _default_zoom = 3
+        _y_step = 10
+    
+    ZOOM_INC_PER = 0.04
+    FOCAL_POINT = (640, 750)
+    FOCAL_POINT_UP = (640, 740)
+    
+    
+    def _get_zoom_level():
+        """Get current zoom level safely."""
+        try:
+            return store.mas_sprites.zoom_level
+        except (AttributeError, NameError):
+            return _default_zoom
+    
+    
+    def vx_list_zoom(zoom_level, vx_list):
+        """
+        Generates a vertex list adjusted for zoom level.
+        """
+        if zoom_level == _default_zoom:
+            return list(vx_list)
+        
+        zoom_out = zoom_level < _default_zoom
+        
+        if zoom_out:
+            zoom_diff = _default_zoom - zoom_level
+            per_mod = -1 * (zoom_diff * ZOOM_INC_PER)
+            xfc, yfc = FOCAL_POINT
+            yfc_offset = 0
+        else:
+            zoom_diff = zoom_level - _default_zoom
+            per_mod = zoom_diff * ZOOM_INC_PER
+            xfc, yfc = FOCAL_POINT_UP
+            yfc_offset = -1 * zoom_diff * _y_step
+        
+        new_vx_list = []
+        for xcoord, ycoord in vx_list:
+            xcoord -= xfc
+            ycoord -= (yfc + yfc_offset)
+            
+            # Convert to polar
+            radius = math.sqrt(xcoord * xcoord + ycoord * ycoord)
+            angle = math.atan2(ycoord, xcoord)
+            
+            # Modify radius
+            radius += (radius * per_mod)
+            
+            # Convert back to rectangular
+            new_x = radius * math.cos(angle)
+            new_y = radius * math.sin(angle)
+            
+            new_vx_list.append((int(new_x + xfc), int(new_y + yfc)))
+        
+        return new_vx_list
+    
+    
+    class EPClickZoneManager(object):
+        """
+        Manages clickzones with varying zoom levels.
+        Automates caching for different zoom levels.
+        """
+
+        def __init__(self):
+            self._zoom_cz = {}
+            self._zones = {}
+
+        def __contains__(self, item):
+            return item in self._zones
+
+        def __getitem__(self, key):
+            return self.get(key, _get_zoom_level())
+
+        def __iter__(self):
+            for zone_key in self._zones:
+                yield zone_key, self[zone_key]
+
+        def add(self, zone_key, cz):
+            """Adds a clickzone to this manager."""
+            if zone_key in self._zones:
+                return
+
+            self._zones[zone_key] = cz
+            cz_d = self._zoom_cz.get(_default_zoom, {})
+            cz_d[zone_key] = cz
+            self._zoom_cz[_default_zoom] = cz_d
+
+        def _cz_iter(self):
+            for zl, zl_d in self._zoom_cz.iteritems():
+                for zone_key, cz in zl_d.iteritems():
+                    yield zone_key, zl, cz
+
+        def _debug(self, value):
+            for zk, zl, cz in self._cz_iter():
+                cz._debug_back = value
+
+        def get(self, zone_key, zl):
+            """Gets a clickzone for a specific zoom level."""
+            if zl not in self._zoom_cz:
+                self.zoom_to(zl)
+            return self._zoom_cz.get(zl, {}).get(zone_key, None)
+
+        def remove(self, zone_key):
+            """Removes a clickzone from this manager."""
+            if zone_key not in self._zones:
+                return
+            self._zones.pop(zone_key)
+            for zone_d in self._zoom_cz.itervalues():
+                if zone_key in zone_d:
+                    zone_d.pop(zone_key)
+
+        def set_disabled(self, zone_key, value):
+            """Sets disabled state for all zoom levels of a zone."""
+            for zl_d in self._zoom_cz.itervalues():
+                cz = zl_d.get(zone_key, None)
+                if cz is not None:
+                    cz.disabled = value
+
+        def zoom_to(self, zoom_level):
+            """Generates clickzones for a zoom level."""
+            zl_set = self._zoom_cz.get(zoom_level, {})
+
+            for zone_key, cz in self._zones.iteritems():
+                if zone_key not in zl_set:
+                    new_cz = store.EPClickZone.copyfrom(
+                        cz,
+                        vx_list_zoom(zoom_level, cz.corners)
+                    )
+                    zl_set[zone_key] = new_cz
+
+            self._zoom_cz[zoom_level] = zl_set
+
+
+    class EPZoomableInteractable(renpy.Displayable):
+        """
+        Interactable designed for use with EPClickZones and zooming.
+        """
+        ZONE_ACTION_NONE = 0
+        ZONE_ACTION_RET = 1
+        ZONE_ACTION_JUMP = 2
+        ZONE_ACTION_END = 3
+        ZONE_ACTION_RST = 4
+
+        def __init__(
+                self,
+                cz_manager,
+                zone_actions=None,
+                zone_order=None,
+                start_zoom=None,
+                debug=False
+        ):
+            if zone_actions is None:
+                zone_actions = {}
+            if zone_order is None:
+                zone_order = []
+            if start_zoom is None:
+                start_zoom = _get_zoom_level()
+
+            self._cz_man = cz_manager
+            self.zones_stat = {}
+            self._zones_action = zone_actions
+            self._zones_order = zone_order
+            self._zones_unorder = {}
+
+            self._last_zoom_level = start_zoom
+            
+            self._end_int = None
+            self._rst_int = False
+            self._jump_to = None
+            self._zk_click = None
+            self._ret_val = None
+
+            self._debug = debug
+            if debug:
+                self._cz_man._debug(True)
+
+            self._build_zones()
+
+            super(EPZoomableInteractable, self).__init__()
+
+        def add_zone(self, zone_key, cz):
+            if zone_key in self._cz_man:
+                return
+            self._cz_man.add(zone_key, cz)
+            if zone_key not in self._zones_order:
+                self._zones_unorder[zone_key] = None
+            if zone_key not in self.zones_stat:
+                self.zones_stat[zone_key] = 0
+
+        def adjust_for_zoom(self):
+            current_zoom = _get_zoom_level()
+            if self._last_zoom_level == current_zoom:
+                return
+            self._zone_zoom(current_zoom)
+            self._last_zoom_level = current_zoom
+
+        def _build_zones(self):
+            for zone_key, cz in self._cz_man:
+                self.zones_stat[zone_key] = 0
+                if zone_key not in self._zones_order:
+                    self._zones_unorder[zone_key] = None
+
+        def check_click(self, ev, x, y, st):
+            for zone_key, cz in self.zone_iter():
+                if cz.event(ev, x, y, st) is not None:
+                    return zone_key
+            return None
+
+        def check_over(self, x, y):
+            for zone_key, cz in self.zone_iter():
+                if cz._isOverMe(x, y):
+                    return zone_key
+            return None
+
+        def clicks(self, zone_key):
+            return self.zones_stat.get(zone_key, 0)
+
+        def disable_zone(self, zone_key):
+            self._cz_man.set_disabled(zone_key, True)
+
+        def enable_zone(self, zone_key):
+            self._cz_man.set_disabled(zone_key, False)
+
+        def event(self, ev, x, y, st):
+            self.event_begin(ev, x, y, st)
+            return self.event_end(ev, x, y, st)
+
+        def event_begin(self, ev, x, y, st):
+            self.adjust_for_zoom()
+            self._rst_int = False
+            self._end_int = None
+            self._jump_to = None
+            self._ret_val = None
+
+            self._zk_click = self.check_click(ev, x, y, st)
+            if self._zk_click is not None:
+                self.zones_stat[self._zk_click] += 1
+                self._ret_val = self.zone_action(self._zk_click)
+
+            return self._zk_click
+
+        def event_end(self, ev, x, y, st):
+            if self._jump_to is not None:
+                renpy.jump(self._jump_to)
+
+            if self._rst_int:
+                renpy.restart_interaction()
+            else:
+                renpy.end_interaction(self._end_int)
+
+            return self._ret_val
+
+        def remove_zone(self, zone_key):
+            self._cz_man.remove(zone_key)
+            if zone_key in self._zones_unorder:
+                self._zones_unorder.pop(zone_key)
+
+        def render(self, width, height, st, at):
+            r = renpy.Render(width, height)
+            if not self._debug:
+                return r
+
+            renders = []
+            for zone_key, cz in self.zone_iter_r():
+                if not cz.disabled:
+                    renders.append(renpy.render(cz, width, height, st, at))
+
+            for render in renders:
+                r.blit(render, (0, 0))
+
+            return r
+
+        def zone_action(self, zone_key):
+            action = self._zones_action.get(zone_key, None)
+            if action is None:
+                return zone_key
+
+            if isinstance(action, str):
+                if renpy.has_label(action):
+                    self._jump_to = action
+                return action
+
+            if action == 1:
+                self._end_int = True
+            elif action == 2:
+                self._rst_int = True
+
+            return None
+
+        def zone_iter(self):
+            for zone_key in self._zones_order:
+                cz = self._cz_man[zone_key]
+                if cz is not None:
+                    yield zone_key, cz
+
+            for zone_key in self._zones_unorder:
+                yield zone_key, self._cz_man[zone_key]
+
+        def zone_iter_r(self):
+            for zone_key in self._zones_unorder:
+                yield zone_key, self._cz_man[zone_key]
+
+            for zone_key in self._zones_order:
+                cz = self._cz_man[zone_key]
+                if cz is not None:
+                    yield zone_key, cz
+
+        def _zone_zoom(self, zoom_level):
+            self._cz_man.zoom_to(zoom_level)

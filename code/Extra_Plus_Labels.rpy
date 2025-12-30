@@ -2326,9 +2326,24 @@ label plus_pending_gifts:
             store.ep_chibis.chibika_notify(_("Great news! All sprite gifts have been unlocked~"))
             renpy.jump("plus_make_gift")
         
-        items = [(_("Nevermind"), "plus_make_gift", 20)]
-    
+        items = [
+            (_("Quick"), "plus_quick_gifts", 20),
+            (_("Nevermind"), "plus_make_gift", 0)
+        ]
+    show monika idle at t21
     call screen extra_gen_list(pending_menu, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, items)
+    return
+
+label plus_quick_gifts:
+    show monika idle at t11
+    python:
+        # Get available filters
+        filters = store.ep_files.getQuickGiftFilters()
+        
+        if not filters:
+            store.ep_chibis.chibika_notify(_("No pending gifts to process~"))
+            renpy.jump("plus_make_gift")
+    call screen extra_quick_gifts_screen(filters)
     return
 
 label extra_show_stats:
