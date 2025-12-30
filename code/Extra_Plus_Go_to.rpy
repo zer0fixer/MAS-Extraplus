@@ -1324,6 +1324,10 @@ label library_reading_session:
         if persistent._ep_lib_last_reading_date != today:
             persistent._ep_lib_last_reading_date = today
             persistent._ep_lib_seen_poems = []
+        
+        # Ensure list type (fixes corrupted persistent)
+        if not isinstance(persistent._ep_lib_seen_poems, list):
+            persistent._ep_lib_seen_poems = []
             
         # 2. MASTER LIST OF POEMS
         all_poems = ['dickinson', 'poe', 'shakespeare', 'browning', 'byron']
@@ -1651,6 +1655,10 @@ label library_talk_topic:
         # 1. DAILY RESET: If it's a new day, clear the topic memory
         if persistent._ep_lib_last_topic_date != today:
             persistent._ep_lib_last_topic_date = today
+            persistent._ep_lib_seen_topics = []
+        
+        # Ensure list type (fixes corrupted persistent)
+        if not isinstance(persistent._ep_lib_seen_topics, list):
             persistent._ep_lib_seen_topics = []
             
         # 2. MASTER LIST OF TOPICS

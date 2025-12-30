@@ -12,7 +12,7 @@ init -990 python in mas_submod_utils:
         author="ZeroFixer",
         name="Extra Plus",
         description="Expand your time with Monika with new minigames, dates, and interactions.",
-        version="1.4.1",
+        version="1.4.2",
         settings_pane="_extra_plus_submod_settings"
     )
 
@@ -526,20 +526,20 @@ init -5 python:
             self.ep_boop_war_count = 0
             self._zones_enabled = True
 
-            # Create MAS components internally (with compatibility check)
+            # Create interaction components using EP classes
+            # Classes are provided by Extra_Plus_Interactions.rpy
             try:
-                self.cz_manager = mas_interactions.MASClickZoneManager()
+                self.cz_manager = ep_interactions.EPClickZoneManager()
                 for zone_key, vx_list in self.zone_map.items():
-                    self.cz_manager.add(zone_key, MASClickZone(vx_list))
+                    self.cz_manager.add(zone_key, EPClickZone(vx_list))
                 
-                self.interactable = MASZoomableInteractable(
+                self.interactable = ep_interactions.EPZoomableInteractable(
                     self.cz_manager,
                     zone_actions={},  # Actions handled manually
                     debug=False
                 )
-            except AttributeError:
-                # Older MAS version without mas_sprites.default_zoom_level
-                # Disable zone-based interactions gracefully
+            except (AttributeError, NameError, TypeError) as e:
+                # Something went wrong - disable zone interactions gracefully
                 self._zones_enabled = False
                 self.cz_manager = None
                 self.interactable = None
@@ -1102,7 +1102,7 @@ screen sticker_customization():
         ypos 90
 
         use extra_close_button("close_dev_extraplus")
-        textbutton _("Return") action Jump("extraplus_tools")
+        textbutton _("Back") action Jump("extraplus_tools")
 
     frame:
         xalign 0.5
@@ -1169,7 +1169,7 @@ screen gen_accessories_twopane_screen():
         ypos 90
 
         use extra_close_button("close_dev_extraplus")
-        textbutton _("Return") action Jump("extra_chibi_main")
+        textbutton _("Back") action Jump("extra_chibi_main")
 
     # Main content area without a visible frame, like the timeline
     hbox:
@@ -1352,7 +1352,7 @@ screen score_minigame(game=None):
 # === Interactions ===
 screen boop_revamped():
     zorder 49
-    
+
     key "mouseup_1" action Function(store.EP_interaction_manager.handle_click, button=1)
     key "mouseup_3" action Function(store.EP_interaction_manager.handle_click, button=3) # Right click
     vbox:
@@ -1374,7 +1374,7 @@ screen boop_revamped():
         ypos 90
 
         use extra_close_button("close_boop_screen")
-        textbutton _("Return") action Jump("return_boop_screen")
+        textbutton _("Back") action Jump("return_boop_screen")
 
 screen boop_capture_overlay(label_boop):
     zorder 49  # Below the UI buttons (which are at zorder 51)
@@ -1534,7 +1534,7 @@ screen maxwell_april_fools():
     ]
 
 screen extraplus_stats_screen():
-    #Shows the player’s stats and time spent with Monika in a styled frame.
+    #Shows the player's stats and time spent with Monika in a styled frame.
     zorder 50
     vbox:
         style_prefix "hkb"
@@ -1543,7 +1543,7 @@ screen extraplus_stats_screen():
         ypos 90
 
         use extra_close_button()
-        textbutton _("Return") action Jump("extraplus_tools")
+        textbutton _("Back") action Jump("extraplus_tools")
 
     frame:
         style_prefix "check"
@@ -1573,6 +1573,146 @@ screen extraplus_stats_screen():
                         text stat_name
                         text str(stat_value)
 
+screen extra_quick_gifts_screen(filters):
+    # Screen for bulk/quick gift creation with filters
+    zorder 50
+    
+    default selected_type = None
+    default selected_prefix = None
+    default preview_list = []
+    default preview_count = 0
+    
+    # Update preview when filters change
+    python:
+        preview_list = store.ep_files.getPendingGiftsByFilter(selected_type, selected_prefix)
+        preview_count = len(preview_list)
+    
+    vbox:
+        style_prefix "hkb"
+        xpos 0.05
+        yanchor 1.0
+        ypos 90
+        use extra_close_button()
+        textbutton _("Back") action Jump("plus_pending_gifts")
+    
+    frame:
+        style_prefix "check"
+        xalign 0.3
+        yalign 0.5
+        padding (30, 30, 30, 30)
+        xmaximum 500
+        ymaximum 620
+        xfill True
+        
+        vbox:
+            xfill True
+            spacing 15
+            xsize 450
+            label _("Quick Gift Creator")
+            
+            text _("Create multiple gifts at once by filtering:"):
+                size 18
+            
+            null height 10
+            
+            # Type filter
+            vbox:
+                xfill True
+                spacing 5
+                text _("Gift Type:") size 16
+                viewport:
+                    xfill True
+                    ysize 40
+                    xsize 450
+                    mousewheel "horizontal"
+                    hbox:
+                        spacing 10
+                        textbutton _("All"):
+                            action SetScreenVariable("selected_type", None)
+                            style "check_button"
+                            selected selected_type is None
+                        for type_name in filters["types"]:
+                            textbutton type_name:
+                                action SetScreenVariable("selected_type", type_name)
+                                style "check_button"
+                                selected selected_type == type_name
+            
+            null height 10
+            
+            # Prefix/Author filter
+            if filters["prefixes"]:
+                vbox:
+                    xfill True
+                    spacing 5
+                    text _("Author:") size 16
+                    viewport:
+                        xfill True
+                        ysize 40
+                        xsize 450
+                        mousewheel "horizontal"
+                        hbox:
+                            spacing 8
+                            textbutton _("All"):
+                                action SetScreenVariable("selected_prefix", None)
+                                style "check_button"
+                                selected selected_prefix is None
+                            for prefix in filters["prefixes"]:
+                                textbutton prefix:
+                                    action SetScreenVariable("selected_prefix", prefix)
+                                    style "check_button"
+                                    selected selected_prefix == prefix
+            
+            null height 15
+            
+            # Action buttons
+            hbox:
+                spacing 20                
+                textbutton _("Create {} Gifts").format(preview_count):
+                    style "confirm_button"
+                    sensitive preview_count > 0
+                    action [
+                        Function(store.ep_files.createBulkGifts, preview_list),
+                        Function(store.ep_chibis.chibika_notify, _("Created {} gift files!").format(preview_count)),
+                        Jump("plus_make_gift")
+                    ]
+    
+    # Preview frame (independent, right side)
+    frame:
+        style_prefix "check"
+        xalign 0.85
+        yalign 0.5
+        xmaximum 350
+        ymaximum 500
+        padding (30, 30, 30, 30)
+        xfill True
+        
+        vbox:
+            xalign 0.5
+            xfill True
+            spacing 8
+            xsize 320
+            
+            text _("Selected: [preview_count] gifts"):
+                xalign 0.5
+                size 16
+            
+            viewport:
+                xfill True
+                yfill True
+                mousewheel True
+                scrollbars "vertical"
+                xsize 320
+                
+                vbox:
+                    spacing 3
+                    for giftname, sp_type, sp_name in preview_list[:50]:
+                        text "{} ({})".format(sp_name, sp_type):
+                            size 16
+                    if preview_count > 50:
+                        text _("... and {} more").format(preview_count - 50):
+                            size 16
+                            italic True
+
 screen extra_timeline_screen():
     zorder 49
     
@@ -1586,7 +1726,7 @@ screen extra_timeline_screen():
         ypos 90
 
         use extra_close_button()
-        textbutton _("Return") action Jump("extraplus_tools")
+        textbutton _("Back") action Jump("extraplus_tools")
 
     # --- Main Panel (Center) ---
     frame:
