@@ -1577,15 +1577,15 @@ screen extra_quick_gifts_screen(filters):
     # Screen for bulk/quick gift creation with filters
     zorder 50
     
-    default selected_type = None
-    default selected_prefix = None
-    default preview_list = []
-    default preview_count = 0
+    default EP_selected_type = None
+    default EP_selected_prefix = None
+    default EP_preview_list = []
+    default EP_preview_count = 0
     
     # Update preview when filters change
     python:
-        preview_list = store.ep_files.getPendingGiftsByFilter(selected_type, selected_prefix)
-        preview_count = len(preview_list)
+        EP_preview_list = store.ep_files.getPendingGiftsByFilter(EP_selected_type, EP_selected_prefix)
+        EP_preview_count = len(EP_preview_list)
     
     vbox:
         style_prefix "hkb"
@@ -1628,14 +1628,14 @@ screen extra_quick_gifts_screen(filters):
                     hbox:
                         spacing 10
                         textbutton _("All"):
-                            action SetScreenVariable("selected_type", None)
+                            action SetScreenVariable("EP_selected_type", None)
                             style "check_button"
-                            selected selected_type is None
+                            selected EP_selected_type is None
                         for type_name in filters["types"]:
                             textbutton type_name:
-                                action SetScreenVariable("selected_type", type_name)
+                                action SetScreenVariable("EP_selected_type", type_name)
                                 style "check_button"
-                                selected selected_type == type_name
+                                selected EP_selected_type == type_name
             
             null height 10
             
@@ -1653,26 +1653,26 @@ screen extra_quick_gifts_screen(filters):
                         hbox:
                             spacing 8
                             textbutton _("All"):
-                                action SetScreenVariable("selected_prefix", None)
+                                action SetScreenVariable("EP_selected_prefix", None)
                                 style "check_button"
-                                selected selected_prefix is None
+                                selected EP_selected_prefix is None
                             for prefix in filters["prefixes"]:
                                 textbutton prefix:
-                                    action SetScreenVariable("selected_prefix", prefix)
+                                    action SetScreenVariable("EP_selected_prefix", prefix)
                                     style "check_button"
-                                    selected selected_prefix == prefix
+                                    selected EP_selected_prefix == prefix
             
             null height 15
             
             # Action buttons
             hbox:
                 spacing 20                
-                textbutton _("Create {} Gifts").format(preview_count):
+                textbutton _("Create {} Gifts").format(EP_preview_count):
                     style "confirm_button"
-                    sensitive preview_count > 0
+                    sensitive EP_preview_count > 0
                     action [
-                        Function(store.ep_files.createBulkGifts, preview_list),
-                        Function(store.ep_chibis.chibika_notify, _("Created {} gift files!").format(preview_count)),
+                        Function(store.ep_files.createBulkGifts, EP_preview_list),
+                        Function(store.ep_chibis.chibika_notify, _("Created {} gift files!").format(EP_preview_count)),
                         Jump("plus_make_gift")
                     ]
     
@@ -1692,7 +1692,7 @@ screen extra_quick_gifts_screen(filters):
             spacing 8
             xsize 320
             
-            text _("Selected: [preview_count] gifts"):
+            text _("Selected: [EP_preview_count] gifts"):
                 xalign 0.5
                 size 16
             
@@ -1705,11 +1705,11 @@ screen extra_quick_gifts_screen(filters):
                 
                 vbox:
                     spacing 3
-                    for giftname, sp_type, sp_name in preview_list[:50]:
+                    for giftname, sp_type, sp_name in EP_preview_list[:50]:
                         text "{} ({})".format(sp_name, sp_type):
                             size 16
-                    if preview_count > 50:
-                        text _("... and {} more").format(preview_count - 50):
+                    if EP_preview_count > 50:
+                        text _("... and {} more").format(EP_preview_count - 50):
                             size 16
                             italic True
 

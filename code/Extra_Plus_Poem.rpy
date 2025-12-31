@@ -820,7 +820,7 @@ label minigame_poem_classic:
 # Store: ep_poems (extends Extra_Plus_Poem.rpy)
 #===========================================================================================
 
-default persistent._ep_free_poems = []  # List of last 15 poems {text, mood, date}
+default persistent._ep_free_poems = []  # List of last 25 poems {text, mood, date, title}
 default persistent._ep_free_poem_count = 0
 
 #===========================================================================================
@@ -833,7 +833,7 @@ init python in ep_poems:
     
     # Character limit for free poems
     MAX_POEM_CHARS = 800
-    MAX_SAVED_POEMS = 15
+    MAX_SAVED_POEMS = 30
 
 
 # ============================================================================
@@ -1337,10 +1337,10 @@ init python in ep_poems:
         
         # Words that need context check (poetic use allowed)
         HATE_CONTEXT_CHECK = [
-            'die', 'kill', 'hate', 'monster', 'demon',
-            'crazy', 'insane', 'psycho', 'freak',
-            'scary', 'creepy', 'annoying', 'boring',
-            'prick', 'fat', 'ugly', 'disgusting', 'repulsive'
+            "die", "kill", "hate", "monster", "demon",
+            "crazy", "insane", "psycho", "freak",
+            "scary", "creepy", "annoying", "boring",
+            "prick", "fat", "ugly", "disgusting", "repulsive"
         ]
 
         # Check Hate Content (immediately banned) - HATE
@@ -1873,9 +1873,9 @@ init python in ep_poems:
         # CHECK 1: Other Dokis with CONTEXT awareness
         # This catches cases like "Monika, I love Natsuki"
         other_dokis = {
-            'sayori': ['sayori', 'sayo', 'bun', 'cinnamon', 'cinny'],
-            'yuri': ['yuri', 'yuyu', 'tea lover'],
-            'natsuki': ['natsuki', 'nat', 'cupcake', 'baker', 'natsu']
+            "sayori": ["sayori", "sayo", "bun", "cinnamon", "cinny"],
+            "yuri": ["yuri", "yuyu", "tea lover"],
+            "natsuki": ["natsuki", "nat", "cupcake", "baker", "natsu"]
         }
         
         # Words that indicate romantic/positive feelings
@@ -1909,7 +1909,7 @@ init python in ep_poems:
             "mine", "my girl", "girlfriend", "wife material", "future wife",
             "baby", "babe", "honey", "darling", "sweetie", "princess"
             
-            # NEW: Explicit physical desire
+            # NEW: Explicit physical desire (No)
             # "thicc", "thick", "curves", "boobs", "tits", "ass", "booty",
             # "legs", "thighs", "smol", "tiny", "petite"
         ]
@@ -2887,13 +2887,32 @@ init python in ep_poems:
         
         return best_line
     
-    def save_poem(poem_text, mood, secondary_mood=None, word_count=0, has_monika=False, keywords=None):
+    def save_poem(poem_text, mood, secondary_mood=None, word_count=0, has_monika=False, keywords=None, title=None):
         """
         Saves poem to persistent history (max 5).
         Now with more metadata for richer history viewing.
+        If no title is provided, generates one based on mood.
         """
+        # Default titles based on mood
+        default_titles = {
+            "romantic": "A Letter from Your Heart",
+            "sad": "Echoes of Sorrow",
+            "intellectual": "Reflections of the Mind",
+            "playful": "A Ray of Sunshine",
+            "bittersweet": "Love and Longing",
+            "melancholic": "Shadows in Ink",
+            "flirty": "A Cheeky Whisper",
+            "philosophical": "Existential Musings",
+            "creative": "A Creative Experiment"
+        }
+        
+        # Use provided title or generate default
+        if not title or not title.strip():
+            title = default_titles.get(mood, "Your Unique Voice")
+        
         poem_data = {
             "text": poem_text[:500],
+            "title": title,
             "mood": mood,
             "secondary_mood": secondary_mood,
             "date": datetime.datetime.now().strftime("%Y-%m-%d"),
@@ -3004,10 +3023,19 @@ screen extra_free_poem():
     key "ctrl_K_BACKSPACE" action Function(EP_poem_input.delete_word_back)
     # key "ctrl_v" action Function(EP_poem_input.paste_text)
 
+    # Android-only navigation controls
+    if renpy.android:
+        vbox:
+            style_prefix "hkb"
+            xalign 0.88
+            yalign 0.2
+            # Paste focus button
+            textbutton "Paste" action Function(EP_poem_input.paste_text)
+
     # Help display (if active)
     if EP_show_help:
         frame:
-            xalign 0.1
+            xalign 0.06
             yalign 0.3
             background "#ffffffee"
             padding (20, 20)
@@ -3037,10 +3065,10 @@ screen extra_free_poem():
                     size 20
                     color "#222"
                 
-                text "Ctrl+V -- Paste from clipboard":
-                    style "monika_text"
-                    size 20
-                    color "#222"
+                # text "Ctrl+V -- Paste from clipboard":
+                #     style "monika_text"
+                #     size 20
+                #     color "#222"
                 
                 text "Arrow Up/Down -- Navigate between lines":
                     style "monika_text"
@@ -3062,11 +3090,11 @@ screen extra_free_poem():
 
     # Bottom buttons - two rows
     vbox:
-        xalign 0.86
+        xalign 0.90
         yalign 0.50
         spacing 8
         
-        # Top row: Help and Inspire
+        # Top row: Clear and Done
         hbox:
             spacing 20
             
@@ -3078,12 +3106,12 @@ screen extra_free_poem():
                 activate_sound gui.activate_sound
                 selected False
 
-            textbutton "Paste":
-                action Function(EP_poem_input.paste_text)
-                style "poem_menu_button"
-                text_style "poem_menu_button_text"
-                hover_sound gui.hover_sound
-                activate_sound gui.activate_sound
+            # textbutton "Paste":
+            #     action Function(EP_poem_input.paste_text)
+            #     style "poem_menu_button"
+            #     text_style "poem_menu_button_text"
+            #     hover_sound gui.hover_sound
+            #     activate_sound gui.activate_sound
                 
             textbutton "Done":
                 action Return(EP_poem_input.current_value)
@@ -3093,7 +3121,7 @@ screen extra_free_poem():
                 activate_sound gui.activate_sound
                 sensitive len(EP_poem_input.current_value.strip()) > 0
 
-        # Bottom row: Help and Inspire
+        # Bottom row: Help and Load
         hbox:
             spacing 30
             
@@ -3151,7 +3179,7 @@ style poem_menu_button:
     padding (5, 5)
 
 #===========================================================================================
-# VIEW POEM HISTORY
+# VIEW POEM HISTORY (with Delete/Export)
 #===========================================================================================
 label library_poem_history:
     # Check if there are any poems
@@ -3166,8 +3194,6 @@ label library_poem_history:
     python:
         poem_items = []
         for i, poem in enumerate(persistent._ep_free_poems):
-            preview = poem["text"][:40] + "..." if len(poem["text"]) > 40 else poem["text"]
-            preview = preview.replace("\n", " ")
             mood_icons = {
                 "romantic": "(Love) ",
                 "sad": "(Sad) ",
@@ -3180,14 +3206,25 @@ label library_poem_history:
                 "creative": "(Creative) "
             }
             mood_icon = mood_icons.get(poem.get("mood"), "")
-            label_text = "{}{} - {}".format(mood_icon, poem["date"], preview)
+            
+            # If poem has custom title, show it. Otherwise show text preview
+            poem_title = poem.get("title")
+            if poem_title:
+                # Custom title exists - show it
+                display_text = poem_title
+            else:
+                # No custom title - show text preview
+                preview = poem["text"][:40] + "..." if len(poem["text"]) > 40 else poem["text"]
+                display_text = preview.replace("\n", " ")
+            
+            label_text = "{}{} - {}".format(mood_icon, poem["date"], display_text)
             poem_items.append((label_text, i, False, False))
         
         ret_back = ("Nevermind", -1, False, False, 20)
     
     # Show poem selection menu
     label library_poem_menu:
-    call screen mas_gen_scrollable_menu(poem_items, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, mas_ui.SCROLLABLE_MENU_XALIGN, ret_back)
+    call screen mas_gen_scrollable_menu(poem_items, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, mas_ui.SCROLLABLE_MENU_XALIGN, ret_back)
     
     $ selected = _return
     
@@ -3195,49 +3232,182 @@ label library_poem_history:
         jump extra_library_interactions
         return
 
-    # Get selected poem data
+    # Get selected poem data (use store. to persist across jumps)
     python:
-        selected_poem = persistent._ep_free_poems[selected]
-        poem_text = selected_poem["text"]
-        poem_mood = selected_poem.get("mood", "creative")
+        _ep_selected_poem = persistent._ep_free_poems[selected]
+        store._ep_poem_text = _ep_selected_poem["text"]
+        store._ep_poem_mood = _ep_selected_poem.get("mood", "creative")
+        store._ep_poem_date = _ep_selected_poem.get("date", "unknown")
+        # Get title, with fallback for legacy poems
+        store._ep_poem_title = _ep_selected_poem.get("title")
+        if not store._ep_poem_title:
+            _default_titles = {
+                "romantic": "A Letter from Your Heart",
+                "sad": "Echoes of Sorrow",
+                "intellectual": "Reflections of the Mind",
+                "playful": "A Ray of Sunshine",
+                "bittersweet": "Love and Longing",
+                "melancholic": "Shadows in Ink",
+                "flirty": "A Cheeky Whisper",
+                "philosophical": "Existential Musings",
+                "creative": "A Creative Experiment"
+            }
+            store._ep_poem_title = _default_titles.get(store._ep_poem_mood, "Your Unique Voice")
     
-    # Display poem silently
+    # Display poem with action buttons (background is in the screen via 'add')
+    label .poem_view_loop:
     window hide
     $ HKBHideButtons()
-    show screen extra_display_poem(poem_text, poem_mood)
-    pause
+    call screen extra_display_poem(_ep_poem_text, _ep_poem_mood, selected, _ep_poem_title)
+    $ poem_action = _return
     hide screen extra_display_poem
     $ HKBShowButtons()
     window auto
     
-    # Return to poem menu to allow viewing more poems
-    jump library_poem_menu
+    # Handle actions
+    if poem_action == "export":
+        # Export poem to text file in characters folder
+        python:
+            import os
+            import datetime
+            
+            # Create safe filename from date, mood and preview
+            safe_date = store._ep_poem_date.replace("/", "-").replace(" ", "_")
+            safe_mood = store._ep_poem_mood.lower()
+            # Get first few words as preview (max 20 chars, alphanumeric only)
+            preview_text = store._ep_poem_text[:30].replace("\n", " ").strip()
+            import re
+            safe_preview = re.sub(r'[^a-zA-Z0-9 ]', '', preview_text)[:20].strip().replace(" ", "_")
+            if safe_preview:
+                filename = "poem_{}_{}-{}.txt".format(safe_mood, safe_date, safe_preview)
+            else:
+                filename = "poem_{}_{}.txt".format(safe_mood, safe_date)
+            
+            # Get the characters folder path
+            characters_folder = os.path.join(renpy.config.basedir, "characters")
+            
+            # Create characters folder if it doesn't exist
+            if not os.path.exists(characters_folder):
+                os.makedirs(characters_folder)
+            
+            export_path = os.path.join(characters_folder, filename)
+            
+            # Check if file already exists
+            if os.path.exists(export_path):
+                export_status = "exists"
+            else:
+                # Get player name
+                player_name = persistent.playername if persistent.playername else "Anonymous"
+                
+                # Use stored poem title (already has fallback for legacy poems)
+                
+                try:
+                    with open(export_path, 'w') as f:
+                        f.write("=" * 50 + "\n")
+                        f.write("MY POEM FOR MONIKA\n")
+                        f.write("=" * 50 + "\n")
+                        f.write("Author: {}\n".format(player_name))
+                        f.write("Date: {}\n".format(store._ep_poem_date))
+                        f.write("Title: {}\n".format(store._ep_poem_title))
+                        f.write("=" * 50 + "\n\n")
+                        f.write(store._ep_poem_text)
+                        f.write("\n")
+                    export_status = "success"
+                except Exception as e:
+                    export_status = "error"
+        
+        # Show notification based on status
+        if export_status == "exists":
+            $ renpy.notify("This poem is already exported to characters/")
+        elif export_status == "success":
+            $ renpy.notify("Poem exported to characters/")
+        else:
+            $ renpy.notify("Could not export poem")
+        
+        # Return to poem view
+        jump .poem_view_loop
+    
+    elif poem_action == "confirm_delete":
+        # User confirmed deletion via Yes button in screen
+        python:
+            # Remove poem from list
+            if 0 <= selected < len(persistent._ep_free_poems):
+                persistent._ep_free_poems.pop(selected)
+                
+                # Rebuild menu items
+                poem_items = []
+                for i, poem in enumerate(persistent._ep_free_poems):
+                    mood_icons = {
+                        "romantic": "(Love) ",
+                        "sad": "(Sad) ",
+                        "intellectual": "(Deep) ",
+                        "playful": "(Fun) ",
+                        "bittersweet": "(Bittersweet) ",
+                        "melancholic": "(Melancholic) ",
+                        "flirty": "(Flirty) ",
+                        "philosophical": "(Philosophical) ",
+                        "creative": "(Creative) "
+                    }
+                    mood_icon = mood_icons.get(poem.get("mood"), "")
+                    
+                    # If poem has custom title, show it. Otherwise show text preview
+                    poem_title = poem.get("title")
+                    if poem_title:
+                        display_text = poem_title
+                    else:
+                        preview = poem["text"][:40] + "..." if len(poem["text"]) > 40 else poem["text"]
+                        display_text = preview.replace("\n", " ")
+                    
+                    label_text = "{}{} - {}".format(mood_icon, poem["date"], display_text)
+                    poem_items.append((label_text, i, False, False))
+        
+        # Show notification
+        $ renpy.notify("Poem deleted...")
+        
+        # Check if any poems left
+        if len(persistent._ep_free_poems) == 0:
+            show monika 1eka at t11
+            m "That was your last saved poem."
+            m 1hua "But don't worry, you can always write more!"
+            jump to_library_loop
+            return
+        
+        # Restore library scene and return to poem menu
+        jump library_poem_menu
+    
+    else:  # "back" or any other
+        # Restore library scene and return to poem menu
+        jump library_poem_menu
+    
     return
 
 #===========================================================================================
-# DISPLAY POEM SCREEN (Read-only)
+# DISPLAY POEM SCREEN (Read-only with Delete/Export)
 #===========================================================================================
-screen extra_display_poem(poem_text, poem_mood="creative"):
+screen extra_display_poem(poem_text, poem_mood="creative", poem_index=-1, poem_title=None):
     modal True
     key "h" action NullAction()
     key "H" action NullAction()
     key "m" action NullAction()
     key "M" action NullAction()
     key "mouseup_3" action NullAction()
-    # Dynamic title based on mood
+    # Use provided title, or generate from mood if not provided
     python:
-        poem_titles = {
-            "romantic": "A Letter from Your Heart",
-            "sad": "Echoes of Sorrow",
-            "intellectual": "Reflections of the Mind",
-            "playful": "A Ray of Sunshine",
-            "bittersweet": "Love and Longing",
-            "melancholic": "Shadows in Ink",
-            "flirty": "A Cheeky Whisper",
-            "philosophical": "Existential Musings",
-            "creative": "A Creative Experiment"
-        }
-        poem_title = poem_titles.get(poem_mood, "Your Unique Voice")
+        if poem_title:
+            display_title = poem_title
+        else:
+            poem_titles = {
+                "romantic": "A Letter from Your Heart",
+                "sad": "Echoes of Sorrow",
+                "intellectual": "Reflections of the Mind",
+                "playful": "A Ray of Sunshine",
+                "bittersweet": "Love and Longing",
+                "melancholic": "Shadows in Ink",
+                "flirty": "A Cheeky Whisper",
+                "philosophical": "Existential Musings",
+                "creative": "A Creative Experiment"
+            }
+            display_title = poem_titles.get(poem_mood, "Your Unique Voice")
     
     add "bg extra_poem_preview"
     
@@ -3248,7 +3418,7 @@ screen extra_display_poem(poem_text, poem_mood="creative"):
         # background Solid("#2f00ff")
 
         vbox:
-            text poem_title:
+            text display_title:
                 style "monika_text"
                 xalign 0.5
                 size 26
@@ -3256,32 +3426,78 @@ screen extra_display_poem(poem_text, poem_mood="creative"):
             
     frame:
         xalign 0.50
-        yalign 0.60
-        xsize 450
-        ysize 550
+        yalign 0.70
+        xsize 550
+        ysize 510
         background None
         # background Solid("#2f00ff")
         padding (10, 10)
         
         viewport:
             xfill True
-            ysize 550
+            ysize 510
             scrollbars "vertical"
             mousewheel True
             
             text poem_text style "library_poem_input"
 
+    # Button row on the right side - switches between normal and confirm mode
+    default EP_confirm_mode = False
+    
     hbox:
-        xalign 0.82
+        xalign 0.93
         yalign 0.5
-        spacing 40
+        spacing 20
+        
+        if not EP_confirm_mode:
+            # Normal mode: Export, Delete, Back
+            textbutton "Export":
+                action Return("export")
+                style "poem_menu_button"
+                text_style "poem_menu_button_text"
+                hover_sound gui.hover_sound
+                activate_sound gui.activate_sound
+                sensitive (poem_index >= 0)
 
-        textbutton "Back":
-            action Return()
-            style "poem_menu_button"
-            text_style "poem_menu_button_text"
-            hover_sound gui.hover_sound
-            activate_sound gui.activate_sound
+            textbutton "Delete":
+                action SetScreenVariable("EP_confirm_mode", True)
+                style "poem_menu_button"
+                text_style "poem_menu_button_text"
+                hover_sound gui.hover_sound
+                activate_sound gui.activate_sound
+                sensitive (poem_index >= 0)
+
+            textbutton "Back":
+                action Return("back")
+                style "poem_menu_button"
+                text_style "poem_menu_button_text"
+                hover_sound gui.hover_sound
+                activate_sound gui.activate_sound
+
+    hbox:
+        xalign 0.87
+        yalign 0.5
+        spacing 20
+
+        if EP_confirm_mode:
+            # Confirm mode: Yes, No
+            textbutton "Yes":
+                action Return("confirm_delete")
+                style "poem_menu_button"
+                text_style "poem_menu_button_text"
+                hover_sound gui.hover_sound
+                activate_sound gui.activate_sound
+
+            textbutton "No":
+                action SetScreenVariable("EP_confirm_mode", False)
+                style "poem_menu_button"
+                text_style "poem_menu_button_text"
+                hover_sound gui.hover_sound
+                activate_sound gui.activate_sound
+    
+    # Show notification when in confirm mode
+    if EP_confirm_mode:
+        timer 0.01 action Function(renpy.notify, "Are you sure you want to delete this poem?")
 
 #===========================================================================================
 # MAIN LABEL
@@ -3970,13 +4186,51 @@ label minigame_poem_free:
         
         # Save to history (only appropriate poems) with full metadata
         if poem_mood != "empty":
+            # Ask for poem title
+            _ep_poem_will_save = True
+        else:
+            _ep_poem_will_save = False
+    
+    # Ask for poem title before saving
+    if _ep_poem_will_save:
+        m 1eua "Before we continue..."
+        m 3eua "What would you like to call this poem?"
+        $ poem_title_input = store.ep_tools.ep_input("Title (or leave empty):", length=50, allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'-").strip()
+        
+        if poem_title_input:
+            # Check for bad words using MAS's bad name list
+            python:
+                _title_is_bad = False
+                _lower_title = poem_title_input.lower()
+                # Use MAS bad name list if available
+                if hasattr(store, 'mas_bad_name_list'):
+                    for bad_word in store.mas_bad_name_list:
+                        if bad_word.lower() in _lower_title:
+                            _title_is_bad = True
+                            break
+            
+            if _title_is_bad:
+                m 2tfd "..."
+                m 2tfc "[player]... really?"
+                m 2eka "Let's... not call it that."
+                m 1hua "I'll give it a nicer name based on its mood~"
+                $ _ep_poem_title = None  # Use default
+            else:
+                m 1hub "'{i}[poem_title_input]{/i}'... I love it!"
+                $ _ep_poem_title = poem_title_input
+        else:
+            m 1eka "No worries! I'll give it a name based on its mood."
+            $ _ep_poem_title = None  # Will use default in save_poem
+        
+        python:
             store.ep_poems.save_poem(
                 player_poem, 
                 poem_mood,
                 secondary_mood=secondary_mood,
                 word_count=poem_words,
                 has_monika=has_monika,
-                keywords=poem_keywords
+                keywords=poem_keywords,
+                title=_ep_poem_title
             )
             # Save the style for contextual dialogue on next visit
             persistent._ep_last_poem_style = poem_mood
@@ -4058,6 +4312,8 @@ label minigame_poem_free:
         
         # Save even short poems if they have meaning
         if poem_mood != "empty" and poem_mood != "creative":
+            # For short poems, title was already asked in the main flow via _ep_poem_will_save
+            # But if we reach here, the poem was too short - use default title
             python:
                 store.ep_poems.save_poem(
                     player_poem, 
@@ -4065,7 +4321,8 @@ label minigame_poem_free:
                     secondary_mood=secondary_mood,
                     word_count=poem_words,
                     has_monika=has_monika,
-                    keywords=poem_keywords
+                    keywords=poem_keywords,
+                    title=None  # Use default for short poems
                 )
             # Confirm save for short poems with meaning
             m 1ekbsa "Even though it's short, I'll keep this in our collection~"
