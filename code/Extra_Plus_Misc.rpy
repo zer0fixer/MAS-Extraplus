@@ -1278,11 +1278,19 @@ init -5 python in ep_tools:
 
     def show_boop_feedback(message, color="#FF1493"):
         t = "boop_notif{}".format(renpy.random.randint(1, 10000))
-        renpy.show_screen("extra_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color, duration=1.3, trans=store.boop_feedback_trans)
+        # Calculate position once before showing screen
+        mouse_pos = renpy.get_mouse_pos()
+        pos_x = mouse_pos[0] + renpy.random.randint(-30, 30)
+        pos_y = mouse_pos[1] + renpy.random.randint(-30, 30)
+        renpy.show_screen("extra_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color, pos_x=pos_x, pos_y=pos_y, duration=1.3, trans=store.boop_feedback_trans)
 
     def show_doki_feedback(message, color="#ff0000"):
         t = "doki_notif{}".format(renpy.random.randint(1, 10000))
-        renpy.show_screen("extra_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color, duration=0.8, trans=store.doki_feedback_trans)
+        # Calculate position once before showing screen
+        mouse_pos = renpy.get_mouse_pos()
+        pos_x = mouse_pos[0] + renpy.random.randint(-30, 30)
+        pos_y = mouse_pos[1] + renpy.random.randint(-30, 30)
+        renpy.show_screen("extra_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color, pos_x=pos_x, pos_y=pos_y, duration=0.8, trans=store.doki_feedback_trans)
 
     def getPlayerGenderString():
         return {"M": "boyfriend", "F": "girlfriend"}.get(store.persistent.gender, "beloved")

@@ -1477,13 +1477,12 @@ screen force_mouse_move():
     timer .6 repeat True action MouseMove(x=412, y=237, duration=.3)
 
 # === Mics ===
-screen extra_feedback_notif(msg, tag, txt_color, duration=1.3, trans=boop_feedback_trans):
-    # Show a notification message at the mouse position
+screen extra_feedback_notif(msg, tag, txt_color, pos_x, pos_y, duration=1.3, trans=boop_feedback_trans):
+    # Show a notification message at specified position
     zorder 2000
     timer duration action Hide(tag)
-    default EP_feedback_pos = (renpy.get_mouse_pos()[0] + renpy.random.randint(-30, 30), renpy.get_mouse_pos()[1] + renpy.random.randint(-30, 30))
     
-    text "{}".format(msg) at trans pos EP_feedback_pos size 40 color txt_color outlines [ (2, "#000", 0, 0) ] font "mod_assets/font/m1_fixed.ttf"
+    text "{}".format(msg) at trans pos (pos_x, pos_y) size 40 color txt_color outlines [ (2, "#000", 0, 0) ] font "mod_assets/font/m1_fixed.ttf"
 
 screen extra_doki_heartbeat():
     # Show a heartbeat animation for Monika
