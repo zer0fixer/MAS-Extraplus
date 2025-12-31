@@ -1477,12 +1477,12 @@ screen force_mouse_move():
     timer .6 repeat True action MouseMove(x=412, y=237, duration=.3)
 
 # === Mics ===
-screen extra_feedback_notif(msg, tag, txt_color, pos_x, pos_y, duration=1.3, trans=boop_feedback_trans):
-    # Show a notification message at specified position
+screen extra_feedback_notif(msg, tag, txt_color, pos_x, pos_y, txt_size=40, duration=1.3, trans=boop_feedback_trans):
+    # Show a notification message at specified position with dynamic size
     zorder 2000
     timer duration action Hide(tag)
     
-    text "{}".format(msg) at trans pos (pos_x, pos_y) size 40 color txt_color outlines [ (2, "#000", 0, 0) ] font "mod_assets/font/m1_fixed.ttf"
+    text "{}".format(msg) at trans pos (pos_x, pos_y) size txt_size color txt_color outlines [ (2, "#000", 0, 0) ] font "mod_assets/font/m1_fixed.ttf"
 
 screen extra_doki_heartbeat():
     # Show a heartbeat animation for Monika

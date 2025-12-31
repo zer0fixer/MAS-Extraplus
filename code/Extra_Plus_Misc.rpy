@@ -1282,7 +1282,12 @@ init -5 python in ep_tools:
         mouse_pos = renpy.get_mouse_pos()
         pos_x = mouse_pos[0] + renpy.random.randint(-30, 30)
         pos_y = mouse_pos[1] + renpy.random.randint(-30, 30)
-        renpy.show_screen("extra_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color, pos_x=pos_x, pos_y=pos_y, duration=1.3, trans=store.boop_feedback_trans)
+        # Calculate size based on zoom (base 40, scales with zoom)
+        zoom = store.mas_sprites.zoom_level
+        base_size = 40
+        txt_size = int(base_size * (zoom / store.mas_sprites.default_zoom_level))
+        txt_size = max(30, min(60, txt_size))  # Clamp between 30 and 60
+        renpy.show_screen("extra_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color, pos_x=pos_x, pos_y=pos_y, txt_size=txt_size, duration=1.3, trans=store.boop_feedback_trans)
 
     def show_doki_feedback(message, color="#ff0000"):
         t = "doki_notif{}".format(renpy.random.randint(1, 10000))
@@ -1290,7 +1295,12 @@ init -5 python in ep_tools:
         mouse_pos = renpy.get_mouse_pos()
         pos_x = mouse_pos[0] + renpy.random.randint(-30, 30)
         pos_y = mouse_pos[1] + renpy.random.randint(-30, 30)
-        renpy.show_screen("extra_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color, pos_x=pos_x, pos_y=pos_y, duration=0.8, trans=store.doki_feedback_trans)
+        # Calculate size based on zoom (base 40, scales with zoom)
+        zoom = store.mas_sprites.zoom_level
+        base_size = 40
+        txt_size = int(base_size * (zoom / store.mas_sprites.default_zoom_level))
+        txt_size = max(30, min(60, txt_size))  # Clamp between 30 and 60
+        renpy.show_screen("extra_feedback_notif", msg=message, tag=t, _tag=t, txt_color=color, pos_x=pos_x, pos_y=pos_y, txt_size=txt_size, duration=0.8, trans=store.doki_feedback_trans)
 
     def getPlayerGenderString():
         return {"M": "boyfriend", "F": "girlfriend"}.get(store.persistent.gender, "beloved")
