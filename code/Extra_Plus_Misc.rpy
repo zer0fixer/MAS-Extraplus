@@ -2434,22 +2434,31 @@ init -14 python in ep_interactions:
     def vx_list_zoom(zoom_level, vx_list):
         """
         Generates a vertex list adjusted for zoom level.
+        Reads mas_sprites values dynamically to match MAS behavior.
         """
-        if zoom_level == _default_zoom:
+        # Read current values from mas_sprites (not cached)
+        try:
+            default_zoom = store.mas_sprites.default_zoom_level
+            y_step = store.mas_sprites.y_step
+        except (AttributeError, NameError):
+            default_zoom = _default_zoom
+            y_step = _y_step
+        
+        if zoom_level == default_zoom:
             return list(vx_list)
         
-        zoom_out = zoom_level < _default_zoom
+        zoom_out = zoom_level < default_zoom
         
         if zoom_out:
-            zoom_diff = _default_zoom - zoom_level
+            zoom_diff = default_zoom - zoom_level
             per_mod = -1 * (zoom_diff * ZOOM_INC_PER)
             xfc, yfc = FOCAL_POINT
             yfc_offset = 0
         else:
-            zoom_diff = zoom_level - _default_zoom
+            zoom_diff = zoom_level - default_zoom
             per_mod = zoom_diff * ZOOM_INC_PER
             xfc, yfc = FOCAL_POINT_UP
-            yfc_offset = -1 * zoom_diff * _y_step
+            yfc_offset = -1 * zoom_diff * y_step
         
         new_vx_list = []
         for xcoord, ycoord in vx_list:
@@ -2624,6 +2633,8 @@ init -14 python in ep_interactions:
             return None
 
         def check_over(self, x, y):
+            # Ensure zones are adjusted for current zoom before checking
+            self.adjust_for_zoom()
             for zone_key, cz in self.zone_iter():
                 if cz._isOverMe(x, y):
                     return zone_key

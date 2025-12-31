@@ -37,11 +37,13 @@ label show_boop_screen:
     return
 
 label return_boop_screen:
+    # hide screen ep_debug_zones
     jump screen_extraplus
     return
 
 label close_boop_screen:
     show monika idle at t11
+    # hide screen ep_debug_zones
     python:
         store.ep_button.hide_zoom_button()
     jump ch30_visual_skip

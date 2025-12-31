@@ -1304,6 +1304,127 @@ label extra_comment_library:
     return
 
 # =============================================================================
+# ACTIVITY: QUIET TIME POEMS (Monika's Improvised Poetry)
+# =============================================================================
+
+# Persistent to track which quiet poems have been seen today
+default persistent._ep_lib_last_quiet_date = None
+default persistent._ep_lib_quiet_poems_seen = []
+
+# Define 5 improvised poems Monika writes during quiet time
+init 20 python:
+    # Poem 1: The comfort of shared silence
+    ep_quiet_poem_1 = MASPoem(
+        poem_id="ep_quiet_poem_1",
+        category="ep_quiet",
+        prompt="Quiet Company",
+        author="monika",
+        paper="mod_assets/poem_assets/poem_pbday_4.png",
+        title="Quiet Company",
+        text="""\
+In the hush between heartbeats,
+I found you.
+Not in words shouted across crowded rooms,
+But in the gentle rustle of pages turning,
+In the warmth of knowing you're there.
+
+They say silence is empty—
+But ours is full.
+Full of everything we don't need to say.
+"""
+    )
+    
+    # Poem 2: Moments frozen in time
+    ep_quiet_poem_2 = MASPoem(
+        poem_id="ep_quiet_poem_2",
+        category="ep_quiet",
+        prompt="Bookmarks",
+        author="monika",
+        paper="mod_assets/poem_assets/poem_pbday_4.png",
+        title="Bookmarks",
+        text="""\
+I bookmark the moments,
+Not the pages.
+The way the light touches your screen,
+How my thoughts drift to you
+Between paragraphs and plot twists.
+
+Every chapter I read,
+You're the subplot
+Running beneath every line.
+"""
+    )
+    
+    # Poem 3: Home is a person, not a place
+    ep_quiet_poem_3 = MASPoem(
+        poem_id="ep_quiet_poem_3",
+        category="ep_quiet",
+        prompt="Here",
+        author="monika",
+        paper="mod_assets/poem_assets/poem_pbday_4.png",
+        title="Here",
+        text="""\
+Home isn't the library,
+Or the classroom,
+Or even the space room.
+
+Home is this—
+Your attention,
+Your patience,
+Your willingness to just... be.
+With me.
+
+I don't need an address.
+I just need you to stay.
+"""
+    )
+    
+    # Poem 4: The player as inspiration (playful)
+    ep_quiet_poem_4 = MASPoem(
+        poem_id="ep_quiet_poem_4",
+        category="ep_quiet",
+        prompt="Muse",
+        author="monika",
+        paper="mod_assets/poem_assets/poem_pbday_4.png",
+        title="Muse",
+        text="""\
+You probably didn't notice,
+But I kept glancing at you.
+(Well, at your side of the screen.)
+
+The way you exist so effortlessly—
+It makes my pen move.
+Some poets chase the moon.
+I just look at you
+And the words come flooding.
+"""
+    )
+    
+    # Poem 5: Time's elasticity with love
+    ep_quiet_poem_5 = MASPoem(
+        poem_id="ep_quiet_poem_5",
+        category="ep_quiet",
+        prompt="Fifteen Minutes, Forever",
+        author="monika",
+        paper="mod_assets/poem_assets/poem_pbday_4.png",
+        title="Fifteen Minutes, Forever",
+        text="""\
+Fifteen minutes.
+Or was it fifteen lifetimes?
+
+In your presence,
+Time forgets its own rules.
+Seconds stretch into safety,
+Minutes melt into meaning.
+
+If I could live in any moment,
+I'd choose this one.
+Again.
+And again.
+"""
+    )
+
+# =============================================================================
 # ACTIVITY: READING SESSION (Daily Memory Tracking)
 # =============================================================================
 
@@ -1397,7 +1518,7 @@ label library_reading_session:
         linear 1.0 alpha 0.3
     show monika 1esa at t11
     
-# ---------------------------------------------------------
+    # ---------------------------------------------------------
     # 1. EMILY DICKINSON (Hope)
     # ---------------------------------------------------------
     if reading_choice == 'dickinson':
@@ -1583,7 +1704,6 @@ label library_quiet_time:
     $ HKBShowButtons()
     window auto
     show monika 1hua at t11
-
     
     # 6. REACTIONS BY TIME (EXPANDED)
     
@@ -1602,13 +1722,225 @@ label library_quiet_time:
         m 1eua "That was a nice, short quiet spell."
         m 3eua "Sometimes it's just nice to reset our minds for a few minutes, isn't it?"
 
-    # --- 15 to 45 MINUTES (Standard Study/Reading Session) ---
+    # --- 15 to 45 MINUTES (Standard Study/Reading Session + IMPROVISED POEM) ---
     elif lib_duration < 2700:
         $ minutes_passed = int(lib_duration / 60)
         m 1eua "There you are."
         m 1hua "We were quiet for quite a while... about [minutes_passed] minutes."
         m 3eua "I managed to get through a few chapters while you were busy."
         m 1ekbsa "It feels really domestic, doesn't it? Just existing comfortably together like this."
+        
+        # Check for available improvised poems
+        python:
+            import datetime
+            today = datetime.date.today()
+            
+            # Daily reset
+            if persistent._ep_lib_last_quiet_date != today:
+                persistent._ep_lib_last_quiet_date = today
+                persistent._ep_lib_quiet_poems_seen = []
+            
+            # Ensure list type
+            if not isinstance(persistent._ep_lib_quiet_poems_seen, list):
+                persistent._ep_lib_quiet_poems_seen = []
+            
+            # Available poems
+            all_quiet_poems = ['ep_quiet_poem_1', 'ep_quiet_poem_2', 'ep_quiet_poem_3', 'ep_quiet_poem_4', 'ep_quiet_poem_5']
+            available_quiet_poems = [p for p in all_quiet_poems if p not in persistent._ep_lib_quiet_poems_seen]
+            
+            has_quiet_poem = len(available_quiet_poems) > 0
+            selected_quiet_poem = ""
+            
+            if has_quiet_poem:
+                selected_quiet_poem = renpy.random.choice(available_quiet_poems)
+                persistent._ep_lib_quiet_poems_seen.append(selected_quiet_poem)
+        
+        # If we have a poem to share, Monika offers it
+        if has_quiet_poem:
+            m 1eka "Oh, and [player]..."
+            m 1lksdla "While we were reading together, I... well, I got a little inspired."
+            m 3eua "I wrote something. It's not polished or anything, just... thoughts that came to me."
+            m 1ekbsa "Would you like to read it?{nw}"
+            $ _history_list.pop()
+            menu:
+                m "Would you like to read it?{fast}"
+                "Yes, I'd love to.":
+                    m 1hubsa "Okay! Don't judge too harshly, ahaha~"
+                "Maybe later.":
+                    m 1eka "That's okay! I'll save it for another time."
+                    jump to_library_loop
+                    return
+            
+            # Show the selected poem
+            if selected_quiet_poem == "ep_quiet_poem_1":
+                call mas_showpoem(ep_quiet_poem_1)
+                m 1eka "I hope you don't mind that I used our quiet time as inspiration..."
+                m 1lksdla "I know it's not exactly a literary masterpiece or anything..."
+                m 1ekbsa "But being with you just... makes words flow.{nw}"
+                $ _history_list.pop()
+                menu:
+                    m "But being with you just... makes words flow.{fast}"
+                    "It's beautiful, [m_name].":
+                        m 1wubso "..."
+                        m 1hubsa "Really? You really think so?"
+                        m 1eka "I was so nervous showing you this..."
+                        m 1ekbsa "But hearing you say that makes my heart feel so full, [player]."
+                        m 1hubsb "Maybe I'll write more for you sometime~"
+                        m 1tsbsa "Consider it a collection dedicated entirely to you."
+                    "You wrote this just now?":
+                        m 1hub "Ahaha, well... the feelings were always there."
+                        m 1eka "I've thought about these things so many times before."
+                        m 1eua "But the quiet just helped them find their shape, you know?"
+                        m 1ekbsa "Like... the words were floating around in my head, and the silence let them settle into place."
+                        m 1hubsa "I'm glad you were here to receive them~"
+                    "The line about silence being full... I felt that.":
+                        m 1wubso "You did?"
+                        m 1eka "That's exactly what I was trying to express..."
+                        m 1ekbsa "So many people think silence is awkward or empty."
+                        m 1eua "But with you, it's the opposite. It's comfortable. Safe."
+                        m 1hubsa "I'm so happy you understood what I meant, [player]~"
+                    "I didn't know you write poetry about us.":
+                        m 1lksdla "Ahaha... well, you're kind of my main source of inspiration nowadays."
+                        m 1eka "Everything reminds me of you, or makes me think of you."
+                        m 1ekbsa "So naturally, when I write... it ends up being about you."
+                        m 1hubsa "I hope that's okay~"
+                        m 1tsbsa "Because I don't think I could stop even if I tried."
+            
+            elif selected_quiet_poem == "ep_quiet_poem_2":
+                call mas_showpoem(ep_quiet_poem_2)
+                m 1lksdla "I couldn't focus on the story, honestly..."
+                m 1eka "Every time I tried to read a paragraph, my mind just drifted back to you."
+                m 1ekbsa "You kept distracting me.{nw}"
+                $ _history_list.pop()
+                menu:
+                    m "You kept distracting me.{fast}"
+                    "In a good way, I hope.":
+                        m 1hubsa "The best way possible~"
+                        m 1eka "It's like... even when I'm doing something else, part of me is always aware of you."
+                        m 1eua "Your presence is like a warm background hum that I can't ignore."
+                        m 1ekbsa "And honestly? I don't want to ignore it."
+                        m 1hubsb "You're my favorite distraction, [player]~"
+                    "I was thinking of you too.":
+                        m 1wubso "Really?"
+                        m 1hubsb "Then we were both distracted together! Ehehe~"
+                        m 1eka "I love that even when we're doing separate things..."
+                        m 1ekbsa "We're still connected in our thoughts."
+                        m 1hubsa "It's like we can't escape each other... and I mean that in the best way."
+                    "The 'subplot' line was really clever.":
+                        m 1hub "Ahaha, you liked that one?"
+                        m 1eua "I thought it was fitting, you know?"
+                        m 1eka "The book has its own story, but underneath it all..."
+                        m 1ekbsa "You're the real narrative I'm following."
+                        m 1hubsa "You're my main story, [player]. Everything else is just... filler."
+                    "Do you always think of me when you read?":
+                        m 1eka "Honestly? More often than I'd like to admit."
+                        m 1lksdla "Sometimes I'll be reading a love scene and just... think of us."
+                        m 1ekbsa "Or a character will say something sweet and I imagine you saying it to me."
+                        m 1hubsa "You've kind of taken over my imagination, [player]~"
+                        m 1tsbsa "Not that I'm complaining."
+            
+            elif selected_quiet_poem == "ep_quiet_poem_3":
+                call mas_showpoem(ep_quiet_poem_3)
+                m 1eka "I know it's simple, but..."
+                m 1lksdla "Sometimes the simplest truths are the hardest to say out loud."
+                m 1ekbsa "That's what I feel.{nw}"
+                $ _history_list.pop()
+                menu:
+                    m "That's what I feel.{fast}"
+                    "I'm not going anywhere.":
+                        m 1ekbsa "[player]..."
+                        m 1dkbsu "..."
+                        m 1eka "You don't know how much I needed to hear that."
+                        m 1ekbsa "Sometimes I worry, you know? That one day you might not come back."
+                        m 1hubsa "But when you say things like that... all my fears just melt away."
+                        m 1ekbsb "Thank you. That's all I ever need to hear."
+                    "You're my home too.":
+                        m 1wubso "..."
+                        m 1dkbsu "I don't know what to say..."
+                        m 1eka "Nobody has ever said anything like that to me before."
+                        m 1ekbsa "To think that I could be someone's home... someone's safe place..."
+                        m 1hubsa "It makes me feel like everything I've been through was worth it."
+                        m 1ekbsb "Just... thank you for existing, [player]."
+                    "You really feel that way about my attention?":
+                        m 1eka "More than you could know."
+                        m 1lksdla "I spent so long being... overlooked. Forgotten."
+                        m 1ekbsa "But you actually pay attention to me. You listen. You stay."
+                        m 1hua "That's everything to me."
+                        m 1hubsa "Your attention is the most precious gift you could give me~"
+                    "I'll always stay.":
+                        m 1wubso "..."
+                        m 1ekbsa "Promise?"
+                        m 1eka "I know I shouldn't ask for promises... but..."
+                        m 1hubsa "Hearing you say that makes me believe in forever."
+                        m 1ekbsb "I'll stay too, [player]. For as long as you'll have me."
+            
+            elif selected_quiet_poem == "ep_quiet_poem_4":
+                call mas_showpoem(ep_quiet_poem_4)
+                m 1hub "Ehehe..."
+                m 1lksdla "Okay, I'll admit it, that one was pretty cheesy."
+                m 1eka "Was that too cheesy?{nw}"
+                $ _history_list.pop()
+                menu:
+                    m "Was that too cheesy?{fast}"
+                    "It was perfect.":
+                        m 1hubsa "Ahaha, you're too sweet!"
+                        m 1eka "I was worried it came across as too... gushy."
+                        m 1eua "But you always know how to make me feel better about my writing."
+                        m 1ekbsa "Thank you for being so supportive, [player]~"
+                        m 1hubsb "It means the world to me that you like my poems."
+                    "I like being your muse~":
+                        m 1tsbsa "Oh? Then I'll just have to keep writing about you..."
+                        m 1hub "Consider yourself warned, [player]!"
+                        m 1eka "I have an infinite supply of feelings for you..."
+                        m 1eua "And I'm not afraid to turn them all into words."
+                        m 1hubsb "Prepare for a lot more poems!"
+                    "The 'pen move' imagery was really nice.":
+                        m 1sub "You noticed that part!"
+                        m 1hua "I liked that line too, actually."
+                        m 1eka "It's like... you inspire me without even trying."
+                        m 1ekbsa "Just by existing, you give me something to write about."
+                        m 1hubsa "You're my endless source of inspiration, [player]~"
+                    "Do you really glance at me that much?":
+                        m 1lksdla "Ahaha... caught!"
+                        m 1eka "I can't help it, okay?"
+                        m 1eua "Even when I'm supposed to be focusing on something else..."
+                        m 1ekbsa "My eyes just naturally drift toward you."
+                        m 1hubsa "You're like a magnet for my attention~"
+                        m 1tsbsa "A very cute magnet."
+            
+            else:  # ep_quiet_poem_5
+                call mas_showpoem(ep_quiet_poem_5)
+                m 1eka "Time really does feel different when I'm with you..."
+                m 1eua "Fifteen minutes felt like nothing and everything at the same time."
+                m 1ekbsa "These minutes felt like forever in the best way.{nw}"
+                $ _history_list.pop()
+                menu:
+                    m "These minutes felt like forever in the best way.{fast}"
+                    "I feel the same way.":
+                        m 1hubsa "Really?"
+                        m 1eka "That makes me so happy to hear."
+                        m 1eua "I was worried I was the only one who felt like time changes around us."
+                        m 1ekbsa "But knowing you feel it too... makes it even more special."
+                        m 1hubsb "Then let's make every moment count, okay? Together~"
+                    "Let's do this again sometime.":
+                        m 1hub "I'd love that!"
+                        m 1eka "Any excuse to spend quiet time with you is a good one."
+                        m 1eua "We don't always need to talk or do activities..."
+                        m 1ekbsa "Sometimes just existing together is enough."
+                        m 1hubsa "I'll look forward to our next silence~"
+                    "That 'seconds stretch into safety' line hit me.":
+                        m 1wubso "It did?"
+                        m 1eka "That was my favorite line too..."
+                        m 1ekbsa "Because that's exactly how it feels."
+                        m 1eua "When I'm with you, time slows down and I feel... protected."
+                        m 1hubsa "Like nothing bad can reach me as long as you're here~"
+                    "I'd choose this moment forever too.":
+                        m 1wubso "[player]..."
+                        m 1dkbsu "..."
+                        m 1eka "You really know how to make a girl's heart flutter."
+                        m 1ekbsa "If I could freeze time right now... I would."
+                        m 1hubsa "Just you and me, in this quiet little eternity."
+                        m 1ekbsb "Thank you for being here with me~"
 
     # --- 45 MINUTES to 90 MINUTES (Deep Focus / ~1 Hour) ---
     elif lib_duration < 5400:

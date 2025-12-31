@@ -1996,46 +1996,70 @@ screen _extra_plus_submod_settings():
             action Function(store.ep_files.cleanup_old_files)
             hovered tooltip.Action("Removes outdated files from previous versions.")
 
-# DEBUG: Visual overlay to see clickable zones
-# screen ep_debug_zones():
-#     zorder 100
+# DEBUG: Visual overlay to see clickable zones (with zoom support)
+screen ep_debug_zones():
+    zorder 100
     
-#     # Define colors for each zone type
-#     python:
-#         zone_colors = {
-#             "extra_head": "#ff000080",       # Red
-#             "extra_nose": "#00ff0080",       # Green  
-#             "extra_cheek_l": "#0000ff80",    # Blue
-#             "extra_cheek_r": "#0000ff80",    # Blue
-#             "extra_hands": "#ffff0080",      # Yellow
-#             "extra_ear_l": "#ff00ff80",      # Magenta
-#             "extra_ear_r": "#ff00ff80",      # Magenta
-#             "extra_shoulder_l": "#00ffff80", # Cyan
-#             "extra_shoulder_r": "#00ffff80", # Cyan
-#         }
-    
-#     # Draw each zone as a rectangle
-#     for zone_name, coords in store.EP_interaction_manager.zone_map.items():
-#         $ x1, y1 = coords[0]
-#         $ x2, y2 = coords[2]  # Opposite corner
-#         $ width = x2 - x1
-#         $ height = y2 - y1
-#         $ color = zone_colors.get(zone_name, "#ffffff80")
+    # Get current zoom level and zones from cz_manager
+    python:
+        zone_colors = {
+            "extra_head": "#ff000080",       # Red
+            "extra_nose": "#00ff0080",       # Green  
+            "extra_cheek_l": "#0000ff80",    # Blue
+            "extra_cheek_r": "#0000ff80",    # Blue
+            "extra_hands": "#ffff0080",      # Yellow
+            "extra_ear_l": "#ff00ff80",      # Magenta
+            "extra_ear_r": "#ff00ff80",      # Magenta
+            "extra_shoulder_l": "#00ffff80", # Cyan
+            "extra_shoulder_r": "#00ffff80", # Cyan
+        }
         
-#         # Draw the zone rectangle
-#         frame:
-#             xpos x1
-#             ypos y1
-#             xsize width
-#             ysize height
-#             background color
+        # Get zoom-adjusted zones from cz_manager
+        current_zoom = store.mas_sprites.zoom_level
+        debug_zones = []
+        
+        if store.EP_interaction_manager._zones_enabled:
+            cz_man = store.EP_interaction_manager.cz_manager
+            for zone_name in store.EP_interaction_manager.zone_map.keys():
+                cz = cz_man.get(zone_name, current_zoom)
+                if cz and cz.corners:
+                    corners = cz.corners
+                    min_x = min(x for x, y in corners)
+                    min_y = min(y for x, y in corners)
+                    max_x = max(x for x, y in corners)
+                    max_y = max(y for x, y in corners)
+                    debug_zones.append({
+                        'name': zone_name,
+                        'x': min_x,
+                        'y': min_y,
+                        'w': max_x - min_x,
+                        'h': max_y - min_y,
+                        'color': zone_colors.get(zone_name, "#ffffff80")
+                    })
+    
+    # Show current zoom level
+    text "Zoom: [current_zoom]":
+        xpos 10
+        ypos 10
+        size 20
+        color "#fff"
+        outlines [(2, "#000", 0, 0)]
+    
+    # Draw each zone as a rectangle
+    for zone in debug_zones:
+        frame:
+            xpos zone['x']
+            ypos zone['y']
+            xsize zone['w']
+            ysize zone['h']
+            background zone['color']
             
-#             # Label in center
-#             text zone_name.replace("extra_", ""):
-#                 align (0.5, 0.5)
-#                 size 12
-#                 color "#000"
-#                 outlines [(1, "#fff", 0, 0)]
+            # Label in center
+            text zone['name'].replace("extra_", ""):
+                align (0.5, 0.5)
+                size 12
+                color "#000"
+                outlines [(1, "#fff", 0, 0)]
 
 #===========================================================================================
 # TRANSFORM

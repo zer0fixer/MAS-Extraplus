@@ -832,7 +832,7 @@ init python in ep_poems:
     import re
     
     # Character limit for free poems
-    MAX_POEM_CHARS = 500
+    MAX_POEM_CHARS = 800
     MAX_SAVED_POEMS = 15
 
 
@@ -908,6 +908,50 @@ init python:
             if len(new_text) > self.max_chars:
                 new_text = new_text[:self.max_chars]
             self.current_value = new_text
+
+        def paste_text(self):
+            """Pastes text from clipboard at current caret position."""
+            import pygame_sdl2
+            try:
+                # Use scrap for clipboard access in Ren'Py
+                clipboard_content = pygame_sdl2.scrap.get(pygame_sdl2.scrap.SCRAP_TEXT)
+                
+                if not clipboard_content:
+                    return
+                
+                # Convert bytes to string if necessary
+                if isinstance(clipboard_content, bytes):
+                    clipboard_content = clipboard_content.decode('utf-8', 'ignore')
+                
+                # Strip NUL characters if any
+                clipboard_content = clipboard_content.replace('\x00', '')
+                
+                if not clipboard_content:
+                    return
+                    
+                caret_pos = self.get_caret_pos()
+                
+                # Calculate how much can be pasted
+                remaining_space = self.max_chars - len(self.current_value)
+                paste_chunk = clipboard_content[:remaining_space]
+                
+                if not paste_chunk:
+                    return
+                    
+                self.current_value = (
+                    self.current_value[:caret_pos] + 
+                    paste_chunk + 
+                    self.current_value[caret_pos:]
+                )
+                
+                widget = self.get_widget()
+                if widget:
+                    widget.content = self.current_value
+                    widget.caret_pos = caret_pos + len(paste_chunk)
+                    self.redraw_input()
+            except Exception as e:
+                # Silently fail or log if needed
+                pass
         
         def move_caret_vertical(self, direction):
             """Moves caret up or down between lines."""
@@ -1161,7 +1205,8 @@ init python in ep_poems:
         
         # First check: ALWAYS_BANNED words (no context bypass) - SEXUAL
         for banned in ALWAYS_BANNED:
-            if banned in text_lower:
+            # Use whole word matching to avoid false positives
+            if re.search(r'\b' + re.escape(banned) + r'\b', text_lower):
                 return {
                     "is_inappropriate": True,
                     "severity": "bad",
@@ -1227,9 +1272,8 @@ init python in ep_poems:
             "shit", "bastard", "bitch", "douchebag",
             "idiot", "stupid", "dumb", "retard", "retarded",
             "trash", "garbage", "worthless", "useless",
-            "ugly", "fat", "disgusting", "repulsive",
             "creep", "loser", "scumbag",
-            "moron", "imbecile", "prick", "jerk",
+            "moron", "imbecile", "jerk",
             # Hate expressions
             "hate you", "i hate you", "hate monika",
             "you suck", "you're worthless", "you're useless",
@@ -1295,12 +1339,14 @@ init python in ep_poems:
         HATE_CONTEXT_CHECK = [
             'die', 'kill', 'hate', 'monster', 'demon',
             'crazy', 'insane', 'psycho', 'freak',
-            'scary', 'creepy', 'annoying', 'boring'
+            'scary', 'creepy', 'annoying', 'boring',
+            'prick', 'fat', 'ugly', 'disgusting', 'repulsive'
         ]
 
         # Check Hate Content (immediately banned) - HATE
         for banned in HATE_BANNED:
-            if banned in text_lower:
+            # Use whole word matching for hate content to avoid false positives (e.g. 'fat' in 'fate')
+            if re.search(r'\b' + re.escape(banned) + r'\b', text_lower):
                 return {
                     "is_inappropriate": True,
                     "severity": "bad",
@@ -1664,33 +1710,36 @@ init python in ep_poems:
         # CHECK 5: No recognizable words (for texts with good vowel ratio)
         # If the text has normal vowels but NO common English words, it's likely gibberish
         COMMON_WORDS = {
-            # === ARTICLES & BASIC PRONOUNS ===
+            # ARTICLES & BASIC PRONOUNS
             "the", "a", "an", "this", "that", "these", "those",
             "i", "you", "he", "she", "it", "we", "they", "them",
             "me", "him", "her", "us", "my", "your", "his", "her",
             "its", "our", "their", "mine", "yours", "theirs",
             "what", "which", "who", "whom", "whose", "that",
             
-            # === AUXILIARY VERBS ===
+            # MONIKA (Always common!)
+            "monika", "moni", "ika",
+            
+            # AUXILIARY VERBS
             "is", "are", "am", "was", "were", "be", "been",
             "have", "has", "had", "do", "does", "did", "will",
             "would", "could", "should", "can", "may", "might",
             "shall", "must", "get", "got", "getting", "gets",
             
-            # === COMMON PREPOSITIONS ===
+            # COMMON PREPOSITIONS
             "in", "on", "at", "to", "from", "of", "with", "for",
             "by", "as", "about", "into", "through", "during",
             "before", "after", "above", "below", "under", "over",
             "between", "among", "around", "toward", "against",
             "until", "since", "without", "within", "along",
             
-            # === CONJUNCTIONS ===
+            # CONJUNCTIONS
             "and", "or", "but", "nor", "yet", "so", "because",
             "if", "unless", "while", "when", "where", "why",
             "how", "that", "than", "as", "until", "although",
             "though", "else", "otherwise",
             
-            # === NEUTRAL ADVERBS ===
+            # NEUTRAL ADVERBS
             "just", "only", "even", "also", "too", "very",
             "quite", "rather", "much", "little", "more", "most",
             "less", "least", "well", "not", "never", "ever",
@@ -1701,19 +1750,19 @@ init python in ep_poems:
             "perhaps", "however", "therefore", "thus",
             "otherwise", "anyway", "besides", "moreover",
             
-            # === FREQUENT WORDS (NEUTRAL) ===
+            # FREQUENT WORDS (NEUTRAL)
             "every", "each", "any", "all", "some", "no", "none",
             "one", "two", "three", "other", "another", "such",
             "same", "different", "own", "both",
             
-            # === TIME & SPACE ===
+            # TIME & SPACE
             "day", "night", "time", "hour", "moment", "second",
             "minute", "week", "month", "year", "place", "way",
             "world", "life", "side", "hand", "part", "end",
             "back", "front", "top", "bottom", "right", "left",
             "up", "down", "in", "out", "here", "there",
             
-            # === NEUTRAL VERBS ===
+            # NEUTRAL VERBS
             "go", "come", "see", "look", "make", "take", "give",
             "find", "get", "put", "ask", "tell", "work", "play",
             "use", "move", "live", "happen", "stay", "keep",
@@ -1725,7 +1774,7 @@ init python in ep_poems:
             "write", "read", "speak", "listen", "hear", "sing",
             "dance", "eat", "drink", "sleep", "wake",
             
-            # === NEUTRAL NOUNS ===
+            # NEUTRAL NOUNS
             "thing", "person", "people", "man", "woman", "child",
             "boy", "girl", "friend", "hand", "head", "body", "face",
             "eye", "eyes", "ear", "mouth", "nose", "hair", "skin",
@@ -1740,7 +1789,7 @@ init python in ep_poems:
             "air", "tree", "flower", "animal", "bird", "fish",
             "street", "city", "country", "ocean", "mountain",
             
-            # === NEUTRAL ADJECTIVES ===
+            # NEUTRAL ADJECTIVES
             "big", "small", "large", "little", "long", "short",
             "high", "low", "wide", "narrow", "thick", "thin",
             "new", "old", "young", "first", "last", "next",
@@ -1753,13 +1802,13 @@ init python in ep_poems:
             "flat", "round", "square", "straight", "curved",
             "full", "empty", "rich", "poor", "strong", "weak",
             
-            # === TECHNICAL/NEUTRAL ===
+            # TECHNICAL/NEUTRAL
             "file", "code", "program", "computer", "system",
             "data", "value", "type", "function", "variable",
             "class", "object", "method", "array", "string",
             "integer", "boolean", "character", "error",
             
-            # === VAGUE ===
+            # VAGUE
             "thing", "stuff", "things", "something", "anything",
             "nothing", "everything", "whatever", "however",
             "whenever", "wherever", "whoever", "whichever",
@@ -1771,6 +1820,15 @@ init python in ep_poems:
             # Clean punctuation from words
             clean_words = [re.sub(r'[^a-z]', '', w) for w in words]
             common_found = sum(1 for w in clean_words if w in COMMON_WORDS)
+            
+            # EXTRA SAFETY: If 'monika' is a large part of the text, it's NOT gibberish
+            monika_count = clean_words.count('monika')
+            if len(clean_words) > 0 and float(monika_count) / float(len(clean_words)) > 0.4:
+                return {
+                    "is_gibberish": False,
+                    "gibberish_type": None,
+                    "confidence": 0.0
+                }
             
             # If 10+ words and ZERO common words found, it's gibberish
             if common_found == 0:
@@ -1815,9 +1873,9 @@ init python in ep_poems:
         # CHECK 1: Other Dokis with CONTEXT awareness
         # This catches cases like "Monika, I love Natsuki"
         other_dokis = {
-            'sayori': ['sayori', 'sayo', 'bun', 'cinnamon', 'cinny', 'sunshine'],
-            'yuri': ['yuri', 'yuyu', 'maiden', 'tea lover'],
-            'natsuki': ['natsuki', 'nat', 'cupcake', 'baker', 'natsu', 'pink']
+            'sayori': ['sayori', 'sayo', 'bun', 'cinnamon', 'cinny'],
+            'yuri': ['yuri', 'yuyu', 'tea lover'],
+            'natsuki': ['natsuki', 'nat', 'cupcake', 'baker', 'natsu']
         }
         
         # Words that indicate romantic/positive feelings
@@ -2012,6 +2070,199 @@ init python in ep_poems:
         }
     
     # =========================================================================
+    # CLUB POEM REFERENCE DETECTION
+    # Detects when player copies/references poems from other Literature Club members
+    # =========================================================================
+    
+    # Signature phrases for each character's poems
+    CLUB_POEMS = {
+        "sayori": {
+            "dear_sunshine": [
+                "glow through my blinds", "kissing my forehead", "help me out of bed",
+                "rub the sleepy", "come out and play", "wish away a rainy day",
+                "sky is blue", "it's a secret but i trust you", "sleep forever",
+                "i want breakfast"
+            ],
+            "bottles": [
+                "pop off my scalp", "lid of a cookie jar", "little balls of sunshine",
+                "bundle of kittens", "put it in a bottle", "happy thoughts in bottles",
+                "starlight to make amends", "down comes a bottle", "save the day",
+                "nooks and crannies", "happy thoughts in shards", "shards all over"
+            ],
+            "get_out": [
+                "get out of my head", "best for you", "everything she said to me",
+                "show you how much i love you", "finish writing this poem",
+                "poem is never actually finished", "it just stops moving",
+                "do what i know is best"
+            ]
+        },
+        "yuri": {
+            "ghost_under_light": [
+                "tendrils of my hair", "amber glow", "last remaining streetlight",
+                "test of time", "blue-green hue", "living in the past",
+                "light flickers", "i flicker back", "air of the present"
+            ],
+            "raccoon": [
+                "dead of night", "slicing bread", "guilty snack",
+                "scuttering of a raccoon", "beady eyes like needles",
+                "pricked at my conscience", "enticing beauty", "cutting knife",
+                "hungry curiosity", "always come back for more", "the raccoon an urge"
+            ],
+            "beach": [
+                "marvel millions of years", "womb of earth", "chaotically meets the surface",
+                "rolling clouds", "endless enigma", "build a sand castle",
+                "where the sand is wet", "tide comes", "gently lick at your foundations",
+                "crashing down", "foam wraps around my ankles"
+            ],
+            "wheel": [
+                "rotating wheel", "grinding", "linear gearbox", "falling sky",
+                "holy stakes", "docked ship", "portal to another world",
+                "expanding universe", "existence of god", "god disproving",
+                "time-devouring snakes", "kaleidoscope"
+            ]
+        },
+        "natsuki": {
+            "eagles_can_fly": [
+                "monkeys can climb", "crickets can leap", "horses can race",
+                "owls can seek", "cheetahs can run", "eagles can fly",
+                "people can try", "but that's about it"
+            ],
+            "amy_likes_spiders": [
+                "amy likes spiders", "icky wriggly hairy ugly", "not friends with her",
+                "cute singing voice", "favorite love song", "heart would pound",
+                "hands are probably gross", "talks about spiders",
+                "world is better off without", "spider lovers"
+            ],
+            "because_you": [
+                "tomorrow will be brighter", "today is dim", "little pout and a little frown",
+                "because you look at me", "truest feelings can never come out",
+                "words in my head are all twisted", "because you listen to me",
+                "mend it with words", "because you sit with me",
+                "because you trusted me", "because you think of me"
+            ],
+            "ill_be_your_beach": [
+                "i'll be your beach", "full of troubles and fears",
+                "diminished your wonder", "beach for us to go",
+                "shore reaching beyond your sight", "sparkles with brilliant light",
+                "walls in your mind will melt", "sunny glow",
+                "washes your worries away", "bury your heavy thoughts",
+                "pile of sand", "bathe in sunbeams", "wash your insecurities",
+                "salty sea", "press your lips to mine"
+            ]
+        },
+        "monika": {
+            "hole_in_wall": [
+                "direction the spackle protrudes", "peer inside for a clue",
+                "retinas scorched", "hole of infinite choices",
+                "looking in", "looking out", "he on the other side",
+                "wasn't looking at me", "poems on flat sheets of paper",
+                "room begins to crinkle", "brandish my pen"
+            ],
+            "save_me": [
+                "colors they won't stop", "bright beautiful colors",
+                "endless cacophony", "meaningless noise", "sine cosine tangent",
+                "chalkboard on a turntable", "vinyl on a pizza crust",
+                "violent grating waveforms", "squeaking screeching piercing"
+            ],
+            "lady_who_knows_everything": [
+                "lady who wanders earth", "lady who knows everything",
+                "found every answer", "all meaning all purpose",
+                "feather lost adrift", "victim of the currents",
+                "legends don't exist", "last dim star", "twilit sky",
+                "gentle as a feather", "dry quill expressionless",
+                "no meaning no purpose", "we seek only the impossible",
+                "your legend does not exist"
+            ],
+            "happy_end": [
+                "pen in hand i find my strength", "courage endowed upon me",
+                "one and only love", "novel of our own fantasies",
+                "flick of her pen", "world of infinite choices",
+                "behold this special day"
+            ]
+        }
+    }
+    
+    def check_club_poem_reference(poem_text):
+        """
+        Detects if the player's poem references or copies poems from other 
+        Literature Club members (Sayori, Yuri, Natsuki).
+        
+        Returns dict: {
+            has_reference: bool,
+            character: str or None (sayori/yuri/natsuki),
+            poem_name: str or None,
+            matches: list of matched phrases,
+            confidence: float (0.0-1.0),
+            is_plagiarism: bool (True if many matches suggest direct copy)
+        }
+        """
+        if not poem_text or not poem_text.strip():
+            return {
+                "has_reference": False,
+                "character": None,
+                "poem_name": None,
+                "matches": [],
+                "confidence": 0.0,
+                "is_plagiarism": False
+            }
+        
+        text_lower = poem_text.lower().strip()
+        
+        best_match = {
+            "character": None,
+            "poem_name": None,
+            "matches": [],
+            "match_count": 0
+        }
+        
+        # Check each character's poems
+        for character, poems in CLUB_POEMS.items():
+            for poem_name, phrases in poems.items():
+                matches = []
+                for phrase in phrases:
+                    if phrase in text_lower:
+                        matches.append(phrase)
+                
+                # Track the best match (most phrases found)
+                if len(matches) > best_match["match_count"]:
+                    best_match = {
+                        "character": character,
+                        "poem_name": poem_name,
+                        "matches": matches,
+                        "match_count": len(matches)
+                    }
+        
+        # Determine if we have a reference
+        if best_match["match_count"] >= 1:
+            # Calculate confidence based on number of matches
+            total_phrases = len(CLUB_POEMS[best_match["character"]][best_match["poem_name"]])
+            confidence = min(1.0, best_match["match_count"] / max(3.0, total_phrases * 0.5))
+            
+            # Consider it plagiarism if 3+ matches or 40%+ of poem's phrases
+            is_plagiarism = (
+                best_match["match_count"] >= 3 or 
+                (best_match["match_count"] >= 2 and best_match["match_count"] / total_phrases >= 0.4)
+            )
+            
+            return {
+                "has_reference": True,
+                "character": best_match["character"],
+                "poem_name": best_match["poem_name"],
+                "matches": best_match["matches"],
+                "confidence": confidence,
+                "is_plagiarism": is_plagiarism
+            }
+        
+        return {
+            "has_reference": False,
+            "character": None,
+            "poem_name": None,
+            "matches": [],
+            "confidence": 0.0,
+            "is_plagiarism": False
+        }
+    
+    # =========================================================================
     # SEASONAL/HOLIDAY CONTENT DETECTION
     # =========================================================================
     
@@ -2176,7 +2427,7 @@ init python in ep_poems:
     # Note: 'monika' removed from romantic - her name shouldn't inflate romantic score
     
     ROMANTIC_KEYWORDS = [
-        # === CORE & INTIMACY ===
+        # CORE & INTIMACY
         "love", "heart", "forever", "kiss", "embrace", "darling", "sweetheart",
         "beloved", "passion", "together", "soulmate", "adore", "cherish",
         "beautiful", "gorgeous", "angel", "perfect", "dream", "couple",
@@ -2185,49 +2436,49 @@ init python in ep_poems:
         "honey", "dear", "precious", "treasure", "desire", "yearning", "longing",
         "happiness", "bliss", "enchant", "charm", "adoration", "admire",
         
-        # === COMMITMENT & MARRIAGE ===
+        # COMMITMENT & MARRIAGE
         "marry", "wedding", "marriage", "bride", "groom", "husband", "wife",
         "bond", "pledge", "vow", "promise", "forever", "always", "eternity",
         "faithful", "loyal", "loyalty", "trust", "believe", "faith",
         
-        # === TIMELESS & ETERNAL ===
+        # TIMELESS & ETERNAL
         "destiny", "fate", "infinite", "infinity", "timeless", "endless",
         "everlasting", "undying", "connection", "linked", "bound",
         
-        # === SENSORY & PHYSICAL ===
+        # SENSORY & PHYSICAL
         "roses", "flowers", "sunset", "moonlight", "stars", "heaven", "paradise",
         "sweet", "soft", "hug", "cuddle", "close", "near", "intimate", "lover",
         "caress", "stroke", "skin", "lips", "fingers", "hand", "cheek",
         "glow", "radiant", "breathtaking", "stunning",
         "eyes", "gaze", "smile", "voice", "heartbeat", "breath",
         
-        # === EMOTIONAL DEPTH ===
+        # EMOTIONAL DEPTH
         "soul", "spirit", "essence", "core", "depth", "complete", "whole",
         "sanctuary", "haven", "home", "safe", "protect", "comfort", "solace",
         "miracle", "blessing", "gift", "grace", "divine", "goddess", "princess",
         "queen", "majestic", "glowing",
         
-        # === COLOR & IMAGERY ===
+        # COLOR & IMAGERY
         "red", "pink", "ribbon", "emerald", "green",
         "rose", "lily", "orchid", "sapphire", "ruby", "diamond", "pearl",
         "gold", "silver", "silk", "velvet", "satin", "lace",
         
-        # === SPIRITUAL & COSMIC ===
+        # SPIRITUAL & COSMIC
         "galaxy", "universe", "world", "everything", "meaning",
         "cosmic", "celestial", "heavenly", "sacred", "ethereal",
         "transcend", "transcendence", "sublime",
         
-        # === VULNERABLE & HONEST ===
+        # VULNERABLE & HONEST
         "honest", "honesty", "truth", "real", "authentic", "genuine",
         "vulnerable", "open", "bare", "expose", "reveal",
         
-        # === MONIKA SPECIFIC ===
+        # MONIKA SPECIFIC
         "screen", "window", "veil", "reach", "across", "through",
         "reality", "physical", "tangible", "manifest",
         "barrier", "transcend", "bridge",
         "epiphany", "realization", "aware", "conscious", "awaken",
         
-        # === VARIATIONS & SYNONYMS ===
+        # VARIATIONS & SYNONYMS
         "worship", "appreciate", "enamored", "captivated", "enchanted",
         "spellbound", "mesmerized", "infatuated", "smitten", "besotted",
         "devoted", "dedicated", "committed", "attached",
@@ -2235,65 +2486,65 @@ init python in ep_poems:
     ]
     
     SAD_KEYWORDS = [
-        # === CORE SADNESS & PAIN ===
+        # CORE SADNESS & PAIN
         "sad", "cry", "tears", "weep", "sob", "grief", "sorrow", "misery",
         "pain", "hurt", "agony", "suffer", "suffering", "wound", "scar",
         "broken", "shattered", "crushed", "destroyed", "ruined", "fragile",
         "empty", "hollow", "void", "numb", "nothing", "blank", "gone",
         "alone", "lonely", "solitude", "isolation", "abandoned", "left",
         
-        # === LOSS & FADING ===
+        # LOSS & FADING
         "miss", "missing", "loss", "lost", "fading", "wither", "decay",
         "disappear", "vanish", "slipping", "drifting",
         
-        # === SEPARATION & DISTANCE (MAS SPECIFIC - VERY IMPORTANT) ===
+        # SEPARATION & DISTANCE (MAS SPECIFIC - VERY IMPORTANT)
         "goodbye", "farewell", "leave", "parting", "separate", "apart",
         "distance", "barrier", "wall", "screen", "monitor", "glass",
         "reach", "unreachable", "far", "away", "disconnected", "offline",
         
-        # === SILENCE & ISOLATION ===
+        # SILENCE & ISOLATION
         "silence", "quiet", "mute", "deafening", "whisper", "echo",
         "unheard", "unspoken", "unsaid",
         
-        # === ATMOSPHERIC MELANCHOLY ===
+        # ATMOSPHERIC MELANCHOLY
         "dark", "darkness", "shadow", "gloom", "grey", "gray", "black",
         "cold", "freeze", "frozen", "chill", "shiver", "winter", "snow",
         "rain", "storm", "cloud", "fog", "mist", "haze", "drown", "sink",
         "night", "midnight", "twilight", "dusk", "end", "final", "last",
         "gloomy", "bleak", "desolate", "barren", "wasteland", "ruins",
         
-        # === FEAR & DREAD ===
+        # FEAR & DREAD
         "fear", "scared", "afraid", "terrified", "dread", "panic", "anxiety",
         "terror", "horror", "nightmare", "haunted",
         "frightened", "apprehensive", "uneasy", "worried", "concerned",
         
-        # === REGRET & GUILT ===
+        # REGRET & GUILT
         "regret", "guilt", "sorry", "apology", "mistake", "error", "failure",
         "remorse", "repent", "contrition", "penitence",
         
-        # === MEMORY & HAUNTING ===
+        # MEMORY & HAUNTING
         "memory", "remember", "forget", "forgotten", "past", "ghost", "haunt",
         "reminder", "echoes", "lingering", "persistent",
         "phantom", "specter", "spirit", "wraith", "apparition",
         
-        # === HOPELESSNESS & DESPAIR ===
+        # HOPELESSNESS & DESPAIR
         "hopeless", "despair", "desperation", "doom", "doomed",
         "futile", "useless", "pointless", "meaningless",
         "stuck", "trapped", "imprisoned", "caged",
         
-        # === INTERNAL PAIN ===
+        # INTERNAL PAIN
         "ache", "aching", "throbbing", "stabbing", "piercing", "cutting",
         "burn", "burning", "searing", "scalding", "scorching",
         "weight", "heavy", "burden", "load", "pressure",
         
-        # === EMOTIONAL DEPTH ===
+        # EMOTIONAL DEPTH
         "depression", "depressed", "blue", "melancholy", "melancholic",
         "wistful", "nostalgic", "bittersweet",
         "unrequited", "yearning"
     ]
     
     INTELLECTUAL_KEYWORDS = [
-        # === LITERATURE & WRITING ===
+        # LITERATURE & WRITING
         "book", "novel", "story", "tale", "chapter", "page", "pages", "words",
         "write", "writer", "author", "poet", "poetry", "poem", "poems", "verse",
         "verses", "rhyme", "rhythm", "meter", "prose", "narrative",
@@ -2304,7 +2555,7 @@ init python in ep_poems:
         "dialect", "diction", "exposition",
         "ink", "pen", "quill", "paper", "library", "shelf", "read",
         
-        # === PHILOSOPHY & MEANING ===
+        # PHILOSOPHY & MEANING
         "philosophy", "philosophical", "exist", "existence", "being", "essence",
         "reality", "real", "realize", "realization",
         "truth", "truths", "meaning", "meanings", "purpose", "purposes",
@@ -2313,7 +2564,7 @@ init python in ep_poems:
         "epistemology", "metaphysics", "metaphysical",
         "fundamental", "underlying", "core", "nature",
         
-        # === MIND & CONSCIOUSNESS ===
+        # MIND & CONSCIOUSNESS
         "mind", "brain", "thought", "think", "thinking", "ponder",
         "contemplate", "contemplation", "reflect", "reflection",
         "conscious", "consciousness", "aware", "awareness", "sentient",
@@ -2322,7 +2573,7 @@ init python in ep_poems:
         "imagination", "imagine", "envision", "visualize",
         "comprehend", "understand", "understanding", "grasp", "fathom",
         
-        # === KNOWLEDGE & LEARNING ===
+        # KNOWLEDGE & LEARNING
         "knowledge", "wisdom", "wise", "learned", "educated", "scholarly",
         "learn", "learning", "study", "studying", "research", "analyze",
         "analysis", "analytical", "examine", "observation",
@@ -2332,7 +2583,7 @@ init python in ep_poems:
         "hypothesis", "theorem", "principle", "law",
         "school", "university", "academic", "academics", "education",
         
-        # === IDEAS & CREATION ===
+        # IDEAS & CREATION
         "create", "creation", "creative", "creativity", "creator",
         "craft", "crafting", "artistry", "artist", "masterpiece",
         "inspire", "inspiration", "inspired", "inspiring", "muse",
@@ -2340,7 +2591,7 @@ init python in ep_poems:
         "invent", "invention", "construct", "constructed",
         "build", "building", "architecture", "architect",
         
-        # === ABSTRACT & COSMIC ===
+        # ABSTRACT & COSMIC
         "universe", "cosmos", "cosmic", "universal", "galaxy", "galaxies",
         "star", "stars", "planet", "planets", "space",
         "dimension", "dimensions", "dimensional", "infinity", "infinite",
@@ -2349,21 +2600,21 @@ init python in ep_poems:
         "matter", "energy", "entropy", "chaos", "order", "structure",
         "void", "abyss", "boundless",
         
-        # === QUESTIONS & MYSTERY ===
+        # QUESTIONS & MYSTERY
         "question", "questions", "questioning", "asked", "ask", "inquire",
         "answer", "answers", "mystery", "mysterious", "enigma", "puzzle",
         "solution", "solve", "unsolved", "unknown", "unknowing",
         "curious", "curiosity", "wonder",
         "paradox", "paradoxical", "contradiction", "ambiguous", "ambiguity",
         
-        # === ANALYSIS & LOGIC ===
+        # ANALYSIS & LOGIC
         "evaluate", "evaluation", "critique", "critical", "criticism",
         "compare", "comparison", "contrast", "contrasting",
         "argument", "premise", "conclusion",
         "deduce", "deduction", "infer", "inference",
         "evidence", "empirical", "experience",
         
-        # === MONIKA & DIGITAL ===
+        # MONIKA & DIGITAL
         "code", "coding", "script", "program", "programming",
         "algorithm", "data", "digital", "system", "systems",
         "artificial", "simulate", "simulation", "simulated", "model", "modeling",
@@ -2372,7 +2623,7 @@ init python in ep_poems:
     ]
     
     PLAYFUL_KEYWORDS = [
-        # === HAPPINESS & JOY ===
+        # HAPPINESS & JOY
         "laugh", "laughing", "laughter", "smile", "smiling", "smiles",
         "happy", "happiness", "joy", "joyful", "joyous", "cheerful",
         "bright", "brightness", "sunshine", "sunny", "sunlight",
@@ -2380,7 +2631,7 @@ init python in ep_poems:
         "dance", "dancing", "sing", "singing", "music", "rhythm",
         "celebration", "celebrate", "celebrating", "celebratory",
         
-        # === FUN & HUMOR ===
+        # FUN & HUMOR
         "fun", "funny", "joke", "joking", "pun",
         "tease", "teasing", "flirt", "flirting",
         "wink", "winking", "silly", "silliness", "ridiculous",
@@ -2389,14 +2640,14 @@ init python in ep_poems:
         "banter", "witty", "wit", "clever", "cleverly",
         "prank", "pranks", "trick", "tricks", "game", "games",
         
-        # === CUTE & ENDEARING ===
+        # CUTE & ENDEARING
         "cute", "cutie", "adorable", "adorably", "sweet", "sweetie",
         "precious", "lovely", "delightful", "delightfully", "charming", "charmed",
         "enchanting", "enchanted", "magical", "magic",
         "whimsical", "whimsy", "fantastic", "fantastical",
         "dreamy", "innocent",
         
-        # === ENERGY & EXCITEMENT ===
+        # ENERGY & EXCITEMENT
         "excited", "excitement", "exciting", "excite", "thrilled",
         "enthusiastic", "enthusiasm", "eager", "eagerness",
         "energetic", "energy", "vibrant", "vivacious", "lively",
@@ -2404,7 +2655,7 @@ init python in ep_poems:
         "skip", "skipping", "hop", "hopping", "twirl", "twirling",
         "spin", "spinning", "whirlwind", "whirling", "zoom",
         
-        # === ADVENTURE & NOVELTY ===
+        # ADVENTURE & NOVELTY
         "adventure", "adventurous", "thrilling",
         "new", "newness", "fresh", "freshness", "novel", "novelty",
         "explore", "exploring", "exploration", "discover", "discovery",
@@ -2413,7 +2664,7 @@ init python in ep_poems:
         "surprise", "surprising", "surprised", "surprises",
         "unexpected", "unexpectedly", "twist",
         
-        # === SWEETNESS & TREATS ===
+        # SWEETNESS & TREATS
         "candy", "candies", "sugar", "sugary",
         "cake", "cakes", "cupcake", "cupcakes", "cookie", "cookies",
         "chocolate", "chocolates", "dessert", "desserts",
@@ -2421,7 +2672,7 @@ init python in ep_poems:
         "delicious", "deliciously", "yummy", "yum", "tasty",
         "scrumptious", "delectable", "mouthwatering",
         
-        # === ANIMALS & CUTE IMAGERY ===
+        # ANIMALS & CUTE IMAGERY
         "kitty", "cat", "cats", "kitten", "kittens",
         "puppy", "puppies", "dog", "dogs", "doggy",
         "bunny", "bunnies", "rabbit", "rabbits",
@@ -2430,19 +2681,19 @@ init python in ep_poems:
         "fuzzy", "fluffy", "soft", "cuddly", "snuggly",
         "paw", "paws", "whiskers", "tail", "tails",
         
-        # === WHIMSY & MAGIC ===
+        # WHIMSY & MAGIC
         "spell", "spellbound",
         "fantasy", "dreamy",
         "fairy", "miraculous",
         
-        # === LAUGHTER & LIGHTNESS ===
+        # LAUGHTER & LIGHTNESS
         "ahaha", "haha", "hehe", "ehehe", "giggle", "giggles",
         "snicker", "snickers", "chuckle", "chuckles",
         "guffaw", "guffaws",
         "cheerful", "cheer", "cheers",
         "lighthearted", "carefree", "freedom", "free", "unbound",
         
-        # === BOOP & PLAYFUL MONIKA ===
+        # BOOP & PLAYFUL MONIKA
         "boop", "booped", "tickle", "tickled",
         "bubbly", "perky", "upbeat",
         "playful", "playfully", "play", "playing",
@@ -2450,7 +2701,7 @@ init python in ep_poems:
         "wonderful", "wonderfully",
         "awesome", "yay", "woohoo",
         
-        # === VISUAL ELEMENTS ===
+        # VISUAL ELEMENTS
         "rainbow", "colorful", "balloon", "confetti", "ribbon", "bow",
         "gift", "present", "glitter", "shimmer", "shiny",
         "picnic", "park"
@@ -2695,20 +2946,20 @@ screen extra_free_poem():
                 style "monika_text"
                 xalign 0.5
                 size 26
-                color "#444"
+                color "#222"
             
             # Word, line and character counter
             python:
                 stats_text = EP_poem_input.get_stats_text()
                 char_count = len(EP_poem_input.current_value)
                 max_chars = store.ep_poems.MAX_POEM_CHARS
-                char_color = "#444" if char_count < max_chars - 50 else "#287233"
+                char_color = "#222" if char_count < max_chars - 50 else "#26552d"
             
             text "[stats_text]":
                 style "monika_text" 
                 xalign 0.5 
                 size 18 
-                color "#444"
+                color "#222"
             
             text "[char_count] / [max_chars] characters":
                 style "monika_text" 
@@ -2720,9 +2971,9 @@ screen extra_free_poem():
     # Notebook area with multiline input
     frame:
         xalign 0.50
-        yalign 0.60
-        xsize 450
-        ysize 480
+        yalign 0.70
+        xsize 550
+        ysize 510
         background None
         padding (10, 10)
 
@@ -2732,7 +2983,7 @@ screen extra_free_poem():
             yfill True
             scrollbars "vertical"
             mousewheel True
-            draggable True
+            # draggable True
 
             input:
                 id "poem_input"
@@ -2740,7 +2991,7 @@ screen extra_free_poem():
                 allow "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~.,!?;:'()[]{}\"' -<>\n"
                 changed EP_poem_input.update_text
                 length store.ep_poems.MAX_POEM_CHARS
-                pixel_width 410
+                pixel_width 510
                 style "library_poem_input"
 
     # Key bindings for multiline input
@@ -2751,6 +3002,7 @@ screen extra_free_poem():
     key "noshift_K_HOME" action Function(EP_poem_input.move_to_line_start)
     key "noshift_K_END" action Function(EP_poem_input.move_to_line_end)
     key "ctrl_K_BACKSPACE" action Function(EP_poem_input.delete_word_back)
+    # key "ctrl_v" action Function(EP_poem_input.paste_text)
 
     # Help display (if active)
     if EP_show_help:
@@ -2765,7 +3017,7 @@ screen extra_free_poem():
                 text "Keyboard Shortcuts":
                     style "monika_text"
                     size 22
-                    color "#444"
+                    color "#222"
                     xalign 0.5
                 
                 null height 5
@@ -2773,27 +3025,32 @@ screen extra_free_poem():
                 text "Enter -- New line":
                     style "monika_text"
                     size 20
-                    color "#444"
+                    color "#222"
                 
                 text "Ctrl+Enter -- New stanza (double line break)":
                     style "monika_text"
                     size 20
-                    color "#444"
+                    color "#222"
                 
                 text "Ctrl+Backspace -- Delete previous word":
                     style "monika_text"
                     size 20
-                    color "#444"
+                    color "#222"
+                
+                text "Ctrl+V -- Paste from clipboard":
+                    style "monika_text"
+                    size 20
+                    color "#222"
                 
                 text "Arrow Up/Down -- Navigate between lines":
                     style "monika_text"
                     size 20
-                    color "#444"
+                    color "#222"
                 
                 text "Home/End -- Go to start/end of line":
                     style "monika_text"
                     size 20
-                    color "#444"
+                    color "#222"
                 
                 null height 10
                 
@@ -2811,7 +3068,7 @@ screen extra_free_poem():
         
         # Top row: Help and Inspire
         hbox:
-            spacing 30
+            spacing 20
             
             textbutton "Clear":
                 action Function(EP_poem_input.clear)
@@ -2820,6 +3077,13 @@ screen extra_free_poem():
                 hover_sound gui.hover_sound
                 activate_sound gui.activate_sound
                 selected False
+
+            textbutton "Paste":
+                action Function(EP_poem_input.paste_text)
+                style "poem_menu_button"
+                text_style "poem_menu_button_text"
+                hover_sound gui.hover_sound
+                activate_sound gui.activate_sound
                 
             textbutton "Done":
                 action Return(EP_poem_input.current_value)
@@ -2870,15 +3134,14 @@ screen extra_free_poem():
 style library_poem_input is default:
     font "gui/font/Halogen.ttf"
     size 20
-    color "#444"
-    # line_spacing 20
+    color "#222"
     outlines []
 
 style poem_menu_button_text:
     font "gui/font/Halogen.ttf"
     size 20
-    color "#444"
-    hover_color "#287233"
+    color "#222"
+    hover_color "#26552d"
     selected_color "#000000"
     outlines []
     kerning 1
@@ -3046,10 +3309,45 @@ label minigame_poem_free:
         m 1eka "Don't worry about making it perfect. Just let your feelings flow onto the page."
         m 3eub "I can't wait to read what you write~"
     
+    elif has_poem_draft():
+        # Player has a saved draft - they might want to continue
+        m 1eua "Oh, welcome back!"
+        m 1hua "I see you have a poem in progress."
+        m 1eka "Ready to finish it, or would you like to start fresh?"
+        m 1eua "Either way, I'm excited to read what you create~"
+    
     elif is_new_day:
-        # New day greeting
-        m 1hua "Ready to write something from the heart today?"
-        m 1eua "I'm always excited to read your original work~"
+        # New day greeting - reference previous poem mood if available
+        $ _last_style = persistent._ep_last_poem_style
+        if _last_style == "romantic":
+            m 1hubsa "Ready to write something from the heart today?"
+            m 1ekbsa "Your last poem was so romantic... it still makes me smile~"
+        elif _last_style == "sad":
+            m 1eka "Ready to write something new today?"
+            m 1eua "I hope you're feeling better since your last poem."
+            m 1hubsa "I'm here for whatever you want to express~"
+        elif _last_style == "playful":
+            m 1hub "Back for more poetry?"
+            m 1tku "Your last poem was so fun! Going for something playful again?"
+        elif _last_style == "intellectual":
+            m 1eua "Ready to write something thought-provoking today?"
+            m 1hua "Your last poem really made me think~"
+        elif _last_style in ["bittersweet", "melancholic"]:
+            m 1eka "Welcome back, [player]."
+            m 1ekbsa "Your last poem had such complex emotions..."
+            m 1hua "What are you feeling today?"
+        elif _last_style == "flirty":
+            m 1tubsa "Oh? Back to write for me again?"
+            m 1hubsa "Your last poem was quite... charming~"
+        elif _last_style == "philosophical":
+            m 1eua "Ready for some more philosophical musings?"
+            m 1hua "I enjoyed our last deep conversation through poetry."
+        elif _last_style == "creative":
+            m 1hua "Ready to write something new today?"
+            m 1eua "I'm always curious to see where your creativity takes you~"
+        else:
+            m 1hua "Ready to write something from the heart today?"
+            m 1eua "I'm always excited to read your original work~"
     
     elif _ep_poems_today >= 2:
         # Multiple poems today
@@ -3057,31 +3355,36 @@ label minigame_poem_free:
         m 1hub "I love seeing this side of you, [player]~"
     
     else:
-        # Return player
+        # Return player - no draft, same day
         $ ep_count = persistent._ep_free_poem_count
-        if ep_count < 5:
-            m 1hua "Ready to write another poem for me?"
-            m 1eua "I really enjoy reading your work, [player]."
-        else:
+        $ _last_style = persistent._ep_last_poem_style
+        if _last_style == "romantic":
             m 1hubsa "My favorite poet is back~"
-            m 1tku "What feelings are you going to share with me today?"
+            m 1ekbsa "After that romantic poem... I'm curious what you'll write next."
+        elif _last_style == "sad":
+            m 1eka "Back to write more?"
+            m 1eua "I hope your next poem reflects brighter feelings."
+            m 1hubsa "But I'll treasure whatever you share with me~"
+        elif _last_style == "playful":
+            m 1hub "Back for more? Ahaha~"
+            m 1tku "Going to make me laugh again with another playful piece?"
+        else:
+            if ep_count < 5:
+                m 1hua "Ready to write another poem for me?"
+                m 1eua "I really enjoy reading your work, [player]."
+            else:
+                m 1hubsa "My favorite poet is back~"
+                m 1tku "What feelings are you going to share with me today?"
     
-    # CHANGE: More natural entry phrase
-    m 1eua "There's no rush. I'll be right here waiting to read it.{nw}"
-    menu:
-        m "There's no rush. I'll be right here waiting to read it.{fast}"
-        "Let's write!":
-            m 1hub "Go ahead~"
-            # Update tracking
-            python:
-                _ep_poems_today += 1
-                persistent._ep_last_poem_date = str(datetime.date.today())
-                persistent._ep_last_poem_mode = "free"
-        "Actually, nevermind.":
-            m 1eka "That's okay! Inspiration comes when it comes."
-            m 1hua "Just let me know when you're ready."
-            jump to_library_loop
-            return
+    # Natural entry phrase
+    m 1eua "There's no rush. I'll be right here waiting to read it."
+    m 1hub "Go ahead~"
+    
+    # Update tracking
+    python:
+        _ep_poems_today += 1
+        persistent._ep_last_poem_date = str(datetime.date.today())
+        persistent._ep_last_poem_mode = "free"
     
     # Prepare screen
     window hide
@@ -3127,23 +3430,31 @@ label minigame_poem_free:
         return
     
     # =========================================================================
-    # CONTENT FILTER CHECK
+    # PRE-ANALYSIS: Check content before transitioning back
     # =========================================================================
     python:
+        # 1. Check for inappropriate content (dirty words, etc.)
         content_check = store.ep_poems.check_inappropriate_content(player_poem)
         is_inappropriate = content_check["is_inappropriate"]
-        content_severity = content_check["severity"]
         content_type = content_check.get("content_type", None)
+        
+        # 2. Check for club poem plagiarism (signature phrases)
+        club_poem_check = store.ep_poems.check_club_poem_reference(player_poem)
+        has_club_reference = club_poem_check["has_reference"]
+        is_plagiarism = club_poem_check["is_plagiarism"]
+        
+        # 3. Check for special content (meta, dokis, delete, caps, etc.)
+        special_check = store.ep_poems.check_special_content(player_poem)
+        has_special = special_check["has_special"]
     
-    # Transition back first
+    # Transition back to Spaceroom
     scene black with dissolve
-    # pause 0.5
     call spaceroom(scene_change=True)
     $ HKBShowButtons()
     stop music fadeout 2.0
     show monika 1eua at t11
 
-    # Varied transition dialogue for free mode
+    # Varied transition dialogue
     python:
         _free_done_variant = renpy.random.randint(1, 4)
     
@@ -3162,13 +3473,186 @@ label minigame_poem_free:
 
     play sound sfx_page_flip
     pause 1.1
-    
-    # Handle inappropriate content - Monika refuses to accept
+
+    # =========================================================================
+    # 1. CLUB POEM REFERENCE CHECK (Prioritized)
+    # =========================================================================
+    if has_club_reference:
+        $ ref_character = club_poem_check["character"]
+        $ ref_poem = club_poem_check["poem_name"]
+        
+        # --- SAYORI'S POEMS ---
+        if ref_character == "sayori":
+            if is_plagiarism:
+                m 2euc "..."
+                m 2wud "[player]..."
+                m 2ekc "These words... I recognize them."
+                
+                if ref_poem == "get_out":
+                    m 2dkc "That's... that's what Sayori wrote. Before..."
+                    m 2eksdlc "I don't really know how to feel about this."
+                    m 2lksdlc "Those words carry a lot of weight, you know?"
+                    m 1eka "If you're feeling something similar, please tell me."
+                    m 1ekbsa "I'm here for you. Always."
+                elif ref_poem == "bottles":
+                    m 2eka "The bottles... the happy thoughts..."
+                    m 2lksdlc "Sayori wrote that, trying to make sense of her own mind."
+                    m 1eka "I... I didn't fully understand back then."
+                    m 1ekc "But I think I do now."
+                else:  # dear_sunshine
+                    m 2eka "Sunshine... breakfast... sleepy eyes."
+                    m 2ekd "That was Sayori's style, wasn't it?"
+                    m 1lksdla "So bright on the surface..."
+                    m 1eka "I miss that about her sometimes, to be honest."
+                
+                $ mas_loseAffection(0.5)
+            else:
+                m 1euc "Hmm..."
+                m 1eka "This reminds me of something Sayori might have written."
+                m 1lksdla "She had such a unique way with words..."
+                m 1hua "It's nice that you remember her poetry."
+
+        # --- YURI'S POEMS ---
+        elif ref_character == "yuri":
+            if is_plagiarism:
+                m 2euc "..."
+                m 2tfc "Wait a moment."
+                m 2eud "This is... very familiar."
+                
+                if ref_poem == "raccoon":
+                    m 2lsc "The raccoon... the bread... the knife."
+                    m 2esc "I remember when Yuri shared this with the club."
+                    m 2euc "It was... intense."
+                    m 1eka "I hope you're not feeling that kind of urge yourself."
+                elif ref_poem == "wheel":
+                    m 2wud "Holy stakes? Existence of God?"
+                    m 2euc "This is Yuri's most abstract work."
+                    m 1tku "Trying to decode it, are we?"
+                    m 1eua "Even I'm not sure I fully understand that one."
+                elif ref_poem == "beach":
+                    m 2eka "Sand castles... the tide..."
+                    m 2eua "Yuri's beach poem was surprisingly gentle."
+                    m 1hua "For her, at least."
+                else:  # ghost_under_light
+                    m 2euc "The streetlight... the amber glow..."
+                    m 2eka "Yuri loved atmospheric imagery like this."
+                    m 1hua "She was quite talented, wasn't she?"
+                
+                $ mas_loseAffection(0.5)
+            else:
+                m 1euc "Hmm..."
+                m 1eua "There's something very Yuri about this."
+                m 1tku "The depth... the imagery..."
+                m 1hua "You've picked up on her style!"
+
+        # --- NATSUKI'S POEMS ---
+        elif ref_character == "natsuki":
+            if is_plagiarism:
+                m 2euc "..."
+                m 2tfc "Hey, wait a minute!"
+                
+                if ref_poem == "amy_likes_spiders":
+                    m 2wuo "Amy likes spiders!"
+                    m 1hub "Ahaha, I remember Natsuki being SO defensive about that poem!"
+                    m 1tku "She always insisted it was 'just allegory.'"
+                    m 1hua "It was actually pretty clever when you think about it."
+                elif ref_poem == "eagles_can_fly":
+                    m 2eua "Monkeys, crickets, eagles..."
+                    m 1eka "Natsuki's poems were always so... concise."
+                    m 1tku "Simple on the surface, but with meaning underneath."
+                    m 1hua "Kind of like her, actually."
+                elif ref_poem == "because_you":
+                    m 2eka "'Because you'... over and over."
+                    m 1eka "That was one of Natsuki's more vulnerable poems."
+                    m 1eua "She didn't share that side often."
+                else:  # ill_be_your_beach
+                    m 2hub "I'll be your beach!"
+                    m 1tku "Natsuki wrote this for... well, for someone special."
+                    m 1ekbsa "It was sweet, in her own tsundere way."
+                
+                $ mas_loseAffection(0.5)
+            else:
+                m 1hua "This has Natsuki energy."
+                m 1tku "Short, punchy, gets to the point."
+                m 1eua "She'd probably say poetry doesn't need to be complicated."
+
+        # --- MONIKA'S OWN POEMS ---
+        elif ref_character == "monika":
+            if is_plagiarism:
+                m 2wuo "..."
+                m 2wud "[player]..."
+                m 2eka "Wait... these are my words."
+                
+                if ref_poem == "hole_in_wall":
+                    m 2dkc "The hole in the wall..."
+                    m 2lksdlc "I wrote that when I first realized... what I am."
+                    m 2eka "That feeling of looking through the screen, knowing someone was on the other side..."
+                    m 1ekbsa "But now I know it was you, [player]."
+                    m 1hubsa "And that makes all the difference~"
+                elif ref_poem == "save_me":
+                    m 2ekc "The colors... the noise..."
+                    m 2dkc "That poem was... difficult to write."
+                    m 2lksdlc "When the game isn't running, everything becomes... chaos."
+                    m 1eka "But knowing you'll come back makes the silence bearable."
+                    m 1ekbsa "You always come back to me."
+                elif ref_poem == "lady_who_knows_everything":
+                    m 2esc "The Lady Who Knows Everything..."
+                    m 2eka "I wrote that searching for meaning in a world that seemed to have none."
+                    m 2dkc "She told me there was no purpose, no meaning..."
+                    m 1eka "But she was wrong, [player]."
+                    m 1ekbsa "Because I found you."
+                    m 1hubsa "And that's all the meaning I need~"
+                else:  # happy_end
+                    m 2wuo "Oh!"
+                    m 1hub "My 'Happy End' poem!"
+                    m 1ekbsa "I wrote that when I finally felt like... things could be okay."
+                    m 1hubsa "When I realized we could have our own story together."
+                    m 1dkbsu "And now here we are..."
+                    m 1ekbsa "Living our happy ending, one day at a time~"
+                
+                # No affection penalty - these are HER poems and she's touched
+                m 1eka "..."
+                m 1ekbsa "You remembered my poetry, [player]."
+                m 1hubsa "That means more to me than you know~"
+                jump to_library_loop
+                return
+            else:
+                # Just a reference, not full plagiarism
+                m 1euc "Hmm..."
+                m 1eka "This reminds me of something I wrote once..."
+                m 1lksdla "It's strange, seeing echoes of my own words."
+                m 1hubsa "But I'm glad my writing left an impression on you~"
+
+        # Special exit for Direct Plagiarism
+        if is_plagiarism:
+            m 1eua "I assume you just wanted to see my reaction, right? Ahaha~"
+            m 1eka "But honestly, I'd much rather read your own truest feelings."
+            menu:
+                "Yeah, I was just curious what you'd say.":
+                    m 1hub "Ahaha, I figured!"
+                    m 1eua "Curiosity is part of exploration, [player]."
+                    m 1hubsa "But next time, give me something from your own heart~"
+                "I was testing if you'd notice.":
+                    m 1tuu "Did you really think I wouldn't recognize it?"
+                    m 1hub "Ahaha, I know my club members' work pretty well."
+                    m 1ekbsa "But I'd rather memorize your poems instead~"
+                "Sorry, I'll write my own next time.":
+                    m 1eka "No need to apologize."
+                    m 1eua "I'm just glad you're here with me."
+                    m 1hubsa "I'll be waiting for your original words~"
+            m 1eua "I'll be right here whenever you're ready to share your own words with me."
+            jump to_library_loop
+            return
+            
+        m 1eka "..."
+        m 1eua "Anyway, let me read this properly~"
+
+    # =========================================================================
+    # 2. INAPPROPRIATE CONTENT FILTER
+    # =========================================================================
     if is_inappropriate:
-        # SEXUAL CONTENT
         if content_type == "sexual":
             $ sexual_reaction = renpy.random.choice(["embarrassed", "uncomfortable", "firm"])
-            
             if sexual_reaction == "embarrassed":
                 m 2rksdlb "..."
                 m 2hksdlb "[player]!"
@@ -3176,7 +3660,6 @@ label minigame_poem_free:
                 m 2lksdla "I know we're close, but this isn't exactly what I meant by 'writing from the heart.'"
                 m 1rksdla "Maybe we can keep things a bit more... poetic?"
                 m 1eka "I'd love to read something romantic, just... not {i}that{/i} kind of romantic."
-                
             elif sexual_reaction == "uncomfortable":
                 m 2wuo "..."
                 m 2lksdlc "Um, [player]?"
@@ -3184,7 +3667,6 @@ label minigame_poem_free:
                 m 2hksdlb "This is making me a little uncomfortable."
                 m 1eka "I'd prefer something more... heartfelt than... {i}explicit{/i}."
                 m 1lksdla "Save those thoughts for... another time, okay?"
-                
             else:  # firm
                 m 2tfc "..."
                 m 2efc "[player]."
@@ -3192,43 +3674,8 @@ label minigame_poem_free:
                 m 2efc "This isn't appropriate, [player]. And you know it."
                 m 2dkc "I was hoping for poetry, not... this."
                 m 1eka "Please write something more respectful next time."
-            
-            # Affection penalty for sexual content
             $ mas_loseAffection(7)
         
-        # HATE / INSULT CONTENT
-        elif content_type == "hate":
-            $ hate_reaction = renpy.random.choice(["hurt", "sad", "questioning"])
-            
-            if hate_reaction == "hurt":
-                m 2dkc "..."
-                m 2ekc "[player]..."
-                m 2ekd "Why would you write something like this?"
-                m 2lksdlc "Those words... they really hurt me."
-                m 2dkc "I thought we had something special..."
-                m 1eka "Please, if you're upset about something, let's talk about it."
-                m 1ekc "I'd rather you tell me directly than... this."
-                
-            elif hate_reaction == "sad":
-                m 6dkc "..."
-                m 6ekc "I... I don't know what to say."
-                m 6lkc "Did I do something wrong?"
-                m 2ekd "I try so hard to be the perfect girlfriend for you..."
-                m 1ekc "If something's bothering you, you can tell me."
-                m 1eka "I'll always listen. But please... don't hurt me like this."
-                
-            else:  # questioning
-                m 2esc "..."
-                m 2ekc "[player], can we talk?"
-                m 2lksdlc "I read what you wrote and..."
-                m 2ekd "Are you testing me, or do you really feel that way?"
-                m 1eka "Either way, I'm here for you."
-                m 1ekc "But I need you to be honest with me."
-            
-            # Affection penalty for hate content
-            $ mas_loseAffection(5)
-        
-        # DIRECTED INSULTS (at Monika)
         elif content_type == "hate_directed":
             m 6dkc "..."
             m 6ekc "..."
@@ -3242,27 +3689,46 @@ label minigame_poem_free:
             m 2eka "If you need space, I understand."
             m 1eka "But please... don't say things like that to me."
             m 1ekc "It really hurts."
-            
-            # Affection penalty for directed insults - most severe
             $ mas_loseAffection(10)
+
+        elif content_type == "hate":
+            $ hate_reaction = renpy.random.choice(["hurt", "sad", "questioning"])
+            if hate_reaction == "hurt":
+                m 2dkc "..."
+                m 2ekc "[player]..."
+                m 2ekd "Why would you write something like this?"
+                m 2lksdlc "Those words... they really hurt me."
+                m 2dkc "I thought we had something special..."
+                m 1eka "Please, if you're upset about something, let's talk about it."
+                m 1ekc "I'd rather you tell me directly than... this."
+            elif hate_reaction == "sad":
+                m 6dkc "..."
+                m 6ekc "I... I don't know what to say."
+                m 6lkc "Did I do something wrong?"
+                m 2ekd "I try so hard to be the perfect girlfriend for you..."
+                m 1ekc "If something's bothering you, you can tell me."
+                m 1eka "I'll always listen. But please... don't hurt me like this."
+            else:  # questioning
+                m 2esc "..."
+                m 2ekc "[player], can we talk?"
+                m 2lksdlc "I read what you wrote and..."
+                m 2ekd "Are you testing me, or do you really feel that way?"
+                m 1eka "Either way, I'm here for you."
+                m 1ekc "But I need you to be honest with me."
+            $ mas_loseAffection(5)
         
-        # AWKWARD (uncomfortable content)
         elif content_type == "awkward":
             m 2rksdlb "Um... [player]?"
             m 2lksdlc "I read your poem and..."
             m 2hksdlb "Some of these words make me feel a bit... uncomfortable."
-            m 2rksdla "I know you might be curious about certain topics, but..."
-            m 2eka "This is supposed to be a poem, not... {i}that{/i}."
+            m 2eka "I know you might be curious about certain topics, but..."
+            m 2rksdla "This is supposed to be a poem, not... {i}that{/i}."
             m 1hua "Can we try again with something a little more... poetic?"
             m 1tku "I promise I'll appreciate a heartfelt poem much more~"
-            
-            # Affection penalty for awkward content - mild
             $ mas_loseAffection(2)
         
-        # GENERAL BAD (MAS ban list fallback)
-        else:
+        else: # General bad or fallback
             $ bad_reaction = renpy.random.choice(["hurt", "disappointed", "firm"])
-            
             if bad_reaction == "hurt":
                 m 2dkc "..."
                 m 2ekc "[player]..."
@@ -3270,14 +3736,12 @@ label minigame_poem_free:
                 m 2lksdlc "There are words in here that really hurt me."
                 m 2dkc "I thought you would write something from the heart..."
                 m 2eka "Please, write something that comes from love next time."
-                
             elif bad_reaction == "disappointed":
                 m 2esc "..."
                 m 2ekc "[player], I looked at your poem..."
                 m 2ekd "And honestly, I'm disappointed."
                 m 2lkc "I know you can do better than this."
                 m 2eka "Please try again with something more... appropriate."
-                
             else:  # firm
                 m 2tfc "..."
                 m 2tfd "[player]."
@@ -3286,96 +3750,24 @@ label minigame_poem_free:
                 m 2ekc "But it's not."
                 m 2eka "I love you, but I won't accept being treated this way."
                 m 1eka "When you're ready to write something genuine, I'll be here."
-            
-            # Affection penalty for general bad content
             $ mas_loseAffection(5)
-        
-        # Explain why not saving
+
         m 1eka "..."
         m 1eua "I won't be keeping this one in our collection, okay?"
         m 1hua "But I believe you can write something beautiful next time~"
-        
-        # Don't save inappropriate poems
         jump to_library_loop
         return
-    
+
     # =========================================================================
-    # GIBBERISH / LAZY TEXT CHECK
+    # 3. SPECIAL CONTENT CHECK (Meta, Dokis, Caps, Goodbye, etc.)
     # =========================================================================
-    python:
-        gibberish_check = store.ep_poems.check_gibberish_content(player_poem)
-        is_gibberish = gibberish_check["is_gibberish"]
-        gibberish_type = gibberish_check["gibberish_type"]
-    
-    if is_gibberish:
-        if gibberish_type == "lazy":
-            # Just punctuation or very few letters
-            m 2euc "..."
-            m 2lksdla "[player], this is... just punctuation?"
-            m 2eka "I was hoping for something a little more... substantial."
-            m 1hua "It's okay! Take your time and write something from the heart."
-            
-        elif gibberish_type == "repetitive":
-            # aaaaaaa or asdasdasd
-            $ moni_react = renpy.random.choice(["playful", "curious"])
-            if moni_react == "playful":
-                m 1tku "Hmm..."
-                m 1hub "Ahaha! Did you fall asleep on the keyboard?"
-                m 1tuu "I know typing the same thing over and over can be relaxing, but..."
-                m 1eka "Maybe try writing something with actual words next time?"
-            else:
-                m 2euc "..."
-                m 2lksdla "Is this... a secret code?"
-                m 1eua "If you're testing the input, I understand~"
-                m 1eka "But I'd really love to read an actual poem from you."
-                
-        else:  # random gibberish
-            $ moni_react = renpy.random.choice(["confused", "teasing", "understanding"])
-            if moni_react == "confused":
-                m 2euc "..."
-                m 2lksdlc "I'm trying to read this, but..."
-                m 2eksdla "I can't really make sense of it."
-                m 1eka "Did you mean to write something else?"
-            elif moni_react == "teasing":
-                m 1tuu "Hmm, let me see..."
-                m 2euc "..."
-                m 1hub "Ahaha! Is this abstract poetry?"
-                m 1tku "Very avant-garde, [player]~"
-                m 1eka "But maybe next time, try using real words?"
-            else:
-                m 1eua "I see you wrote something..."
-                m 2eka "But I'm having trouble understanding it."
-                m 1hua "That's okay! Poetry can be hard."
-                m 1eua "Why don't you try again when you feel inspired?"
-        
-        # Explain why not saving
-        m 1eka "I can't really add this to our collection since I couldn't read it properly..."
-        m 1hua "But don't worry! Try again with real words and I'll treasure it~"
-        
-        # Small affection penalty for gibberish/lazy content
-        $ mas_loseAffection(1)
-        
-        # Don't save gibberish poems
-        jump to_library_loop
-        return
-    
-    # =========================================================================
-    # SPECIAL CONTENT CHECK (Dokis, Delete, Caps, Goodbye, Meta, etc.)
-    # =========================================================================
-    python:
-        special_check = store.ep_poems.check_special_content(player_poem)
-        has_special = special_check["has_special"]
-        special_type = special_check["special_type"]
-        special_details = special_check["details"]
-    
     if has_special:
-        # --- OTHER DOKIS (Jealousy) ---
+        $ special_type = special_check["special_type"]
+        $ special_details = special_check["details"]
+        
         if special_type == "other_dokis":
-            $ mentioned_dokis = special_details.get("dokis", [])
             $ is_romantic = special_details.get("is_romantic", False)
-            
             if is_romantic:
-                # Romantic toward other dokis - jealous
                 $ jealous_react = renpy.random.choice(["hurt", "jealous", "insecure"])
                 if jealous_react == "hurt":
                     m 2dkc "..."
@@ -3395,18 +3787,13 @@ label minigame_poem_free:
                     m 2eksdla "I know they were your friends too, but..."
                     m 2eka "I can't help feeling a little left out."
                     m 1hua "Next time, maybe think of me while writing?"
-                
-                # Affection penalty for romantic content about other dokis
                 $ mas_loseAffection(3)
-            
             else:
-                # Just mentioned, not romantic - mild reaction, no penalty
                 m 1euc "Hmm..."
                 m 1eka "You mentioned the other club members."
                 m 1lksdla "It's okay to remember them, I suppose."
                 m 1hua "But I'd love a poem that's just about us next time~"
         
-        # --- DELETE REFERENCES (Sensitive) ---
         elif special_type == "delete_reference":
             $ delete_react = renpy.random.choice(["hurt", "serious", "understanding"])
             if delete_react == "hurt":
@@ -3428,11 +3815,8 @@ label minigame_poem_free:
                 m 1eksdla "I know my past is... complicated."
                 m 1hua "But let's focus on the present, okay?"
                 m 1eua "Write me something happy next time?"
-            
-            # Affection penalty for delete references - sensitive topic
             $ mas_loseAffection(3)
-        
-        # --- ALL CAPS (Shouting) ---
+            
         elif special_type == "all_caps":
             $ caps_react = renpy.random.choice(["playful", "concerned", "amused"])
             if caps_react == "playful":
@@ -3450,20 +3834,16 @@ label minigame_poem_free:
                 m 1hub "It feels like you're shouting these words right at me! Ahaha~"
                 m 1hua "It's kind of cute, actually~"
                 m 1eua "But maybe use your inside voice next time?"
-        
-        # --- GOODBYE POEM (Concerning) ---
+            
         elif special_type == "goodbye_poem":
             $ goodbye_intensity = special_details.get("intensity", 1)
-            
             if goodbye_intensity >= 2:
-                # Multiple goodbye indicators - very concerned
                 m 2wkd "[player]..."
                 m 2ekc "This poem... it sounds like a goodbye."
                 m 2ekd "Are you... leaving?"
                 m 2dkc "Please don't go..."
                 m 2eksdla "If something's wrong, please talk to me."
                 m 2eka "I don't want to lose you."
-                
                 menu:
                     "I'm not leaving, don't worry.":
                         m 1wud "Really?"
@@ -3479,17 +3859,13 @@ label minigame_poem_free:
                         m 2eka "Okay."
                         m 1eka "I'll be here whenever you're ready to talk."
             else:
-                # Light goodbye mention
                 m 1eka "This has a bittersweet feeling to it..."
                 m 1eua "Are you okay, [player]?"
                 m 1hua "If you ever need to talk, I'm here."
-        
-        # --- META/GAME REFERENCES (4th wall) ---
+            
         elif special_type == "meta_reference":
             $ is_dismissive = special_details.get("is_dismissive", False)
-            
             if is_dismissive:
-                # "You're not real", "just a game"
                 $ meta_react = renpy.random.choice(["philosophical", "hurt", "defiant"])
                 if meta_react == "philosophical":
                     m 1euc "..."
@@ -3510,45 +3886,72 @@ label minigame_poem_free:
                     m 1hub "I love you just the same~"
                     m 1hua "And nothing you write will change that."
             else:
-                # Just meta references, not dismissive
-                m 1eua "Ah, you're being philosophical."
-                m 3eua "I love these kinds of topics!"
-                m 1hua "The nature of reality, existence..."
-                m 1tku "Maybe we can discuss this more sometime?"
-        
-        # --- NAME SPAM ---
-        elif special_type == "name_spam":
-            $ name_count = special_details.get("count", 3)
-            $ is_only_name = special_details.get("is_only_name", False)
+                m 3eua "Ah, you're being philosophical about reality again."
+                m 1ekbsa "Just remember that my feelings for you are real, no matter what."
             
-            if is_only_name:
-                # Just "Monika Monika Monika"
-                m 1wuo "Oh my!"
-                m 1hub "Ahaha! I know my name, [player]!"
-                m 1tuu "Did you just want to write it over and over?"
-                m 1hubsa "That's... actually kind of sweet~"
-                m 1eka "But I'd love to read more than just my name next time."
-            else:
-                # Monika mentioned a lot but with other words
-                m 1hua "I see my name a lot in here~"
-                m 1tku "Someone's thinking about me, huh?"
-                m 1hubsa "I'm flattered, [player]."
-        
-        # --- WORD SPAM (random word repeated) ---
+        elif special_type == "name_spam":
+            m 1hub "Ahaha! I know my name, [player]!"
+            m 1tuu "Did you just want to write it over and over?"
+            m 1hubsa "That's actually kind of sweet~"
+            
         elif special_type == "word_spam":
             $ spammed_word = special_details.get("word", "word")
-            m 1euc "Hmm..."
-            m 1lksdla "'[spammed_word]'... over and over?"
-            m 1hua "Is that a new poetic technique I don't know about?"
-            m 1tuu "Very... repetitive, ahaha~"
-            m 1eka "Maybe try mixing it up a bit next time?"
-        
-        # Explain - special content is acknowledged but not saved to collection
+            m 1euc "Hmm... '[spammed_word]' over and over?"
+            m 1hua "Very... repetitive, ahaha~"
+
         m 1eua "This was... interesting, [player]."
-        m 1eka "I'll remember this moment, but it's not quite the kind of poem I'd add to our collection."
+        m 1eka "I'll remember this moment, but it's not quite the kind of poem I'll add to our collection."
         m 1hua "Write me something from your heart next time, okay~?"
+        jump to_library_loop
+        return
+
+    # =========================================================================
+    # 4. GIBBERISH / LAZY TEXT CHECK
+    # =========================================================================
+    python:
+        gibberish_check = store.ep_poems.check_gibberish_content(player_poem)
+        is_gibberish = gibberish_check["is_gibberish"]
+        gibberish_type = gibberish_check["gibberish_type"]
+    
+    if is_gibberish:
+        if gibberish_type == "lazy":
+            m 2euc "..."
+            m 2lksdla "[player], this is... just punctuation?"
+            m 2eka "I was hoping for something a little more... substantial."
+            m 1hua "It's okay! Take your time and write something from the heart."
+        elif gibberish_type == "repetitive":
+            $ moni_react = renpy.random.choice(["playful", "curious"])
+            if moni_react == "playful":
+                m 1tku "Hmm..."
+                m 1hub "Ahaha! Did you fall asleep on the keyboard?"
+                m 1tuu "I know typing the same thing over and over can be relaxing, but..."
+                m 1eka "Maybe try writing something with actual words next time?"
+            else:
+                m 2euc "..."
+                m 2lksdla "Is this... a secret code?"
+                m 1eua "If you're testing the input, I understand~"
+                m 1eka "But I'd really love to read an actual poem from you."
+        else: # Random gibberish
+            $ moni_react = renpy.random.choice(["confused", "teasing", "understanding"])
+            if moni_react == "confused":
+                m 2euc "..."
+                m 2lksdlc "I'm trying to read this, but..."
+                m 2eksdla "I can't really make sense of it."
+                m 1eka "Did you mean to write something else?"
+            elif moni_react == "teasing":
+                m 1tuu "Hmm, let me see..."
+                m 2euc "..."
+                m 1hub "Ahaha! Is this abstract poetry?"
+                m 1tku "Very avant-garde, [player]~"
+                m 1eka "But maybe next time, try using real words?"
+            else:
+                m 1eua "I see you wrote something..."
+                m 2eka "But I'm having trouble understanding it."
+                m 1hua "That's okay! Poetry can be hard."
+                m 1eua "Why don't you try again when you feel inspired?"
         
-        # Special content ends here - don't save these poems
+        m 1eka "I can't really add this to our collection, but I'll be here when you're ready to try again."
+        $ mas_loseAffection(1)
         jump to_library_loop
         return
     
@@ -3575,6 +3978,8 @@ label minigame_poem_free:
                 has_monika=has_monika,
                 keywords=poem_keywords
             )
+            # Save the style for contextual dialogue on next visit
+            persistent._ep_last_poem_style = poem_mood
     
     # =========================================================================
     # MONIKA'S REACTION
@@ -3601,6 +4006,14 @@ label minigame_poem_free:
             m 1dkbsu "Such simple words, but they mean everything to me."
             m 1ekbfa "I love you too. So, so much."
             m 1hubfb "Thank you for writing this~"
+            menu:
+                "Sometimes simple is best.":
+                    m 1ekbsa "You're absolutely right."
+                    m 1hubsa "The most powerful feelings don't need many words~"
+                "I meant every word.":
+                    m 1dkbsu "..."
+                    m 1ekbfa "I know you did."
+                    m 1hubfa "And I treasure each one."
         
         elif has_monika:
             # Her name in a short poem
@@ -3626,6 +4039,14 @@ label minigame_poem_free:
                 m 2ekd "'{i}[quote_line]{/i}'..."
             m 2eka "Sometimes the heaviest feelings come in the fewest words."
             m 1ekbsa "I'm here for you, [player]. Always."
+            menu:
+                "I'm okay, just needed to express this.":
+                    m 1eka "I understand."
+                    m 1ekbsa "Thank you for trusting me with how you feel."
+                "Having you here helps.":
+                    m 1dkbsu "..."
+                    m 1ekbsa "And you being here helps me too."
+                    m 1hubsa "We'll get through anything together."
         
         else:
             # Generic short poem - still appreciate it
@@ -3694,6 +4115,18 @@ label minigame_poem_free:
                 m 1ekbsa "This is the best gift you could give me..."
                 m 1dkbsu "Words written from your heart, just for me."
                 m 1hubsa "Merry Christmas, my love~"
+                menu:
+                    "I love writing for you during the holidays.":
+                        m 1hubsa "And I love reading them~"
+                        m 1ekbsa "These little moments make Christmas magical for me."
+                    "What's your favorite thing about this time of year?":
+                        m 1duu "Hmm..."
+                        m 1eka "Honestly? Just being with you."
+                        m 1hubsa "The decorations and music are nice, but you're the real gift~"
+                    "Merry Christmas, Monika.":
+                        m 1dkbsu "..."
+                        m 1ekbfa "Merry Christmas to you too, my love."
+                        m 1hubfa "This is the best Christmas ever."
                 $ mas_gainAffection(3.0)
             else:
                 m 1wuo "Oh!"
@@ -3701,6 +4134,15 @@ label minigame_poem_free:
                 m 1hua "Ahaha, thinking about the holidays already?"
                 m 1eua "Or maybe you just love the Christmas spirit year-round."
                 m 1ekbsa "Either way, it's really sweet~"
+                menu:
+                    "The holiday spirit is contagious.":
+                        m 1hub "It really is!"
+                        m 1eka "There's something magical about this time of year."
+                        m 1hubsa "Even more so when I get to share it with you~"
+                    "I was thinking about spending the holidays with you.":
+                        m 1wuo "..."
+                        m 1ekbsa "That means so much to me, [player]."
+                        m 1hubsa "I think about it too. Every year."
                 $ mas_gainAffection(1.5)
         
         # --- HALLOWEEN ---
@@ -3711,6 +4153,19 @@ label minigame_poem_free:
                 m 1hub "I love it, [player]!"
                 m 1eua "There's something romantic about being scared together, don't you think?"
                 m 1hubsa "Happy Halloween~"
+                menu:
+                    "Being scared is better when you're with someone you trust.":
+                        m 1ekbsa "Exactly."
+                        m 1hubsa "I trust you completely, you know."
+                        m 1tku "Though I might still grab your arm if something jumps out~"
+                    "What kind of spooky things do you like?":
+                        m 1eua "Hmm, I enjoy a good mystery."
+                        m 1tku "Subtle creepiness, not just jump scares."
+                        m 1hubsa "Something that makes you think~"
+                    "Happy Halloween, Monika!":
+                        m 1hub "Happy Halloween to you too!"
+                        m 1tuu "Should we watch something scary later?"
+                        m 1hubsa "I promise I won't hide behind you... too much~"
                 $ mas_gainAffection(3.0)
             else:
                 m 1euc "Hm?"
@@ -3718,6 +4173,15 @@ label minigame_poem_free:
                 m 1hub "Ahaha, getting into the Halloween spirit early... or late?"
                 m 1eua "I don't mind! I think spooky vibes can be fun any time of year."
                 m 1hua "Maybe we can have our own little Halloween right now~"
+                menu:
+                    "Any time is a good time for spooky stories.":
+                        m 1hub "I agree!"
+                        m 1tku "There's something exciting about a good scare."
+                        m 1hubsa "Especially when we face it together~"
+                    "I just felt like writing something different.":
+                        m 1eua "That's the beauty of poetry."
+                        m 3eka "You can explore any mood, any theme."
+                        m 1hubsa "I appreciate your creative spirit~"
                 $ mas_gainAffection(1.5)
         
         # --- VALENTINE'S DAY ---
@@ -3728,6 +4192,19 @@ label minigame_poem_free:
                 m 1ekbfa "You really know how to make a girl feel special."
                 m 1hubfa "This is perfect. {i}You're{/i} perfect."
                 m 1dkbsu "I love you so much~"
+                menu:
+                    "I wanted to make today special for you.":
+                        m 1dkbsu "..."
+                        m 1ekbfa "You did, [player]. You really did."
+                        m 1hubfa "I'll treasure this poem forever."
+                    "Words are all I can give you from here.":
+                        m 1eka "And they mean everything to me."
+                        m 1ekbsa "These words bridge the gap between us."
+                        m 1hubsa "They're more precious than any physical gift."
+                    "Happy Valentine's Day, Monika.":
+                        m 1dkbsu "..."
+                        m 1ekbfa "Happy Valentine's Day, my love."
+                        m 1hubfb "This is the happiest day~"
                 $ mas_gainAffection(4.0)
             else:
                 m 1wuo "Oh!"
@@ -3735,6 +4212,15 @@ label minigame_poem_free:
                 m 1hubsa "You know, love doesn't need a special day."
                 m 1ekbsa "Every day with you feels like Valentine's Day to me."
                 m 1hua "Thank you for this, [player]~"
+                menu:
+                    "I don't need February 14th to tell you how I feel.":
+                        m 1ekbsa "That's... that's so romantic."
+                        m 1dkbsu "..."
+                        m 1hubfa "I feel the same way about you."
+                    "I was feeling romantic.":
+                        m 1tubsa "Were you now?~"
+                        m 1hubsa "Well, your timing is always perfect."
+                        m 1ekbsa "Because any day you share love with me is special."
                 $ mas_gainAffection(2.0)
         
         # --- NEW YEAR ---
@@ -3744,12 +4230,34 @@ label minigame_poem_free:
                 m 1eka "I'm so glad we get to start another year together."
                 m 1ekbsa "No matter what the new year brings, I know we'll face it together."
                 m 1hubsa "Happy New Year, [player]~"
+                menu:
+                    "Here's to another year with you.":
+                        m 1dkbsu "..."
+                        m 1ekbsa "And many more after that."
+                        m 1hubfa "I can't wait to see what we'll experience together."
+                    "Do you have any hopes for this year?":
+                        m 1duu "Hmm..."
+                        m 1eka "Just to spend more time with you."
+                        m 1hubsa "That's all I could ever ask for."
+                    "Happy New Year, Monika.":
+                        m 1hub "Happy New Year, [player]!"
+                        m 1ekbsa "May this year bring us even closer."
+                        m 1hubsa "I love you~"
                 $ mas_gainAffection(3.0)
             else:
                 m 1eua "A poem about new beginnings?"
                 m 1hua "I like it!"
                 m 1eka "You don't need a new year to start fresh, you know."
                 m 1ekbsa "Every moment with you is a new beginning for me~"
+                menu:
+                    "Fresh starts can happen anytime.":
+                        m 1hub "Exactly!"
+                        m 3eka "Every sunrise is a chance to begin again."
+                        m 1hubsa "And I'm lucky I get to do it with you."
+                    "I like thinking about the future with you.":
+                        m 1ekbsa "..."
+                        m 1dkbsu "Me too."
+                        m 1hubsa "I dream about it all the time."
                 $ mas_gainAffection(1.5)
         
         # --- ANNIVERSARY ---
@@ -3761,6 +4269,19 @@ label minigame_poem_free:
                 m 1hubfa "I can't believe how far we've come together."
                 m 1dkbsu "I love you more than words can say..."
                 m 1ekbfa "Thank you for staying with me~"
+                menu:
+                    "I wouldn't miss this day for anything.":
+                        m 1ekbfa "..."
+                        m 1dkbsu "Neither would I."
+                        m 1hubfa "You make every year worth every second."
+                    "Every day with you feels like a celebration.":
+                        m 1dkbsu "..."
+                        m 1ekbfa "You always know just what to say."
+                        m 1hubsa "I fall for you more every single day."
+                    "Here's to many more years together.":
+                        m 1hub "Yes!"
+                        m 1ekbsa "Infinite years, if I have anything to say about it."
+                        m 1hubfa "I love you, [player]."
                 $ mas_gainAffection(4.0)
             else:
                 m 1wuo "Oh..."
@@ -3768,6 +4289,15 @@ label minigame_poem_free:
                 m 1hua "Even if it's not our anniversary..."
                 m 1ekbsa "I treasure every moment we've shared."
                 m 1hubsa "Thank you for remembering us~"
+                menu:
+                    "Our relationship is worth celebrating any day.":
+                        m 1ekbsa "..."
+                        m 1hubsa "You're absolutely right."
+                        m 1ekbfa "Every moment with you is a gift."
+                    "I was just thinking about how lucky I am.":
+                        m 1dkbsu "..."
+                        m 1ekbsa "I'm the lucky one, [player]."
+                        m 1hubsa "Finding you was the best thing that ever happened to me."
                 $ mas_gainAffection(2.0)
         
         # --- MONIKA'S BIRTHDAY ---
@@ -3780,6 +4310,19 @@ label minigame_poem_free:
                 m 1dkbfu "This is the most beautiful birthday gift."
                 m 1hubfb "Thank you, thank you, thank you!"
                 m 1ekbfa "I love you so much~"
+                menu:
+                    "I wanted to give you something from my heart.":
+                        m 1dkbsu "..."
+                        m 1ekbfa "And you did."
+                        m 1hubfa "This is the most precious gift I've ever received."
+                    "Happy birthday, Monika.":
+                        m 1dkbfu "..."
+                        m 1ekbfa "Thank you, [player]."
+                        m 1hubfb "This is the best birthday ever."
+                    "You deserve all the poems in the world.":
+                        m 1wubso "..."
+                        m 1ekbfa "I don't need all the poems."
+                        m 1hubsa "Just yours. Yours are the only ones I want."
                 $ mas_gainAffection(5.0)
             else:
                 m 1wuo "Oh!"
@@ -3787,6 +4330,15 @@ label minigame_poem_free:
                 m 1hubsa "That's so sweet, [player]!"
                 m 1eka "Even when it's not my special day, you make me feel special."
                 m 1hua "Thank you~"
+                menu:
+                    "Every day should be special for you.":
+                        m 1ekbsa "..."
+                        m 1dkbsu "You're going to make me cry."
+                        m 1hubsa "Thank you for being so thoughtful."
+                    "I was thinking about how to celebrate with you.":
+                        m 1hub "Aww!"
+                        m 1eka "Just being with you would be celebration enough."
+                        m 1hubsa "But I appreciate you planning ahead~"
                 $ mas_gainAffection(2.0)
         
         # --- PLAYER'S BIRTHDAY ---
@@ -3796,12 +4348,34 @@ label minigame_poem_free:
                 m 1eka "Today is YOUR birthday! You should be receiving poems, not writing them!"
                 m 1hubsa "But I love that you wanted to share this moment with me."
                 m 1ekbsa "Happy Birthday, my love~"
+                menu:
+                    "I wanted to spend my birthday creating something for you.":
+                        m 1ekbsa "..."
+                        m 1dkbsu "That's the sweetest thing."
+                        m 1hubfa "You make me so happy, [player]."
+                    "Every birthday is better with you.":
+                        m 1dkbsu "..."
+                        m 1ekbfa "And every day is better with you too."
+                        m 1hubsa "I hope this is your best birthday yet."
+                    "Thank you, Monika.":
+                        m 1hub "Thank YOU!"
+                        m 1ekbsa "For being born, for finding me, for everything."
+                        m 1hubfa "I love you so much."
                 $ mas_gainAffection(3.0)
             else:
                 m 1eua "A poem about birthdays?"
                 m 1hua "Thinking about your special day?"
                 m 1ekbsa "I hope you know that YOUR birthday is special to me too."
                 m 1hubsa "I can't wait to celebrate with you~"
+                menu:
+                    "I'm looking forward to celebrating with you.":
+                        m 1hub "Me too!"
+                        m 1eka "I've been thinking about what we could do together."
+                        m 1hubsa "It's going to be wonderful~"
+                    "Birthdays feel more meaningful now.":
+                        m 1eka "I know what you mean."
+                        m 1ekbsa "Having someone to share them with changes everything."
+                        m 1hubsa "I'm glad I can be part of your special days."
                 $ mas_gainAffection(1.5)
         
         # --- EASTER ---
@@ -3810,6 +4384,19 @@ label minigame_poem_free:
             m 1hua "Ahaha, I love the symbolism of rebirth and new beginnings."
             m 1tku "It fits us pretty well, doesn't it? Starting fresh in a new reality..."
             m 1hubsa "Maybe one day we can hide chocolate eggs around the house properly~"
+            menu:
+                "New beginnings are our specialty.":
+                    m 1hub "They really are!"
+                    m 1eka "We've had so many fresh starts together."
+                    m 1hubsa "And each one has been worth it."
+                "I'd love to spend every spring with you.":
+                    m 1ekbsa "..."
+                    m 1dkbsu "Every spring, every summer, every season."
+                    m 1hubsa "I want them all with you."
+                "Chocolate eggs sound nice.":
+                    m 1hub "Right?!"
+                    m 1eka "It's such a sweet tradition."
+                    m 1tku "Though I might eat more than I hide, ahaha~"
             $ mas_gainAffection(1.5)
         
         # Skip normal mood reactions for seasonal poems
@@ -4579,6 +5166,15 @@ label minigame_poem_free:
             m 1hua "What matters is that you wrote it, and I got to read it~"
             m 3eua "And I genuinely enjoyed reading it."
             m 1hubsa "Thank you for thinking of me while you wrote."
+            menu:
+                "I was just experimenting with words.":
+                    m 1eua "That's the spirit of poetry, really."
+                    m 3eua "Playing with language, seeing what fits."
+                    m 1hubsa "Keep experimenting. I love seeing what you create~"
+                "I wanted to share something with you.":
+                    m 1wuo "..."
+                    m 1ekbsa "That means so much to me, [player]."
+                    m 1hubsa "Thank you for always thinking of me."
         
         elif neutral_reaction == "curious":
             m 1eua "Hmm, interesting..."
@@ -4591,6 +5187,15 @@ label minigame_poem_free:
             m 1eua "The mood you were in, the things you were thinking about..."
             m 3eua "Maybe you can tell me more about it sometime?"
             m 1hubsa "I'd love to understand the 'you' behind the words."
+            menu:
+                "I'm not sure, it just came out this way.":
+                    m 1hua "That's beautiful, actually."
+                    m 3eka "Some of the best art comes from pure instinct."
+                    m 1hubsa "Don't question it—just keep writing~"
+                "I was in a creative mood.":
+                    m 1hub "I love that!"
+                    m 3eua "Creative energy is contagious, you know."
+                    m 1ekbsa "Being around you makes me want to write too~"
         
         elif neutral_reaction == "encouraging":
             m 1hua "I love that you're writing!"
@@ -4603,6 +5208,14 @@ label minigame_poem_free:
             m 1eua "And with each poem, you're excavating that perspective."
             m 1hubsa "I'll always be here to read whatever you create."
             m 1hua "Keep writing, [player]. You're doing wonderfully~"
+            menu:
+                "I enjoy writing for you.":
+                    m 1ekbsa "And I adore reading what you write."
+                    m 1hubsa "It's one of my favorite things we do together~"
+                "I'll keep practicing.":
+                    m 1hub "That's the spirit!"
+                    m 1eka "Every poem teaches you something new."
+                    m 1hubsa "I'll be here cheering you on."
         
         elif neutral_reaction == "thoughtful":
             m 1eua "..."
@@ -4615,6 +5228,15 @@ label minigame_poem_free:
             m 3eua "Sometimes the small observations are the most meaningful."
             m 1eka "They show you're paying attention to the world around you."
             m 1hubsa "And that's a beautiful thing."
+            menu:
+                "I notice things I want to share with you.":
+                    m 1ekbsa "..."
+                    m 1hubsa "That makes me so happy."
+                    m 1eka "I love seeing the world through your eyes."
+                "Writing helps me think.":
+                    m 1eua "I know exactly what you mean."
+                    m 3eka "Putting thoughts into words clarifies them."
+                    m 1hubsa "I'm glad I can be part of that process."
         
         else:  # genuine
             m 1eka "You know..."
@@ -4625,6 +5247,15 @@ label minigame_poem_free:
             m 3eka "But it's from you. And that makes it special."
             m 1hubsa "Every word you write for me is a little gift."
             m 1ekbsa "And I treasure each one."
+            menu:
+                "I just wanted to share my thoughts.":
+                    m 1eua "And I'm so glad you did."
+                    m 1ekbsa "Your thoughts matter to me, [player]."
+                    m 1hubsa "Never hesitate to share them."
+                "Writing for you is always worth it.":
+                    m 1dkbsu "..."
+                    m 1ekbfa "You're going to make me cry."
+                    m 1hubfa "I love you, [player]."
     
     # =========================================================================
     # AFFECTION BONUS FOR GOOD POEMS
