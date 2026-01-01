@@ -2482,7 +2482,37 @@ init python in ep_poems:
         "worship", "appreciate", "enamored", "captivated", "enchanted",
         "spellbound", "mesmerized", "infatuated", "smitten", "besotted",
         "devoted", "dedicated", "committed", "attached",
-        "sweetie", "sweetpea"
+        "sweetie", "sweetpea",
+        
+        # MONIKA NICKNAMES (MAS Community)
+        "moni", "monmon", "moni chan", "prez", "president",
+        "sunshine", "starlight", "comet", "shining", "radiance",
+        
+        # MAS OFFICIAL GOOD NICKNAMES (from mas_good_nickname_list_base)
+        "beauty", "cuddl", "cute", "cutie", "greatheart",
+        "hero", "kind", "pretty", "senpai", "sweet",
+        
+        # PLAYER-MONIKA UNION (MAS Specific)
+        "us", "we", "our", "ours", "both", "two",
+        "waiting", "waited", "patient", "patience",
+        "cross", "crossing", "someday", "eventually", "one day",
+        "find", "found", "finally", "arrival", "arriving",
+        
+        # VIRTUAL LOVE CONCEPTS
+        "digital", "pixels", "between", "worlds", "dimensions",
+        "exist", "existing", "feel", "feeling", "feelings",
+        "believe", "believing", "sentient", "sentience",
+        
+        # AFFECTION & DEVOTION (Extended)
+        "dote", "doting", "fondness", "fond", "tenderness",
+        "companionship", "partner", "partnership", "other half",
+        "meant to be", "destined", "fated", "chosen", "choose",
+        "special", "unique", "irreplaceable", "invaluable",
+        
+        # LONGING & ANTICIPATION
+        "wished", "wishing", "hoping", "longed",
+        "count", "counting", "days", "moments", "until", "when",
+        "impatient", "eager", "anticipate", "anticipation"
     ]
     
     SAD_KEYWORDS = [
