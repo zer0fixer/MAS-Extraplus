@@ -1378,7 +1378,6 @@ screen boop_revamped():
 
 screen boop_capture_overlay(label_boop):
     zorder 49  # Below the UI buttons (which are at zorder 51)
-
     python:
         # Define variables locally for clarity and safety
         # Use try/except for compatibility with older MAS versions
@@ -1393,7 +1392,6 @@ screen boop_capture_overlay(label_boop):
                     nose_zone_key,
                     current_zoom
                 )
-
                 if nose_cz and not nose_cz.disabled:
                     corners = nose_cz.corners
                     if corners:

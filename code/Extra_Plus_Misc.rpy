@@ -317,7 +317,7 @@ init -5 python in ep_files:
             store.ep_tools.safe_overlay_add("bday_oki_doki")
 
     def main_file_exists():
-        return os.path.isfile(os.path.normcase(store.ep_tools.check_main_file))
+        return os.path.isfile(store.ep_tools.check_main_file)
 
     # --- Debugging and maintenance tools ---
     def run_asset_linter():
@@ -2387,10 +2387,14 @@ init -15 python:
         def _isOverMe(self, x, y):
             if not self._inBoundingBox(x, y):
                 return False
-            intersections = 0
-            for edge in self.__edges:
-                intersections += int(edge.horizontalIntersect(x, y))
-            return (intersections % 2) == 1
+            # Local variable for loop efficiency
+            edges = self.__edges
+            count = 0
+            for edge in edges:
+                if edge.horizontalIntersect(x, y):
+                    count += 1
+            # Bitwise AND is faster than modulo
+            return (count & 1) == 1
 
         def __setup(self):
             self.__setupBoundingBox()
@@ -2440,27 +2444,40 @@ init -14 python in ep_interactions:
     FOCAL_POINT = (640, 750)
     FOCAL_POINT_UP = (640, 740)
     
+    # Cached zoom parameters (initialized lazily)
+    _cached_default_zoom = _default_zoom
+    _cached_y_step = _y_step
+    _cache_initialized = False
+    
+    def _init_zoom_cache():
+        """Initialize zoom cache once mas_sprites is available."""
+        global _cached_default_zoom, _cached_y_step, _cache_initialized
+        if _cache_initialized:
+            return
+        try:
+            _cached_default_zoom = store.mas_sprites.default_zoom_level
+            _cached_y_step = store.mas_sprites.y_step
+            _cache_initialized = True
+        except (AttributeError, NameError):
+            pass
     
     def _get_zoom_level():
-        """Get current zoom level safely."""
-        try:
-            return store.mas_sprites.zoom_level
-        except (AttributeError, NameError):
-            return _default_zoom
+        """Get current zoom level safely using getattr for speed."""
+        sprites = getattr(store, 'mas_sprites', None)
+        if sprites is not None:
+            return getattr(sprites, 'zoom_level', _default_zoom)
+        return _default_zoom
     
     
     def vx_list_zoom(zoom_level, vx_list):
         """
         Generates a vertex list adjusted for zoom level.
-        Reads mas_sprites values dynamically to match MAS behavior.
+        Uses cached values for performance.
         """
-        # Read current values from mas_sprites (not cached)
-        try:
-            default_zoom = store.mas_sprites.default_zoom_level
-            y_step = store.mas_sprites.y_step
-        except (AttributeError, NameError):
-            default_zoom = _default_zoom
-            y_step = _y_step
+        # Use cached values (initialized lazily)
+        _init_zoom_cache()
+        default_zoom = _cached_default_zoom
+        y_step = _cached_y_step
         
         if zoom_level == default_zoom:
             return list(vx_list)
@@ -2651,8 +2668,12 @@ init -14 python in ep_interactions:
             return None
 
         def check_over(self, x, y):
-            # Ensure zones are adjusted for current zoom before checking
-            self.adjust_for_zoom()
+            # Lightweight zoom check (avoids full adjust_for_zoom overhead)
+            current_zl = _get_zoom_level()
+            if self._last_zoom_level != current_zl:
+                self._zone_zoom(current_zl)
+                self._last_zoom_level = current_zl
+            
             for zone_key, cz in self.zone_iter():
                 if cz._isOverMe(x, y):
                     return zone_key
