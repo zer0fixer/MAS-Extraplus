@@ -49,13 +49,13 @@ This guide will walk you through the installation process. Please follow the ste
 ### ⚠️ Prerequisites
 
 Before you begin, please ensure you have the following:
-* A stable and working installation of **Monika After Story**. It is highly recommended to be on the latest official version of MAS.
-* You have downloaded the latest release of **Extraplus** from the [Releases](https://github.com/zer0fixer/MAS-Extraplus/releases) page.
+* A stable and working installation of **Monika After Story**. From version 0.12.15 and higher, it is functional and you will have no problems using it.
+* You have downloaded the latest/pre release of **Extra+** from the [Releases](https://github.com/zer0fixer/MAS-Extraplus/releases) page.
 
 ### 📓 Step-by-Step Guide
 
 1.  **Download and Unzip the File**
-    * Download the `.zip` file for the latest release from the link above.
+    * Download the `.zip` file for the latest/pre release from the link above.
     * Once downloaded, unzip the file using a program like 7-Zip or WinRAR. You will see a `game/` folder inside.
 
 2.  **Locate Your DDLC Directory**
