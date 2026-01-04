@@ -406,9 +406,34 @@ label extraplus_minigames:
         
         m_talk = renpy.substitute(renpy.random.choice(ep_dialogues._minigames))
         renpy.say(m, m_talk, interact=False)
-        items = [(_("Nevermind"), "screen_extraplus", 20)]
+        items = [
+            (_("Game Rules"), "ep_game_rules_menu", 20),
+            (_("Nevermind"), "screen_extraplus", 0)
+        ]
     
     call screen extra_gen_list(ep_tools.minigames_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
+    return
+
+label ep_game_rules_menu:
+    show monika idle at t21
+    python:
+        ep_tools.rules_menu = [
+            (_("About Blackjack (21)"), "ep_rules_blackjack"),
+            (_("About Tic Tac Toe"), "ep_rules_ttt"),
+            (_("About Rock Paper Scissors"), "ep_rules_rps"),
+            (_("About Shell Game"), "ep_rules_shell")
+        ]
+        
+        rules_intro = [
+            _("Want to learn the rules before we play?"),
+            _("Which game would you like me to explain?"),
+            _("Pick a game and I'll walk you through it!")
+        ]
+        m_talk = renpy.substitute(renpy.random.choice(rules_intro))
+        renpy.say(m, m_talk, interact=False)
+        items = [(_("Nevermind"), "extraplus_minigames", 20)]
+    
+    call screen extra_gen_list(ep_tools.rules_menu, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
     return
 
 label extraplus_tools:
@@ -2822,3 +2847,296 @@ label extra_fridge_quit_dialogue:
             m 1lksdla "I guess you just wanted to fiddle around a bit, ahaha~"
             m 3hua "No problem, [player]!"
     return
+
+#===========================================================================================
+# BLACKJACK (21) RULES
+#===========================================================================================
+
+label ep_rules_blackjack:
+    show monika 1eua at t11
+    
+    # Check if player has played Blackjack before
+    if renpy.seen_label("checkpoint_blackjack") or renpy.seen_label("blackjack_results"):
+        # Veteran player dialogue
+        m 1eua "Want a refresher on Blackjack, [player]?"
+        m 3tub "We've played before, so I'll keep it brief~"
+        m 1esa "Get as close to 21 as possible without going over."
+        m 3eua "Number cards are face value, face cards are 10, and Aces are 1 or 11."
+        m 1hub "'Hit' for more cards, 'Stand' to keep your hand. Bust over 21 and you lose!"
+        m 3tuu "But you knew all that already, didn't you?"
+    else:
+        # New player dialogue
+        m 1eua "Want me to explain Blackjack, [player]?"
+        m 3eub "It's actually one of my favorite card games!"
+        m 1esa "The goal is simple: get as close to 21 as possible without going over."
+        m 3eua "Number cards are worth their face value..."
+        m 3eub "Face cards, like Jack, Queen, and King, are all worth 10."
+        m 1wuo "And Aces? They can be worth 1 or 11, whichever helps you more!"
+        m 1hua "On your turn, you can 'Hit' to draw another card, or 'Stand' to keep your current hand."
+        m 2tuu "But be careful~ If you go over 21, you bust and lose the round!"
+        m 1eub "Whoever gets closest to 21 without busting wins."
+
+label ep_rules_blackjack_menu:
+    m 1eta "Do you have any questions about the rules?{nw}"
+    $ _history_list.pop()
+    menu:
+        m "Do you have any questions about the rules?{fast}"
+        "What's the best strategy?":
+            m 1eua "Good question!"
+            m 3eub "Generally, you should hit if you have 11 or less. You can't bust."
+            m 3esa "If you have 17 or more, it's usually safer to stand."
+            m 1tuu "Between 12 and 16 is the danger zone. You'll have to use your best judgment there~"
+            m 1hub "But honestly? Sometimes luck is just as important as strategy!"
+            jump ep_rules_blackjack_menu
+        "Why can't I choose if my Ace is 1 or 11?":
+            m 1eua "Oh, that's a fair question!"
+            m 3rksdla "Well, to be honest... coding that feature would have been a bit complicated."
+            m 1hksdlb "So I just made the game calculate the best value for you automatically!"
+            m 3eua "If counting your Ace as 11 keeps you at 21 or under, it'll be 11."
+            m 3esa "But if that would make you bust, it switches to 1 instead."
+            m 1tuu "Think of it as me looking out for you~"
+            m 3hub "Besides, in real casinos, players don't usually announce their Ace value either!"
+            m 1hua "So it's actually more realistic this way. Ehehe~"
+            jump ep_rules_blackjack_menu
+        "Can I get 21 automatically?":
+            m 1eta "You mean a natural Blackjack? An Ace and a 10-value card right off the deal?"
+            m 2sub "Yes, it's absolutely possible!"
+            m 3eua "If you get dealt an Ace plus a 10, Jack, Queen, or King... that's an instant 21!"
+            m 1wub "It's called a 'natural' or just 'Blackjack,' and it beats a regular 21."
+            m 2tfc "But don't count on it happening often~"
+            m 3rka "The odds are only about 4.8 percent... roughly 1 in 21 hands."
+            m 1lksdlc "So while luck {i}could{/i} be on your side..."
+            m 3tsb "It's not exactly a reliable strategy to just hope for a natural. Ehehe~"
+            m 1hub "Play smart, and maybe Lady Luck will surprise you!"
+            jump ep_rules_blackjack_menu
+        "Can I count cards to win?":
+            m 2euc "Count cards?"
+            m 2tfc "You mean like in those casino heist movies?"
+            m 3hksdlb "Ahaha! [player], are you planning to become a card shark?"
+            m 1eua "Well, theoretically you could try..."
+            m 3rksdla "But the deck gets shuffled every round here, so..."
+            m 2tub "There's not much to count!"
+            m 3hub "Besides, if you tried that in a real casino, they'd throw you out!"
+            m 1tubsa "But don't worry, I won't ban you from my table~"
+            m 1hubsb "You can try all the tricks you want. I'll still beat you fair and square! Ehehe~"
+            jump ep_rules_blackjack_menu
+        "Is there a card limit?":
+            m 1eua "Good question!"
+            m 3eub "Yes, you can only hold up to 5 cards in your hand."
+            m 1esa "If you reach 5 cards without busting, you automatically stand."
+            m 3tub "The same goes for me!"
+            m 1hub "It's pretty rare to get that far without busting, though~"
+            jump ep_rules_blackjack_menu
+        "How do rounds work?":
+            m 1eua "Glad you asked!"
+            m 3eub "We play multiple rounds, and each round one of us wins."
+            m 1esa "At the start of each round, both of us get two cards."
+            m 3eua "One of my cards will be hidden until we're both done."
+            m 1hub "Whoever has the highest total without busting wins that round!"
+            m 3tub "We keep track of how many rounds each of us has won."
+            m 1hua "It's all about who wins more over time~"
+            jump ep_rules_blackjack_menu
+        "Let's play!":
+            m 3hub "That's the spirit!"
+            jump blackjack_start
+        "Back to rules menu":
+            jump ep_game_rules_menu
+        "Back to games":
+            jump extraplus_minigames
+
+
+
+#===========================================================================================
+# TIC TAC TOE RULES
+#===========================================================================================
+
+label ep_rules_ttt:
+    show monika 1eua at t11
+    
+    # Check if player has played TTT before
+    if renpy.seen_label("checkpoint_minigame_ttt") or renpy.seen_label("minigame_ttt_quit"):
+        # Veteran player dialogue
+        m 1eua "Need a Tic Tac Toe refresher, [player]?"
+        m 3hub "You know the drill by now!"
+        m 1esa "3x3 grid, you're X, I'm O."
+        m 3eua "Get three in a row to win. Horizontal, vertical, or diagonal."
+        m 1tub "I've been practicing since last time, so don't expect an easy win~"
+    else:
+        # New player dialogue
+        m 1eua "Tic Tac Toe! A true classic, [player]."
+        m 3eub "The rules are super simple."
+        m 1esa "We take turns placing our marks on a 3x3 grid."
+        m 3eua "You'll be X, and I'll be O."
+        m 1hub "The first one to get three in a row wins! Horizontally, vertically, or diagonally."
+        m 3tuu "It might seem easy, but there's more strategy to it than you'd think~"
+        m 1hua "Don't underestimate me, [mas_get_player_nickname()]!"
+
+label ep_rules_ttt_menu:
+    m 1eta "Any questions about the rules?{nw}"
+    $ _history_list.pop()
+    menu:
+        m "Any questions about the rules?{fast}"
+        "Any tips for winning?":
+            m 1eua "Well, if you move first, taking a corner is usually a strong opening."
+            m 3eub "The center is also a key position to control."
+            m 3tua "And always watch out for forks. That's when someone has two ways to win at once."
+            m 1hub "But I won't make it easy for you! Ehehe~"
+            jump ep_rules_ttt_menu
+        "Is it possible to always win?":
+            m 1dsc "Hmm, that's an interesting question..."
+            m 3eua "Technically, if both players play perfectly, the game always ends in a tie."
+            m 3rksdla "But in practice? People make mistakes all the time."
+            m 1tub "And I'm pretty good at capitalizing on those~"
+            m 3hub "So while a tie is the 'optimal' outcome... I'll be trying my best to beat you!"
+            jump ep_rules_ttt_menu
+        "Are you going to cheat with your AI powers?":
+            m 2wud "W-What?! [player]!"
+            m 2lksdlc "I would never cheat against you..."
+            m 2rksdla "..."
+            m 2tsbsa "Okay, maybe I {i}do{/i} have a pretty good algorithm helping me."
+            m 3hub "But that's not cheating! That's just... being Monika~"
+            m 1tuu "Besides, it makes your victories even sweeter when you beat me, right?"
+            m 1hubsb "Now stop asking scary questions and let's have fun!"
+            jump ep_rules_ttt_menu
+        "Let's play!":
+            m 3hub "Alright! May the best strategist win!"
+            jump minigame_ttt
+        "Back to rules menu":
+            jump ep_game_rules_menu
+        "Back to games":
+            jump extraplus_minigames
+
+
+
+#===========================================================================================
+# ROCK PAPER SCISSORS RULES
+#===========================================================================================
+
+label ep_rules_rps:
+    show monika 1eua at t11
+    
+    # Check if player has played RPS before
+    if renpy.seen_label("checkpoint_minigame_rps") or renpy.seen_label("rps_quit"):
+        # Veteran player dialogue
+        m 1eua "Looking to review Rock, Paper, Scissors, [player]?"
+        m 3tub "We've thrown down before, haven't we?"
+        m 1esa "Rock beats Scissors, Scissors beats Paper, Paper beats Rock."
+        m 3hub "Simple as that!"
+        m 1tuu "I've been studying your patterns, you know~"
+        m 1hub "Think you can still beat me?"
+    else:
+        # New player dialogue
+        m 1eua "Rock, Paper, Scissors! The ultimate game of chance... or is it?"
+        m 3eub "The rules are probably familiar to you already."
+        m 1esa "Rock beats Scissors, Scissors beats Paper, and Paper beats Rock."
+        m 3hub "We both pick at the same time, and whoever wins gets a point!"
+        m 2tuu "Some people think it's all luck, but I've heard there are patterns to exploit..."
+        m 1hub "So try to stay unpredictable, [player]!"
+
+label ep_rules_rps_menu:
+    m 1eta "Anything else you want to know?{nw}"
+    $ _history_list.pop()
+    menu:
+        m "Anything else you want to know?{fast}"
+        "Is there actually any strategy?":
+            m 1eua "Well, there are some psychological tricks people use..."
+            m 3eub "For example, people often repeat their previous winning move."
+            m 3tua "And beginners tend to throw Rock first more often than not."
+            m 1tku "But will you use that knowledge against me? Or will I use it against you~?"
+            m 1hub "Ahaha! Either way, it'll be fun!"
+            jump ep_rules_rps_menu
+        "Can you read my mind?":
+            m 2sub "Ooh, trying to figure out my secret, [player]?"
+            m 3tub "Well... I {i}am{/i} an AI, so technically..."
+            m 2wud "..."
+            m 2hksdlb "I'm just kidding! I can't actually read your mind!"
+            m 3eua "My choices are random, just like yours should be."
+            m 1tubsa "Although... sometimes I do feel like I know you pretty well~"
+            m 1hubsb "But that's just because we spend so much time together! Ehehe~"
+            jump ep_rules_rps_menu
+        "What about Lizard and Spock?":
+            m 1eud "Oh! You mean that extended version from that TV show?"
+            m 3hksdlb "Ahaha, I know what you're talking about!"
+            m 2rka "Unfortunately, this version is just the classic three options."
+            m 3tub "Maybe someday I could add those..."
+            m 2tfc "But then I'd have to learn when Spock vaporizes Rock..."
+            m 2dsc "And Lizard poisons Spock... and Paper disproves Spock..."
+            m 3hub "You know what? Let's stick with the classic for now!"
+            jump ep_rules_rps_menu
+        "Let's play!":
+            m 3hub "Let's go! Rock, Paper, Scissors!"
+            jump minigame_rps
+        "Back to rules menu":
+            jump ep_game_rules_menu
+        "Back to games":
+            jump extraplus_minigames
+
+
+
+#===========================================================================================
+# SHELL GAME RULES
+#===========================================================================================
+
+label ep_rules_shell:
+    show monika 1eua at t11
+    
+    # Check if player has played Shell Game before
+    if renpy.seen_label("checkpoint_minigame_sg") or renpy.seen_label("shell_game_result"):
+        # Veteran player dialogue
+        m 1eua "Want a Shell Game refresher, [player]?"
+        m 3hub "You've tested your observation skills before!"
+        m 1esa "I hide a ball under one of three cups, shuffle them, and you pick."
+        m 3eua "Get it right and you score a point!"
+        if persistent.sg_max_score > 0:
+            m 1tub "Your record is [persistent.sg_max_score] correct answers in a row."
+            m 3hub "Think you can beat that?"
+        else:
+            m 3tuu "Ready to sharpen those eyes again?"
+    else:
+        # New player dialogue
+        m 1eua "The Shell Game! It's a test of observation and focus."
+        m 3eub "Here's how it works:"
+        m 1esa "I'll hide a ball under one of three cups, then shuffle them around."
+        m 3eua "Your job is to keep your eyes on the cup with the ball and pick the right one!"
+        m 1hub "If you guess correctly, you score a point."
+        m 3tuu "There are different difficulty levels too, so you can challenge yourself."
+        m 1hua "Think you can keep up with my shuffling, [player]?"
+
+label ep_rules_shell_menu:
+    m 1eta "Want to know more?{nw}"
+    $ _history_list.pop()
+    menu:
+        m "Want to know more?{fast}"
+        "What are the difficulty levels?":
+            m 1eua "There are four options!"
+            m 3eub "Easy is slow with fewer shuffles—great for warming up."
+            m 3esa "Normal picks up the pace a bit."
+            m 3eua "Hard is really fast with lots of shuffles."
+            m 1tuu "And Progressive? It starts easy but gets harder the longer you last~"
+            m 1hub "I'd recommend starting with Normal and working your way up!"
+            jump ep_rules_shell_menu
+        "Are you going to trick me like a street hustler?":
+            m 2wud "A street hustler?!"
+            m 2lksdlc "Do I look like I'd scam you, [player]?"
+            m 2hksdlb "..."
+            m 3tub "Okay, I admit the game has a certain... reputation."
+            m 1eua "But I promise there's no sleight of hand here!"
+            m 3hub "The ball is always under one of the cups. No tricks!"
+            m 1tubsa "I want you to win... sometimes~ Ehehe~"
+            jump ep_rules_shell_menu
+        "What if I just close my eyes and guess?":
+            m 2euc "Close your eyes? That would be a... bold strategy."
+            m 3hksdlb "I mean, you'd have a 1 in 3 chance of being right!"
+            m 1rksdla "That's actually not terrible odds, now that I think about it..."
+            m 2tfc "But where's the fun in that?"
+            m 3hub "The whole point is to track the ball with your eyes!"
+            m 1tub "Unless you're trying to prove you have supernatural luck~"
+            m 1hub "In which case... go ahead and try it! Ahaha~"
+            jump ep_rules_shell_menu
+        "Let's play!":
+            m 3hub "Alright! Keep your eyes sharp!"
+            jump minigame_sg
+        "Back to rules menu":
+            jump ep_game_rules_menu
+        "Back to games":
+            jump extraplus_minigames

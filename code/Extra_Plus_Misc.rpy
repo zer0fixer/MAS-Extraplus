@@ -570,10 +570,8 @@ init -5 python in ep_files:
             for f in table_chair_files:
                 files_deleted += delete_file(f)
             
-            # 3. Delete old accessory files (relative to game directory)
-            for acs_tuple in store.extraplus_accessories:
-                acs_file_name_base = acs_tuple[1]
-                files_deleted += delete_file("mod_assets/monika/a/acs-{}-0.png".format(acs_file_name_base))
+            # NOTE: Old accessory files (acs-xxx-0.png) are NOT deleted because 
+            # they are required for MAS 0.12.15 and below compatibility.
 
             # --- Final Notification ---
             if files_deleted > 0 or folders_deleted > 0:

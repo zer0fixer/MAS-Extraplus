@@ -7,8 +7,8 @@
 # Source Code: https://github.com/zer0fixer/MAS-Extraplus
 
 #====Register the submod
-init -990 python in mas_submod_utils:
-    Submod(
+init -990 python:
+    store.mas_submod_utils.Submod(
         author="ZeroFixer",
         name="Extra Plus",
         description="Expand your time with Monika with new minigames, dates, and interactions.",
