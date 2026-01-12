@@ -50,7 +50,7 @@ This guide will walk you through the installation process. Please follow the ste
 
 Before you begin, please ensure you have the following:
 * A stable and working installation of **Monika After Story**. From version 0.12.15 and higher, it is functional and you will have no problems using it.
-* You have downloaded the latest/pre release of **Extra+** from the [Releases](https://github.com/zer0fixer/MAS-Extraplus/releases) page.
+* You have downloaded the latest/pre release of **Extra+** from the [Releases](https://github.com/zer0fixer/MAS-Extraplus/releases) page or from the [Google Drive](https://drive.google.com/drive/folders/1hWtWE6JcYq5U5qwTVtkiA04SthIWNkfS?usp=drive_link) folder if you’re not familiar with GitHub.
 
 ### 📓 Step-by-Step Guide
 
