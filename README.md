@@ -123,7 +123,7 @@ For now, Chibika will use the base sprites and appearances included in the submo
 ## 💖 MAS Repository
 Here you can see the official Monika After Story repository!
 
-[![card](https://github-readme-stats.vercel.app/api/pin/?username=Monika-After-Story&repo=MonikaModDev)](https://github.com/Monika-After-Story/MonikaModDev)
+![GitHub Repo Card](https://githubcard.com/Monika-After-Story/MonikaModDev.svg)
 
 
 > ### **Warning:**
