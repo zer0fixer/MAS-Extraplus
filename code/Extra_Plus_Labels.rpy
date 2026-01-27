@@ -67,7 +67,9 @@ label hide_images_rps:
 label extra_restore_bg(label="ch30_visual_skip"):
     window hide
     hide monika
+    hide screen ep_date_ui
     python:
+        store.ep_dates.clear_current_date()
         store.ep_tools.manage_date_location(False)
         store.ep_button.hide_zoom_button()
         HKBHideButtons()
@@ -79,6 +81,8 @@ label extra_restore_bg(label="ch30_visual_skip"):
         HKBShowButtons()
         renpy.jump(label)
     return
+
+
 
 # Consolidated initializer for locations that only differ by background and jump target.
 label extra_location_init(bg, target_label, show_monika=True):
@@ -180,27 +184,96 @@ label monika_booprestaurant:
 #===========================================================================================
 # Loops
 #===========================================================================================
-label to_cafe_loop:
-    show monika staticpose at t11 zorder MAS_MONIKA_Z
 
-    call screen extra_dating_loop("cafe_talk", "monika_boopcafe", boop_enable=True)
+# =============================================================================
+# CENTRALIZED DATE LOOP
+# This is the main loop for all date locations, similar to MAS's ch30_loop.
+# It handles:
+#   - Showing Monika with the correct pose/position
+#   - Displaying the UI (Talk button, boop overlay)
+#   - Periodically checking and updating the background for time-of-day changes
+#   - Waiting for user input via renpy.pause()
+#
+# USAGE:
+#   Set _ep_date_type to one of: "cafe", "restaurant", "pool", "library"
+#   Then jump to ep_date_loop_start
+#
+# Or use the convenience wrappers: to_cafe_loop, to_restaurant_loop, etc.
+# =============================================================================
+
+label ep_date_loop_visual:
+    # Show Monika with the correct pose and position
+    # We use renpy.show to dynamically set the pose based on config
+    python:
+        _monika_pose = "monika {}".format(_ep_date_config.monika_pose)
+        _position = getattr(store, _ep_date_config.monika_position, t11)
+        renpy.show(_monika_pose, at_list=[_position], zorder=MAS_MONIKA_Z)
+
+label ep_date_loop_main:
+    # Check if filter has changed and update background if needed
+    # This follows MAS's approach of calling spaceroom for visual updates
+    if store.ep_dates.should_check_background():
+        # progress_filter=True lets spaceroom handle the filter progression
+        # dissolve_all=True for smooth transition when filter changes
+        call spaceroom(progress_filter=True, dissolve_all=True)
+    
+    # Show the UI screen (Talk button + boop overlay)
+    show screen ep_date_ui(_ep_date_config.talk_label, _ep_date_config.boop_label, _ep_date_config.boop_enabled)
+    
+    # Wait for user input
+    # The screen has Jump actions for Talk button and keyboard keys
+    # When the user interacts, the screen will trigger the appropriate jump
+    # We use a pause to wait, which will be interrupted by screen actions
+    $ renpy.pause(delay=5.0, hard=False)
+    
+    # If we reach here, the pause completed without interaction
+    # Jump back to the start of the loop to check background again
+    jump ep_date_loop_main
+
+# Label to cleanly exit the date loop
+label ep_date_loop_exit:
+    hide screen ep_date_ui
+    $ store.ep_dates.clear_current_date()
     return
+
+# =============================================================================
+# WRAPPER LABELS FOR BACKWARDS COMPATIBILITY
+# These maintain the old label names so existing code continues to work.
+# They now delegate to the centralized ep_date_loop.
+# =============================================================================
+
+label to_cafe_loop:
+    $ _ep_date_type = "cafe"
+    jump ep_date_loop_start
 
 label to_restaurant_loop:
-    show monika staticpose at t11 zorder MAS_MONIKA_Z
-
-    call screen extra_dating_loop("restaurant_talk", "monika_booprestaurant", boop_enable=True)
-    return
+    $ _ep_date_type = "restaurant"
+    jump ep_date_loop_start
 
 label to_pool_loop:
-    show monika idle at t11_float
-    call screen extra_dating_loop("extra_pool_interactions", "", boop_enable=False)
-    return
+    $ _ep_date_type = "pool"
+    jump ep_date_loop_start
 
 label to_library_loop:
-    show monika idle at t11
-    call screen extra_dating_loop("extra_library_interactions", "", boop_enable=False)
-    return
+    $ _ep_date_type = "library"
+    jump ep_date_loop_start
+
+# Entry point that reads the date type from the variable
+label ep_date_loop_start:
+    window hide
+    # Get the configuration for this date type
+    $ _ep_date_config = store.ep_dates.get_config(_ep_date_type)
+    
+    if _ep_date_config is None:
+        # Invalid date type, return to normal
+        $ store.mas_utils.mas_log.error("[EP] Invalid date type: {}".format(_ep_date_type))
+        jump ch30_loop
+    
+    # Set the current date type for state tracking
+    $ store.ep_dates.set_current_date(_ep_date_type)
+    
+    # Continue to visual setup
+    jump ep_date_loop_visual
 
 #===========================================================================================
 # Others
@@ -466,7 +539,8 @@ label extraplus_tools:
     call screen extra_gen_list(ep_tools.tools_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items)
     return
 
-label cafe_talk:
+label extra_cafe_talk:
+    hide screen ep_date_ui
     show monika staticpose at t21
     python:
         cafe_menu = [
@@ -489,7 +563,8 @@ label cafe_talk:
     call screen extra_gen_list(cafe_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, False)
     return
 
-label restaurant_talk:
+label extra_restaurant_talk:
+    hide screen ep_date_ui
     show monika staticpose at t21
     python:
         restaurant_menu = [
@@ -514,6 +589,7 @@ label restaurant_talk:
     return
 
 label extra_pool_interactions:
+    hide screen ep_date_ui
     show monika idle at t21_float 
 
     python:
@@ -531,6 +607,7 @@ label extra_pool_interactions:
     return
 
 label extra_library_interactions:
+    hide screen ep_date_ui
     show monika idle at t21
 
     python:

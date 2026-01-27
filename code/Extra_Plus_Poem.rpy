@@ -164,8 +164,8 @@ label minigame_poem:
     # Date tracking for daily poem count
     python:
         import datetime
-        today = datetime.date.today()
-        
+        today = store.ep_button.get_today_date()
+
         # Check if it's a new day
         if persistent._ep_last_poem_date != str(today):
             _ep_poems_today = 0
@@ -214,7 +214,7 @@ label checkpoint_minigame_poem:
     # Update tracking
     python:
         _ep_poems_today += 1
-        persistent._ep_last_poem_date = str(datetime.date.today())
+        persistent._ep_last_poem_date = store.ep_button.get_today_str()
         persistent._ep_last_poem_mode = "classic"
     
     # Go directly to classic mode
@@ -851,9 +851,9 @@ init python:
         Supports Enter for newlines, arrow key navigation, and Home/End.
         """
         
-        def __init__(self, initial_text="", max_chars=500):
+        def __init__(self, initial_text="", max_chars=None):
             self.current_value = initial_text
-            self.max_chars = max_chars
+            self.max_chars = max_chars if max_chars is not None else store.ep_poems.MAX_POEM_CHARS
         
         def get_widget(self):
             """Gets the input widget from the screen."""
@@ -2425,6 +2425,13 @@ init python in ep_poems:
     
     # Keyword categories for mood detection (EXPANDED)
     # Note: 'monika' removed from romantic - her name shouldn't inflate romantic score
+    #
+    # VERSION 1.4.3 IMPROVEMENTS:
+    # - Dynamic thresholds based on poem length (minimum 15 words)
+    # - Density-based scoring to prevent keyword spam detection
+    # - Confidence levels for mood classification
+    # - Higher minimum thresholds to reduce false positives
+    # - Adaptive mixed mood detection with ratio-based logic
     
     ROMANTIC_KEYWORDS = [
         # CORE & INTIMACY
@@ -2762,6 +2769,7 @@ init python in ep_poems:
         """
         Analyzes the poem and returns mood info.
         Returns dict: {mood, keywords_found, word_count, line_count, lines, has_monika}
+        IMPROVED: Better thresholds, density-based scoring, confidence levels
         """
         if not poem_text or not poem_text.strip():
             return {
@@ -2772,23 +2780,33 @@ init python in ep_poems:
                 "lines": [],
                 "has_monika": False,
                 "secondary_mood": None,
-                "mood_counts": {}
+                "mood_counts": {},
+                "confidence": 0.0,
+                "density_score": 0.0
             }
-        
+
         # Process text
         text_lower = poem_text.lower()
         lines = [l.strip() for l in poem_text.strip().split("\n") if l.strip()]
         words = text_lower.split()
         word_count = len(words)
-        
+
         # Check for Monika mention
         has_monika = "monika" in text_lower
-        
-        # Count keywords by category (using precise matching)
+
+        # IMPROVED: Density-based keyword counting with quality filtering
+        # Only count meaningful keywords, not generic descriptive words
         romantic_count = sum(1 for w in words if any(is_keyword_match(w, kw) for kw in ROMANTIC_KEYWORDS))
         sad_count = sum(1 for w in words if any(is_keyword_match(w, kw) for kw in SAD_KEYWORDS))
         intel_count = sum(1 for w in words if any(is_keyword_match(w, kw) for kw in INTELLECTUAL_KEYWORDS))
         playful_count = sum(1 for w in words if any(is_keyword_match(w, kw) for kw in PLAYFUL_KEYWORDS))
+
+        # Calculate keyword density (keywords per 100 words)
+        total_keywords = romantic_count + sad_count + intel_count + playful_count
+        density_score = (total_keywords / max(word_count, 1)) * 100
+
+        # Minimum word threshold for mood classification
+        min_words_for_mood = 15  # Poems shorter than this are "creative" by default
         
         # Collect found keywords for citation (using precise matching)
         keywords_found = []
@@ -2804,48 +2822,65 @@ init python in ep_poems:
             "intellectual": intel_count,
             "playful": playful_count
         }
-        
+
         max_count = max(counts.values())
-        
-        # MIXED MOOD DETECTION
-        # Only classify as mixed if both moods are BALANCED (not dominated by one)
-        # A mood is "dominated" if one is 3x or more than the other
-        
-        # Bittersweet: romantic + sad (melancholic love poems)
-        # Only if both are significant AND balanced
-        if romantic_count >= 2 and sad_count >= 2:
-            # Check if one dominates
-            if romantic_count >= sad_count * 3:
-                mood = "romantic"  # Romantic dominates
-            elif sad_count >= romantic_count * 3:
-                mood = "sad"  # Sad dominates
-            elif romantic_count >= sad_count:
-                mood = "bittersweet"
-            else:
-                mood = "melancholic"  # More sad than romantic
-        
-        # Flirty: playful + romantic (teasing love)
-        # Only if both are significant AND playful is at least 1/3 of romantic
-        elif playful_count >= 2 and romantic_count >= 2:
-            if romantic_count >= playful_count * 3:
-                mood = "romantic"  # Romantic dominates, not flirty
-            else:
-                mood = "flirty"
-        
-        # Philosophical: intellectual + sad (deep contemplation)
-        elif intel_count >= 2 and sad_count >= 2:
-            if intel_count >= sad_count * 3:
-                mood = "intellectual"
-            elif sad_count >= intel_count * 3:
-                mood = "sad"
-            else:
-                mood = "philosophical"
-        
-        # Standard mood detection
-        elif max_count == 0:
+
+        # IMPROVED MOOD DETECTION WITH BETTER THRESHOLDS
+        # Dynamic thresholds based on poem length and keyword density
+
+        # Calculate adaptive thresholds based on word count
+        if word_count < min_words_for_mood:
+            # Too short for reliable mood detection
             mood = "creative"
+            confidence = 0.3
         else:
-            mood = max(counts, key=counts.get)
+            # Adaptive thresholds: more keywords needed for longer poems
+            base_threshold = max(3, int(word_count * 0.02))  # 2% of words, minimum 3
+            mixed_threshold = max(2, int(word_count * 0.015))  # 1.5% of words, minimum 2
+
+            # Density check: if too many keywords relative to length, it's probably not genuine
+            if density_score > 15:  # More than 15 keywords per 100 words = spammy
+                mood = "creative"
+                confidence = 0.4
+            else:
+                # MIXED MOOD DETECTION with higher thresholds
+                # Bittersweet: romantic + sad (melancholic love poems)
+                if romantic_count >= mixed_threshold and sad_count >= mixed_threshold:
+                    ratio = max(romantic_count, sad_count) / min(romantic_count, sad_count)
+                    if ratio >= 3:
+                        mood = "romantic" if romantic_count > sad_count else "sad"
+                        confidence = 0.7
+                    else:
+                        mood = "bittersweet" if romantic_count >= sad_count else "melancholic"
+                        confidence = 0.8
+
+                # Flirty: playful + romantic (teasing love)
+                elif playful_count >= mixed_threshold and romantic_count >= base_threshold:
+                    if romantic_count >= playful_count * 2:
+                        mood = "romantic"
+                        confidence = 0.7
+                    else:
+                        mood = "flirty"
+                        confidence = 0.8
+
+                # Philosophical: intellectual + sad (deep contemplation)
+                elif intel_count >= mixed_threshold and sad_count >= mixed_threshold:
+                    ratio = max(intel_count, sad_count) / min(intel_count, sad_count)
+                    if ratio >= 3:
+                        mood = "intellectual" if intel_count > sad_count else "sad"
+                        confidence = 0.7
+                    else:
+                        mood = "philosophical"
+                        confidence = 0.8
+
+                # Standard mood detection with minimum thresholds
+                elif max_count >= base_threshold:
+                    mood = max(counts, key=counts.get)
+                    confidence = min(0.9, max_count / (word_count * 0.05))  # Max 90% confidence
+                else:
+                    # Not enough keywords for confident classification
+                    mood = "creative"
+                    confidence = 0.5
         
         # Find secondary mood (for dialogue variety)
         sorted_moods = sorted(counts.items(), key=lambda x: x[1], reverse=True)
@@ -2861,7 +2896,9 @@ init python in ep_poems:
             "line_count": len(lines),
             "lines": lines,
             "has_monika": has_monika,
-            "mood_counts": counts  # For debug/detail
+            "mood_counts": counts,  # For debug/detail
+            "confidence": confidence,
+            "density_score": round(density_score, 2)
         }
     
     def get_best_line(lines, mood):
@@ -2919,7 +2956,7 @@ init python in ep_poems:
     
     def save_poem(poem_text, mood, secondary_mood=None, word_count=0, has_monika=False, keywords=None, title=None):
         """
-        Saves poem to persistent history (max 5).
+        Saves poem to persistent history (max 30).
         Now with more metadata for richer history viewing.
         If no title is provided, generates one based on mood.
         """
@@ -2941,7 +2978,7 @@ init python in ep_poems:
             title = default_titles.get(mood, "Your Unique Voice")
         
         poem_data = {
-            "text": poem_text[:500],
+            "text": poem_text[:store.ep_poems.MAX_POEM_CHARS],
             "title": title,
             "mood": mood,
             "secondary_mood": secondary_mood,
@@ -3538,8 +3575,8 @@ label minigame_poem_free:
     # Date tracking for free poems
     python:
         import datetime
-        today = datetime.date.today()
-        
+        today = store.ep_button.get_today_date()
+
         if persistent._ep_last_poem_date != str(today):
             _ep_poems_today = 0
             is_new_day = True
@@ -3629,7 +3666,7 @@ label minigame_poem_free:
     # Update tracking
     python:
         _ep_poems_today += 1
-        persistent._ep_last_poem_date = str(datetime.date.today())
+        persistent._ep_last_poem_date = store.ep_button.get_today_str()
         persistent._ep_last_poem_mode = "free"
     
     # Prepare screen

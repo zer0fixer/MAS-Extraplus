@@ -55,10 +55,12 @@ init -995 python in ep_folders:
         return "ExtraPlus"  # Default value if not found
 
     # Detect 'submods' folder case-insensitively
-    EP_submods_folder = find_submods_folder()
+    # NOTE: Must use the absolute path to game/ directory, not current working directory
+    _game_dir_path = _normalize_path(os.path.join(renpy.config.basedir, "game"))
+    EP_submods_folder = find_submods_folder(_game_dir_path)
     
     # Detect 'ExtraPlus' folder case-insensitively (for Linux/macOS compatibility)
-    _submods_full_path = _normalize_path(os.path.join(renpy.config.basedir, "game", EP_submods_folder))
+    _submods_full_path = _normalize_path(os.path.join(_game_dir_path, EP_submods_folder))
     EP_extraplus_folder = find_extraplus_folder(_submods_full_path)
 
     # --- SUBMOD BASE PATH DEFINITIONS ---
@@ -104,6 +106,44 @@ init -995 python in ep_folders:
 init -5 python in ep_button:
     import store
     import datetime
+    import time
+
+    # Cache for date/time calculations to avoid repeated calls
+    _cached_today = None
+    _cached_today_str = None
+    _cache_timestamp = 0
+
+    def get_today_str():
+        """
+        Optimized function to get today's date as string.
+        Caches the result to avoid repeated datetime.date.today() calls.
+        """
+        global _cached_today, _cached_today_str, _cache_timestamp
+        current_time = time.time()
+
+        # Cache for 5 minutes (300 seconds)
+        if _cached_today_str is None or (current_time - _cache_timestamp) > 300:
+            _cached_today = datetime.date.today()
+            _cached_today_str = str(_cached_today)
+            _cache_timestamp = current_time
+
+        return _cached_today_str
+
+    def get_today_date():
+        """
+        Optimized function to get today's date object.
+        Caches the result to avoid repeated datetime.date.today() calls.
+        """
+        global _cached_today, _cached_today_str, _cache_timestamp
+        current_time = time.time()
+
+        # Cache for 5 minutes (300 seconds)
+        if _cached_today is None or (current_time - _cache_timestamp) > 300:
+            _cached_today = datetime.date.today()
+            _cached_today_str = str(_cached_today)
+            _cache_timestamp = current_time
+
+        return _cached_today
 
     def _evaluate_current_conditions():
         # Internal helper to check all conditions at once.
@@ -1019,17 +1059,17 @@ init -5 python in ep_wardrobe:
             # Clothes
             cloth_list = store.mas_selspr.CLOTH_SEL_SL
             stats["clothes_total"] = len(cloth_list)
-            stats["clothes_unlocked"] = len([x for x in cloth_list if x.unlocked])
-            
+            stats["clothes_unlocked"] = sum(1 for x in cloth_list if x.unlocked)
+
             # Accessories
             acs_list = store.mas_selspr.ACS_SEL_SL
             stats["acs_total"] = len(acs_list)
-            stats["acs_unlocked"] = len([x for x in acs_list if x.unlocked])
-            
+            stats["acs_unlocked"] = sum(1 for x in acs_list if x.unlocked)
+
             # Hairstyles
             hair_list = store.mas_selspr.HAIR_SEL_SL
             stats["hair_total"] = len(hair_list)
-            stats["hair_unlocked"] = len([x for x in hair_list if x.unlocked])
+            stats["hair_unlocked"] = sum(1 for x in hair_list if x.unlocked)
         except Exception:
             pass
         
@@ -1334,7 +1374,7 @@ init -5 python in ep_tools:
         try:
             start_datetime = store.persistent.sessions["first_session"]
             start_date = start_datetime.date()
-            current_date = datetime.date.today()
+            current_date = store.ep_button.get_today_date()
             delta = current_date - start_date
             total_days = delta.days
 
@@ -1392,7 +1432,7 @@ init -5 python in ep_tools:
         try:
             start_datetime = store.persistent.sessions["first_session"]
             start_date = start_datetime.date()
-            current_date = datetime.date.today()
+            current_date = store.ep_button.get_today_date()
             delta = current_date - start_date
             return delta.days
         except Exception:
@@ -1409,7 +1449,7 @@ init -5 python in ep_tools:
         try:
             start_datetime = store.persistent.sessions["first_session"]
             start_date = start_datetime.date()
-            current_date = datetime.date.today()
+            current_date = store.ep_button.get_today_date()
 
             # Calculate actual years by comparing dates
             years = current_date.year - start_date.year
@@ -1455,7 +1495,10 @@ init -5 python in ep_tools:
     # --- Utility Functions ---
     def filtered_clipboard_text(allowed_chars):
         """Get clipboard text, filter by allowed_chars, return or 'cancel'."""
-        import pygame
+        try:
+            import pygame
+        except ImportError:
+            return "cancel"
         try:
             pygame.scrap.init()
             clipboard_bytes = pygame.scrap.get(pygame.scrap.SCRAP_TEXT)
@@ -1862,7 +1905,11 @@ init python in ep_fridge:
     import datetime
     import renpy.store as store
     import renpy.exports as renpy
-    import pygame
+    try:
+        import pygame
+        pygame_available = True
+    except ImportError:
+        pygame_available = False
     
     EP_FM_FONT = "gui/font/RifficFree-Bold.ttf"
 
@@ -1947,11 +1994,12 @@ init python in ep_fridge:
             self.top = []
             self.bottom = []
             self.holding = None
+            self.delete_mode = False  # Toggle for delete mode
             self.event_handler = EventHandler()
             
             # --- Monika's logic for adding magnets ---
-            today_str = str(datetime.date.today())
-            
+            today_str = store.ep_button.get_today_str()
+
             # Load existing magnets FIRST so collision detection works
             self.load()
             
@@ -2010,6 +2058,20 @@ init python in ep_fridge:
             # Assign the mouse position to the magnet we are going to hold
             letter.x, letter.y = mouse_pos[0], mouse_pos[1]
             self.holding = letter
+        
+        def delete(self, place, letter):
+            """Deletes a single magnet from the fridge."""
+            if place == "top":
+                if letter in self.top:
+                    self.top.remove(letter)
+            else:
+                if letter in self.bottom:
+                    self.bottom.remove(letter)
+            self.save()  # Save after deletion
+        
+        def toggle_delete_mode(self):
+            """Toggles delete mode on/off."""
+            self.delete_mode = not self.delete_mode
             
         def clean_magnets(self):
             """Cleans all magnets from the fridge."""
@@ -2178,8 +2240,12 @@ init -10 python in ep_sg:
 # ============================================================================
 
 init -15 python:
-    import pygame
-    
+    try:
+        import pygame
+        pygame_available = True
+    except ImportError:
+        pygame_available = False
+
     class EPLinearForm(object):
         """
         Representation of linear functions for edge calculations.

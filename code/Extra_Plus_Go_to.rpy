@@ -1439,8 +1439,8 @@ label library_reading_session:
     # ---------------------------------------------------------
     python:
         import datetime
-        today = datetime.date.today()
-        
+        today = store.ep_button.get_today_date()
+
         # 1. DAILY RESET: If it's a new day, clear the poem memory
         if persistent._ep_lib_last_reading_date != today:
             persistent._ep_lib_last_reading_date = today
@@ -1733,8 +1733,8 @@ label library_quiet_time:
         # Check for available improvised poems
         python:
             import datetime
-            today = datetime.date.today()
-            
+            today = store.ep_button.get_today_date()
+
             # Daily reset
             if persistent._ep_lib_last_quiet_date != today:
                 persistent._ep_lib_last_quiet_date = today
@@ -1982,8 +1982,8 @@ label library_talk_topic:
     show monika idle at t11
     python:
         import datetime
-        today = datetime.date.today()
-        
+        today = store.ep_button.get_today_date()
+
         # 1. DAILY RESET: If it's a new day, clear the topic memory
         if persistent._ep_lib_last_topic_date != today:
             persistent._ep_lib_last_topic_date = today

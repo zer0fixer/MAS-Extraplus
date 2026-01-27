@@ -12,7 +12,7 @@ init -990 python:
         author="ZeroFixer",
         name="Extra Plus",
         description="Expand your time with Monika with new minigames, dates, and interactions.",
-        version="1.4.2",
+        version="1.4.3",
         settings_pane="_extra_plus_submod_settings"
     )
 
@@ -298,11 +298,16 @@ init 20 python in ep_chibis:
     notify_icon = store.ep_folders._join_path(store.ep_folders.EP_ICONS,"{}_icon.png")
 
 # Store: ep_dates (date state)
-# Tracks state during date locations (cafe, restaurant, pool).
+# Tracks state during date locations (cafe, restaurant, pool, library).
 init -5 python in ep_dates:
     import store
+    import datetime
+    
+    # UI positioning
     xpos = 0.05
     ypos = 555 if store.ep_tools.noises_submod else 595
+    
+    # Date state variables
     old_bg = None
     chair = None
     table = None
@@ -310,6 +315,107 @@ init -5 python in ep_dates:
     food_player = None
     stop_snike_time = False
     snack_timer = None
+    
+    # Loop control variables
+    _current_date_type = None  # Current date type (cafe, restaurant, pool, library)
+    _last_bg_check = None      # Last time we checked the background
+    _bg_check_interval = 30    # Seconds between background checks
+    
+    # =========================================================================
+    # DATE CONFIGURATION
+    # Each date type has its configuration here for centralized management
+    # =========================================================================
+    class DateConfig:
+        """Configuration for a date location."""
+        def __init__(self, talk_label, boop_label, boop_enabled, monika_pose, monika_position):
+            self.talk_label = talk_label        # Label to jump to for Talk menu
+            self.boop_label = boop_label        # Label for boop interaction
+            self.boop_enabled = boop_enabled    # Whether boop is enabled
+            self.monika_pose = monika_pose      # Monika's pose (e.g., "staticpose", "idle")
+            self.monika_position = monika_position  # Position transform (e.g., "t11", "t11_float")
+    
+    # Date type configurations
+    DATE_CONFIGS = {
+        "cafe": DateConfig(
+            talk_label="extra_cafe_talk",
+            boop_label="monika_boopcafe",
+            boop_enabled=True,
+            monika_pose="staticpose",
+            monika_position="t11"
+        ),
+        "restaurant": DateConfig(
+            talk_label="extra_restaurant_talk",
+            boop_label="monika_booprestaurant",
+            boop_enabled=True,
+            monika_pose="staticpose",
+            monika_position="t11"
+        ),
+        "pool": DateConfig(
+            talk_label="extra_pool_interactions",
+            boop_label="",
+            boop_enabled=False,
+            monika_pose="idle",
+            monika_position="t11_float"
+        ),
+        "library": DateConfig(
+            talk_label="extra_library_interactions",
+            boop_label="",
+            boop_enabled=False,
+            monika_pose="idle",
+            monika_position="t11"
+        )
+    }
+    
+    def get_config(date_type):
+        """
+        Gets the configuration for a date type.
+        
+        IN:
+            date_type - string identifier for the date type
+            
+        RETURNS:
+            DateConfig object or None if not found
+        """
+        return DATE_CONFIGS.get(date_type)
+    
+    def set_current_date(date_type):
+        """
+        Sets the current date type and resets loop state.
+        
+        IN:
+            date_type - string identifier for the date type
+        """
+        global _current_date_type, _last_bg_check
+        _current_date_type = date_type
+        _last_bg_check = datetime.datetime.now()
+    
+    def clear_current_date():
+        """Clears the current date state."""
+        global _current_date_type, _last_bg_check
+        _current_date_type = None
+        _last_bg_check = None
+    
+    def should_check_background():
+        """
+        Checks if enough time has passed to check for background updates.
+        
+        RETURNS:
+            True if we should check the background, False otherwise
+        """
+        global _last_bg_check
+        
+        if _last_bg_check is None:
+            _last_bg_check = datetime.datetime.now()
+            return True
+        
+        now = datetime.datetime.now()
+        elapsed = (now - _last_bg_check).total_seconds()
+        
+        if elapsed >= _bg_check_interval:
+            _last_bg_check = now
+            return True
+        
+        return False
 
 init -1 python in ep_chibis:
     monika_costumes_ = [(_("Blanket"), blanket_monika), (_("Android"), android_monika), (_("Casual"), casual_monika)]
@@ -509,7 +615,11 @@ init -10 python in mas_interactions:
     ZONE_EXTRA_SHOULDER_R = "extra_shoulder_r"
 
 init -5 python:
-    import pygame
+    try:
+        import pygame
+        pygame_available = True
+    except ImportError:
+        pygame_available = False
 
     class ExtraPlusInteractionManager(object):
 
@@ -766,6 +876,10 @@ init 5 python:
         vars()[name] = acs
         store.mas_sprites.init_acs(acs)
 
+#====Configurable Image Sizes
+define ep_cup_width = 200
+define ep_cup_height = 260
+
 #====Rock Paper Scissors
 image extra_paper = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_RPS, "paper.png"))
 image extra_rock = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_RPS, "rock.png"))
@@ -776,7 +890,7 @@ image extra_card_back = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_R
 image note_score = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "note_score.png"))
 image extra_cup = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "{}".format(store.ep_sg.cup_skin)))
 image extra_cup_hover = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "cup_hover.png"))
-image extra_cup_idle = im.Scale("mod_assets/other/transparent.png", 200, 260)
+image extra_cup_idle = im.Scale("mod_assets/other/transparent.png", ep_cup_width, ep_cup_height)
 image extra_ball = MASFilterSwitch(ep_folders._join_path(ep_folders.EP_MG_SHELLGAME, "ball.png"))
 
 #====Tic-Tac-Toe
@@ -1353,8 +1467,60 @@ screen score_minigame(game=None):
 screen boop_revamped():
     zorder 49
 
-    key "mouseup_1" action Function(store.EP_interaction_manager.handle_click, button=1)
-    key "mouseup_3" action Function(store.EP_interaction_manager.handle_click, button=3) # Right click
+    # Desktop: use key events for mouse clicks
+    if not renpy.android:
+        key "mouseup_1" action Function(store.EP_interaction_manager.handle_click, button=1)
+        key "mouseup_3" action Function(store.EP_interaction_manager.handle_click, button=3)
+    else:
+        # Android: use touchable imagebuttons for ALL interaction zones
+        # Dynamically calculate zone positions based on current zoom level
+        python:
+            # Get the zones from the cz_manager with current zoom
+            _ep_android_zones = {}
+            try:
+                _im = store.EP_interaction_manager
+                if _im._zones_enabled and _im.cz_manager:
+                    _current_zoom = store.mas_sprites.zoom_level
+                    
+                    # List of all zone keys we want to display
+                    _zone_keys = [
+                        store.mas_interactions.ZONE_EXTRA_HEAD,
+                        store.mas_interactions.ZONE_EXTRA_NOSE,
+                        store.mas_interactions.ZONE_EXTRA_CHEEK_L,
+                        store.mas_interactions.ZONE_EXTRA_CHEEK_R,
+                        store.mas_interactions.ZONE_EXTRA_HANDS,
+                        store.mas_interactions.ZONE_EXTRA_EAR_L,
+                        store.mas_interactions.ZONE_EXTRA_EAR_R,
+                        store.mas_interactions.ZONE_EXTRA_SHOULDER_L,
+                        store.mas_interactions.ZONE_EXTRA_SHOULDER_R,
+                    ]
+                    
+                    for _zone_key in _zone_keys:
+                        _cz = _im.cz_manager.get(_zone_key, _current_zoom)
+                        if _cz and not _cz.disabled and _cz.corners:
+                            _corners = _cz.corners
+                            _min_x = min(x for x, y in _corners)
+                            _min_y = min(y for x, y in _corners)
+                            _max_x = max(x for x, y in _corners)
+                            _max_y = max(y for x, y in _corners)
+                            _ep_android_zones[_zone_key] = {
+                                'x': _min_x,
+                                'y': _min_y,
+                                'w': _max_x - _min_x,
+                                'h': _max_y - _min_y
+                            }
+            except (AttributeError, TypeError):
+                pass
+        
+        # Render imagebuttons for each available zone
+        for _zone_key, _zone_data in _ep_android_zones.items():
+            imagebutton:
+                xpos _zone_data['x']
+                ypos _zone_data['y']
+                xysize (_zone_data['w'], _zone_data['h'])
+                idle Solid("#00000000")
+                action Function(store.EP_interaction_manager.handle_click, button=1)
+                alternate Function(store.EP_interaction_manager.handle_click, button=3)
     vbox:
         style_prefix "check"
         yanchor 0.5
@@ -1437,15 +1603,20 @@ screen boop_war_score_ui():
         text _("Boops : [store.EP_interaction_manager.ep_boop_war_count]") size 25 style "monika_text"
 
 # === DATES ===
-screen extra_dating_loop(ask, label_boop, boop_enable=False):
+# New simplified UI screen for date loops
+# Only handles the Talk button and boop overlay - no background logic
+screen ep_date_ui(talk_label, boop_label="", boop_enabled=False):
     zorder 51
-
-    key "t" action Jump(ask)
-    key "T" action Jump(ask)
-
-    if boop_enable:
-        use boop_capture_overlay(label_boop)
     
+    # Keyboard shortcuts for Talk
+    key "t" action Jump(talk_label)
+    key "T" action Jump(talk_label)
+    
+    # Boop interaction overlay (only if enabled)
+    if boop_enabled and boop_label:
+        use boop_capture_overlay(boop_label)
+    
+    # Talk button
     vbox:
         xpos store.ep_dates.xpos
         yanchor 1.0
@@ -1453,20 +1624,15 @@ screen extra_dating_loop(ask, label_boop, boop_enable=False):
         
         textbutton _("Talk"):
             style "hkb_button"
-            action Jump(ask)
+            action Jump(talk_label)
 
 screen extra_timer_monika(time, label):
-
-    timer time action SetField(store.ep_dates, "stop_snike_time", True)
-    
-    timer 0.5 repeat True action If(
-        store.ep_dates.stop_snike_time and renpy.get_screen("extra_dating_loop"),
-        true=[
-            Hide("extra_dating_loop"),
-            Jump(label)
-        ],
-        false=NullAction()
-    )
+    # Timer for food/dessert consumption during dates
+    # When the timer completes, it hides the date UI and jumps to the specified label
+    timer time action [
+        Hide("ep_date_ui"),
+        Jump(label)
+    ]
 
 screen force_mouse_move():
     #Forces the mouse to move to a specific position, used for certain effects or minigames.
@@ -1864,13 +2030,30 @@ screen extra_fridge_magnets():
         use extra_magnet_render(EP_fridge_manager.holding, EP_fridge_manager, None, magnet_size)
         timer .01 repeat True action Function(EP_fridge_manager.tick)
 
-    # Exit Button
+    # Delete mode indicator
+    if EP_fridge_manager.delete_mode:
+        text _("TAP A MAGNET TO DELETE"):
+            xalign 0.5
+            ypos 420
+            size 24
+            color "#ff4444"
+            outlines [(2, "#000", 0, 0)]
+
+    # Control buttons
     vbox:
         style_prefix "hkb"
         xpos 0.85
         yanchor 1.0
-        ypos 90
+        ypos 130
         use extra_close_button("extra_fridge_quit")
+        if EP_fridge_manager.delete_mode:
+            textbutton _("Move"):
+                action Function(EP_fridge_manager.toggle_delete_mode)
+                text_color "#88ff88"
+        else:
+            textbutton _("Delete"):
+                action Function(EP_fridge_manager.toggle_delete_mode)
+                text_color "#ff8888"
         textbutton _("Clean") action Function(EP_fridge_manager.clean_magnets)
 
 # Animation for coffee popup - fade in with slide up
@@ -1943,20 +2126,34 @@ screen extra_magnet_render(item, manager, location, fsize):
         # --- 2. Main Letter (Front) ---
         if location:
             # First, we draw the main text in its correct position
-            text item.letter:
-                font store.ep_fridge.EP_FM_FONT
-                size fsize
-                color current_main_color
-                outlines [(2, current_shadow_color, 0, 0)]
-                at fm_text_trans(item.rotation)
-                pos item.x, item.y anchor 0.5, 0.5
+            # In delete mode, show a red outline to indicate deletable
+            if manager.delete_mode:
+                text item.letter:
+                    font store.ep_fridge.EP_FM_FONT
+                    size fsize
+                    color current_main_color
+                    outlines [(3, "#ff4444", 0, 0)]
+                    at fm_text_trans(item.rotation)
+                    pos item.x, item.y anchor 0.5, 0.5
+            else:
+                text item.letter:
+                    font store.ep_fridge.EP_FM_FONT
+                    size fsize
+                    color current_main_color
+                    outlines [(2, current_shadow_color, 0, 0)]
+                    at fm_text_trans(item.rotation)
+                    pos item.x, item.y anchor 0.5, 0.5
             
             # Then, we overlay a transparent button for interaction
+            # Action depends on current mode (move vs delete)
             button:
                 style "empty" # A style with no background or margins
                 xysize (fsize, fsize) # We make the button the size of the letter
                 pos item.x, item.y anchor 0.5, 0.5
-                action Function(manager.swap, location, item)
+                if manager.delete_mode:
+                    action Function(manager.delete, location, item)
+                else:
+                    action Function(manager.swap, location, item)
         
         else:
             text item.letter:
