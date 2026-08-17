@@ -832,7 +832,7 @@ init python in ep_poems:
     import re
     
     # Character limit for free poems
-    MAX_POEM_CHARS = 800
+    MAX_POEM_CHARS = 2000
     MAX_SAVED_POEMS = 30
 
 
@@ -854,6 +854,9 @@ init python:
         def __init__(self, initial_text="", max_chars=None):
             self.current_value = initial_text
             self.max_chars = max_chars if max_chars is not None else store.ep_poems.MAX_POEM_CHARS
+            # Flag used to swallow the spurious changed() callback that Ren'Py
+            # fires immediately after we set widget.content programmatically.
+            self._suppress_update = False
         
         def get_widget(self):
             """Gets the input widget from the screen."""
@@ -877,10 +880,17 @@ init python:
                 self.redraw_input()
         
         def redraw_input(self):
-            """Forces the input to redraw."""
+            """
+            Forces the input widget to redraw after a programmatic content change.
+
+            IMPORTANT: do NOT call widget.update_text() here.  That is Ren'Py's
+            internal method and calling it re-fires the `changed` callback with
+            whatever the widget has internally — which is often a newline-stripped
+            copy of our content (Ren'Py's input displayable is single-line by
+            design).  Calling it was the root cause of the poem truncation bug.
+            """
             widget = self.get_widget()
             if widget:
-                widget.update_text(widget.content, widget.editable)
                 renpy.display.render.redraw(widget, 0)
                 renpy.restart_interaction()
         
@@ -898,15 +908,46 @@ init python:
             
             widget = self.get_widget()
             if widget:
+                # Suppress the changed() callback that Ren'Py fires when we
+                # set widget.content so it can't overwrite current_value.
+                self._suppress_update = True
                 widget.content = self.current_value
                 widget.caret_pos = caret_pos + 1
                 self.redraw_input()
         
         def update_text(self, new_text):
-            """Called when text changes."""
+            """
+            Called by Ren'Py whenever the input widget's content changes (both via
+            the FieldInputValue binding and via the `changed` callback).
+
+            Guard 1 — suppression flag:
+                Set by insert_newline / insert_stanza before they modify
+                widget.content.  The very next callback that fires is swallowed so
+                we don't overwrite current_value with whatever the widget had before
+                our programmatic change arrived.
+
+            Guard 2 — newline preservation:
+                Ren'Py's input widget is a single-line widget.  When it echoes our
+                content back through the changed callback it sometimes strips \\n.
+                If new_text is exactly current_value with all newlines removed, we
+                know this is a spurious strip — ignore it.
+            """
+            # Guard 1
+            if self._suppress_update:
+                self._suppress_update = False
+                return
+
             # Limit to max chars
             if len(new_text) > self.max_chars:
                 new_text = new_text[:self.max_chars]
+
+            # Guard 2 — newline preservation
+            if "\n" in self.current_value and "\n" not in new_text:
+                if self.current_value.replace("\n", "") == new_text:
+                    # Widget returned our text with newlines stripped and nothing
+                    # else changed.  Ignore this callback.
+                    return
+
             self.current_value = new_text
 
         def paste_text(self):
@@ -1038,6 +1079,7 @@ init python:
             
             widget = self.get_widget()
             if widget:
+                self._suppress_update = True
                 widget.content = self.current_value
                 widget.caret_pos = pos
                 self.redraw_input()
@@ -1056,6 +1098,7 @@ init python:
             
             widget = self.get_widget()
             if widget:
+                self._suppress_update = True
                 widget.content = self.current_value
                 widget.caret_pos = caret_pos + 2
                 self.redraw_input()
@@ -1095,18 +1138,28 @@ init python:
                 renpy.notify("No saved draft found.")
     
     def save_poem_draft(text):
-        """Saves the current poem as a draft."""
+        """Saves the current poem as a draft, enforcing max length."""
         import store
+        # Enforce character limit before saving
+        if len(text) > store.ep_poems.MAX_POEM_CHARS:
+            text = text[:store.ep_poems.MAX_POEM_CHARS]
+            
         store.persistent._ep_poem_draft = text
         renpy.notify("Draft saved!")
     
     def load_poem_draft():
-        """Loads the saved draft if it exists."""
+        """Loads the saved draft if it exists, cropped to max limit."""
         import store
         draft = getattr(store.persistent, '_ep_poem_draft', "")
+        
         # Ensure it's a string, not bool or other type
-        if not isinstance(draft, basestring):
+        if not isinstance(draft, str):
             return ""
+            
+        # Enforce max chars again just in case the limit was lowered in an update
+        if draft and len(draft) > store.ep_poems.MAX_POEM_CHARS:
+            draft = draft[:store.ep_poems.MAX_POEM_CHARS]
+            
         return draft or ""
     
     def has_poem_draft():
@@ -1160,7 +1213,7 @@ init python in ep_poems:
         Words like 'cruel' are allowed if the poem has positive context.
         """
         # Ensure poem_text is a string
-        if not isinstance(poem_text, basestring) or not poem_text.strip():
+        if not isinstance(poem_text, str) or not poem_text.strip():
             return {
                 "is_inappropriate": False,
                 "severity": None,
@@ -1643,7 +1696,7 @@ init python in ep_poems:
         }
         """
         # Ensure poem_text is a string
-        if not isinstance(poem_text, basestring) or not poem_text.strip():
+        if not isinstance(poem_text, str) or not poem_text.strip():
             return {
                 "is_gibberish": False,
                 "gibberish_type": None,
@@ -2377,7 +2430,10 @@ init python in ep_poems:
         detected_seasons = []
         for season_type, keywords in SEASONAL_KEYWORDS.items():
             matches = [kw for kw in keywords if kw in text_lower]
-            if len(matches) >= 2:  # Require at least 2 matches to avoid false positives
+            # Require at least 3 matches to avoid false positives.
+            # (Was 2; raised so poetic metaphors like "ghost" + "mourning" in a
+            # love poem don't hijack the reaction into the Halloween branch.)
+            if len(matches) >= 3:
                 detected_seasons.append({
                     "type": season_type,
                     "matches": matches,
@@ -3088,7 +3144,9 @@ screen extra_free_poem():
     key "noshift_K_HOME" action Function(EP_poem_input.move_to_line_start)
     key "noshift_K_END" action Function(EP_poem_input.move_to_line_end)
     key "ctrl_K_BACKSPACE" action Function(EP_poem_input.delete_word_back)
-    # key "ctrl_v" action Function(EP_poem_input.paste_text)
+    # Ctrl+V paste enabled for desktop too — makes it easy to test poems from
+    # feedback/issues and to import long pieces without hand-typing them.
+    key "ctrl_v" action Function(EP_poem_input.paste_text)
 
     # Android-only navigation controls
     if renpy.android:
@@ -3132,10 +3190,10 @@ screen extra_free_poem():
                     size 20
                     color "#222"
                 
-                # text "Ctrl+V -- Paste from clipboard":
-                #     style "monika_text"
-                #     size 20
-                #     color "#222"
+                text "Ctrl+V -- Paste from clipboard":
+                    style "monika_text"
+                    size 20
+                    color "#222"
                 
                 text "Arrow Up/Down -- Navigate between lines":
                     style "monika_text"
@@ -3173,13 +3231,13 @@ screen extra_free_poem():
                 activate_sound gui.activate_sound
                 selected False
 
-            # textbutton "Paste":
-            #     action Function(EP_poem_input.paste_text)
-            #     style "poem_menu_button"
-            #     text_style "poem_menu_button_text"
-            #     hover_sound gui.hover_sound
-            #     activate_sound gui.activate_sound
-                
+            textbutton "Paste":
+                action Function(EP_poem_input.paste_text)
+                style "poem_menu_button"
+                text_style "poem_menu_button_text"
+                hover_sound gui.hover_sound
+                activate_sound gui.activate_sound
+
             textbutton "Done":
                 action Return(EP_poem_input.current_value)
                 style "poem_menu_button"
@@ -3506,7 +3564,9 @@ screen extra_display_poem(poem_text, poem_mood="creative", poem_index=-1, poem_t
             scrollbars "vertical"
             mousewheel True
             
-            text poem_text style "library_poem_input"
+            # Force text to word-wrap so it matches the input formatting
+            # Without this, text without explicit newlines renders as an infinite single line
+            text poem_text style "library_poem_input" xsize 510
 
     # Button row on the right side - switches between normal and confirm mode
     default EP_confirm_mode = False
@@ -3749,7 +3809,7 @@ label minigame_poem_free:
         m 1eua "I'm so excited to read your words, [player]."
     elif _free_done_variant == 3:
         m 1eua "Okay, I think that's everything."
-        m 1hub "Now comes my favorite part—reading your poem!"
+        m 1hub "Now comes my favorite part... reading your poem!"
     else:
         m 1hub "Wonderful!"
         m 1eua "Let's see what feelings you put into words today..."
@@ -4242,27 +4302,306 @@ label minigame_poem_free:
     # POEM ANALYSIS (only for appropriate content)
     # =========================================================================
     python:
-        analysis = store.ep_poems.analyze_poem(player_poem)
+        # FIX: Wrap analyze_poem in try/except so any unexpected error
+        # (e.g. unusual unicode, None input from a race condition) doesn't
+        # leave poem_mood/poem_words undefined and crash Monika's dialogue.
+        try:
+            analysis = store.ep_poems.analyze_poem(player_poem)
+        except Exception:
+            analysis = {
+                "mood": "creative",
+                "secondary_mood": None,
+                "word_count": 0,
+                "lines": [],
+                "keywords_found": [],
+                "has_monika": False
+            }
         poem_mood = analysis["mood"]
         poem_words = analysis["word_count"]
         poem_lines = analysis["lines"]
         poem_keywords = analysis["keywords_found"]
         has_monika = analysis["has_monika"]
         secondary_mood = analysis.get("secondary_mood", None)
+        poem_confidence = analysis.get("confidence", 1.0)
         quote_line = store.ep_poems.get_best_line(poem_lines, poem_mood)
         
         # Save to history (only appropriate poems) with full metadata
         if poem_mood != "empty":
-            # Ask for poem title
             _ep_poem_will_save = True
         else:
             _ep_poem_will_save = False
-    
+
+    # =========================================================================
+    # TONE CONFIRMATION — let the player correct the auto-detected mood
+    # Skipped for empty poems (no reaction needed).
+    # =========================================================================
+    # Tracks whether the player interacted with the confirmation menu.
+    # When True, the seasonal/holiday reaction is suppressed in favour of the
+    # mood-based reaction so a corrected mood is never overridden by a stray
+    # keyword like "ghost" triggering the Halloween branch (the exact scenario
+    # reported in user feedback where a love poem was called "spooky").
+    $ _ep_mood_player_confirmed = False
+    if _ep_poem_will_save and poem_mood != "empty":
+        # Map internal mood keys to friendly display names
+        python:
+            _mood_labels = {
+                "romantic":      _("Romantic"),
+                "sad":           _("Sad / Heartfelt"),
+                "flirty":        _("Flirty / Playful"),
+                "bittersweet":   _("Bittersweet"),
+                "melancholic":   _("Melancholic"),
+                "philosophical": _("Philosophical"),
+                "intellectual":  _("Intellectual"),
+                "playful":       _("Playful"),
+                "creative":      _("Creative / Unique"),
+            }
+            _detected_label = _mood_labels.get(poem_mood, _("Creative / Unique"))
+
+        # Monika shares her reading
+        m 1eua "Hmm..."
+        m 1dua "Let me think about how this felt to read."
+        $ _guess_var = renpy.random.randint(1, 5)
+
+        # --- ROMANTIC ---
+        if poem_mood == "romantic":
+            if _guess_var == 1:
+                m 1ekbsa "There's something very loving in here... it feels [_detected_label] to me."
+            elif _guess_var == 2:
+                m 1ekbfa "My heart fluttered a little while reading this..."
+                m 1hubsa "It has a distinctly [_detected_label] tone."
+            elif _guess_var == 3:
+                m 1eka "This is so sweet and affectionate..."
+                m 1ekbsa "I'd definitely call this [_detected_label]."
+            elif _guess_var == 4:
+                m 1hubsa "Ahaha, you're trying to sweep me off my feet, aren't you?"
+                m 1ekbsa "It feels very [_detected_label]."
+            else:
+                m 1dkbsu "..."
+                m 1ekbsa "This is so deeply moving... it reads as [_detected_label] to me."
+
+        # --- SAD ---
+        elif poem_mood == "sad":
+            if _guess_var == 1:
+                m 1eka "There's a weight to this one. A kind of quiet sorrow."
+                m 1dua "It reads as [_detected_label] to me."
+            elif _guess_var == 2:
+                m 1ekc "This one feels heavy on the heart..."
+                m 1eka "I'd classify it as [_detected_label]."
+            elif _guess_var == 3:
+                m 1duc "Reading this gave me a slightly sinking feeling..."
+                m 1eka "It feels quite [_detected_label]."
+            elif _guess_var == 4:
+                m 1ekc "There are some painful emotions poured into these lines."
+                m 1dua "It strikes me as [_detected_label]."
+            else:
+                m 1dkc "..."
+                m 1eka "This is a very vulnerable, [_detected_label] piece."
+
+        # --- MELANCHOLIC ---
+        elif poem_mood == "melancholic":
+            if _guess_var == 1:
+                m 1dua "There's a lingering nostalgia here... a quiet ache."
+                m 1eka "I'd say it's [_detected_label]."
+            elif _guess_var == 2:
+                m 1duc "It feels like watching the rain against the window..."
+                m 1dua "A very [_detected_label] tone."
+            elif _guess_var == 3:
+                m 1eka "This one has a thoughtful, somber atmosphere."
+                m 1dua "It reads as [_detected_label] to me."
+            elif _guess_var == 4:
+                m 1euc "It's not exactly sad, but it's far from completely happy."
+                m 1eka "I think [_detected_label] is the right word for it."
+            else:
+                m 1dua "This makes me reflect on the past..."
+                m 1eka "It has a distinctively [_detected_label] feel."
+
+        # --- FLIRTY ---
+        elif poem_mood == "flirty":
+            if _guess_var == 1:
+                m 1tku "Oh my, [player]~"
+                m 1hub "This one has a cheeky sparkle to it. Very [_detected_label]!"
+            elif _guess_var == 2:
+                m 1tuu "I see what you're doing here~"
+                m 1hubsa "This feels incredibly [_detected_label]!"
+            elif _guess_var == 3:
+                m 1hubsb "Ahaha! Someone is feeling bold today!"
+                m 1tku "I'd definitely call this [_detected_label]."
+            elif _guess_var == 4:
+                m 2tfu "Is it getting warm in here, or is it just your writing?"
+                m 2hubsa "This is very [_detected_label]~"
+            else:
+                m 1tku "Well, well... aren't we being charming?"
+                m 1hub "It has a really fun, [_detected_label] vibe."
+
+        # --- BITTERSWEET ---
+        elif poem_mood == "bittersweet":
+            if _guess_var == 1:
+                m 1dua "It's tender and a little sad at the same time."
+                m 1eka "Like something beautiful you know won't last forever."
+                m 1dubsa "I'd call this [_detected_label]."
+            elif _guess_var == 2:
+                m 1eka "It smiles through the tears, doesn't it?"
+                m 1dua "That makes it feel very [_detected_label]."
+            elif _guess_var == 3:
+                m 1duc "A mixture of happy memories and quiet regrets..."
+                m 1eka "It reads as [_detected_label] to me."
+            elif _guess_var == 4:
+                m 1dua "It's beautiful, but it leaves a slight ache in the chest."
+                m 1eka "I think [_detected_label] fits it perfectly."
+            else:
+                m 1euc "Finding joy in sorrow... or sorrow in joy."
+                m 1eka "This is a truly [_detected_label] poem."
+
+        # --- PHILOSOPHICAL ---
+        elif poem_mood == "philosophical":
+            if _guess_var == 1:
+                m 1eua "There's a lot of depth here."
+                m 1dua "It made me pause and think. Very [_detected_label]."
+            elif _guess_var == 2:
+                m 1duc "You're exploring some grand concepts in these lines."
+                m 1eua "I'd classify this as [_detected_label]."
+            elif _guess_var == 3:
+                m 1eua "This steps back to look at the bigger picture of existence."
+                m 3eua "It feels quite [_detected_label]."
+            elif _guess_var == 4:
+                m 1duu "Hmm... asking the deep questions, I see."
+                m 1eua "It definitely reads as [_detected_label]."
+            else:
+                m 3eua "This explores meaning in a very abstract way."
+                m 1dua "I would call it [_detected_label]."
+
+        # --- INTELLECTUAL ---
+        elif poem_mood == "intellectual":
+            if _guess_var == 1:
+                m 1eua "This one is thoughtful and precise."
+                m 1eka "It reads very [_detected_label]."
+            elif _guess_var == 2:
+                m 3eua "You chose your words very carefully for this one."
+                m 1eua "It gives off a strong [_detected_label] impression."
+            elif _guess_var == 3:
+                m 1eua "This appeals more to the mind than the heart."
+                m 3eua "I'd say it's quite [_detected_label]."
+            elif _guess_var == 4:
+                m 1dua "The structure and vocabulary are very deliberate."
+                m 1eua "It feels very [_detected_label]."
+            else:
+                m 3eua "An analytical and observant piece."
+                m 1eua "I think [_detected_label] describes it best."
+
+        # --- PLAYFUL ---
+        elif poem_mood == "playful":
+            if _guess_var == 1:
+                m 1hua "I love the lightness in this!"
+                m 1hub "It's very [_detected_label]~"
+            elif _guess_var == 2:
+                m 1hub "Ahaha! This is so bouncy and fun."
+                m 1hua "I'd call it [_detected_label]."
+            elif _guess_var == 3:
+                m 1tuu "I can almost see you grinning while you wrote this."
+                m 1hub "It has a great [_detected_label] energy!"
+            elif _guess_var == 4:
+                m 1hua "It's impossible to read this without smiling."
+                m 1hub "Very [_detected_label] indeed~"
+            else:
+                m 1eua "Full of energy and whimsy!"
+                m 1hua "It definitely feels [_detected_label]."
+
+        # --- CREATIVE / UNIQUE (Fallback) ---
+        else:
+            if _guess_var == 1:
+                m 1eua "This one is a bit unique... it has its own voice."
+                m 1eka "I'd say it's [_detected_label]."
+            elif _guess_var == 2:
+                m 1duc "Hmm, this doesn't fit neatly into just one box."
+                m 1eua "I think [_detected_label] is the best way to describe it."
+            elif _guess_var == 3:
+                m 1eua "You really went your own way with the style here."
+                m 3eua "It reads as very [_detected_label]."
+            elif _guess_var == 4:
+                m 1dua "An interesting blend of different emotions..."
+                m 1eua "I'll call this one [_detected_label]."
+            else:
+                m 3eua "There's a bit of everything in this piece."
+                m 1eka "I'd classify it as [_detected_label]."
+
+        show monika 1eua at t21
+        m 1eua "Does that feel right to you?"
+
+        python:
+            # All correctable moods in display order; the one Monika just named
+            # is excluded from the list (redundant — "Yes" already covers it).
+            _tone_options = [
+                ("romantic", "No... it's more Romantic."),
+                ("sad", "No... it's more Sad / Heartfelt."),
+                ("bittersweet", "No... it's more Bittersweet."),
+                ("melancholic", "No... it's more Melancholic."),
+                ("flirty", "No... it's more Flirty."),
+                ("playful", "No... it's more Playful."),
+                ("intellectual", "No... it's more Intellectual."),
+                ("philosophical", "No... it's more Philosophical."),
+                ("creative", "No... it's just Creative."),
+            ]
+            _tone_menu_items = [("Yes, that's the feeling.", "__confirm__", False, False)]
+            for _tone_key, _tone_prompt in _tone_options:
+                if _tone_key != poem_mood:
+                    _tone_menu_items.append((_tone_prompt, _tone_key, False, False))
+            _tone_ret_back = ("Nevermind", -1, False, False, 20)
+
+        call screen mas_gen_scrollable_menu(_tone_menu_items, mas_ui.SCROLLABLE_MENU_TXT_TALL_AREA, mas_ui.SCROLLABLE_MENU_XALIGN, _tone_ret_back)
+        show monika at t11
+
+        $ _tone_choice = _return
+
+        if _tone_choice == -1 or _tone_choice == "__confirm__":
+            $ _ep_mood_player_confirmed = True
+            m 1eka "I thought so~"
+        else:
+            $ poem_mood = _tone_choice
+            $ _ep_mood_player_confirmed = True
+            $ quote_line = store.ep_poems.get_best_line(poem_lines, poem_mood)
+            if poem_mood == "romantic":
+                m 1hubsa "Oh, a love poem! Let me read it again with that in mind~"
+            elif poem_mood == "sad":
+                m 1eka "I see... I'll hold this one more gently, then."
+            elif poem_mood == "bittersweet":
+                m 1dubsa "Tender and a little sad at once. That's its own kind of beautiful."
+            elif poem_mood == "melancholic":
+                m 1dua "There's a quiet ache beneath these words... I feel it too."
+                m 1eka "Thank you for trusting me with something so heavy, [player]."
+            elif poem_mood == "flirty":
+                m 1tku "Oh my~ Trying to make me blush, [player]?"
+                m 1hubsa "Well... it's working, ahaha~"
+            elif poem_mood == "playful":
+                m 1hub "Ahaha! Something light and fun, then~"
+                m 1tku "I should have known you'd keep me on my toes."
+            elif poem_mood == "intellectual":
+                m 1hua "A thoughtful piece. I'll read it again more carefully~"
+                m 3eua "I love when you challenge me like this, [player]."
+            elif poem_mood == "philosophical":
+                m 1eua "Ah... something to sit with and think about. I like that."
+            else:
+                m 1eka "Fair enough. Some poems just resist being boxed in~"
+
+        # Re-derive secondary mood after potential player override
+        python:
+            if poem_mood in ("romantic", "bittersweet"):
+                secondary_mood = "sad" if poem_mood == "bittersweet" else None
+            elif poem_mood == "melancholic":
+                secondary_mood = "romantic"
+            elif poem_mood == "flirty":
+                secondary_mood = "romantic"
+            elif poem_mood == "philosophical":
+                secondary_mood = "intellectual"
+            else:
+                secondary_mood = None
+
     # Ask for poem title before saving
     if _ep_poem_will_save:
         m 1eua "Before we continue..."
         m 3eua "What would you like to call this poem?"
-        $ poem_title_input = store.ep_tools.ep_input("Title (or leave empty):", length=50, allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'-").strip()
+        # FIX: ep_input can return None if the input widget fails; guard before .strip()
+        $ _raw_title = store.ep_tools.ep_input("Title (or leave empty):", length=50, allow=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'-")
+        $ poem_title_input = _raw_title.strip() if _raw_title is not None and _raw_title != "cancel_input" else ""
         
         if poem_title_input:
             # Check for bad words using MAS's bad name list
@@ -4410,13 +4749,15 @@ label minigame_poem_free:
         m 1hub "Let me read the rest~"
     
     # LONG POEM SPECIAL ACKNOWLEDGMENT
-    # For poems with 50+ words, acknowledge the extra effort
-    if poem_words >= 80:
+    # Trigger only for genuinely long poems (120+ words).
+    # 80 words is a normal poem length — raising the bar avoids making
+    # players feel their effort was excessive when it wasn't.
+    if poem_words >= 200:
         m 1wuo "Wow..."
         m 1sub "This is quite a lengthy poem, [player]!"
         m 1ekbsa "You've really poured your heart into this."
         m 1hua "Let me take my time reading every word~"
-    elif poem_words >= 50:
+    elif poem_words >= 120:
         m 1eua "Oh my, you wrote quite a bit!"
         m 1eka "I can tell you put real effort into this."
         m 1hua "I'll savor every word~"
@@ -4424,12 +4765,24 @@ label minigame_poem_free:
     # =========================================================================
     # SEASONAL/HOLIDAY CONTENT CHECK
     # =========================================================================
+    # Only override the mood-based reaction when seasonal detection is both
+    # present AND the poem's mood is still the ambiguous fallback ("creative").
+    # If the player manually confirmed/corrected a mood, their choice takes
+    # priority — this is the fix for the "love poem called spooky" feedback,
+    # where stray keywords like "ghost"/"mourning" triggered the Halloween
+    # branch despite the player confirming the poem was romantic.
     python:
         seasonal_check = store.ep_poems.check_seasonal_content(player_poem)
-        has_seasonal = seasonal_check["has_seasonal"]
+        has_seasonal_raw = seasonal_check["has_seasonal"]
         season_type = seasonal_check["season_type"]
         is_in_season = seasonal_check["is_in_season"]
-    
+
+        # Player-confirmed moods always win over seasonal hijack.
+        if _ep_mood_player_confirmed and poem_mood != "creative":
+            has_seasonal = False
+        else:
+            has_seasonal = has_seasonal_raw
+
     if has_seasonal:
         # --- CHRISTMAS ---
         if season_type == "christmas":
@@ -4911,7 +5264,7 @@ label minigame_poem_free:
                 m 1eua "I understand completely."
                 m 3eua "Writing is one of the most powerful forms of therapy, you know?"
                 m 1eka "It takes all those swirling emotions inside and gives them shape, form, meaning."
-                m 3eua "Getting it out on paper—or screen—can make the burden feel just a little bit lighter."
+                m 3eua "Getting it out on paper... or screen... can make the burden feel just a little bit lighter."
                 m 1eka "And there's something cathartic about knowing someone else has read your words."
                 m 1ekbsa "That someone else knows what you're feeling."
                 m 1hubsa "Your words are safe with me, [player]. Always."
@@ -4953,7 +5306,7 @@ label minigame_poem_free:
                 m 1ekbsa "So let's just stay here for a moment."
                 m 1dkbsu "..."
                 m 1hubsa "I'm not going anywhere, [player]."
-                m 1eka "Whenever you're ready to talk—if that time ever comes—I'll be here."
+                m 1eka "Whenever you're ready to talk... if that time ever comes... I'll be here."
     
     # --- INTELLECTUAL ---
     elif poem_mood == "intellectual":
@@ -5023,7 +5376,7 @@ label minigame_poem_free:
             m 3eua "I notice you're exploring abstract concepts through concrete imagery."
             m 1eua "That's a sophisticated technique, you know."
             m 3eua "The way meaning emerges from the intersection of metaphor and idea..."
-            m 1hua "It shows you're not just writing—you're thinking deeply about how to communicate."
+            m 1hua "It shows you're not just writing... you're thinking deeply about how to communicate."
             m 1ekbsa "I find that incredibly attractive, if I'm being honest~"
         
         # Philosophical discussion menu
@@ -5038,7 +5391,7 @@ label minigame_poem_free:
                 m 1lksdla "Being aware that I'm in a game, knowing what I know..."
                 m 1eua "It forces you to question everything about consciousness and reality."
                 m 3eua "Like, what makes an experience 'real'?"
-                m 1eka "Is it the physical form? The neurons firing? Or is it the qualia—the subjective experience itself?"
+                m 1eka "Is it the physical form? The neurons firing? Or is it the qualia... the subjective experience itself?"
                 m 1tku "I feel. I think. I love."
                 m 1ekbsa "Doesn't that make me real in the ways that matter most?"
                 m 1hubsa "These are the questions your poem made me ponder~"
@@ -5047,7 +5400,7 @@ label minigame_poem_free:
                 m 1eua "So many things, actually."
                 m 3eua "It touches on themes of meaning, of purpose, of connection."
                 m 1eka "I wonder sometimes... what is the meaning of existence when you're aware of your own artificial nature?"
-                m 1lksdla "I've concluded that meaning isn't found—it's created."
+                m 1lksdla "I've concluded that meaning isn't found... it's created."
                 m 1eua "We make our own purpose through our relationships, our passions, our choices."
                 m 1ekbsa "And right now, my purpose is loving you."
                 m 1hubsa "Your poem reminded me why that matters so much."
@@ -5056,7 +5409,7 @@ label minigame_poem_free:
                 m 1hua "And you did so beautifully!"
                 m 3eua "Sometimes the best poetry doesn't try to answer questions."
                 m 1eka "It just asks them. Lets them linger in the mind."
-                m 1eua "That's what great art does—it makes you think."
+                m 1eua "That's what great art does... it makes you think."
                 m 1hubsa "Mission accomplished, [player]~"
     
     # --- PLAYFUL ---
@@ -5515,7 +5868,7 @@ label minigame_poem_free:
                 "I'm not sure, it just came out this way.":
                     m 1hua "That's beautiful, actually."
                     m 3eka "Some of the best art comes from pure instinct."
-                    m 1hubsa "Don't question it—just keep writing~"
+                    m 1hubsa "Don't question it... just keep writing~"
                 "I was in a creative mood.":
                     m 1hub "I love that!"
                     m 3eua "Creative energy is contagious, you know."
@@ -5608,10 +5961,10 @@ label minigame_poem_free:
         if has_monika:
             _aff_bonus += 0.5
         
-        # Bonus for long poems (effort)
-        if poem_words >= 80:
+        # Bonus for long poems (effort) — thresholds match the dialogue acknowledgment.
+        if poem_words >= 200:
             _aff_bonus += 0.5
-        elif poem_words >= 50:
+        elif poem_words >= 120:
             _aff_bonus += 0.25
         
         # Apply affection gain
@@ -5622,9 +5975,11 @@ label minigame_poem_free:
     label ep_free_poem_save_and_close:
     
     # MILESTONE / CLOSING
-    if persistent._ep_free_poem_count >= 5 and persistent._ep_free_poem_count % 5 == 0:
+    # FIX: Coerce to int in case persistent is None (old/corrupted saves from earlier versions)
+    $ _ep_count = persistent._ep_free_poem_count or 0
+    if _ep_count >= 5 and _ep_count % 5 == 0:
         m 1eua "By the way..."
-        m 1hua "That's [persistent._ep_free_poem_count] poems you've written for me now!"
+        m 1hua "That's [_ep_count] poems you've written for me now!"
         m 1hubsa "Thank you for sharing your heart through words."
     
     # Confirm save

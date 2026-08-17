@@ -12,7 +12,7 @@ init -990 python:
         author="ZeroFixer",
         name="Extra Plus",
         description="Expand your time with Monika with new minigames, dates, and interactions.",
-        version="1.4.3",
+        version="1.4.4",
         settings_pane="_extra_plus_submod_settings"
     )
 
@@ -170,7 +170,7 @@ init -5 python in ep_tools:
     backup_window_title = "Monika After Story   "
     random_outcome = None
     last_affection_notify_time = 0
-    check_main_file = store.ep_folders._getGamePath(store.ep_folders.EP_ROOT, "Extra_Plus_Main.rpy")
+    check_main_file = store.ep_folders.EP_ROOT + "/Extra_Plus_Main.rpy"
     pictograms_font = store.ep_folders._join_path(store.ep_folders.EP_FONTS, "pictograms_icons.ttf")
     affection_icons = store.ep_folders._join_path(store.ep_folders.EP_FONTS, "peperrito_faces.ttf")
 
@@ -319,7 +319,8 @@ init -5 python in ep_dates:
     # Loop control variables
     _current_date_type = None  # Current date type (cafe, restaurant, pool, library)
     _last_bg_check = None      # Last time we checked the background
-    _bg_check_interval = 30    # Seconds between background checks
+    _bg_check_interval = 60    # Seconds between background checks (matches MAS convention)
+
     
     # =========================================================================
     # DATE CONFIGURATION
@@ -352,13 +353,20 @@ init -5 python in ep_dates:
         ),
         "pool": DateConfig(
             talk_label="extra_pool_interactions",
-            boop_label="",
-            boop_enabled=False,
+            boop_label="monika_boop_pool",
+            boop_enabled=True,
             monika_pose="idle",
             monika_position="t11_float"
         ),
         "library": DateConfig(
             talk_label="extra_library_interactions",
+            boop_label="",
+            boop_enabled=False,
+            monika_pose="idle",
+            monika_position="t11"
+        ),
+        "arcade": DateConfig(
+            talk_label="extra_arcade_interactions",
             boop_label="",
             boop_enabled=False,
             monika_pose="idle",
@@ -394,6 +402,7 @@ init -5 python in ep_dates:
         global _current_date_type, _last_bg_check
         _current_date_type = None
         _last_bg_check = None
+        renpy.hide("ep_water_drip")
     
     def should_check_background():
         """
@@ -447,6 +456,30 @@ default persistent._ep_button_last_update = None
 default persistent._ep_fridge_magnets_data = None
 default persistent._ep_fridge_last_monika_post = None
 default persistent._ep_relation_seen = False
+
+# Track how many times player forces Monika into the pool with the wrong outfit
+default persistent._ep_pool_wrong_outfit_count = 0
+# Track cumulative water fights at pool (used for screen-wipe dialogue variants)
+default persistent._ep_pool_water_fight_count = 0
+# Pool cuddle: persistent counter for dialogue variants and affection rewards
+default persistent._ep_pool_cuddle_count = 0
+# Pool Marco Polo: persistent counter for dialogue variants
+default persistent._ep_pool_marco_count = 0
+# Pool swimsuit auto-change: stores saved outfit state and change flag
+default persistent._ep_pool_saved_outfit = None
+default persistent._ep_pool_changed_into_swim = False
+# Pool session: track if sunscreen was applied during the current pool date
+default _ep_pool_sunscreen_applied = False
+# Pool session: track if player and Monika retreated to shelter lounge due to bad weather
+default _ep_pool_retreated_to_shelter = False
+default _ep_pool_shelter_reason = None
+# Pool date: remember which talk topics were seen today
+default persistent._ep_pool_last_topic_date = None
+default persistent._ep_pool_seen_topics = []
+
+# Arcade visit tracking
+default persistent._ep_arcade_visits = 0
+
 #====SFX
 define sfx_cup_shuffle = ep_folders._join_path(ep_folders.EP_SFX, "cup_shuffle.ogg")
 define sfx_coin_flip = ep_folders._join_path(ep_folders.EP_SFX, "coin_flip_sfx.ogg")
@@ -458,6 +491,11 @@ define sfx_place_fridge = store.ep_folders._join_path(ep_folders.EP_SFX, "place.
 define sfx_doki_heartbeats = store.ep_folders._join_path(ep_folders.EP_SFX, "heartbeats.ogg")
 define sfx_poem_music = ep_folders._join_path(ep_folders.EP_SFX, "youreality.ogg")
 define sfx_page_flip = ep_folders._join_path(ep_folders.EP_SFX, "page_flip.ogg")
+define sfx_water_splash = ep_folders._join_path(ep_folders.EP_SFX, "splash.ogg")
+define sfx_wipe = ep_folders._join_path(ep_folders.EP_SFX, "wipe.ogg")
+define sfx_lotion_apply = ep_folders._join_path(ep_folders.EP_SFX, "lotion_apply.ogg")
+define sfx_pool_day_ambience = ep_folders._join_path(ep_folders.EP_SFX, "pool_day_ambience.ogg")
+define sfx_pool_night_ambience = ep_folders._join_path(ep_folders.EP_SFX, "pool_night_ambience.ogg")
 #====Windows Title
 default persistent._save_window_title = "Monika After Story   "
 
@@ -615,11 +653,7 @@ init -10 python in mas_interactions:
     ZONE_EXTRA_SHOULDER_R = "extra_shoulder_r"
 
 init -5 python:
-    try:
-        import pygame
-        pygame_available = True
-    except ImportError:
-        pygame_available = False
+    import pygame
 
     class ExtraPlusInteractionManager(object):
 
@@ -802,7 +836,7 @@ init -5 python:
 #===========================================================================================
 # FUNCTIONS
 #===========================================================================================
-init 999 python:
+init 15 python:
     # Migrate old data structures to prevent crashes when upgrading from older versions.
     store.ep_chibis.migrate_chibi_costume_data()
     store.ep_files.migrate_window_title_data()
@@ -825,6 +859,7 @@ init 999 python:
 
 init -1 python:
     renpy.music.register_channel("maxwellcat", "sfx", True)
+    renpy.music.register_channel("ep_ambient", mixer="amb", loop=True, stop_on_mute=True, tight=True)
 
     class SGVerification(Action):
         """Verifies if the selected cup is correct in the shell game."""
@@ -936,34 +971,10 @@ image extra_poem_paper:
     )
 
 #====Chibi
-image chibi_blink_effect:
-    block:
-        MASFilterSwitch(ep_chibis.sprite_path.format(persistent.chibika_current_costume[0], persistent.chibika_current_costume[1]))
-        block:
-            choice:
-                3
-            choice:
-                5
-            choice:
-                7
-        MASFilterSwitch(ep_chibis.sprite_path.format(persistent.chibika_current_costume[0], persistent.chibika_current_costume[2]))
-        choice 0.02:
-            block:
-                choice:
-                    8
-                choice:
-                    6
-                choice:
-                    4
-                MASFilterSwitch(ep_chibis.sprite_path.format(persistent.chibika_current_costume[0], persistent.chibika_current_costume[1]))
-        choice 0.098:
-            pass
-        0.06
-        repeat
+# Dynamic chibi sprites with blanket color tinting support
+image chibi_blink_effect = DynamicDisplayable(store.ep_chibis.draw_chibi_blink_effect)
 
-image chibi_hover_effect:
-    block:
-        MASFilterSwitch(ep_chibis.sprite_path.format(persistent.chibika_current_costume[0], persistent.chibika_current_costume[3]))
+image chibi_hover_effect = DynamicDisplayable(store.ep_chibis.draw_tinted_chibi_hover)
 
 image extra_chibi_base = LiveComposite(
     (188, 188),
@@ -1116,7 +1127,7 @@ screen extra_gen_list(extra_list, extra_area, others, close=True):
                     # Iterate directly over extra_list (if empty, do not execute)
                     for item in extra_list:
                         # Calculate text and action based on the structure of the element.
-                        $ btn_text = item[0] if isinstance(item, tuple) else item.name
+                        $ btn_text = item[0] if isinstance(item, tuple) else getattr(item, "display_name", item.name)
                         $ btn_action = Jump(item[1]) if isinstance(item, tuple) else Function(item)
                         textbutton _(btn_text):
                             xsize extra_area[2]
@@ -1159,41 +1170,105 @@ screen extra_close_button(jump_action="close_extraplus"):
 
 #=== Chibis ===
 screen doki_chibi_idle():
-    #Displays Chibika on the screen, allowing for dragging if enabled.
+    # Displays Chibika on the screen, allowing for dragging if enabled.
+    # Now uses ChibiManager for flexible chibi management
     zorder 52
 
     # Cache screen check to avoid function call on each redraw
     $ EP_chibi_overlay_active = renpy.get_screen("hkb_overlay")
+    
+    # Get main chibi from manager (fallback to legacy if not available)
+    $ EP_main_chibi = store.ep_chibis.chibi_manager.main if store.ep_chibis.chibi_manager._initialized else None
 
     if EP_chibi_overlay_active:
-        if persistent.enable_drag_chibika:
-            drag:
-                child "extra_chibi_base"
-                selected_hover_child "extra_chibi_hover"
-                dragged store.ep_chibis.chibi_drag
-                drag_offscreen True
-                xpos persistent.chibika_drag_x
-                ypos persistent.chibika_drag_y
+        # Get main chibi displayables from the unified system
+        $ EP_main_sprites = store.ep_chibis.get_chibi_displayables("main")
 
-        else:
-            # Check if jumping animation is active
-            if store.ep_chibis.is_jumping:
-                # Show hover sprite with jump animation
-                add "extra_chibi_hover" at chibika_jump_anim:
-                    xpos store.ep_chibis.xpos
-                    ypos store.ep_chibis.ypos
-                
-                # Timer to reset jumping state after animation
-                timer 0.5 action SetField(store.ep_chibis, "is_jumping", False)
+        # Check if main chibi exists and is visible
+        if EP_main_chibi and EP_main_chibi.visible:
+            if EP_main_chibi.draggable:
+                drag:
+                    child EP_main_sprites["base"]
+                    selected_hover_child EP_main_sprites["hover"]
+                    dragged store.ep_chibis.chibi_drag
+                    drag_offscreen True
+                    xpos EP_main_chibi.x
+                    ypos EP_main_chibi.y
+
             else:
-                # Normal idle state - use button for clicking
-                imagebutton:
-                    idle "extra_chibi_base"
-                    xpos store.ep_chibis.xpos
-                    ypos store.ep_chibis.ypos
-                    action Function(store.ep_chibis.clicker)
-                    focus_mask True
+                # Check if jumping animation is active
+                if EP_main_chibi.is_jumping:
+                    # Show hover sprite with jump animation
+                    add EP_main_sprites["hover"] at chibika_jump_anim:
+                        xpos EP_main_chibi.x
+                        ypos EP_main_chibi.y
+                    
+                    # Timer to reset jumping state after animation
+                    timer 0.5 action [SetField(EP_main_chibi, "is_jumping", False), SetField(store.ep_chibis, "is_jumping", False)]
+                else:
+                    # Normal idle state - use button for clicking
+                    imagebutton:
+                        idle EP_main_sprites["base"]
+                        xpos EP_main_chibi.x
+                        ypos EP_main_chibi.y
+                        action Function(store.ep_chibis.clicker)
+                        focus_mask True
+        
+        # Fallback to legacy behavior if ChibiManager not initialized
+        elif not EP_main_chibi:
+            if persistent.enable_drag_chibika:
+                drag:
+                    child "extra_chibi_base"
+                    selected_hover_child "extra_chibi_hover"
+                    dragged store.ep_chibis.chibi_drag
+                    drag_offscreen True
+                    xpos persistent.chibika_drag_x
+                    ypos persistent.chibika_drag_y
 
+            else:
+                if store.ep_chibis.is_jumping:
+                    add "extra_chibi_hover" at chibika_jump_anim:
+                        xpos store.ep_chibis.xpos
+                        ypos store.ep_chibis.ypos
+                    timer 0.5 action SetField(store.ep_chibis, "is_jumping", False)
+                else:
+                    imagebutton:
+                        idle "extra_chibi_base"
+                        xpos store.ep_chibis.xpos
+                        ypos store.ep_chibis.ypos
+                        action Function(store.ep_chibis.clicker)
+                        focus_mask True
+
+        # =================================================================
+        # SECONDARY CHIBIS (cupcake, cinnamon, teacup)
+        # Rendered from ChibiManager.secondary_visible
+        # =================================================================
+        for _sec_chibi in store.ep_chibis.chibi_manager.secondary_visible:
+            # Get cached displayables for this specific chibi
+            $ _sec_sprites = store.ep_chibis.get_chibi_displayables(_sec_chibi.id)
+
+            if _sec_chibi.draggable:
+                drag:
+                    child _sec_sprites["base"]
+                    selected_hover_child _sec_sprites["hover"]
+                    dragged store.ep_chibis.make_drag_handler(_sec_chibi.id)
+                    drag_offscreen True
+                    xpos _sec_chibi.x
+                    ypos _sec_chibi.y
+
+            else:
+                if _sec_chibi.is_jumping:
+                    add _sec_sprites["hover"] at chibika_jump_anim:
+                        xpos _sec_chibi.x
+                        ypos _sec_chibi.y
+                    timer 0.5 action SetField(_sec_chibi, "is_jumping", False)
+                else:
+                    imagebutton:
+                        idle _sec_sprites["base"]
+                        xpos _sec_chibi.x
+                        ypos _sec_chibi.y
+                        action Function(store.ep_chibis.click_chibi, _sec_chibi.id)
+                        focus_mask True
 
 screen chibi_visual_effect(x, y):
     zorder 60
@@ -1207,7 +1282,7 @@ screen chibi_visual_effect(x, y):
     timer 0.9 action Hide("chibi_visual_effect")
 
 screen sticker_customization():
-    #Allows the player to customize Chibika’s appearance and behavior, including dragging, visibility, and accessories.
+    #Allows the player to customize any chibi's appearance and behavior.
     zorder 50
     vbox:
         style_prefix "hkb"
@@ -1218,50 +1293,123 @@ screen sticker_customization():
         use extra_close_button("close_dev_extraplus")
         textbutton _("Back") action Jump("extraplus_tools")
 
+    # Get the currently editing chibi for dynamic display
+    $ _ep_edit_chibi = store.ep_chibis.get_editing_chibi()
+    $ _ep_edit_id = store.ep_chibis.get_editing_chibi_id()
+
     frame:
         xalign 0.5
         yalign 0.5
-        padding (60, 30, 30, 30)
-        xmaximum 900
-        ymaximum 650
+        padding (40, 25, 40, 25)
+        xmaximum 780
         vbox:
-            spacing 18
+            spacing 8
             xalign 0.5
             style_prefix "check"
 
             label _("Chibi Options"):
-                xalign 0.45
+                xalign 0.5
 
+            null height 2
+
+            # ==== CHIBI SELECTOR TABS ====
             hbox:
-                spacing 20
-                vbox:
-                    label _("Draggable Chibi:")
-                    # null height 30
-                    textbutton _("[persistent.enable_drag_chibika]") action ToggleField(persistent, "enable_drag_chibika")
-                vbox:
-                    label _("Always on screen:")
-                    textbutton _("[persistent.hi_chibika]") action ToggleField(persistent, "hi_chibika")
-                vbox:
-                    label _("Toggle Visibility:")
-                    # null height 10
-                    textbutton _("Show/Hide") action Function(store.ep_chibis.add_remv_chibi)
+                spacing 8
+                xalign 0.5
 
-            null height 10
+                textbutton store.ep_chibis.DOKI_DISPLAY_NAMES["main"]:
+                    action Function(store.ep_chibis.set_editing_chibi, "main")
+                    selected (_ep_edit_id == "main")
 
+                if store.persistent._mas_pm_cares_about_dokis:
+                    for _doki_id in ["cupcake", "cinnamon", "teacup"]:
+                        $ _doki_name = store.ep_chibis.DOKI_DISPLAY_NAMES.get(_doki_id, _doki_id.capitalize())
+                        textbutton _doki_name:
+                            action Function(store.ep_chibis.set_editing_chibi, _doki_id)
+                            selected (_ep_edit_id == _doki_id)
+
+            null height 4
+
+            # ==== SETTINGS FOR SELECTED CHIBI ====
+            hbox:
+                spacing 30
+                xalign 0.5
+
+                # Visibility toggle
+                vbox:
+                    xalign 0.5
+                    label _("Visible:")
+                    if _ep_edit_id == "main":
+                        if store.ep_chibis.is_main_visible():
+                            textbutton _("Yes") action Function(store.ep_chibis.toggle_main_visibility)
+                        else:
+                            textbutton _("No") action Function(store.ep_chibis.toggle_main_visibility)
+                    else:
+                        if store.ep_chibis.is_doki_visible(_ep_edit_id):
+                            textbutton _("Yes") action Function(store.ep_chibis.toggle_doki, _ep_edit_id)
+                        else:
+                            textbutton _("No") action Function(store.ep_chibis.toggle_doki, _ep_edit_id)
+
+                # Draggable toggle
+                vbox:
+                    xalign 0.5
+                    label _("Draggable:")
+                    if _ep_edit_chibi:
+                        if _ep_edit_chibi.draggable:
+                            textbutton _("Yes") action Function(store.ep_chibis.toggle_draggable)
+                        else:
+                            textbutton _("No") action Function(store.ep_chibis.toggle_draggable)
+                    else:
+                        textbutton _("[persistent.enable_drag_chibika]") action Function(store.ep_chibis.toggle_draggable)
+
+                # Always on screen
+                vbox:
+                    xalign 0.5
+                    label _("Show on startup:")
+                    if persistent.hi_chibika:
+                        textbutton _("Yes") action ToggleField(persistent, "hi_chibika")
+                    else:
+                        textbutton _("No") action ToggleField(persistent, "hi_chibika")
+
+            null height 6
+
+            # ==== DRESS UP ====
             label _("Dress Up!"):
-                xalign 0.45
+                xalign 0.5
 
-            hbox:
-                spacing 20
-                vbox:
-                    label _("Outfits:")
-                    # null height 30
-                    textbutton _("Select") action Jump("doki_change_appe")
-                vbox:
-                    label _("Accessories:")
-                    textbutton _("Select") action Jump("chibi_accessories_menu")
+            vbox:
+                spacing 6
+                xalign 0.5
+                xsize 500
 
-            null height 10
+                textbutton _("Outfits"):
+                    style "twopane_scrollable_menu_special_button"
+                    xsize 500
+                    action Jump("doki_change_appe")
+
+                textbutton _("Accessories"):
+                    style "twopane_scrollable_menu_special_button"
+                    xsize 500
+                    action Jump("chibi_accessories_menu")
+
+                textbutton _("Blanket Color"):
+                    style "twopane_scrollable_menu_special_button"
+                    xsize 500
+                    action Jump("chibi_blanket_color_menu")
+
+            null height 6
+
+            # ==== SHOW/HIDE ALL SECONDARY DOKIS ====
+            if store.persistent._mas_pm_cares_about_dokis:
+                hbox:
+                    spacing 12
+                    xalign 0.5
+                    if store.ep_chibis.are_extra_dokis_visible():
+                        textbutton _("Hide All Dokis") action Function(store.ep_chibis.toggle_all_dokis)
+                    else:
+                        textbutton _("Show All Dokis") action Function(store.ep_chibis.toggle_all_dokis)
+
+            null height 4
 
 screen gen_accessories_twopane_screen():
     zorder 50
@@ -1332,7 +1480,7 @@ screen gen_accessories_twopane_screen():
                             spacing 10 # Space between cards
 
                             for item in current_accessories:
-                                textbutton item.name action Function(item) xfill True style "scrollable_menu_button"
+                                textbutton item.display_name action Function(item) xfill True style "scrollable_menu_button"
 
                     bar:
                         style "classroom_vscrollbar"
@@ -1344,7 +1492,7 @@ screen gen_accessories_twopane_screen():
 
                 null height -20
                 # --- Static Remove button ---
-                textbutton current_remove_action.name action Function(current_remove_action) xfill True style "scrollable_menu_button"
+                textbutton current_remove_action.display_name action Function(current_remove_action) xfill True style "scrollable_menu_button"
 
 screen chibika_notify(message, icon):
     zorder 100
@@ -1654,11 +1802,13 @@ screen extra_doki_heartbeat():
     modal True
     timer 0.9 repeat True action Function(store.ep_tools.show_doki_feedback, "*Doki*")
 
-    key "mouseup_1" action Return()
-    key "mouseup_3" action Return()
-    key "K_RETURN" action Return()
-    key "K_SPACE" action Return()
-    key "K_KP_ENTER" action Return()
+    # NOTE: Use Hide() instead of Return() because this screen is shown
+    # with 'show screen' (not 'call screen'), so Return() would not close it.
+    key "mouseup_1" action Hide("extra_doki_heartbeat")
+    key "mouseup_3" action Hide("extra_doki_heartbeat")
+    key "K_RETURN" action Hide("extra_doki_heartbeat")
+    key "K_SPACE" action Hide("extra_doki_heartbeat")
+    key "K_KP_ENTER" action Hide("extra_doki_heartbeat")
 
 screen bday_oki_doki():
     #Shows a special button for Monika’s birthday event.
@@ -2383,37 +2533,96 @@ transform jumpingaround:
             easeout 1 ypos 600
         repeat
     
-transform tfloat(x=640, z=0.80, y_distance=15, duration=5):
+# TEST: continuous bobbing clock for the float transform.
+#
+# Why this replaces the old ease/repeat block:
+# In this Ren'Py (6.99), `show monika ... at OTHER_FLOAT_TRANSFORM` replaces
+# the scene entry: the old ATLTransform is destroyed and its execution state
+# (which phase of the ease/repeat cycle it was on) is lost. The new transform
+# restarts its animation clock (`st`) at zero, so the bob cycle restarts and
+# the float visibly snaps/direction-reverses. That is the t11_float <->
+# t21_float bug. (`at` is preserved by the engine, but ATL uses `st` as the
+# timebase for non-animation transforms, so it does not help here.)
+#
+# The fix: drive the bobbing from wall-clock time (time.time()). Real time
+# never resets when transforms are recreated, so the old and the new transform
+# compute the SAME phase at any given moment and the bobbing stays continuous
+# across the switch. This is not a Ren'Py limitation; it is simply the correct
+# clock source for a persistent idle animation.
+#
+# NOTE: the function MUST live inside `parallel:` under each handler. ATL's
+# Block.execute stops at the first statement that returns "continue" (a
+# top-level function re-rendering every frame would block the `on show` /
+# `on update` blocks below it, so zoom/xcenter/alpha would never run).
+init python:
+    def _ep_float_tick(trans, st, at):
+        import math
+        import time
+
+        y_distance = 15.0
+        duration = 5.0          # one direction; full period = duration * 2
+
+        # Wall-clock time is stable across transform replacement/re-show.
+        t = time.time()
+        angle = (2.0 * math.pi * t) / (duration * 2.0)
+
+        # Oscillate yoffset in [0.0, y_distance], matching the old range.
+        trans.yoffset = (1.0 + math.sin(angle)) * 0.5 * y_distance
+
+        # Redraw every frame to keep the bobbing smooth.
+        return 0
+
+transform tfloat(x=640, z=0.80):
     yanchor 1.0
     subpixel True
     ypos 1.03  # Base position slightly offscreen for bounce effect
 
     on show:
-        zoom z * 0.95
-        alpha 0.0
         xcenter x
-        yoffset -20
-        easein 0.25 yoffset 0 zoom z * 1.0 alpha 1.0
-        block:
-            ease duration yoffset y_distance
-            ease duration yoffset 0
-            repeat
+        parallel:
+            function _ep_float_tick
+        parallel:
+            zoom z * 0.95
+            alpha 0.0
+            easein 0.25 zoom z * 1.0 alpha 1.0
 
     on update, replace:
-        alpha 1.0
         parallel:
+            function _ep_float_tick
+        parallel:
+            alpha 1.0
             easein 0.25 xcenter x zoom z * 1.0
-        parallel:
-            block:
-                ease duration yoffset y_distance
-                ease duration yoffset 0
-                repeat
 
 transform t11_float:
     tfloat(640)  # Center position with floating
 
 transform t21_float:
     tfloat(400)  # Left position with floating
+
+# Water splash VFX: image zooms out from center while fading.
+# Used in pool_water_fight when Monika splashes the player (towards camera).
+transform ep_water_splash_anim:
+    subpixel True
+    xalign 0.5
+    yalign 0.5
+    zoom 0.3
+    alpha 0.0
+    linear 0.05 alpha 1.0
+    linear 0.45 zoom 2.2 alpha 0.0
+
+# Water directed AT Monika: starts large near screen center and shrinks towards her.
+# Used when the player successfully splashes Monika.
+transform ep_water_to_monika_anim:
+    subpixel True
+    xalign 0.5
+    yalign 0.28
+    zoom 1.8
+    alpha 0.0
+    linear 0.05 alpha 1.0
+    linear 0.4  zoom 0.15 alpha 0.0
+
+
+
 
 transform init_card_slide:
     zoom 0.6
@@ -2776,6 +2985,11 @@ image EP_submod_background_pool_rain_night = ep_folders._join_path(ep_folders.EP
 image EP_submod_background_pool_ss = ep_folders._join_path(ep_folders.EP_DATE_POOL, "ss.png")
 image EP_submod_background_pool_rain_ss = ep_folders._join_path(ep_folders.EP_DATE_POOL, "rain-ss.png")
 
+#Pool VFX
+image ep_water_drops = ep_folders._join_path(ep_folders.EP_DATE_POOL, "water_drops.png")
+image ep_water_drip  = Transform(ep_folders._join_path(ep_folders.EP_DATE_POOL, "water_drip.png"), alpha=0.5)
+
+
 init -1 python:
     EP_background_pool = MASFilterableBackground(
         "EP_background_pool",
@@ -3020,131 +3234,254 @@ init -2 python in mas_background:
         store.monika_chr.tablechair.table = "def"
         store.monika_chr.tablechair.chair = "def"
 
-# #====Arcade (Updated paths)
+#====Arcade (Updated paths)
 
-# #Day images
-# image EP_submod_background_arcade_day = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "day.png")
-# image EP_submod_background_arcade_rain = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "rain.png")
+#Day images
+image EP_submod_background_arcade_day = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "day.png")
+image EP_submod_background_arcade_rain = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "rain.png")
 
-# #Night images
-# image EP_submod_background_arcade_night = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "n.png")
-# image EP_submod_background_arcade_rain_night = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "rain-n.png")
+#Night images
+image EP_submod_background_arcade_night = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "n.png")
+image EP_submod_background_arcade_rain_night = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "rain-n.png")
 
-# #Sunset images
-# image EP_submod_background_arcade_ss = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "ss.png")
-# image EP_submod_background_arcade_rain_ss = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "rain-ss.png")
+#Sunset images
+image EP_submod_background_arcade_ss = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "ss.png")
+image EP_submod_background_arcade_rain_ss = ep_folders._join_path(ep_folders.EP_DATE_ARCADE, "rain-ss.png")
 
-# init -1 python:
-#     EP_background_extra_arcade = MASFilterableBackground(
-#         "EP_background_extra_arcade",
-#         "Arcade (Extra+)",
+init -1 python:
+    EP_background_extra_arcade = MASFilterableBackground(
+        "EP_background_extra_arcade",
+        "Arcade (Extra+)",
 
-#         MASFilterWeatherMap(
-#             day=MASWeatherMap({
-#                 store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_arcade_day",
-#                 store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_arcade_rain",
-#                 store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_arcade_rain",
-#                 store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_arcade_rain",
-#             }),
-#             night=MASWeatherMap({
-#                 store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_arcade_night",
-#                 store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_arcade_rain_night",
-#                 store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_arcade_rain_night",
-#                 store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_arcade_rain_night",
-#             }),
-#             sunset=MASWeatherMap({
-#                 store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_arcade_ss",
-#                 store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_arcade_rain_ss",
-#                 store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_arcade_rain_ss",
-#                 store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_arcade_rain_ss",
-#             }),
-#         ),
+        MASFilterWeatherMap(
+            day=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_arcade_day",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_arcade_rain",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_arcade_rain",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_arcade_rain",
+            }),
+            night=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_arcade_night",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_arcade_rain_night",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_arcade_rain_night",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_arcade_rain_night",
+            }),
+            sunset=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF: "EP_submod_background_arcade_ss",
+                store.mas_weather.PRECIP_TYPE_RAIN: "EP_submod_background_arcade_rain_ss",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_arcade_rain_ss",
+                store.mas_weather.PRECIP_TYPE_SNOW: "EP_submod_background_arcade_rain_ss",
+            }),
+        ),
 
-#         MASBackgroundFilterManager(
-#             MASBackgroundFilterChunk(
-#                 False,
-#                 None,
-#                 MASBackgroundFilterSlice.cachecreate(
-#                     store.mas_sprites.FLT_NIGHT,
-#                     60
-#                 )
-#             ),
-#             MASBackgroundFilterChunk(
-#                 True,
-#                 None,
-#                 MASBackgroundFilterSlice.cachecreate(
-#                     store.mas_sprites.FLT_SUNSET,
-#                     60,
-#                     30*60,
-#                     10,
-#                 ),
-#                 MASBackgroundFilterSlice.cachecreate(
-#                     store.mas_sprites.FLT_DAY,
-#                     60
-#                 ),
-#                 MASBackgroundFilterSlice.cachecreate(
-#                     store.mas_sprites.FLT_SUNSET,
-#                     60,
-#                     30*60,
-#                     10,
-#                 ),
-#             ),
-#             MASBackgroundFilterChunk(
-#                 False,
-#                 None,
-#                 MASBackgroundFilterSlice.cachecreate(
-#                     store.mas_sprites.FLT_NIGHT,
-#                     60
-#                 )
-#             )
-#         ),
+        MASBackgroundFilterManager(
+            MASBackgroundFilterChunk(
+                False,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_NIGHT,
+                    60
+                )
+            ),
+            MASBackgroundFilterChunk(
+                True,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_SUNSET,
+                    60,
+                    30*60,
+                    10,
+                ),
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_DAY,
+                    60
+                ),
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_SUNSET,
+                    60,
+                    30*60,
+                    10,
+                ),
+            ),
+            MASBackgroundFilterChunk(
+                False,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_NIGHT,
+                    60
+                )
+            )
+        ),
 
-#         #FOR BACKGROUND PROPERTIES (DON'T TOUCH "ENTRY_PP:/EXIT_PP:)
-#         disable_progressive=False,
-#         hide_masks=False,
-#         hide_calendar=True,
-#         unlocked=False,
-#         entry_pp=store.mas_background._extra_arcade_entry,
-#         exit_pp=store.mas_background._extra_arcade_exit,
-#         ex_props={"skip_outro": None}
-#     )
+        #FOR BACKGROUND PROPERTIES (DON'T TOUCH "ENTRY_PP:/EXIT_PP:)
+        disable_progressive=False,
+        hide_masks=False,
+        hide_calendar=True,
+        unlocked=False,
+        entry_pp=store.mas_background._extra_arcade_entry,
+        exit_pp=store.mas_background._extra_arcade_exit,
+        ex_props={"skip_outro": None}
+    )
 
-# init -2 python in mas_background:
-#     def _extra_arcade_entry(_old, **kwargs):
-#         """
-#         Entry programming point for arcade background
+init -2 python in mas_background:
+    def _extra_arcade_entry(_old, **kwargs):
+        """
+        Entry programming point for arcade background
 
-#         NOTE: ANYTHING IN THE `_old is None` CHECK WILL BE RUN **ON LOAD ONLY**
-#         IF IT IS IN THE CORRESPONDING 'else' BLOCK, IT WILL RUN WHEN THE BACKGROUND IS CHANGED DURING THE SESSION
+        NOTE: ANYTHING IN THE `_old is None` CHECK WILL BE RUN **ON LOAD ONLY**
+        IF IT IS IN THE CORRESPONDING 'else' BLOCK, IT WILL RUN WHEN THE BACKGROUND IS CHANGED DURING THE SESSION
 
-#         IF YOU WANT IT TO RUN IN BOTH CASES, SIMPLY PUT IT AFTER THE ELSE BLOCK
-#         """
-#         if kwargs.get("startup"):
-#             pass
+        IF YOU WANT IT TO RUN IN BOTH CASES, SIMPLY PUT IT AFTER THE ELSE BLOCK
+        """
+        if kwargs.get("startup"):
+            pass
 
-#         else:
-#             store.mas_o31HideVisuals()
-#             store.mas_d25HideVisuals()
-#             store.mas_surpriseBdayHideVisuals()
+        else:
+            store.mas_o31HideVisuals()
+            store.mas_d25HideVisuals()
+            store.mas_surpriseBdayHideVisuals()
 
-#         store.monika_chr.tablechair.table = "extraplus_arcade"
-#         store.monika_chr.tablechair.chair = "extraplus_arcade"
+        store.monika_chr.tablechair.table = "extraplus_arcade"
+        store.monika_chr.tablechair.chair = "extraplus_arcade"
 
-#     def _extra_arcade_exit(_new, **kwargs):
-#         """
-#         Exit programming point for arcade background
-#         """
-#         #O31
-#         if store.persistent._mas_o31_in_o31_mode:
-#             store.mas_o31ShowVisuals()
-#
-#         #D25
-#         if store.persistent._mas_d25_deco_active:
-#             store.mas_d25ShowVisuals()
-#         
-#         #Birthday
-#         if store.persistent._mas_bday_in_bday_mode or store.persistent._mas_bday_visuals:
-#             store.mas_surpriseBdayShowVisuals()
+    def _extra_arcade_exit(_new, **kwargs):
+        """
+        Exit programming point for arcade background
+        """
+        #O31
+        if store.persistent._mas_o31_in_o31_mode:
+            store.mas_o31ShowVisuals()
 
-#         store.monika_chr.tablechair.table = "def"
-#         store.monika_chr.tablechair.chair = "def"
+        #D25
+        if store.persistent._mas_d25_deco_active:
+            store.mas_d25ShowVisuals()
+        
+        #Birthday
+        if store.persistent._mas_bday_in_bday_mode or store.persistent._mas_bday_visuals:
+            store.mas_surpriseBdayShowVisuals()
+
+        store.monika_chr.tablechair.table = "def"
+        store.monika_chr.tablechair.chair = "def"
+
+#====Pool Lounge (shelter room when weather turns bad during pool date)
+
+#Day images
+image EP_submod_background_pool_lounge_day = ep_folders._join_path(ep_folders.EP_DATE_POOL_LOUNGE, "day.png")
+image EP_submod_background_pool_lounge_rain_day = ep_folders._join_path(ep_folders.EP_DATE_POOL_LOUNGE, "rain-day.png")
+
+#Night images
+image EP_submod_background_pool_lounge_night = ep_folders._join_path(ep_folders.EP_DATE_POOL_LOUNGE, "n.png")
+image EP_submod_background_pool_lounge_rain_night = ep_folders._join_path(ep_folders.EP_DATE_POOL_LOUNGE, "rain-n.png")
+
+#Sunset images
+image EP_submod_background_pool_lounge_ss = ep_folders._join_path(ep_folders.EP_DATE_POOL_LOUNGE, "ss.png")
+image EP_submod_background_pool_lounge_rain_ss = ep_folders._join_path(ep_folders.EP_DATE_POOL_LOUNGE, "rain-ss.png")
+
+init -1 python:
+    EP_background_pool_lounge = MASFilterableBackground(
+        "EP_background_pool_lounge",
+        "Pool Lounge (Extra+)",
+
+        MASFilterWeatherMap(
+            day=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF:      "EP_submod_background_pool_lounge_day",
+                store.mas_weather.PRECIP_TYPE_RAIN:     "EP_submod_background_pool_lounge_rain_day",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_pool_lounge_rain_day",
+                store.mas_weather.PRECIP_TYPE_SNOW:     "EP_submod_background_pool_lounge_rain_day",
+            }),
+            night=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF:      "EP_submod_background_pool_lounge_night",
+                store.mas_weather.PRECIP_TYPE_RAIN:     "EP_submod_background_pool_lounge_rain_night",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_pool_lounge_rain_night",
+                store.mas_weather.PRECIP_TYPE_SNOW:     "EP_submod_background_pool_lounge_rain_night",
+            }),
+            sunset=MASWeatherMap({
+                store.mas_weather.PRECIP_TYPE_DEF:      "EP_submod_background_pool_lounge_ss",
+                store.mas_weather.PRECIP_TYPE_RAIN:     "EP_submod_background_pool_lounge_rain_ss",
+                store.mas_weather.PRECIP_TYPE_OVERCAST: "EP_submod_background_pool_lounge_rain_ss",
+                store.mas_weather.PRECIP_TYPE_SNOW:     "EP_submod_background_pool_lounge_rain_ss",
+            }),
+        ),
+
+        MASBackgroundFilterManager(
+            MASBackgroundFilterChunk(
+                False,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_NIGHT,
+                    60
+                )
+            ),
+            MASBackgroundFilterChunk(
+                True,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_SUNSET,
+                    60,
+                    30*60,
+                    10,
+                ),
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_DAY,
+                    60
+                ),
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_SUNSET,
+                    60,
+                    30*60,
+                    10,
+                ),
+            ),
+            MASBackgroundFilterChunk(
+                False,
+                None,
+                MASBackgroundFilterSlice.cachecreate(
+                    store.mas_sprites.FLT_NIGHT,
+                    60
+                )
+            )
+        ),
+
+        #FOR BACKGROUND PROPERTIES (DON'T TOUCH "ENTRY_PP:/EXIT_PP:)
+        disable_progressive=False,
+        hide_masks=False,
+        hide_calendar=True,
+        unlocked=False,
+        entry_pp=store.mas_background._extrapool_lounge_entry,
+        exit_pp=store.mas_background._extrapool_lounge_exit,
+        ex_props={"skip_outro": None}
+    )
+
+init -2 python in mas_background:
+    def _extrapool_lounge_entry(_old, **kwargs):
+        """
+        Entry programming point for pool lounge background (shelter room).
+        """
+        if kwargs.get("startup"):
+            pass
+        else:
+            store.mas_o31HideVisuals()
+            store.mas_d25HideVisuals()
+            store.mas_surpriseBdayHideVisuals()
+
+        store.monika_chr.tablechair.table = "extraplus_pool_lounge"
+        store.monika_chr.tablechair.chair = "extraplus_pool_lounge"
+
+    def _extrapool_lounge_exit(_new, **kwargs):
+        """
+        Exit programming point for pool lounge background.
+        """
+        #O31
+        if store.persistent._mas_o31_in_o31_mode:
+            store.mas_o31ShowVisuals()
+
+        #D25
+        if store.persistent._mas_d25_deco_active:
+            store.mas_d25ShowVisuals()
+
+        #Birthday
+        if store.persistent._mas_bday_in_bday_mode or store.persistent._mas_bday_visuals:
+            store.mas_surpriseBdayShowVisuals()
+
+        store.monika_chr.tablechair.table = "def"
+        store.monika_chr.tablechair.chair = "def"

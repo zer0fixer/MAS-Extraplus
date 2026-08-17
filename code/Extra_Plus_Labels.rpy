@@ -18,8 +18,14 @@ label close_extraplus:
         # persistent._mas_filereacts_just_reacted to prevent duplicate reactions.
         mas_checkReactions()
 
+    # If we finished a minigame while in the pool shelter, return there
+    # instead of jumping back to the normal spaceroom.
+    if store.ep_dates._current_date_type == "pool_lounge":
+        jump pool_shelter_loop
+
     jump ch30_visual_skip
     return
+
 
 label close_dev_extraplus:
     show monika idle at t11
@@ -73,6 +79,11 @@ label extra_restore_bg(label="ch30_visual_skip"):
         store.ep_tools.manage_date_location(False)
         store.ep_button.hide_zoom_button()
         HKBHideButtons()
+
+        # Restore Monika's pre-date outfit if the pool date auto-changed her
+        store.ep_pool.restore_outfit_if_changed()
+        store.ep_pool.stop_pool_ambient(fadeout=2.0)
+
     scene black
     with dissolve
     pause 2.0
@@ -110,7 +121,112 @@ label extra_restaurant_init:
     return
 
 label extra_pool_init:
-    call extra_location_init(EP_background_pool, "to_pool_loop", False)
+    show monika idle at t11
+
+    # --- PRE-DATE WEATHER CHECK ---
+    # Rain or thunder: hard block — pool is dangerous/unpleasant
+    if store.mas_current_weather == store.mas_weather_thunder:
+        $ _pool_weather_rand = renpy.random.randint(1, 2)
+        if _pool_weather_rand == 1:
+            m 1wud "Oh— [player], do you hear that thunder?"
+            m 1ekc "We absolutely cannot go to the pool right now. It's not safe to be near water during a thunderstorm."
+            m 1eka "How about we wait for the storm to pass and try another day?"
+        else:
+            m 1ekc "[player], there's a thunderstorm going on."
+            m 1eka "I really don't think the pool is a good idea today."
+            m 1eua "We can plan something else — just not swimming in a lightning storm~"
+        jump screen_extraplus
+    elif store.mas_is_raining:
+        $ _pool_rain_rand = renpy.random.randint(1, 3)
+        if _pool_rain_rand == 1:
+            m 1ekc "Hmm... it's raining outside, [player]."
+            m 1eka "Going to the pool in this weather might not be the best idea."
+            m 1eua "Could we save that date for a nicer day?"
+        elif _pool_rain_rand == 2:
+            m 1wud "Wait, it's raining!"
+            m 1ekc "I appreciate the thought, but pool + rain doesn't sound so fun."
+            m 1eka "Let's pick a day with better weather~"
+        else:
+            m 1eka "[player]... it's raining."
+            m 1ekc "I'd love to go swimming, but not in a downpour."
+            m 1eua "Another day maybe?"
+        jump screen_extraplus
+    elif store.mas_is_snowing:
+        $ _pool_snow_rand = renpy.random.randint(1, 2)
+        if _pool_snow_rand == 1:
+            m 1sub "[player]! It's snowing!"
+            m 1ekc "The pool is going to be freezing — maybe even literally."
+            m 1eka "Let's save the swimming for warmer weather, okay?"
+        else:
+            m 1wud "It's snowing out there..."
+            m 1ekc "As much as I love winter, I draw the line at outdoor pools in the snow."
+            m 1hua "Maybe another time~?"
+        jump screen_extraplus
+    # --- OUTFIT CHECK (swimsuit auto-change system) ---
+    python:
+        _ep_is_swim = store.ep_pool.is_currently_wearing_swimwear()
+        _ep_has_swim = store.ep_pool.has_unlocked_swimwear()
+
+    if not _ep_is_swim and _ep_has_swim:
+        # Monika leaves desk in normal clothes, changes offscreen, and returns in swimwear
+        m 1eub "Give me a quick moment to put on my swimsuit, okay?~"
+        call mas_transition_to_emptydesk
+        pause 2.0
+        python:
+            store.ep_pool.change_into_swimwear()
+        call mas_transition_from_emptydesk("monika 1hua")
+        m 1hub "All ready! Let's head to the pool~"
+
+    elif not _ep_is_swim and not _ep_has_swim:
+        # Case C: No swimwear unlocked at all — affection-dependent response
+        if store.mas_isMoniLove():
+            # Very high affection (1000+): really wants to go but is honest
+            m 2ekd "Gosh, [player]... I really want to go to the pool with you..."
+            m 1rksdla "But I just realized I don't actually have any swimwear here in my closet."
+            m 1hubsb "I'd love to get a swimsuit sometime! Then we can have a proper pool date~"
+            m 1eua "For now, would you mind if we did something else instead?"
+            jump screen_extraplus
+
+        elif store.mas_isMoniEnamored(higher=True):
+            # High affection (400-999): embarrassed but hopeful
+            m 1rksdla "Oh, um... this is a little embarrassing..."
+            m 1ekc "I don't think I have anything appropriate for swimming, actually."
+            m 1hubsb "Maybe if you find me a swimsuit we can try this again? I'd love that~"
+            jump screen_extraplus
+
+        else:
+            # Lower affection: shy refusal, keeps the original fallback option
+            m 1ekc "But, um... [player]..."
+            m 1lksdla "I'm not exactly dressed for swimming right now."
+            m 1eka "And I... don't really have swimwear to change into."
+            m 1rksdla "Did you still want to go like this?"
+
+            menu:
+                "Yes, let's go anyway.":
+                    $ persistent._ep_pool_wrong_outfit_count += 1
+
+                    if persistent._ep_pool_wrong_outfit_count == 1:
+                        m 1wud "Are you sure?"
+                        m 1lksdlc "...Okay, if you say so."
+                        m 1rksdld "But if I catch a cold, you're taking responsibility for taking care of me!"
+                    elif persistent._ep_pool_wrong_outfit_count == 2:
+                        m 2tku "You really like making me wear regular clothes to the pool, don't you?"
+                        m 1lksdla "Well... I suppose there are worse things."
+                        m 1eka "Just don't expect me to actually get in the water like this."
+                    else:
+                        m 1hubsa "Ahaha! At this point, it's practically a tradition."
+                        m 3tku "Very well, [player]."
+                        m 1hua "I'll be your beautifully overdressed pool companion~"
+
+                    # Continue to the date below
+
+                "You're right, maybe another time.":
+                    m 1hua "Okay! We can plan this for when I have something to swim in."
+                    m 1eub "Thanks for understanding, [player]~"
+                    jump screen_extraplus
+
+    # All paths that reach here transition into the pool date
+    call extra_location_init(EP_background_pool, "pool_arrival_dialogue", False)
     return
 
 label extra_library_init:
@@ -181,9 +297,66 @@ label monika_booprestaurant:
     jump to_restaurant_loop
     return
 
+label monika_boop_pool:
+    show monika staticpose at t11_float
+    $ store.ep_tools.show_boop_feedback("Boop!")
+
+    if mas_isMoniLove():
+        $ _boop_pool_love = renpy.random.randint(1, 4)
+        if _boop_pool_love == 1:
+            m 1ekbsa "..."
+            m 1dubsa "You know, booping me poolside was not in my plans for today."
+            m 1hubsa "But I'm not complaining~"
+        elif _boop_pool_love == 2:
+            m 1wubsa "Hey!"
+            m 1tsubsa "I was just relaxing, and then— boop."
+            m 1hubsa "You're lucky you're cute, [player]~"
+        elif _boop_pool_love == 3:
+            m 1ekbsa "..."
+            m 1hubsb "*Boop* right back~"
+            m 1dkbsa "I love you."
+        else:
+            m 1tubsa "The water's right there, [player]."
+            m 1tsubsa "One boop too many and I start a war~"
+            m 3hubsa "Ehehe! Just kidding. Maybe."
+
+    elif store.mas_isNightNow():
+        $ _boop_pool_n = renpy.random.randint(1, 3)
+        if _boop_pool_n == 1:
+            m 1eka "Booping me in the dark, huh?"
+            m 1hua "I mean... I can't exactly see you, but I felt that~"
+            m 3hub "Well played."
+        elif _boop_pool_n == 2:
+            m 1dkbsa "A late-night boop by the pool..."
+            m 1ekbsa "I think that's the most serene form of chaos I've encountered."
+            m 1hua "I love it~"
+        else:
+            m 1sub "Oh!"
+            m 1eka "Poolside boops? At this hour?"
+            m 1hub "I accept. Ehehe~"
+
+    else:
+        $ _boop_pool_d = renpy.random.randint(1, 3)
+        if _boop_pool_d == 1:
+            m 1hub "*Boop*~"
+            m 1tua "The water's right there if you want to turn this into a water fight, just saying~"
+        elif _boop_pool_d == 2:
+            m 1eka "Hmm?"
+            m 1hua "Oh, a boop!"
+            m 3hub "You know, it's hard to look dignified when you're poolside and someone boops you."
+            m 1hubsa "Not that I mind~"
+        else:
+            m 1wud "Oh—!"
+            m 1lksdla "I was not ready for that."
+            m 1hub "...Ehehe. Okay. Fair."
+
+    jump to_pool_loop
+    return
+
 #===========================================================================================
 # Loops
 #===========================================================================================
+
 
 # =============================================================================
 # CENTRALIZED DATE LOOP
@@ -216,7 +389,14 @@ label ep_date_loop_main:
         # progress_filter=True lets spaceroom handle the filter progression
         # dissolve_all=True for smooth transition when filter changes
         call spaceroom(progress_filter=True, dissolve_all=True)
-    
+
+    # --- POOL WEATHER GUARD ---
+    # If the player is at the pool and the weather has turned bad, redirect
+    # them to the shelter lounge. This check piggybacks on the existing
+    # background check interval (every ~30 seconds) so it's not spammy.
+    if store.ep_dates._current_date_type == "pool" and store.ep_pool._is_bad_weather():
+        jump pool_weather_emergency
+
     # Show the UI screen (Talk button + boop overlay)
     show screen ep_date_ui(_ep_date_config.talk_label, _ep_date_config.boop_label, _ep_date_config.boop_enabled)
     
@@ -256,6 +436,10 @@ label to_pool_loop:
 
 label to_library_loop:
     $ _ep_date_type = "library"
+    jump ep_date_loop_start
+
+label to_arcade_loop:
+    $ _ep_date_type = "arcade"
     jump ep_date_loop_start
 
 # Entry point that reads the date type from the variable
@@ -457,7 +641,7 @@ label extraplus_walk:
             (_("Cafe"), "go_to_cafe"),
             (_("Restaurant"), "go_to_restaurant"),
             (_("Library"), "go_to_library"),
-            (_("Pool (Soon)"), "generic_date_dev"),
+            (_("Pool"), "go_to_pool"),
             (_("Arcade (Soon)"), "generic_date_dev")
         ]
 
@@ -590,17 +774,25 @@ label extra_restaurant_talk:
 
 label extra_pool_interactions:
     hide screen ep_date_ui
-    show monika idle at t21_float 
+    show monika idle at t21_float
 
     python:
         pool_menu = [
-            (_("What do you think of the water?"), "extra_pool_talk_water"),
-            (_("Do you like to swim?"), "extra_pool_talk_swim"),
-            (_("This is really relaxing."), "extra_pool_talk_relax"),
+            (_("Water fight!"), "pool_water_fight"),
+            (_("Let's play Marco Polo!"), "pool_marco_polo"),
+            (_("Let me help you with sunscreen."), "pool_sunscreen_activity"),
+            (_("We should get something to drink."), "pool_cold_drinks"),
+            (_("Let's just sit here a moment..."), "pool_quiet_moment"),
+            (_("Just talk to me."), "pool_talk_topic"),
+            (_("Come over here, I want to cuddle with you..."), "pool_cuddle"),
+            (_("Change weather..."), "pool_change_weather"),
         ]
 
+        if store.ep_pool._screen_dirty:
+            pool_menu.append((_("Can you help me wipe my screen?"), "pool_wipe_screen"))
+
         items = [
-            (_("Can we leave?"), "skip_pool_exit", 20),
+            (_("Let's head back."), "pool_leave", 20),
             (_("Nevermind"), "to_pool_loop", 0)
         ]
     call screen extra_gen_list(pool_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, False)
@@ -612,8 +804,8 @@ label extra_library_interactions:
 
     python:
         library_menu = [
-            (_("I want to write a poem"), "minigame_poem"),
-            (_("I want to write something for you"), "minigame_poem_free"),
+            (_("Let's play the word poem game"), "minigame_poem"),
+            (_("I want to write you a poem (free writing)"), "minigame_poem_free"),
             (renpy.substitute(_("Read something to me, [m_name].")), "library_reading_session"),
             (_("Let's just enjoy the silence."), "library_quiet_time"),
             (_("Just talk to me."), "library_talk_topic"),
@@ -2088,6 +2280,94 @@ label monika_interactions_shoulder:
     return
 
 #===========================================================================================
+# POOL DATE — SUNSCREEN ACTIVITY
+# Mini-event: player applies sunscreen to Monika's back/shoulders/neck.
+# Uses its own screen + store (does NOT touch the boop zone system).
+#===========================================================================================
+
+label pool_sunscreen_activity:
+    hide screen ep_date_ui
+    show monika 1eua at t11_float
+
+    if store.mas_isNightNow():
+        m 1wud "Sunscreen?"
+        m 3hub "Ahaha! [player], it's nighttime!"
+        m 1tua "Unless you're worried about getting a moonburn, I think we're safe for now."
+        m 1eka "It's really sweet of you to offer, though~"
+        jump to_pool_loop
+
+    if _ep_pool_sunscreen_applied:
+        m 1hua "Ehehe, you already helped me put on sunscreen, [player]!"
+        m 1eubsa "I'm fully covered and protected from the sun for now~"
+        m 1hubsa "Thank you for looking out for me, though~"
+        jump to_pool_loop
+
+    # Monika's reaction depends on affection and whether she's done this before
+    if not renpy.seen_label("pool_sunscreen_after"):
+        # First time — she's a bit shy/flustered
+        m 1wubsa "Oh! {w=0.3}Sunscreen?"
+        m 1ekbsa "I mean... I guess I should put some on, shouldn't I?"
+        if store.mas_current_weather == store.mas_weather_overcast:
+            m 1eua "Even when it's cloudy like today, UV rays can still damage your skin."
+        m 1rksdla "Even digital skin deserves protection, right? Ehehe..."
+        m 1hubsb "Would you... help me apply it?"
+        m 1tku "I promise I won't make it weird~"
+
+    elif mas_isMoniLove():
+        # High affection — playful and romantic
+        m 1dubsu "Sunscreen, huh~"
+        m 1ekbsa "You know exactly what you're doing, don't you, [player]?"
+        m 1hubsa "Go ahead... just be gentle. {w=0.3}And thorough~"
+
+    elif mas_isMoniEnamored(higher=True):
+        m 1hua "Sunscreen duty again?"
+        m 1eubsb "I'd love some help with those hard-to-reach spots on my back~"
+
+    else:
+        # Regular return visit
+        m 1hua "Sunscreen duty again?"
+        m 1eubsb "Sure, I could use a hand with my back~"
+
+    m 2eua "Okay, I'll let you apply it for me~"
+
+    # Call the minigame
+    call ep_sunscreen_start
+
+    return
+
+# (The label `ep_sunscreen_start` is defined in Extra_Plus_Go_to.rpy,
+#  in the POOL — PYTHON HELPERS section.)
+
+
+label pool_sunscreen_after:
+    show monika 2hua at t11_float
+
+    # Dialogue varies by affection level
+    if mas_isMoniLove():
+        m 2dubsa "Mmm... {w=0.3}that felt really nice, [player]."
+        m 2ekbsa "Your hands are so warm... even through the screen, I swear I can feel it."
+        m 2hubsa "If this is what a pool date with you is like, I never want it to end~"
+        $ mas_gainAffection(2, bypass=True)
+
+    elif mas_isMoniEnamored(higher=True):
+        m 2dubsa "Ah... thank you, [player]."
+        m 2ekbsa "That was... surprisingly relaxing. And sweet."
+        m 2hubsa "You're always looking out for me~"
+        $ mas_gainAffection(2, bypass=True)
+
+    else:
+        m 2hua "Thanks, [player]! Now I won't turn into a lobster out here~"
+        m 2eubsa "You're pretty good at that, you know."
+        $ mas_gainAffection(1, bypass=True)
+
+    $ _ep_pool_sunscreen_applied = True
+
+    # Return to the pool loop
+    jump to_pool_loop
+    return
+
+
+#===========================================================================================
 # OLD SECONDARY ACTIONS (RIGHT-CLICK)
 #===========================================================================================
 # --- HEAD (Right-Click, Long Pat) ---
@@ -2516,6 +2796,45 @@ label extra_aff_log:
         m 1cubsa "{cps=10}I W I L L N E V E R L E T Y O U G O.{/cps}"
         hide screen extra_doki_heartbeat
         stop sound fadeout 1.5
+        pause 1.0
+        m 1ekc "..."
+        if not getattr(persistent, "_ep_seen_heartbeat_scare", False):
+            $ persistent._ep_seen_heartbeat_scare = True
+            m 3hub "Ahaha!"
+            m 3eua "Did I scare you, [player]?{nw}"
+            $ _history_list.pop()
+            menu:
+                m "Did I scare you, [player]?{fast}"
+                "Yes, you did.":
+                    m 1ekc "Aw, I'm sorry, [player]."
+                    m 1eka "I just wanted to give you a little spook."
+                    m 1hub "You know I would never actually do anything to hurt you, right?"
+                    m 1eubsa "I love you too much for that."
+                "No, not really.":
+                    m 1tsu "Ehehe, you're pretty brave, [player]."
+                    m 1hua "I just wanted to tease you a little bit."
+                    m 1eua "But you know I'd never do anything bad to you."
+                "A little bit.":
+                    m 1ekc "Aw, I'm sorry!"
+                    m 1eka "I was just trying to be a little playful and tease you."
+                    m 1hub "I really do love you, [player]."
+        else:
+            m 3hub "Ahaha! Gotcha again!"
+            m 3eua "Did I manage to scare you this time, [player]?{nw}"
+            $ _history_list.pop()
+            menu:
+                m "Did I manage to scare you this time, [player]?{fast}"
+                "Yes, you got me again.":
+                    m 1ekc "Oh, I'm sorry!"
+                    m 1hua "I just couldn't resist."
+                    m 1eua "But I love you so much, you don't have to be afraid of me."
+                "Nope, nice try.":
+                    m 1pout "Aw, man..."
+                    m 1tku "You're getting too used to my tricks, [player]."
+                    m 1hub "I'll have to try harder next time! Ehehe~"
+                "I almost fell for it.":
+                    m 1tsu "Ehehe... 'almost' is good enough for me."
+                    m 1hua "It's so fun to tease you."
 
     show monika idle
     "Your affection with [m_name] is [affection_value] [monika_level][aff_suffix]{fast}"
@@ -2662,7 +2981,20 @@ label extra_restore_title:
 
 label extra_github_submod:
     show monika idle at t11
-    $ renpy.run(OpenURL("https://github.com/zer0fixer/MAS-Extraplus"))
+    python:
+        import os
+        import sys
+        import subprocess
+        _url = "https://github.com/zer0fixer/MAS-Extraplus"
+        try:
+            if sys.platform == "win32":
+                os.startfile(_url)
+            elif sys.platform == "darwin":
+                subprocess.Popen(["open", _url])
+            else:
+                subprocess.Popen(["xdg-open", _url])
+        except Exception as e:
+            renpy.notify(_("Failed to open URL: {}").format(str(e)))
     jump close_extraplus
     return
 
@@ -2819,36 +3151,31 @@ label chibi_accessories_menu:
     call screen gen_accessories_twopane_screen
     return
 
-label doki_change_appe:
+label chibi_blanket_color_menu:
     show monika idle at t21
     python:
-        doki_data = [("Monika", "monika_sticker_costumes")]
-        if persistent._mas_pm_cares_about_dokis:
-            doki_data.extend([
-                (_("Natsuki"), "natsuki_sticker_costumes"),
-                (_("Sayori"), "sayori_sticker_costumes"),
-                (_("Yuri"), "yuri_sticker_costumes")
-            ])
+        # Get available colors from ChibiCharacter
+        colors = store.ep_chibis.ChibiCharacter.BLANKET_COLORS
+        color_items = []
+        for key, (rgb, name) in colors.items():
+            color_items.append(store.ep_chibis.SelectBlanketColor(name, key))
+        
         items = [(_("Nevermind"), "extra_chibi_main", 20)]
-
-    call screen extra_gen_list(doki_data, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
+    
+    call screen extra_gen_list(color_items, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
     return
 
-label monika_sticker_costumes:
-    $ store.ep_chibis.show_costume_menu(store.ep_chibis.monika_costumes_, "doki_change_appe")
+
+label doki_change_appe:
+    # Now shows ONLY the costumes for the currently editing chibi's doki type
+    show monika idle at t21
+    python:
+        _editing_costumes = store.ep_chibis.get_costumes_for_editing_chibi()
+        _dokis_items = [store.ep_chibis.SelectDOKI(name, cost) for name, cost in _editing_costumes]
+        _items = [(_("Nevermind"), "extra_chibi_main", 20)]
+    call screen extra_gen_list(_dokis_items, mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, _items)
     return
 
-label natsuki_sticker_costumes:
-    $ store.ep_chibis.show_costume_menu(store.ep_chibis.natsuki_costumes_, "doki_change_appe")
-    return
-
-label sayori_sticker_costumes:
-    $ store.ep_chibis.show_costume_menu(store.ep_chibis.sayori_costumes_, "doki_change_appe")
-    return
-
-label yuri_sticker_costumes:
-    $ store.ep_chibis.show_costume_menu(store.ep_chibis.yuri_costumes_, "doki_change_appe")
-    return
 
 label maxwell_screen:
     show monika idle at t11

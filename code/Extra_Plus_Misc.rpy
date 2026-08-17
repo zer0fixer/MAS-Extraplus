@@ -12,59 +12,53 @@
 init -995 python in ep_folders:
     import os
     import store
-    
-    # --- Cross-platform path helper functions ---
-    def _normalize_path(path):
-        """Normalizes a path by replacing '\\' with '/' for compatibility."""
-        return path.replace("\\", "/")
 
-    def _getGamePath(*args):
-        """Builds a normalized, absolute path from the 'game' directory."""
-        game_dir = _normalize_path(os.path.join(renpy.config.basedir, "game"))
-        return _normalize_path(os.path.join(game_dir, *args))
-
+    # --- VFS-relative path helper ---
     def _join_path(*args):
         """
-        Joins path components and normalizes them.
+        Joins path components into a VFS-relative path string.
+        Uses '/' universally — compatible with Ren'Py VFS on Windows, Linux, macOS and Android.
+        Do NOT pass absolute OS paths here; only relative path segments.
         Usage: _join_path("Submods", "ExtraPlus", "dates", "cafe.png")
         """
-        return _normalize_path(os.path.join(*args))
+        return "/".join(args)
 
-    def find_submods_folder(base_path="."):
-        """Case-insensitively finds the 'submods' folder."""
-        try:
-            for folder in os.listdir(base_path):
-                if folder.lower() == "submods" and os.path.isdir(os.path.join(base_path, folder)):
-                    return folder
-        except Exception:
-            # Failsafe in case of permission errors or other issues
-            pass
-        return "Submods"  # Default value if not found
-    
-    def find_extraplus_folder(submods_path):
+    def _getGamePath(*args):
         """
-        Case-insensitively finds the 'ExtraPlus' folder.
-        This is crucial for Linux/macOS compatibility where folder names are case-sensitive.
+        Legacy compatibility shim. Previously returned an absolute OS path.
+        Now returns a VFS-relative path so Ren'Py can resolve it on all platforms,
+        including Android APKs and .rpa archives.
+        NOTE: Do NOT use the result of this function with os.path / os.remove / shutil.
+            For OS-level file operations on PC, build the absolute path manually.
         """
-        try:
-            for folder in os.listdir(submods_path):
-                if folder.lower() == "extraplus" and os.path.isdir(os.path.join(submods_path, folder)):
-                    return folder
-        except Exception:
-            pass
-        return "ExtraPlus"  # Default value if not found
+        return "/".join(args)
 
-    # Detect 'submods' folder case-insensitively
-    # NOTE: Must use the absolute path to game/ directory, not current working directory
-    _game_dir_path = _normalize_path(os.path.join(renpy.config.basedir, "game"))
-    EP_submods_folder = find_submods_folder(_game_dir_path)
-    
-    # Detect 'ExtraPlus' folder case-insensitively (for Linux/macOS compatibility)
-    _submods_full_path = _normalize_path(os.path.join(_game_dir_path, EP_submods_folder))
-    EP_extraplus_folder = find_extraplus_folder(_submods_full_path)
+    def _normalize_path(path):
+        """
+        Legacy compatibility shim. Previously normalized OS backslashes.
+        Now a no-op since all paths are already VFS-relative strings with '/'.
+        Kept to avoid breaking any callers that still reference it.
+        """
+        return path
 
-    # --- SUBMOD BASE PATH DEFINITIONS ---
-    EP_ROOT = _join_path(EP_submods_folder, EP_extraplus_folder)
+    # --- Dynamic EP_ROOT detection via Ren'Py VFS ---
+    # renpy.loader.loadable() checks the engine's internal VFS index — it works
+    # inside APKs, .rpa archives, and loose file directories without touching the OS.
+    # We test the 4 capitalisation variants that fan-made Android ports may produce.
+    EP_ROOT = "Submods/ExtraPlus"
+
+    _root_variants = [
+        "submods/ExtraPlus",
+        "Submods/extraplus",
+        "submods/extraplus",
+        "SUBMODS/EXTRAPLUS"
+    ]
+    for _v in _root_variants:
+        if renpy.loader.loadable(_v + "/Extra_Plus_Main.rpy"):
+            EP_ROOT = _v
+            break
+
+    # --- Submod directory tree (pure relative strings) ---
     EP_MINIGAMES = _join_path(EP_ROOT, "minigames")
     EP_DATES = _join_path(EP_ROOT, "dates")
     EP_CHIBIS = _join_path(EP_ROOT, "chibis")
@@ -89,9 +83,10 @@ init -995 python in ep_folders:
     EP_DATE_RESTAURANT = _join_path(EP_DATES, "restaurant")
     EP_DATE_RESTAURANT_VARIANT = _join_path(EP_DATES, "restaurant_variant")
     EP_DATE_POOL = _join_path(EP_DATES, "pool")
+    EP_DATE_POOL_LOUNGE = _join_path(EP_DATE_POOL, "lounge")
     EP_DATE_LIBRARY = _join_path(EP_DATES, "library")
     EP_DATE_ARCADE = _join_path(EP_DATES, "arcade")
-    
+
     # Chibi accessories folders
     EP_CHIBI_ACC_0 = _join_path(EP_CHIBIS, "accessories_0")
     EP_CHIBI_ACC_1 = _join_path(EP_CHIBIS, "accessories_1")
@@ -100,6 +95,14 @@ init -995 python in ep_folders:
 #==============================================================================
 # 2. CORE LOGIC & DATA STORES
 #==============================================================================
+
+# Auto-register the Extra+ overlay button at startup.
+# This is a fallback that ensures the button appears even if the normal
+# hook-based registration (ep_button.show_button) is never called,
+# which can happen on Android ports where earlier init blocks may fail.
+# init -989 python:
+#     if "extraplus_button" not in renpy.config.overlay_screens:
+#         renpy.config.overlay_screens.append("extraplus_button")
 
 # Store: ep_button
 # Handles the logic for the dynamic main button text.
@@ -357,7 +360,8 @@ init -5 python in ep_files:
             store.ep_tools.safe_overlay_add("bday_oki_doki")
 
     def main_file_exists():
-        return os.path.isfile(store.ep_tools.check_main_file)
+        # Delegates to the Ren'Py VFS — works in APKs, .rpa archives, and loose files.
+        return renpy.loader.loadable(store.ep_folders.EP_ROOT + "/Extra_Plus_Main.rpy")
 
     # --- Debugging and maintenance tools ---
     def run_asset_linter():
@@ -368,8 +372,9 @@ init -5 python in ep_files:
         try:
             # --- Helper function to check files ---
             def check_file(path, found_list, missing_list):
-                full_path = store.ep_folders._getGamePath(path)
-                if os.path.isfile(full_path):
+                # Uses the Ren'Py VFS — works in APKs, .rpa archives, and loose files.
+                # Replaces os.path.isfile() which fails on Android and inside .rpa archives.
+                if renpy.loader.loadable(path):
                     found_list.append(path)
                 else:
                     missing_list.append(path)
@@ -378,51 +383,46 @@ init -5 python in ep_files:
             found_assets = []
             missing_assets = []
 
+            folders = store.ep_folders
+            joinpath = folders._join_path
+
             # --- 1. Static and Minigame Assets ---
-            static_assets = [
+            static_assets = (
                 # Shell Game
-                store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "note_score.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "cup_hover.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "ball.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "cup.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "monika.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "yuri.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "natsuki.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_SHELLGAME, "sayori.png"),
+                [joinpath(folders.EP_MG_SHELLGAME, f) for f in [
+                    "note_score.png", "cup_hover.png", "ball.png", "cup.png",
+                    "monika.png", "yuri.png", "natsuki.png", "sayori.png"
+                ]] +
                 # Tic-Tac-Toe
-                store.ep_folders._join_path(store.ep_folders.EP_MG_TICTACTOE, "notebook.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_TICTACTOE, "line.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_TICTACTOE, "player.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_TICTACTOE, "monika.png"),
+                [joinpath(folders.EP_MG_TICTACTOE, f) for f in [
+                    "notebook.png", "line.png", "player.png", "monika.png"
+                ]] +
                 # Rock, Paper, Scissors
-                store.ep_folders._join_path(store.ep_folders.EP_MG_RPS, "paper.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_RPS, "rock.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_RPS, "scissors.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_RPS, "back.png"),
+                [joinpath(folders.EP_MG_RPS, f) for f in [
+                    "paper.png", "rock.png", "scissors.png", "back.png"
+                ]] +
                 # Blackjack
-                store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "back.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "background.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "name.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_BLACKJACK, "score.png"),
+                [joinpath(folders.EP_MG_BLACKJACK, f) for f in [
+                    "back.png", "background.png", "name.png", "score.png"
+                ]] +
                 # Fridge Magnets
-                store.ep_folders._join_path(store.ep_folders.EP_MG_FRIDGE, "background.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_FRIDGE, "box.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_FRIDGE, "coffee_bag.png"),
+                [joinpath(folders.EP_MG_FRIDGE, f) for f in [
+                    "background.png", "box.png", "coffee_bag.png"
+                ]] +
                 # Poem Game
-                store.ep_folders._join_path(store.ep_folders.EP_MG_POEM, "background.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_POEM, "notebook.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_POEM, "paper.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_MG_POEM, "bloc.png"),
+                [joinpath(folders.EP_MG_POEM, f) for f in [
+                    "background.png", "notebook.png", "paper.png", "bloc.png"
+                ]] +
                 # Misc - Icons
-                store.ep_folders._join_path(store.ep_folders.EP_ICONS, "coin_heads.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_ICONS, "coin_tails.png"),
+                [joinpath(folders.EP_ICONS, f) for f in [
+                    "coin_heads.png", "coin_tails.png"
+                ]] +
                 # Misc - Animations
-                store.ep_folders._join_path(store.ep_folders.EP_ANIMATIONS, "coin.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_ANIMATIONS, "coin-n.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_ANIMATIONS, "poof.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_ANIMATIONS, "poof-n.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_ANIMATIONS, "maxwell_cat.png")
-            ]
+                [joinpath(folders.EP_ANIMATIONS, f) for f in [
+                    "coin.png", "coin-n.png", "poof.png", "poof-n.png", "maxwell_cat.png"
+                ]]
+            )
+
             for asset in static_assets:
                 check_file(asset, found_assets, missing_assets)
 
@@ -453,49 +453,33 @@ init -5 python in ep_files:
                 check_file(path, found_assets, missing_assets)
 
             # --- 4. Backgrounds (Date Locations) ---
-            background_assets = [
-                # Cafe
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "day.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "rain.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "n.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "rain-n.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "ss.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_CAFE, "rain-ss.png"),
-                # Restaurant
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "day.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "rain.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "n.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "rain-n.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "ss.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_RESTAURANT, "rain-ss.png"),
-                # Pool
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "day.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "rain.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "n.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "rain-n.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "ss.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_POOL, "rain-ss.png"),
-                # Library
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_LIBRARY, "day.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_LIBRARY, "rain.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_LIBRARY, "n.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_LIBRARY, "rain-n.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_LIBRARY, "ss.png"),
-                store.ep_folders._join_path(store.ep_folders.EP_DATE_LIBRARY, "rain-ss.png"),
+            # Helper list of time-of-day/weather suffixes
+            bg_suffixes = ["day.png", "rain.png", "n.png", "rain-n.png", "ss.png", "rain-ss.png"]
+            
+            background_assets = (
+                # Date Location Backgrounds
+                [joinpath(loc, suffix) 
+                for loc in [folders.EP_DATE_CAFE, folders.EP_DATE_RESTAURANT, folders.EP_DATE_POOL, folders.EP_DATE_LIBRARY] 
+                for suffix in bg_suffixes] +
                 # Tables & Chairs
-                "mod_assets/monika/t/chair-extraplus_cafe.png",
-                "mod_assets/monika/t/table-extraplus_cafe.png",
-                "mod_assets/monika/t/table-extraplus_cafe-s.png",
-                "mod_assets/monika/t/chair-extraplus_restaurant.png",
-                "mod_assets/monika/t/table-extraplus_restaurant.png",
-                "mod_assets/monika/t/table-extraplus_restaurant-s.png",
-                "mod_assets/monika/t/chair-extraplus_pool.png",
-                "mod_assets/monika/t/table-extraplus_pool.png",
-                "mod_assets/monika/t/table-extraplus_pool-s.png",
-                "mod_assets/monika/t/chair-extraplus_library.png",
-                "mod_assets/monika/t/table-extraplus_library.png",
-                "mod_assets/monika/t/table-extraplus_library-s.png"
-            ]
+                [
+                    "mod_assets/monika/t/chair-extraplus_cafe.png",
+                    "mod_assets/monika/t/table-extraplus_cafe.png",
+                    "mod_assets/monika/t/table-extraplus_cafe-s.png",
+                    "mod_assets/monika/t/chair-extraplus_restaurant.png",
+                    "mod_assets/monika/t/table-extraplus_restaurant.png",
+                    "mod_assets/monika/t/table-extraplus_restaurant-s.png",
+                    "mod_assets/monika/t/chair-extraplus_pool.png",
+                    "mod_assets/monika/t/table-extraplus_pool.png",
+                    "mod_assets/monika/t/table-extraplus_pool-s.png",
+                    "mod_assets/monika/t/chair-extraplus_pool_lounge.png",
+                    "mod_assets/monika/t/table-extraplus_pool_lounge.png",
+                    "mod_assets/monika/t/table-extraplus_pool_lounge-s.png",
+                    "mod_assets/monika/t/chair-extraplus_library.png",
+                    "mod_assets/monika/t/table-extraplus_library.png",
+                    "mod_assets/monika/t/table-extraplus_library-s.png"
+                ]
+            )
             for asset in background_assets:
                 check_file(asset, found_assets, missing_assets)
 
@@ -512,7 +496,9 @@ init -5 python in ep_files:
                 check_file(path, found_assets, missing_assets)
 
             # --- 7. Write Log File ---
-            log_path = store.ep_folders._normalize_path(os.path.join(renpy.config.basedir, "characters", "extra_plus_asset_log.txt"))
+            # renpy.config.savedir is always writable on Android (and on PC).
+            # Previously used characters/ under basedir, which may be read-only in Android ports.
+            log_path = os.path.join(renpy.config.savedir, "extra_plus_asset_log.txt")
             with open(log_path, 'w') as f:
                 f.write("=" * 60 + "\n")
                 f.write("Extra+ Asset Check Report\n")
@@ -567,7 +553,14 @@ init -5 python in ep_files:
     def cleanup_old_files():
         """
         Deletes obsolete files and folders from previous versions of the submod.
+        Safely skipped on Android — OS-level deletion is unsafe there and unnecessary
+        since fan-made ports don't carry old files in their packages.
         """
+        # Android guard: skip entirely to avoid PermissionError / OSError crashes.
+        if renpy.android:
+            store.mas_utils.mas_log.info("[Extra+] Cleanup skipped: Android VFS constraints.")
+            return
+
         try:
             files_deleted = 0
             folders_deleted = 0
@@ -575,24 +568,27 @@ init -5 python in ep_files:
 
             def delete_file(path):
                 """Safely deletes a file and logs the result."""
-                full_path = store.ep_folders._getGamePath(path)
+                # Build the absolute OS path manually — _getGamePath() now returns a
+                # VFS-relative string and must NOT be used for os.path operations.
+                full_path = os.path.join(renpy.config.basedir, "game", path.replace("/", os.sep))
                 if os.path.isfile(full_path):
                     try:
                         os.remove(full_path)
                         return 1
                     except Exception as e:
-                        errors.append("Failed to delete file {}: {}".format(store.ep_folders._normalize_path(path), e))
+                        errors.append("Failed to delete file {}: {}".format(path, e))
                 return 0
 
             def delete_folder(path):
                 """Safely deletes a folder and its contents, and logs the result."""
-                full_path = store.ep_folders._getGamePath(path)
+                # Build the absolute OS path manually for the same reason as delete_file.
+                full_path = os.path.join(renpy.config.basedir, "game", path.replace("/", os.sep))
                 if os.path.isdir(full_path):
                     try:
                         shutil.rmtree(full_path)
                         return 1
                     except Exception as e:
-                        errors.append("Failed to delete folder {}: {}".format(store.ep_folders._normalize_path(path), e))
+                        errors.append("Failed to delete folder {}: {}".format(path, e))
                 return 0
 
             # 1. Delete old folder (relative to EP_ROOT)
@@ -759,8 +755,114 @@ init -5 python in ep_files:
         
         return created
 
+
+# Store: ep_pool
+# Handles pool-date-specific state: weather checking and Splash Challenge minigame.
+init -5 python in ep_pool:
+    import store
+
+    # ---------------------------------------------------------------------------
+    # WEATHER HELPERS
+    # ---------------------------------------------------------------------------
+    def _is_bad_weather():
+        """
+        Returns True when the current MAS weather makes pool use unsafe/impossible.
+        Rain, thunder and snow all count. Overcast alone is allowed (just an advisory).
+        """
+        return (
+            store.mas_is_raining
+            or store.mas_is_snowing
+            or store.mas_current_weather == store.mas_weather_thunder
+        )
+
+    def _is_weather_clear():
+        """
+        Returns True when weather is clear enough to return to the pool.
+        Only default (sunny/clear) weather qualifies.
+        """
+        return store.mas_current_weather == store.mas_weather_def
+
+    # ---------------------------------------------------------------------------
+    # SPLASH CHALLENGE STATE
+    # ---------------------------------------------------------------------------
+    # The mini-game uses a 0-100 slider that oscillates back and forth.
+    # The player must click/press when the bar is in the "green zone".
+    #
+    # Zones:
+    #   0-39    Bad   (red)
+    #   40-59   OK    (yellow)
+    #   60-79   Good  (green)  <- target
+    #   80-100  OK    (yellow) <- overshooting slightly still good
+    #
+    SPLASH_SPEED    = 1.2   # units per tick (tick = timer interval 0.02s ~50fps)
+    SPLASH_MIN      = 0
+    SPLASH_MAX      = 100
+    SPLASH_GREEN_L  = 60    # green zone left edge
+    SPLASH_GREEN_R  = 80    # green zone right edge
+    SPLASH_YELLOW_L = 40
+    SPLASH_YELLOW_R = 100   # yellow covers 40-59 and 81-100
+
+    splash_value  = 50.0  # current slider position
+    splash_dir    = 1     # 1 = moving right, -1 = moving left
+    splash_locked = False # True once the player clicks
+    splash_result = None  # "perfect" | "good" | "miss"
+    pending_jump  = None  # set to a label name to trigger a jump from the screen
+
+    # Session flag: True if a water fight happened during the current pool date.
+    _water_fight_today = False
+
+    # True if the screen currently has water drops on it (not yet wiped by Monika)
+    _screen_dirty = False
+
+
+    def splash_tick():
+        """Called every timer tick to advance the slider."""
+        import store
+        sp = store.ep_pool
+        if sp.splash_locked:
+            return
+        sp.splash_value += sp.SPLASH_SPEED * sp.splash_dir
+        if sp.splash_value >= sp.SPLASH_MAX:
+            sp.splash_value = sp.SPLASH_MAX
+            sp.splash_dir = -1
+        elif sp.splash_value <= sp.SPLASH_MIN:
+            sp.splash_value = sp.SPLASH_MIN
+            sp.splash_dir = 1
+        renpy.restart_interaction()
+
+    def splash_press():
+        """Called when the player clicks / presses the button."""
+        import store
+        sp = store.ep_pool
+        if sp.splash_locked:
+            return
+        sp.splash_locked = True
+        v = sp.splash_value
+        if sp.SPLASH_GREEN_L <= v <= sp.SPLASH_GREEN_R:
+            sp.splash_result = "perfect"
+            sp.pending_jump  = "splash_result_perfect"
+        elif sp.SPLASH_YELLOW_L <= v or v >= sp.SPLASH_GREEN_R:
+            # Yellow zone: 40-59 OR 81-100
+            sp.splash_result = "good"
+            sp.pending_jump  = "splash_result_good"
+        else:
+            sp.splash_result = "miss"
+            sp.pending_jump  = "splash_result_miss"
+        renpy.restart_interaction()
+
+    def splash_reset():
+        """Resets the mini-game state for a new attempt."""
+        import store
+        sp = store.ep_pool
+        sp.splash_value  = 50.0
+        sp.splash_dir    = 1
+        sp.splash_locked = False
+        sp.splash_result = None
+        sp.pending_jump  = None
+
 # Store: ep_tools
 init 5 python in ep_tools:
+
     import store
     import datetime
 
@@ -1481,7 +1583,15 @@ init -5 python in ep_tools:
         stats[_("Total Visits")] = str(total_sessions)
         h, rem = divmod(total_playtime.total_seconds(), 3600)
         m, s = divmod(rem, 60)
-        stats[_("Our Time Together")] = "{:02.0f}h {:02.0f}m".format(h, m)
+        if h >= 48:
+            # 2+ days: show days + hours, minutes are no longer meaningful
+            d = int(h // 24)
+            h_rem = int(h % 24)
+            stats[_("Our Time Together")] = "{}d {}h".format(d, h_rem)
+        else:
+            # Under 48 h: show hours + minutes (useful in early play / beta)
+            stats[_("Our Time Together")] = "{:02.0f}h {:02.0f}m".format(h, m)
+
         if total_sessions > 0:
             avg_playtime = total_playtime / total_sessions
             h_avg, rem_avg = divmod(avg_playtime.total_seconds(), 3600)
@@ -1642,7 +1752,12 @@ init -5 python in ep_tools:
 # Handles Chibi-related logic, classes, and UI helpers.
 init -5 python in ep_chibis:
     import store
-    from renpy.display.layout import LiveComposite
+    # Ren'Py 6.99 exposes LiveComposite via renpy.display.layout.
+    # Ren'Py 7.x moved it; fall back to the top-level alias.
+    try:
+        from renpy.display.layout import LiveComposite
+    except ImportError:
+        LiveComposite = store.LiveComposite
 
     # --- Chibi Management Functions ---
     def init_chibi():
@@ -1667,21 +1782,27 @@ init -5 python in ep_chibis:
         init_chibi()
 
     def draw_background_accessories(st, at):
-        # Return the image directly without LiveComposite wrapper (only 1 image)
+        # Use new ChibiManager if available, fallback to legacy persistent
+        main = chibi_manager.main if chibi_manager._initialized else None
+        accessory = main.accessory_3 if main else store.persistent.chibi_accessory_3_
         return store.MASFilterSwitch(
-            store.ep_chibis.accessory_path_2.format(store.persistent.chibi_accessory_3_)
+            store.ep_chibis.accessory_path_2.format(accessory)
         ), 1
 
     def draw_foreground_accessory_1(st, at):
-        # Return the image directly without LiveComposite wrapper (only 1 image)
+        # Use new ChibiManager if available, fallback to legacy persistent
+        main = chibi_manager.main if chibi_manager._initialized else None
+        accessory = main.accessory_1 if main else store.persistent.chibi_accessory_1_
         return store.MASFilterSwitch(
-            store.ep_chibis.accessory_path_0.format(store.persistent.chibi_accessory_1_)
+            store.ep_chibis.accessory_path_0.format(accessory)
         ), 1
 
     def draw_foreground_accessory_2(st, at):
-        # Return the image directly without LiveComposite wrapper (only 1 image)
+        # Use new ChibiManager if available, fallback to legacy persistent
+        main = chibi_manager.main if chibi_manager._initialized else None
+        accessory = main.accessory_2 if main else store.persistent.chibi_accessory_2_
         return store.MASFilterSwitch(
-            store.ep_chibis.accessory_path_1.format(store.persistent.chibi_accessory_2_)
+            store.ep_chibis.accessory_path_1.format(accessory)
         ), 1
 
     def migrate_chibi_costume_data():
@@ -1720,7 +1841,7 @@ init -5 python in ep_chibis:
             store.persistent.chibika_current_costume = store.ep_chibis.blanket_monika
 
     class DokiAccessory(object):
-        """Callable action that equips an accessory to the chibi."""
+        """Callable action that equips an accessory to the editing chibi."""
         __slots__ = ['name', 'acc', 'slot']
         
         def __init__(self, name, acc, slot):
@@ -1728,41 +1849,103 @@ init -5 python in ep_chibis:
             self.acc = acc
             self.slot = slot  # 'primary', 'secondary', or 'background'
 
+        @property
+        def display_name(self):
+            """Returns the name with an asterisk if it's currently equipped."""
+            target = get_editing_chibi()
+            if target:
+                slot_map = {"primary": "accessory_1", "secondary": "accessory_2", "background": "accessory_3"}
+                attr = slot_map.get(self.slot, "accessory_1")
+                if getattr(target, attr) == self.acc:
+                    return self.name + " *"
+            return self.name
+
         def __call__(self):
-            if self.slot == "primary":
-                store.persistent.chibi_accessory_1_ = self.acc
-            elif self.slot == "secondary":
-                store.persistent.chibi_accessory_2_ = self.acc
-            else:
-                store.persistent.chibi_accessory_3_ = self.acc
+            # Update the currently editing chibi
+            target = get_editing_chibi()
+            if target:
+                target.set_accessory(self.slot, self.acc)
+            
+            # Also update legacy persistent only for the main chibi
+            if _editing_chibi_id == chibi_manager.MAIN_CHIBI_ID:
+                if self.slot == "primary":
+                    store.persistent.chibi_accessory_1_ = self.acc
+                elif self.slot == "secondary":
+                    store.persistent.chibi_accessory_2_ = self.acc
+                else:
+                    store.persistent.chibi_accessory_3_ = self.acc
+            
+            # Save to persistent
+            save_chibis()
+            # Force immediate screen refresh - the DynamicDisplayable will
+            # re-evaluate and pick up the new accessory value
+            renpy.restart_interaction()
 
     class SelectDOKI():
-        """Callable action that changes the chibi's costume."""
+        """Callable action that changes the editing chibi's costume."""
         def __init__(self, name, costume):
             self.name = name
             self.costume = costume  # Tuple: (folder, idle, blink, hover)
 
+        @property
+        def display_name(self):
+            """Returns the name with an asterisk if it's currently equipped."""
+            target = get_editing_chibi()
+            if target:
+                # Compare the idle sprite name from the costume tuple
+                if target.sprites[0] == self.costume[1]:
+                    return self.name + " *"
+            return self.name
+
         def __call__(self):
-            store.persistent.chibika_current_costume = self.costume
+            # Update the currently editing chibi
+            set_costume_from_tuple(self.costume)
+            
+            # Also update legacy persistent only for the main chibi
+            if _editing_chibi_id == chibi_manager.MAIN_CHIBI_ID:
+                store.persistent.chibika_current_costume = self.costume
+            # Save to persistent and rebuild displayables
+            save_chibis()
+            invalidate_displayable_cache(_editing_chibi_id)
             store.ep_chibis.reset_chibi()
             renpy.jump("extra_chibi_main")
 
-    def show_costume_menu(costumes, return_label):
-        dokis_items = [SelectDOKI(name, cost) for name, cost in costumes]
-        items = [(_("Nevermind"), return_label, 20)]
-        renpy.call_screen("extra_gen_list", dokis_items, store.mas_ui.SCROLLABLE_MENU_TXT_LOW_AREA, items)
 
     def chibi_drag(drags, drop):
         """Handle Chibika's drag and drop movement."""
         try:
-            store.persistent.chibika_drag_x = drags[0].x
-            store.persistent.chibika_drag_y = drags[0].y
+            x = drags[0].x
+            y = drags[0].y
+            
+            # Update new ChibiManager system
+            main = chibi_manager.main
+            if main:
+                main.move_to(x, y)
+            
+            # Also update legacy persistent for backwards compatibility
+            store.persistent.chibika_drag_x = x
+            store.persistent.chibika_drag_y = y
+            
+            # Save to persistent so position survives restarts
+            save_chibis()
         except Exception:
             # Defensive: ignore if structure isn't as expected
             pass
     
     def clicker():
         """Handles the logic when the chibi is clicked repeatedly."""
+        # Use new ChibiManager system if available
+        main = chibi_manager.main
+        if main and chibi_manager._initialized:
+            main.handle_click()
+            
+            # Check if chibi ran away
+            if main.is_angry:
+                store.ep_chibis.temp_chibi_anger = True
+                remove_chibi()
+            return
+        
+        # Fallback to legacy behavior
         try:
             current_char = store.persistent.chibika_current_costume[0]
         except (IndexError, TypeError):
@@ -1866,15 +2049,30 @@ init -5 python in ep_chibis:
         # Trigger jump animation if requested and conditions are met
         if jump:
             try:
-                chibi_visible = "doki_chibi_idle" in renpy.config.overlay_screens
-                not_draggable = not store.persistent.enable_drag_chibika
-                current_doki = store.persistent.chibika_current_costume[0]
-                doki_matches = (doki == current_doki)
+                # Ensure the chibi overlay is active
+                if "doki_chibi_idle" not in renpy.config.overlay_screens:
+                    return
+
+                triggered = False
+                # Update all matching chibis in the new manager system
+                if store.ep_chibis.chibi_manager._initialized:
+                    for chibi in store.ep_chibis.chibi_manager.all:
+                        if chibi.doki == doki and not chibi.draggable and chibi.visible:
+                            chibi.is_jumping = True
+                            triggered = True
                 
-                if chibi_visible and not_draggable and doki_matches:
-                    # Set the jumping flag - the screen will handle the animation
+                # Also update legacy global flag if main doki matches (for backwards compatibility)
+                try:
+                    legacy_doki = store.persistent.chibika_current_costume[0]
+                except (IndexError, TypeError, AttributeError):
+                    legacy_doki = "darling"
+                
+                if doki == legacy_doki and not store.persistent.enable_drag_chibika:
                     store.ep_chibis.is_jumping = True
-                    renpy.restart_interaction()  # Force screen refresh
+                    triggered = True
+                
+                if triggered:
+                    renpy.restart_interaction()
             except Exception:
                 pass
 
@@ -1905,11 +2103,8 @@ init python in ep_fridge:
     import datetime
     import renpy.store as store
     import renpy.exports as renpy
-    try:
-        import pygame
-        pygame_available = True
-    except ImportError:
-        pygame_available = False
+    import pygame
+
     
     EP_FM_FONT = "gui/font/RifficFree-Bold.ttf"
 
@@ -2240,11 +2435,7 @@ init -10 python in ep_sg:
 # ============================================================================
 
 init -15 python:
-    try:
-        import pygame
-        pygame_available = True
-    except ImportError:
-        pygame_available = False
+    import pygame
 
     class EPLinearForm(object):
         """
@@ -2611,8 +2802,8 @@ init -14 python in ep_interactions:
             self._zoom_cz[_default_zoom] = cz_d
 
         def _cz_iter(self):
-            for zl, zl_d in self._zoom_cz.iteritems():
-                for zone_key, cz in zl_d.iteritems():
+            for zl, zl_d in self._zoom_cz.items():
+                for zone_key, cz in zl_d.items():
                     yield zone_key, zl, cz
 
         def _debug(self, value):
@@ -2630,13 +2821,13 @@ init -14 python in ep_interactions:
             if zone_key not in self._zones:
                 return
             self._zones.pop(zone_key)
-            for zone_d in self._zoom_cz.itervalues():
+            for zone_d in self._zoom_cz.values():
                 if zone_key in zone_d:
                     zone_d.pop(zone_key)
 
         def set_disabled(self, zone_key, value):
             """Sets disabled state for all zoom levels of a zone."""
-            for zl_d in self._zoom_cz.itervalues():
+            for zl_d in self._zoom_cz.values():
                 cz = zl_d.get(zone_key, None)
                 if cz is not None:
                     cz.disabled = value
@@ -2645,7 +2836,7 @@ init -14 python in ep_interactions:
             """Generates clickzones for a zoom level."""
             zl_set = self._zoom_cz.get(zoom_level, {})
 
-            for zone_key, cz in self._zones.iteritems():
+            for zone_key, cz in self._zones.items():
                 if zone_key not in zl_set:
                     new_cz = store.EPClickZone.copyfrom(
                         cz,

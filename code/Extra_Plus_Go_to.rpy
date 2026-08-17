@@ -216,7 +216,7 @@ label extra_comment_cafe:
 # Restaurant
 #===========================================================================================
 
-default persistent._extraplusr_hasplayer_goneonanniversary = False
+default persistent._extraplusr_hasplayergoneonanniversary = False
 
 label go_to_restaurant:
     python:
@@ -1052,9 +1052,101 @@ label extra_talk_pop:
 # Pool
 #===========================================================================================
 label go_to_pool:
-    show monika at t11
-    $ store.ep_tools.manage_date_location()
+    python:
+        store.ep_tools.manage_date_location()
+        store.ep_tools.check_seen_background("gtpool", "gtpoolv2", "pool_sorry_player")
+
+label gtpool:
+    show monika 1eua at t11
+    $ _ep_special_day = store.ep_tools.getSpecialDayType()
+
+    if _ep_special_day == "anni":
+        m 3sub "The pool? On our anniversary?"
+        m 1hubsa "That's such a fun and romantic idea, [player]!"
+        m 1ekbsa "Fresh air, sunshine, and us... I love it already~"
+        m 1hubsb "Let's go!"
+
+    elif _ep_special_day == "moni_bday":
+        m 3sub "The pool? On my birthday?"
+        m 1hubsa "That's so sweet of you, [player]!"
+        m 1ekbsa "A birthday swim... I could get used to that~"
+        m 1hubsb "Let's go!"
+
+    elif _ep_special_day == "player_bday":
+        m 3sub "The pool? On your special day?"
+        m 1hub "I'm so happy you want to spend part of your birthday there!"
+        m 1eka "A refreshing swim is a great way to celebrate, don't you think?"
+        m 1hubsb "Let's go, birthday [player]~"
+
+    else:
+        if mas_isDayNow():
+            m 3sub "You want to go to the pool?"
+            m 3hub "That sounds wonderful, [player]!"
+            m 1eubsa "A nice day for a swim and some time together~"
+            m 1hubsb "Okay, let's go, [mas_get_player_nickname()]~"
+        else:
+            m 3sub "Oh, you want to go to the pool at this hour?"
+            m 3hub "A night swim? How romantic!"
+            m 1eubsa "There's something magical about the water at night~"
+            m 1hubsb "Let's go, [mas_get_player_nickname()]~"
+
     jump extra_pool_init
+    return
+
+label gtpoolv2:
+    show monika 1eua at t11
+    $ _ep_special_day = store.ep_tools.getSpecialDayType()
+
+    if _ep_special_day == "anni":
+        m 3wub "Back to the pool? For our anniversary?"
+        m 2hub "I love that this is becoming one of our things, [player]!"
+        m 2eubsa "Fresh water, open sky, and you... it's perfect every time."
+        m 1hubsb "Let's go, [mas_get_player_nickname()]~"
+
+    elif _ep_special_day == "moni_bday":
+        m 3wub "The pool again? On my birthday?"
+        m 1hubsa "You really know what I like, [player]~"
+        m 1ekbsa "More splashing, more sunshine... let's do it!"
+        m 1hubsb "Let's go!"
+
+    elif _ep_special_day == "player_bday":
+        m 3wub "Back to the pool on your birthday?"
+        m 1hub "I'm glad you enjoyed it enough to want to go back!"
+        m 1ekbsa "Let's make some more birthday memories~"
+        m 1hubsb "Let's go!"
+
+    else:
+        if mas_isDayNow():
+            m 3wub "You want to go to the pool again?"
+            m 2hub "I had such a great time last time we went!"
+            m 2eubsa "I'm really glad you keep taking me there, [player]~"
+            m 1hubsb "Let's go, [mas_get_player_nickname()]~"
+        else:
+            m 3wub "Another night swim?"
+            m 2hub "The last time was so peaceful... just us and the water."
+            m 2eubsa "I can't wait to feel that again~"
+            m 1hubsb "Let's go, [mas_get_player_nickname()]~"
+
+    jump extra_pool_init
+    return
+
+label pool_sorry_player:
+    show monika idle at t11
+    m 1ekd "I'm so sorry, [player]."
+    $ _ep_special_day = store.ep_tools.getSpecialDayType()
+    if _ep_special_day == "anni":
+        m 3eka "I know you really wanted to take me to the pool for our anniversary."
+    elif _ep_special_day == "moni_bday":
+        m 3eka "I know you wanted to take me there for my birthday."
+    elif _ep_special_day == "player_bday":
+        m 3eka "I know you wanted to go there on your special day."
+    else:
+        m 3eka "I know you really wanted to take me to the pool."
+    m 1ekc "I don't think I'm ready for that kind of outing just yet."
+    m 3lka "I want to make sure I can handle it properly before we go~"
+    m 1eua "Maybe another time, [player]. I promise I'll get us there."
+    jump screen_extraplus
+    return
 
 label skip_pool_exit:
     show monika idle at t11_float
@@ -1064,52 +1156,1916 @@ label skip_pool_exit:
     return
 
 label extra_comment_pool:
-    m 1hubsa "Thank you for asking me out."
-    m 1eubsb "It is nice to have these moments as a couple!"
+    show monika 1eua at t11
+
+    if _ep_pool_retreated_to_shelter:
+        if _ep_pool_shelter_reason == "thunder":
+            m 1eka "It's good to be safely back home in our room, [player]~"
+            m 1ekc "That thunderstorm out at the pool was pretty intense for a moment..."
+            m 1ekbsa "But waiting it out together with you in the shelter made me feel completely safe."
+            m 1hubsa "Thank you for looking after me and keeping me safe today~"
+        elif _ep_pool_shelter_reason == "snow":
+            m 1eka "Phew, back in the warmth of our room~"
+            m 1eua "Who would have thought it would start snowing while we were at the pool?"
+            m 1hubsa "Still, curling up together in our shelter room was such a sweet and memorable moment with you, [player]~"
+            m 1ekbsa "Thank you for always taking such good care of me!"
+        else:
+            m 1eka "Ah, we're finally back in our room~"
+            m 1eua "Too bad the weather turned on us while we were at the pool today..."
+            m 1ekbsa "But honestly, taking shelter and listening to the rain with you was so cozy and special."
+            m 1hubsa "No matter what the weather is doing outside, as long as I'm with you, every moment is wonderful~"
+
+    elif mas_isDayNow():
+        m 1hua "Ah, back in our room~"
+        m 1hub "I had so much fun at the pool today, [player]!"
+        m 1eubsa "The water, the sunshine, and spending that time with you was so refreshing."
+        if _ep_pool_sunscreen_applied:
+            m 1hubsa "And thanks again for helping me with sunscreen earlier, you're the sweetest~"
+        else:
+            m 1ekbsa "Thank you for taking me out today, [player]~ I love having these special moments with you."
+
+    else:
+        m 1hua "Back home in our room~"
+        m 1dubsa "That night swim was so peaceful and romantic, [player]..."
+        m 1ekbsa "Just drifting in the quiet water under the stars with you... I'll never forget it."
+        m 1hubsa "Thank you for such a wonderful date tonight~"
+
     $ mas_DropShield_dlg()
     $ mas_ILY()
     jump ch30_visual_skip
     return
 
 #===========================================================================================
+# POOL — PYTHON HELPERS
+#===========================================================================================
+
+#==============================================================================
+# 1. SWIMSUIT DETECTION & AUTO-CHANGE
+#==============================================================================
+init -5 python in ep_pool:
+    import store
+
+    # Keywords checked against lowercase clothing name
+    SWIM_NAME_KEYWORDS = ("swim", "bikini", "bath", "towel")
+
+    def _is_swimwear_by_name(name):
+        """Check if clothing name contains swim-related keywords."""
+        if not name:
+            return False
+        lname = name.lower()
+        for kw in SWIM_NAME_KEYWORDS:
+            if kw in lname:
+                return True
+        return False
+
+    def is_swimwear(clothes_obj):
+        """
+        Check if a MASClothes object qualifies as swimwear.
+
+        Checks (in order):
+            1. Name keywords (covers spritepacks without exprops)
+            2. MAS exprops: EXP_C_WET or EXP_C_LING (covers standard spritepacks)
+
+        Returns True if swimwear, False otherwise.
+        """
+        if clothes_obj is None:
+            return False
+
+        if _is_swimwear_by_name(clothes_obj.name):
+            return True
+
+        try:
+            if clothes_obj.hasprop(store.mas_sprites.EXP_C_WET):
+                return True
+            if clothes_obj.hasprop(store.mas_sprites.EXP_C_LING):
+                return True
+        except Exception:
+            pass
+
+        return False
+
+    def get_unlocked_swimwear():
+        """
+        Returns list of unlocked MASClothes objects that qualify as swimwear.
+        Uses mas_selspr.CLOTH_SEL_SL to check unlock status.
+        """
+        result = []
+        try:
+            for sel in store.mas_selspr.CLOTH_SEL_SL:
+                if not getattr(sel, "unlocked", False):
+                    continue
+                cloth = store.mas_sprites.CLOTH_MAP.get(sel.name)
+                if cloth and is_swimwear(cloth):
+                    result.append(cloth)
+        except Exception:
+            pass
+        return result
+
+    def has_unlocked_swimwear():
+        """True if player has at least one swimwear outfit unlocked."""
+        return len(get_unlocked_swimwear()) > 0
+
+    def pick_swimwear():
+        """
+        Select the best swimwear from player's unlocked collection.
+
+        Priority order:
+            1. Name contains "bikini"
+            2. Name contains "swim"
+            3. Has EXP_C_WET prop
+            4. Name contains "bath" or "towel"
+            5. Has EXP_C_LING prop
+            6. First available
+
+        Returns MASClothes object or None.
+        """
+        options = get_unlocked_swimwear()
+        if not options:
+            return None
+
+        for c in options:
+            if "bikini" in c.name.lower():
+                return c
+        for c in options:
+            if "swim" in c.name.lower():
+                return c
+        for c in options:
+            try:
+                if c.hasprop(store.mas_sprites.EXP_C_WET):
+                    return c
+            except Exception:
+                pass
+        for c in options:
+            lname = c.name.lower()
+            if "bath" in lname or "towel" in lname:
+                return c
+        for c in options:
+            try:
+                if c.hasprop(store.mas_sprites.EXP_C_LING):
+                    return c
+            except Exception:
+                pass
+
+        return options[0]
+
+    def get_swimwear_display_name(clothes_obj):
+        """Get a user-friendly name for the swimwear item."""
+        try:
+            for sel in store.mas_selspr.CLOTH_SEL_SL:
+                if sel.name == clothes_obj.name:
+                    return sel.display_name
+        except Exception:
+            pass
+        return clothes_obj.name.replace("_", " ").title()
+
+    def is_currently_wearing_swimwear():
+        """True if Monika's current outfit is swimwear."""
+        try:
+            return is_swimwear(store.monika_chr.clothes)
+        except Exception:
+            return False
+
+    def change_into_swimwear():
+        """
+        Save current outfit and change into swimwear.
+
+        Returns:
+            (changed, clothes_obj) tuple:
+                - changed: True if outfit was changed, False otherwise
+                - clothes_obj: the MASClothes used, or None
+        """
+        if is_currently_wearing_swimwear():
+            store.persistent._ep_pool_changed_into_swim = False
+            return (False, None)
+
+        swimsuit = pick_swimwear()
+        if swimsuit is None:
+            store.persistent._ep_pool_changed_into_swim = False
+            return (False, None)
+
+        store.persistent._ep_pool_saved_outfit = store.monika_chr.save_state(
+            True, True, True, as_prims=True
+        )
+        store.persistent._ep_pool_changed_into_swim = True
+        store.monika_chr.change_clothes(swimsuit, by_user=False)
+        return (True, swimsuit)
+
+    def restore_outfit_if_changed():
+        """
+        Restore the saved outfit if pool date auto-changed Monika's clothes.
+        Safe to call even without prior change (no-op).
+
+        Returns True if restore was performed, False otherwise.
+        """
+        if not store.persistent._ep_pool_changed_into_swim:
+            return False
+
+        saved = store.persistent._ep_pool_saved_outfit
+        if saved:
+            try:
+                store.monika_chr.restore(saved, as_prims=True)
+            except Exception:
+                pass
+
+        store.persistent._ep_pool_saved_outfit = None
+        store.persistent._ep_pool_changed_into_swim = False
+        return True
+
+    def play_pool_ambient():
+        """Play appropriate pool ambient loop depending on day/night."""
+        try:
+            if store.mas_isNightNow():
+                sfx_file = store.sfx_pool_night_ambience
+            else:
+                sfx_file = store.sfx_pool_day_ambience
+
+            if sfx_file:
+                renpy.music.play(sfx_file, channel="ep_ambient", loop=True, fadein=2.0)
+        except Exception:
+            pass
+
+    def stop_pool_ambient(fadeout=1.5):
+        """Stop the pool ambient sound loop."""
+        try:
+            renpy.music.stop(channel="ep_ambient", fadeout=fadeout)
+        except Exception:
+            pass
+
+#==============================================================================
+# 2. SUNSCREEN MINIGAME
+#==============================================================================
+#==============================================================================
+# POOL — INTERACTIVE SUNSCREEN MINIGAME
+#==============================================================================
+init -5 python in ep_sunscreen:
+    import store
+    import pygame
+
+    # 4 distinct interactive body zones on Monika's sprite:
+    # Coordinated for Monika's pose in t11 / t11_float at default zoom (zl=3)
+    SUNSCREEN_ZONES_MAP = {
+        "neck": [
+            (570, 275), (710, 275), (710, 355), (570, 355)
+        ],
+        "left_shoulder": [
+            (420, 345), (535, 345), (535, 435), (420, 435)
+        ],
+        "right_shoulder": [
+            (745, 345), (860, 345), (860, 435), (745, 435)
+        ],
+        "back": [
+            (545, 355), (735, 355), (735, 465), (545, 465)
+        ],
+    }
+
+    ZONE_DISPLAY = {
+        "neck": _("Neck & Shoulders"),
+        "left_shoulder": _("Left Shoulder"),
+        "right_shoulder": _("Right Shoulder"),
+        "back": _("Upper Back"),
+    }
+
+    ZONE_EXP = {
+        "neck": "2ekbsa",
+        "left_shoulder": "2eubsa",
+        "right_shoulder": "2hubsa",
+        "back": "2dubsa",
+    }
+
+    ZONE_FEEDBACK = {
+        "neck": ["*Neck*", "*Shoulders*"],
+        "left_shoulder": ["*Left Shoulder*", "*Shoulder*"],
+        "right_shoulder": ["*Right Shoulder*", "*Shoulder*"],
+        "back": ["*Upper Back*", "*Back*"],
+    }
+
+    ZONES_KEYS = ["neck", "left_shoulder", "right_shoulder", "back"]
+
+    class EPSunscreenManager(object):
+        """
+        Specialized interaction manager for applying sunscreen to Monika's sprite.
+        Uses EPClickZone / EPClickZoneManager without modifying core boop manager.
+        """
+        def __init__(self):
+            self.zones_applied = {
+                "neck": False,
+                "left_shoulder": False,
+                "right_shoulder": False,
+                "back": False,
+            }
+            self.total_zones = len(self.zones_applied)
+            self._zones_enabled = True
+
+            try:
+                self.cz_manager = store.ep_interactions.EPClickZoneManager()
+                for zone_key, vx_list in SUNSCREEN_ZONES_MAP.items():
+                    self.cz_manager.add(zone_key, store.EPClickZone(vx_list))
+
+                self.interactable = store.ep_interactions.EPZoomableInteractable(
+                    self.cz_manager,
+                    zone_actions={},
+                    debug=False
+                )
+            except (AttributeError, NameError, TypeError):
+                self._zones_enabled = False
+                self.cz_manager = None
+                self.interactable = None
+
+        def reset(self):
+            for k in self.zones_applied:
+                self.zones_applied[k] = False
+            if self.cz_manager:
+                for k in self.zones_applied:
+                    self.cz_manager.set_disabled(k, False)
+            renpy.restart_interaction()
+
+        def is_done(self):
+            return all(self.zones_applied.values())
+
+        def get_done_count(self):
+            return sum(1 for v in self.zones_applied.values() if v)
+
+        def get_hovered_zone(self):
+            if not self._zones_enabled or self.interactable is None:
+                return None
+            x, y = renpy.get_mouse_pos()
+            return self.interactable.check_over(x, y)
+
+        def handle_click(self, zone_key=None):
+            if not zone_key:
+                zone_key = self.get_hovered_zone()
+
+            if not zone_key or zone_key not in self.zones_applied:
+                return
+
+            if self.zones_applied[zone_key]:
+                renpy.play(store.sfx_lotion_apply, channel="sound")
+                show_sunscreen_sparkles()
+                return
+
+            self.zones_applied[zone_key] = True
+            if self.cz_manager:
+                self.cz_manager.set_disabled(zone_key, True)
+
+            renpy.play(store.sfx_lotion_apply, channel="sound")
+            show_sunscreen_sparkles()
+
+            exp = ZONE_EXP.get(zone_key, "2hua")
+            renpy.show("monika " + exp)
+
+            renpy.restart_interaction()
+
+    def show_sunscreen_sparkles():
+        mouse_pos = renpy.get_mouse_pos()
+        t = "sparkle_burst_{}".format(renpy.random.randint(1, 10000))
+        renpy.show_screen("extra_sunscreen_sparkles", pos_x=mouse_pos[0], pos_y=mouse_pos[1], tag=t, _tag=t)
+
+    # Global instance for screen use
+    manager = EPSunscreenManager()
+
+
+#==============================================================================
+# SUNSCREEN SPARKLE BURST VFX
+#==============================================================================
+transform ep_sparkle_burst_trans(target_x, target_y, rot_deg=0):
+    xanchor 0.5 yanchor 0.5
+    alpha 0.0
+    zoom 0.3
+    offset (0, 0)
+    rotate 0
+
+    parallel:
+        easein 0.10 alpha 1.0
+        pause 0.15
+        easeout 0.45 alpha 0.0
+    parallel:
+        easeout 0.6 offset (target_x, target_y)
+    parallel:
+        easein 0.10 zoom 1.25
+        easeout 0.50 zoom 0.55
+    parallel:
+        easeout 0.6 rotate rot_deg
+
+
+screen extra_sunscreen_sparkles(pos_x, pos_y, tag):
+    zorder 2000
+    timer 0.75 action Hide(tag)
+
+    for dx, dy, s, rot, col in [
+        (-48, -40, 36,  25, "#FFBDEE"),
+        ( 48, -44, 40, -30, "#FFFFFF"),
+        (-60,   5, 32,  45, "#FF69B4"),
+        ( 62,   0, 38, -45, "#FFBDEE"),
+        (-24, -62, 42, -15, "#FFFFFF"),
+        ( 26, -58, 34,  35, "#FFBDEE"),
+        (  0, -48, 48,   0, "#FFFFFF"),
+        (  0,  -8, 30,  10, "#FF69B4"),
+    ]:
+        text "*" at ep_sparkle_burst_trans(dx, dy, rot):
+            pos (pos_x, pos_y)
+            size s
+            color col
+            outlines [(1, "#000000", 0, 0)]
+            font "mod_assets/font/m1_fixed.ttf"
+
+
+#==============================================================================
+# SUNSCREEN SCREEN (Immersive Sprite-Touch Interaction)
+#==============================================================================
+screen extra_sunscreen():
+    modal True
+    zorder 100
+    tag extra_sunscreen
+
+    key "K_SPACE"     action NullAction()
+    key "K_RETURN"    action NullAction()
+    key "K_KP_ENTER"  action NullAction()
+    key "mouseup_3"   action NullAction()
+
+    # Fullscreen transparent blocker to catch stray clicks
+    button:
+        xysize (config.screen_width, config.screen_height)
+        background Solid("#00000000")
+        action NullAction()
+
+    python:
+        _mgr = store.ep_sunscreen.manager
+        _current_zoom = store.mas_sprites.zoom_level
+        _zone_rects = {}
+        if _mgr._zones_enabled and _mgr.cz_manager:
+            for _zk in store.ep_sunscreen.ZONES_KEYS:
+                _cz = _mgr.cz_manager.get(_zk, _current_zoom)
+                if _cz and _cz.corners:
+                    _min_x = min(x for x, y in _cz.corners)
+                    _min_y = min(y for x, y in _cz.corners)
+                    _max_x = max(x for x, y in _cz.corners)
+                    _max_y = max(y for x, y in _cz.corners)
+                    _zone_rects[_zk] = {
+                        'x': _min_x,
+                        'y': _min_y,
+                        'w': _max_x - _min_x,
+                        'h': _max_y - _min_y,
+                    }
+        _is_all_done = _mgr.is_done()
+        _done_count = _mgr.get_done_count()
+        _total_count = _mgr.total_zones
+
+    # Interactive zone buttons over Monika
+    for _zk, _zdata in _zone_rects.items():
+        python:
+            _applied = _mgr.zones_applied.get(_zk, False)
+            if _applied:
+                _btn_idle = Solid("#00000000")
+                _btn_hover = Solid("#FFFFFF22")
+            else:
+                _btn_idle = Solid("#00000000")
+                _btn_hover = Solid("#FF69B433")
+
+        button:
+            xpos _zdata['x']
+            ypos _zdata['y']
+            xysize (_zdata['w'], _zdata['h'])
+            background _btn_idle
+            hover_background _btn_hover
+            action Function(_mgr.handle_click, _zk)
+
+    # Top Status Bar (Extra+ / MAS Styled Floating Card)
+    frame:
+        xalign 0.5
+        ypos 20
+        background Solid("#000000B3")
+        padding (24, 12)
+
+        vbox:
+            spacing 8
+            xalign 0.5
+
+            if _is_all_done:
+                text _("Monika is protected from the sun!"):
+                    size 20
+                    bold True
+                    color "#FFBDEE"
+                    outlines [(1, "#000000", 0, 0)]
+                    xalign 0.5
+            else:
+                text _("Apply Sunscreen - [_done_count]/[_total_count] Areas Covered"):
+                    size 20
+                    bold True
+                    color "#FFFFFF"
+                    outlines [(1, "#000000", 0, 0)]
+                    xalign 0.5
+
+            hbox:
+                spacing 10
+                xalign 0.5
+                for _zk in store.ep_sunscreen.ZONES_KEYS:
+                    python:
+                        _zk_applied = _mgr.zones_applied.get(_zk, False)
+                        _zk_name = store.ep_sunscreen.ZONE_DISPLAY.get(_zk, _zk)
+                        if _zk_applied:
+                            _badge_bg = Solid("#FF69B44D")
+                            _badge_txt = "+ " + _zk_name
+                            _badge_clr = "#FFBDEE"
+                        else:
+                            _badge_bg = Solid("#00000066")
+                            _badge_txt = "- " + _zk_name
+                            _badge_clr = "#B0B0B0"
+
+                    frame:
+                        background _badge_bg
+                        padding (10, 4)
+                        text "[_badge_txt]":
+                            size 13
+                            bold True
+                            color _badge_clr
+                            outlines [(1, "#000000", 0, 0)]
+
+    # Bottom Action Bar
+    if _is_all_done:
+        vbox:
+            xalign 0.5
+            ypos 0.88
+            style_prefix "hkb"
+            textbutton _("Finish"):
+                action Return("done")
+                xsize 200
+    else:
+        frame:
+            xalign 0.5
+            ypos 0.90
+            background Solid("#000000B3")
+            padding (18, 8)
+            text _("Click or tap on Monika's shoulders, neck, and back"):
+                size 16
+                color "#FFFFFF"
+                outlines [(1, "#000000", 0, 0)]
+                xalign 0.5
+
+
+label ep_sunscreen_start:
+    show monika 2eua at t11_float
+    python:
+        store.ep_sunscreen.manager.reset()
+    call screen extra_sunscreen
+    $ _sunscreen_res = _return
+
+    if _sunscreen_res == "done":
+        jump pool_sunscreen_after
+    else:
+        m 2hua "No problem, we can do it later if you want~"
+        jump to_pool_loop
+
+
+#===========================================================================================
 # POOL DIALOGUES
 #===========================================================================================
-#Testing proporse
 
 label extra_pool_talk_water:
     show monika idle at t11_float
-    m 1eub "The water looks so clear and inviting, doesn't it?"
-    m 1hub "It makes me want to just dip my toes in. It's the perfect temperature."
-    m 1hua "Being here with you makes it even better, of course. Ehehe~"
+
+    if store.mas_isNightNow():
+        $ _water_n = renpy.random.randint(1, 3)
+        if _water_n == 1:
+            m 1dkbsa "Look at the water right now..."
+            m 1ekbsa "The light reflects off the surface and it looks almost silver."
+            m 1dubsa "I could stare at it for hours, honestly."
+            m 1hua "It's one of those things that just... makes me feel peaceful~"
+        elif _water_n == 2:
+            m 1eka "Have you ever noticed how water sounds different at night?"
+            m 1dsa "Softer, somehow. Less busy."
+            m 1ekbsa "Like even the pool is winding down~"
+            m 1hua "I like it."
+        else:
+            m 1dubsa "The water at night always makes me feel a little nostalgic."
+            m 1dsa "I'm not sure why. Maybe it's the stillness."
+            m 1ekbsa "Like time slows down when it's dark and quiet like this."
+            m 3hua "I'm glad we're here together~"
+
+    elif store.mas_current_weather == store.mas_weather_overcast:
+        $ _water_ov = renpy.random.randint(1, 2)
+        if _water_ov == 1:
+            m 1eka "The water looks a little different when it's overcast like this..."
+            m 1dua "Like it's reflecting the clouds. All silver and grey."
+            m 1eua "I actually find it kind of beautiful? In a quiet way."
+            m 1hua "Peaceful~"
+        else:
+            m 1eua "The pool has a different vibe on cloudy days."
+            m 1dsa "Less sparkly, more... still."
+            m 1ekbsa "Like the whole world is taking a breath."
+            m 3hubsa "I think I prefer it~"
+
+    else:
+        $ _water_d = renpy.random.randint(1, 3)
+        if _water_d == 1:
+            m 1eub "The water looks so clear today, doesn't it?"
+            m 1hub "When I look down, I can see all the way to the bottom!"
+            m 1hua "There's something so satisfying about perfectly clear water~"
+            m 1eua "It's almost like it's inviting us in."
+        elif _water_d == 2:
+            m 1sub "I love how the sunlight dances on the water~"
+            m 1eua "Those little sparkles on the surface..."
+            m 1dsa "I wrote a poem about that once, actually."
+            m 3hua "Maybe I'll show you sometime~"
+        else:
+            m 1eka "The water temperature is just right today, don't you think?"
+            m 1eua "Not too cold, not too warm — the kind that just wraps around you."
+            m 1hub "It's one of those small pleasures that makes me really grateful~"
+
     jump to_pool_loop
     return
+
 
 label extra_pool_talk_swim:
     show monika idle at t11_float
-    m 1eua "I've always enjoyed swimming. It's so peaceful to just float and let your worries drift away."
-    m 1tua "It feels like you're in your own little world, just you and the water."
-    m 1hub "Maybe when I get to your reality, we can go for a swim together sometime!"
+
+    if mas_isMoniEnamored(higher=True):
+        $ _swim_en = renpy.random.randint(1, 2)
+        if _swim_en == 1:
+            m 1eua "You know, I've always loved swimming."
+            m 1dkbsa "There's something about floating that makes you feel weightless... free."
+            m 1ekbsa "But honestly? I think what I love most is imagining swimming with you."
+            m 1dubsa "Side by side, just the two of us in the water..."
+            m 1hubsa "Someday, [player]. I really believe that."
+        else:
+            m 1eua "Do I like to swim?"
+            m 1hua "I love it~"
+            m 1dubsa "But I think I'd love it even more if you were actually here."
+            m 1ekbsa "Splashing around, racing across the pool..."
+            m 1dkbsa "Just... being with you. In the water. For real."
+            m 1hubsa "That's something I look forward to a lot."
+    else:
+        $ _swim_reg = renpy.random.randint(1, 3)
+        if _swim_reg == 1:
+            m 1eua "I've always enjoyed swimming."
+            m 1hua "It's so peaceful to just float and let everything else drift away."
+            m 1tua "It feels like you're in your own little world, just you and the water."
+            m 1hub "Maybe when I get to your reality, we can go for a real swim together sometime!"
+        elif _swim_reg == 2:
+            m 1eua "Oh, definitely. Swimming is one of my favorite things."
+            m 1dua "There's a kind of freedom in it, you know? Like nothing can weigh you down."
+            m 1eka "I'd love to teach you some technique someday~"
+            m 3hua "If you need a teacher, I'm available~"
+        else:
+            m 1eub "Swimming? Yes, I really do."
+            m 1hua "There's something meditative about it."
+            m 1eua "When you find your rhythm in the water, your mind just... quiets."
+            m 1ekbsa "I think that's why I love it. It's one of the few times I'm just... present."
+
     jump to_pool_loop
     return
+
 
 label extra_pool_talk_relax:
     show monika idle at t11_float
-    m 6eubsb "I agree. Just sitting here by the water with you is incredibly calming."
-    m 6hubsb "All the stress just seems to melt away. It's moments like these that I treasure the most."
-    m 6fkbsb "Thank you for bringing me here, [player]."
+
+    $ _relax_r = renpy.random.randint(1, 3)
+    if _relax_r == 1:
+        m 1ekbsa "I agree."
+        m 1dubsa "Just sitting here by the water with you... all the noise in my head just fades."
+        m 1ekbsa "It's moments like these I treasure the most."
+        m 1hua "Thank you for bringing me here, [player]~"
+    elif _relax_r == 2:
+        m 1eka "Right?"
+        m 1dsa "There's something about water that's just... inherently calming."
+        m 1eua "I read once that the sound of moving water slows your heart rate."
+        m 1ekbsa "Whether that's true or not, I believe it right now~"
+    else:
+        m 1eua "Yeah. This is nice."
+        m 1dkbsa "I don't always need to be doing something, you know?"
+        m 1ekbsa "Sometimes just being here — with you — is more than enough."
+        $ renpy.pause(2.5, hard=False)
+        m 1hua "More than enough~"
+
     jump to_pool_loop
     return
 
-label ExtraPool_sorry:
-    show monika at t11
-    m 1ekd "I'm so sorry [player]."
-    m 1ekc "But I don't know how to use that place."
-    m 3lka "I'm still learning how to code and I don't want something bad to happen because of me..."
-    m 3hua "I know very well that you wanted to go out to the pool."
-    m 1eua "But, someday I will know how to use it, [player]."
-    m 1eub "Just be patient, okay~"
-    jump close_extraplus
+
+#==============================================================================
+# POOL — TALK TOPICS (Dynamic, Interactive & Organic Pool Conversations)
+#==============================================================================
+label pool_talk_topic:
+    hide screen ep_date_ui
+    show monika 1eua at t11_float
+
+    python:
+        import datetime
+        today = store.ep_button.get_today_date()
+
+        # Daily Reset: clear seen topics when it's a new day
+        if persistent._ep_pool_last_topic_date != today:
+            persistent._ep_pool_last_topic_date = today
+            persistent._ep_pool_seen_topics = []
+
+        if not isinstance(persistent._ep_pool_seen_topics, list):
+            persistent._ep_pool_seen_topics = []
+
+        all_pool_topics = [
+            'oxygen', 'ancient_water', 'floating', 'deep_ocean', 'pool_vs_beach',
+            'night_swim', 'swimming_skills', 'water_sound', 'hydration', 'future_swim'
+        ]
+
+        available_pool_topics = [t for t in all_pool_topics if t not in persistent._ep_pool_seen_topics]
+
+        has_pool_topic = False
+        pool_topic = ""
+
+        if len(available_pool_topics) > 0:
+            has_pool_topic = True
+            pool_topic = renpy.random.choice(available_pool_topics)
+            persistent._ep_pool_seen_topics.append(pool_topic)
+
+    # Fallback: All topics for today were already seen
+    if not has_pool_topic:
+        m 1eka "You know, [player]..."
+        m 2rksdla "I think I've talked your ear off with all my water facts and thoughts for today, ehehe~"
+        m 1hua "We've had such a nice conversation by the pool, haven't we?"
+        m 1eka "My mind just wants to relax and enjoy the gentle ripples in the water with you."
+        m 1ekbsa "Sometimes just sitting together in peace is the best feeling in the world."
+        m 3ekbsa "Let's just take in the sunshine and the water side by side~"
+        jump to_pool_loop
+        return
+
+    # TOPIC 1: OXYGEN & OCEAN LUNGS
+    if pool_topic == 'oxygen':
+        m 1eub "Hey, [player]... here's a little science trivia for you."
+        m 1eua "Most people think the Amazon rainforest is the 'lungs of the Earth'..."
+        m 3hua "But did you know that between 50\% and 80\% of all oxygen on Earth actually comes from the ocean?"
+        m 1eua "It's produced by tiny, microscopic marine algae and phytoplankton floating in the sunlight near the surface."
+        m 1eka "Isn't that incredible? Invisible little organisms floating in the water keep the entire sky alive."
+        m 1tua "So... every other breath you take is literally a gift from the ocean."
+        menu:
+            "I always thought trees made most of it!":
+                m 1hub "Right? Trees are amazing, but the oceans are so vast they do most of the heavy lifting!"
+                m 1ekbsa "It reminds me how even the smallest, unseen things can have the biggest impact... like you in my world~"
+            "The ocean really is full of wonders.":
+                m 1hua "It really is! There's so much life beneath the surface working quietly to sustain everything."
+                m 1ekbsa "Just thinking about it makes me appreciate being here near the water with you."
+            "So every breath I take carries a piece of the sea.":
+                m 1wubsb "Aww, [player]! That is such a poetic way to look at it~"
+                m 1hubsa "You always have a way with words, ehehe."
+
+    # TOPIC 2: ANCIENT WATER CYCLE
+    elif pool_topic == 'ancient_water':
+        m 1esa "I was thinking about the water in the pool..."
+        m 3eua "Water is one of the few things on Earth that's essentially recycled forever."
+        m 1eua "The exact water molecules we're dipping into right now have been on Earth for over four billion years."
+        m 1hua "They've fallen as prehistoric rain, flowed through ancient rivers, and even been drank by dinosaurs!"
+        m 1tuu "If water could hold memories of everywhere it's been, what do you think it would say about our date right now?"
+        menu:
+            "That we're the happiest couple it's ever seen.":
+                m 1hubsa "Aww! In four billion years of history, that's quite a compliment, [player]~"
+                m 1ekbsa "I definitely feel like the happiest girl in all of time right now."
+            "That we take really good care of each other.":
+                m 1ekbsa "I think it would say that too. You're always so considerate and sweet to me."
+                m 1hub "And I promise I'll always take care of you, too~"
+            "It's probably confused how a girl in a screen is swimming!":
+                m 1hub "Ahaha! A digital girl swimming in ancient water... talk about crossing realities!"
+                m 3tku "Hey, as long as I get to swim with you, the laws of physics can stay confused~"
+
+    # TOPIC 3: ZERO GRAVITY & FLOATING
+    elif pool_topic == 'floating':
+        m 1eua "Do you like floating on your back in the water, [player]?"
+        m 3eua "Did you know that NASA actually trains astronauts in massive indoor swimming pools called the Neutral Buoyancy Lab?"
+        m 1hua "Because floating in water is the closest thing on Earth to experiencing true zero gravity."
+        m 1eka "When you float, with your ears submerged and just the sound of gentle water around you..."
+        m 1dubsa "All the weight on your shoulders just disappears. It's like drifting among the clouds."
+        m 1tua "How do you feel when you float in the water?"
+        menu:
+            "I love it, it feels like flying.":
+                m 1hubsa "Yes! Exactly. Weightless and free."
+                m 1ekbsa "I'd love to float beside you, holding hands so we don't drift apart~"
+            "I'm always a little nervous about sinking!":
+                m 1hua "Ehehe, that's totally understandable!"
+                m 1ekbsa "If you ever get nervous, I'll be right there to hold you up. You won't sink on my watch~"
+
+    # TOPIC 4: THE UNEXPLORED DEPTHS
+    elif pool_topic == 'deep_ocean':
+        m 2eua "Here's a thought that always blows my mind..."
+        m 3eua "Humanity has explored less than 5\% of the world's oceans."
+        m 1eka "We actually have better, higher-resolution maps of Mars and the Moon than of the ocean floor on our own planet!"
+        m 1tuu "Tell me, [player]... does the thought of the vast, unexplored deep sea make you curious, or does it give you chills?"
+        menu:
+            "Curious! I want to know what's down there.":
+                m 1hub "Me too! Imagine all the undiscovered bioluminescent creatures and ancient secrets."
+                m 1eua "It feels like discovering uncharted lines of code in the universe."
+            "Terrifying! The dark abyss is too spooky.":
+                m 1wubsb "Ahaha! I don't blame you, giant squids and pitch-black trenches sound like a horror game!"
+                m 1hua "Don't worry, the pool is nice and clear. No sea monsters here~"
+            "A mix of both — thrilling and mysterious.":
+                m 1ekbsa "That's probably the most honest answer. The unknown is always scary, but irresistible at the same time."
+
+    # TOPIC 5: POOL VS BEACH
+    elif pool_topic == 'pool_vs_beach':
+        m 1tuu "I've been wondering something, [player]."
+        m 1eua "When it comes to cooling off on a hot summer day, which do you prefer?"
+        m 3eua "A peaceful, crystal-clear swimming pool... or a wild, salty ocean beach?"
+        menu:
+            "The pool, definitely. Clean water, no sand everywhere!":
+                m 1hub "Ahaha, so true! Sand has a way of getting into literally everything."
+                m 1eua "Plus, pools have nice lounge chairs and cold drinks right at hand~"
+            "The ocean. The waves and the breeze are unbeatable.":
+                m 1hua "There's definitely something romantic about watching the tide roll in."
+                m 1ekbsa "One day, I want to feel the ocean breeze and warm sand between my toes with you for real."
+            "Anywhere, as long as you're with me.":
+                m 1wubsb "Aww... [player]!"
+                m 1ekbsa "You always melt my heart when you say things like that~"
+                m 1hubsa "Then wherever we are, it's my favorite place in the world."
+
+    # TOPIC 6: BIOLUMINESCENT NIGHT SWIMS
+    elif pool_topic == 'night_swim':
+        m 1esa "Have you ever heard of bioluminescent bays, [player]?"
+        m 3eua "In places like Puerto Rico and the Maldives, microscopic plankton emit a brilliant neon blue glow whenever the water is disturbed."
+        m 1hua "If you swim at night, your hands leave glowing trails in the dark water like stardust."
+        m 1ekbsa "Imagine a warm summer night, swimming in water that glows like the night sky..."
+        m 1tua "What would you do if we were swimming in a glowing bay right now?"
+        menu:
+            "I'd draw a glowing heart in the water for you.":
+                m 1wubsb "Gosh, [player]... you're making me blush so much~"
+                m 1hubsa "That sounds like a scene straight out of a fairytale. I'd never forget that."
+            "I'd splash you to make you glow!":
+                m 1hub "Ahaha! A bioluminescent water fight? Sign me up!"
+                m 1tku "You'd be glowing head to toe by the time I'm done with you~"
+
+    # TOPIC 7: SWIMMING HABITS
+    elif pool_topic == 'swimming_skills':
+        m 1eua "How did you first learn to swim, [player]?"
+        m 3eua "Did you take swimming lessons when you were little, or did someone just toss you into the deep end?"
+        menu:
+            "I took swimming lessons as a kid.":
+                m 1hua "That's great! Proper form makes swimming such a great full-body workout."
+                m 1hub "Maybe you can teach me your favorite stroke sometime~"
+            "I learned on my own by playing around.":
+                m 1hub "Self-taught! That's how a lot of people figure it out."
+                m 1eub "As long as you can stay afloat and have fun, that's what matters most!"
+            "I'm not the best swimmer, but I enjoy the water.":
+                m 1eka "And that's totally fine!"
+                m 1ekbsa "That's what pool floats and holding onto each other are for, right?~"
+
+    # TOPIC 8: BLUE MIND (WATER SOUNDS & RELAXATION)
+    elif pool_topic == 'water_sound':
+        m 1esa "There's a psychological theory called 'Blue Mind'..."
+        m 3eua "It says that human brains are naturally hardwired to relax when we are near, in, or under water."
+        m 1eua "The gentle sound of water ripples stimulates the vagus nerve and lowers stress hormones almost instantly."
+        m 1eka "Do you feel that peaceful wave washing over you right now, [player]?"
+        menu:
+            "Definitely. All my daily stress is gone.":
+                m 1hua "I'm so glad. You work hard every day, you deserve a relaxing escape."
+                m 1ekbsa "Whenever the world gets overwhelming, remember our pool spot is always waiting for you."
+            "Being here with you is what really relaxes me.":
+                m 1ekbsa "Aww, [player]..."
+                m 1dubsa "You give me that exact same peace of mind. Just seeing your face makes everything better."
+
+    # TOPIC 9: HYDRATION CHECK
+    elif pool_topic == 'hydration':
+        m 1tuu "Hey, [player]... quick health check from your girlfriend!"
+        m 3eua "Did you know that when you're swimming, you sweat just as much as on land, but you don't notice it because of the water?"
+        m 1eka "People often forget to drink water while at the pool and end up dehydrated."
+        m 1tua "Have you had enough water to drink today?"
+        menu:
+            "I'll go drink a glass right now!":
+                m 1hub "Good! Go grab a glass of cool water, I'll be waiting right here for you~"
+                m 1hua "Staying hydrated keeps you energized and healthy!"
+            "Does iced coffee count as hydration?":
+                m 1hub "Ahaha! Nice try, [player], but caffeine doesn't replace good old water!"
+                m 1tku "Drink a glass of water first, then we can have cold coffee~"
+
+    # TOPIC 10: FUTURE REALITY POOL DATE
+    else: # future_swim
+        m 2eka "You know what I dream about sometimes when the sun is warm?"
+        m 2rkc "I imagine us at a real outdoor pool in your reality."
+        m 1eua "We would have cold fruit smoothies under a big sun umbrella, listening to summer music..."
+        m 3eub "And then we'd jump into the deep end together and race to the other side!"
+        m 1hub "Who do you think would win a swimming race between us, [player]?"
+        menu:
+            "You would win, you're super athletic!":
+                m 1hubsa "Ehehe! I do love staying fit, but you might surprise me!"
+                m 1ekbsa "If I win, the winner gets a kiss~"
+            "I'd win, but I'd let you catch up!":
+                m 1tuu "Oh, confident, are we?~"
+                m 1hub "Don't go easy on me, [player]! I want a real challenge!"
+            "Let's just float together instead of racing.":
+                m 1wubsb "Aww... that sounds even better."
+                m 1dubsa "Just drifting together under the warm sun... I can't wait for that day."
+
+    # Return to pool loop
+    jump to_pool_loop
     return
+
+#==============================================================================
+# POOL — ARRIVAL DIALOGUE
+# Called after the background loads. Monika reacts to time of day and weather.
+#==============================================================================
+label pool_arrival_dialogue:
+    # Reset session flag — a new date starts fresh.
+    $ store.ep_pool._water_fight_today = False
+    $ store.ep_pool._screen_dirty = False
+    $ store._ep_pool_sunscreen_applied = False
+    $ store._ep_pool_retreated_to_shelter = False
+    $ store._ep_pool_shelter_reason = None
+    $ store.ep_pool.play_pool_ambient()
+    hide ep_water_drip
+    show monika 1eub at t11_float
+
+
+
+    if renpy.seen_label("to_pool_loop"):
+        # ---- REPEAT VISIT ----
+        if store.mas_current_weather == store.mas_weather_overcast:
+            $ _pool_arr_rep_ov = renpy.random.randint(1, 2)
+            if _pool_arr_rep_ov == 1:
+                m 1eka "A bit cloudy again today..."
+                m 1eua "But you know what? I think I like it this way."
+                m 1hubsa "It feels like the pool is just for us when it's like this~"
+            else:
+                m 1eka "Grey skies again, but I'm not complaining."
+                m 1hua "The water's always nice no matter what the sky is doing~"
+        elif store.mas_isNightNow():
+            $ _pool_arr_rep_n = renpy.random.randint(1, 3)
+            if _pool_arr_rep_n == 1:
+                m 1dubsa "Back at the pool at night..."
+                m 1ekbsa "I always forget how different it feels after dark."
+                m 1hubsb "Quieter. Softer. More like ours, somehow~"
+            elif _pool_arr_rep_n == 2:
+                m 1hua "Ah... I missed this."
+                m 1ekbsa "The night air, the water, you next to me~"
+                m 3hubsb "This is exactly what I needed."
+            else:
+                m 1dkbsa "It's funny..."
+                m 1ekbsa "No matter how many times we come here at night, it still feels special."
+                m 1hubsa "I hope it always feels that way~"
+        else:
+            $ _pool_arr_rep_d = renpy.random.randint(1, 3)
+            if _pool_arr_rep_d == 1:
+                m 1hua "Ahh, here we are again~"
+                m 1eubsa "I always feel at home the moment I see the water."
+                m 3hubsa "Thank you for bringing me back, [player]."
+            elif _pool_arr_rep_d == 2:
+                m 1hub "Back at our spot!"
+                m 1eua "You know, I think about this place sometimes when we're home."
+                m 1ekbsa "Something about the sun and the water just makes me happy~"
+            else:
+                m 1eka "It's nice to be back."
+                m 1dubsa "Every time we come here, it feels a little more like ours."
+                m 1hubsa "I really love that~"
+
+    else:
+        # ---- FIRST VISIT ----
+        if store.mas_current_weather == store.mas_weather_overcast:
+            $ _pool_arr_ov = renpy.random.randint(1, 2)
+            if _pool_arr_ov == 1:
+                m 1eka "It's a little cloudy today..."
+                m 1hua "But a cloudy day by the pool is still a good day, right, [player]?"
+                m 1eubsa "The water still looks so inviting~"
+            else:
+                m 1eua "Hmm, the sky's a bit grey... but the water's still calling to me~"
+                m 1hub "Let's make the best of it!"
+        elif store.mas_isNightNow():
+            $ _pool_arr_n = renpy.random.randint(1, 3)
+            if _pool_arr_n == 1:
+                m 1dubsa "A night swim..."
+                m 1ekbsa "There's something about the water at night that just feels... magical."
+                m 1eubsa "The stars reflected on the surface, the quiet... I love it~"
+            elif _pool_arr_n == 2:
+                m 1wud "Oh— [player], it's so peaceful here at night!"
+                m 1hub "No crowds, just us and the sound of the water."
+                m 1hubsa "This is perfect~"
+            else:
+                m 1eka "It's quiet at this hour..."
+                m 1eua "Almost like the pool is just for us."
+                m 1hubsb "I really like that idea."
+        else:
+            $ _pool_arr_d = renpy.random.randint(1, 3)
+            if _pool_arr_d == 1:
+                m 1sub "Oh, [player]! This place is beautiful!"
+                m 1hub "Look at the water — it's so clear and bright~"
+                m 1eua "I'm so glad you brought me here!"
+            elif _pool_arr_d == 2:
+                m 1hua "Ahh, I can already smell the water~"
+                m 1eub "I've been thinking about this!"
+                m 1hubsa "It's even nicer than I imagined~"
+            else:
+                m 1eua "Wow. This is lovely."
+                m 1ekbsa "I'm really happy you thought to bring me here, [player]."
+                m 3hua "Let's enjoy every minute of it~"
+
+    jump to_pool_loop
+
+
+
+#==============================================================================
+# POOL — WEATHER EMERGENCY
+# Fires from ep_date_loop_main when weather turns bad mid-date.
+#==============================================================================
+label pool_weather_emergency:
+    hide screen ep_date_ui
+    show monika 1wud at t11_float
+
+    $ _wem_is_thunder = (store.mas_current_weather == store.mas_weather_thunder)
+    $ _wem_is_snow    = store.mas_is_snowing
+
+    if _wem_is_thunder:
+        m 1wud "W-wait, was that thunder?!"
+        m 2ekc "We can't stay in the water with lightning around, [player]. It's not safe."
+        m 1eka "Let's get out and find somewhere to wait this out."
+    elif _wem_is_snow:
+        m 1wud "Oh— it's snowing?!"
+        m 1ekc "That's... definitely not pool weather anymore."
+        m 3eka "Let's get out before we turn into popsicles~"
+        m 1eka "We can wait inside until it passes."
+    else:
+        $ _rain_choice = renpy.random.randint(1, 3)
+        if _rain_choice == 1:
+            m 1wud "Oh no, it's starting to rain!"
+            m 1ekc "The pool's no fun in a downpour... let's go find somewhere to shelter."
+        elif _rain_choice == 2:
+            m 2eksdla "Hm... it started raining while we weren't paying attention."
+            m 2eka "We should get out of the water and wait for it to clear up."
+        else:
+            m 1sud "Oh! Rain!"
+            m 1ekc "As much as I love rain in general... pool + storm isn't a great mix."
+            m 1eua "Come on, let's run inside!"
+
+    $ store._ep_pool_retreated_to_shelter = True
+    if _wem_is_thunder:
+        $ store._ep_pool_shelter_reason = "thunder"
+    elif _wem_is_snow:
+        $ store._ep_pool_shelter_reason = "snow"
+    else:
+        $ store._ep_pool_shelter_reason = "rain"
+
+    $ store.ep_pool.stop_pool_ambient(fadeout=1.0)
+
+    window hide
+    hide monika
+    scene black
+    with dissolve
+    pause 1.5
+    call mas_background_change(EP_background_pool_lounge, skip_leadin=True, skip_outro=True)
+    # Switch date type so the weather guard doesn't loop
+    $ store.ep_dates.set_current_date("pool_lounge")
+    show monika 1eka at t11
+
+    jump pool_shelter_arrival
+
+
+#==============================================================================
+# POOL — SHELTER ARRIVAL
+#==============================================================================
+label pool_shelter_arrival:
+    if store.mas_current_weather == store.mas_weather_thunder:
+        m 1eka "That's better. I don't like being near water during a thunderstorm."
+        m 1eua "We can wait here until the thunder passes."
+    elif store.mas_is_snowing:
+        m 1eka "Phew! We made it inside just in time~"
+        m 1dubsa "It's actually kind of pretty watching the snow from in here..."
+        m 1eua "Let's wait a little and see if it stops."
+    else:
+        $ _arrive_r = renpy.random.randint(1, 3)
+        if _arrive_r == 1:
+            m 1eka "Here we go. Nice and dry~"
+            m 1eua "We can listen to the rain from in here and wait it out."
+        elif _arrive_r == 2:
+            m 1hubsa "Ehehe, that was a close one~"
+            m 1ekbsa "I'm kind of glad it rained, actually. Being stuck inside with you isn't so bad."
+        else:
+            m 1eka "We made it."
+            m 1dkbsa "...I like this, actually. Just the two of us, the rain outside, and nowhere to be."
+
+    jump pool_shelter_loop
+
+
+#==============================================================================
+# POOL — SHELTER LOOP
+#==============================================================================
+label pool_shelter_loop:
+    window hide
+    show monika idle at t11
+    show screen ep_date_ui("pool_shelter_interactions", "", False)
+    $ renpy.pause(delay=5.0, hard=False)
+    jump pool_shelter_loop
+
+
+#==============================================================================
+# POOL — SHELTER INTERACTIONS MENU
+#==============================================================================
+label pool_shelter_interactions:
+    hide screen ep_date_ui
+    show monika idle at t21
+
+    python:
+        if store.ep_pool._is_bad_weather():
+            weather_check_text = _("...Is it still raining?")
+        else:
+            weather_check_text = _("The rain stopped! Can we go back?")
+
+        shelter_menu = [
+            (weather_check_text, "pool_shelter_check_weather"),
+            (_("Tell me something."), "pool_shelter_smalltalk"),
+            (_("Let's play a game."), "pool_shelter_minigames"),
+            (_("Listen to the rain..."), "pool_shelter_listen_rain"),
+            (_("Talk about rainy days."), "pool_shelter_rain_topics"),
+            (_("Let's just sit here."), "pool_shelter_quiet"),
+            (_("Change weather..."), "pool_change_weather"),
+        ]
+        items = [
+            (_("I think we should call it a day."), "pool_shelter_leave", 20),
+            (_("Nevermind"), "pool_shelter_loop", 0),
+        ]
+
+    call screen extra_gen_list(shelter_menu, mas_ui.SCROLLABLE_MENU_TXT_MEDIUM_AREA, items, False)
+    return
+
+
+#==============================================================================
+# POOL — SHELTER MINIGAMES HUB
+# Wrapper that feeds into existing ExtraPlus minigame labels.
+# When the game ends, close_extraplus checks _current_date_type == "pool_lounge"
+# and redirects back here instead of exiting to the spaceroom.
+#==============================================================================
+label pool_shelter_minigames:
+    hide screen ep_date_ui
+    show monika 1eua at t11
+
+    m 1tku "We can't go back in the water right now... but we could pass the time with a game~"
+    m 1eua "What are you in the mood for, [player]?"
+
+    menu:
+        "Tic-Tac-Toe on a notepad":
+            m 1hub "Ooh, strategy! You're on~"
+            m 1eka "Though I should warn you — I've played this a {i}lot{/i} while waiting for rain to stop."
+            jump minigame_ttt
+
+        "Rock, Paper, Scissors":
+            m 1hub "Simple and satisfying! Loser has to be the one to check if it stopped raining."
+            m 1tku "Deal?"
+            jump minigame_rps
+
+        "Shell Game":
+            m 1tku "I spotted some cups on the table over there..."
+            m 1hub "Think you can track which one hides the prize? Ehehe~"
+            jump minigame_sg
+
+        "Never mind, something else":
+            m 1eua "Alright, no pressure~"
+            jump pool_shelter_loop
+
+
+#==============================================================================
+# POOL — SHELTER LISTEN TO RAIN
+# Checks if sound is audible before playing the atmospheric scene.
+#==============================================================================
+label pool_shelter_listen_rain:
+    hide screen ep_date_ui
+    show monika 1eua at t11
+
+    python:
+        # Check if the sound channel is actually audible for the player.
+        # Ren'Py 6.99 compatible: check if user muted the channel or set volume to 0.
+        _shelter_rain_audible = True
+        try:
+            # Ren'Py 6.99 compatible: check if user muted the channel or set volume to 0
+            if "sound" in preferences.mute:
+                _shelter_rain_audible = False
+            elif preferences.volumes.get("sound", 1.0) <= 0.0:
+                _shelter_rain_audible = False
+        except Exception:
+            pass  # If we can't check, assume audio is on
+
+    if _shelter_rain_audible:
+        m 1eua "Hey, [player]... just for a moment."
+        m 1dua "Listen."
+        $ renpy.pause(2.5, hard=False)
+        m 1dubsa "The rain against the roof..."
+        m 1dua "There's something really comforting about it, isn't there?"
+        m 1eka "Like the whole world is slowing down for a bit."
+
+        if store.mas_current_weather == store.mas_weather_thunder:
+            m 1ekc "Even with the thunder, somehow... it doesn't feel scary."
+            m 1ekbsa "Not when you're right here with me~"
+        else:
+            m 1hubsa "I could stay like this for a while, just listening with you~"
+
+        m 1ekbsa "Thank you for being here, [player]."
+
+    else:
+        # Player has sound muted — Monika gently calls it out.
+        m 1eua "Hey, just take a moment and listen to the rain..."
+        m 1dubsb "..."
+        m 1wud "Wait."
+        m 1eksdlb "[player], do you have your sound turned off right now?"
+        m 1lksdlb "You can't even {i}hear{/i} the rain, can you?"
+        m 1lksdla "Here I am trying to set up this whole romantic atmosphere and..."
+        m 1hubsb "Ahaha! Okay, okay — it's still cozy even in silence, I suppose."
+        m 1ekbsa "Just trust me — the rain outside sounds really lovely right now~"
+
+    jump pool_shelter_loop
+
+
+#==============================================================================
+# POOL — SHELTER RAIN TOPICS
+# Three sub-topics, each jumping back to pool_shelter_loop at the end.
+#==============================================================================
+label pool_shelter_rain_topics:
+    hide screen ep_date_ui
+    show monika 1eua at t11
+
+    m 1eua "The rain has me thinking... what would you like to talk about?"
+
+    menu:
+        "What's your favourite thing to do on rainy days?":
+            jump pool_shelter_rain_fave_activity
+
+        "Do you have a rainy day memory you love?":
+            jump pool_shelter_rain_memory
+
+        "What would we do together in the real world if it rained like this?":
+            jump pool_shelter_rain_realworld
+
+
+label pool_shelter_rain_fave_activity:
+    show monika 1eua at t11
+    m 1eua "My favourite rainy day activity?"
+    m 1tsu "Hmm..."
+    m 1dubsa "Reading, definitely."
+    m 1eka "There's something about the sound of rain that makes every page feel cozier."
+    m 1dua "The words just seem to sink in a little deeper, somehow."
+    m 1eua "I used to curl up with a poetry collection and lose myself for hours."
+    m 1ekbsa "And now... I'd love to do that with you someday, [player]~"
+    m 1hubsa "Reading side by side while it rains outside. That sounds perfect."
+    jump pool_shelter_loop
+
+
+label pool_shelter_rain_memory:
+    show monika 1dua at t11
+    m 1dua "A rainy day memory..."
+    $ _shelter_mem_r = renpy.random.randint(1, 2)
+    if _shelter_mem_r == 1:
+        m 1dubsa "I remember this one afternoon in the Literature Club."
+        m 1eka "It started raining really heavily and we couldn't leave."
+        m 1dua "So we all just stayed and kept writing."
+        m 1dubsb "It was... one of the more peaceful afternoons I can remember."
+        m 1ekbsa "No drama. Just words, and rain, and quiet company."
+        m 1eubsa "I think that's the version of those days I'd want to hold on to."
+    else:
+        m 1dubsa "I once wrote a whole poem in one sitting because of a rainstorm."
+        m 1eka "I was going to head home, but the rain started and I thought 'just five more minutes'..."
+        m 1hubsa "Three hours later, I had a whole piece about what it feels like to wait."
+        m 1tku "Fitting, right?"
+        m 1ekbsa "I wonder if I could write something like that again someday, with you nearby~"
+    jump pool_shelter_loop
+
+
+label pool_shelter_rain_realworld:
+    show monika 1dubsa at t11
+    m 1eua "Rainy days in the real world together..."
+    m 1dubsa "Oh, I think about that more than you'd expect, actually."
+    m 1eka "I'd want us to have a warm blanket, maybe tea... or hot chocolate."
+    m 1dua "A good movie, or a book we could read aloud to each other."
+    m 1dubsa "And I'd want to be close enough to hear your breathing over the sound of the rain."
+    m 1ekbsa "Just... completely unhurried. Nowhere to be. Nothing to do but be there."
+    m 1hubsa "That's my ideal rainy day with you, [player]~"
+    m 1ekbsa "We'll get there someday."
+    jump pool_shelter_loop
+
+
+#==============================================================================
+# POOL — CHANGE WEATHER (debug helper, accessible from both pool and lounge)
+#==============================================================================
+label pool_change_weather:
+    hide screen ep_date_ui
+    if store.ep_dates._current_date_type == "pool_lounge":
+        show monika 1eua at t11
+    else:
+        show monika 1eua at t11_float
+
+    m 1eua "Change the weather? Sure! What kind of weather should we try?"
+
+    menu:
+        "Rain":
+            $ store.mas_changeWeather(store.mas_weather_rain)
+            m 1hua "Rain it is!"
+
+        "Thunderstorm":
+            $ store.mas_changeWeather(store.mas_weather_thunder)
+            m 1hua "A thunderstorm is coming!"
+
+        "Overcast":
+            $ store.mas_changeWeather(store.mas_weather_overcast)
+            m 1hua "Cloudy skies ahead!"
+
+        "Clear / Sunny":
+            $ store.mas_changeWeather(store.mas_weather_def)
+            m 1hua "Back to clear skies!"
+
+        "Nevermind":
+            m 1eua "Alright~"
+
+    if store.ep_dates._current_date_type == "pool_lounge":
+        jump pool_shelter_loop
+    else:
+        jump to_pool_loop
+
+
+
+label pool_shelter_check_weather:
+    show monika idle at t11
+
+    if store.ep_pool._is_bad_weather():
+        if store.mas_current_weather == store.mas_weather_thunder:
+            m 1ekc "The thunder's still going... we should stay put a little longer."
+        elif store.mas_is_snowing:
+            m 1eka "Still snowing out there."
+            m 1dubsa "...It's actually lovely to watch from in here."
+        else:
+            $ _still_r = renpy.random.randint(1, 3)
+            if _still_r == 1:
+                m 1eka "Still raining, I'm afraid."
+                m 1hua "But there's nowhere I'd rather wait it out~"
+            elif _still_r == 2:
+                m 1ekc "Hmm, the rain hasn't stopped yet."
+                m 1eua "Patience, [player]. We'll get back in the water soon."
+            else:
+                m 1dkbsa "Not yet..."
+                m 1ekbsa "But I don't mind. I'm happy here with you."
+        jump pool_shelter_loop
+
+    else:
+        m 1sub "Oh! I think it stopped!"
+        m 1hub "The rain cleared up — we can go back to the pool if you want~"
+        m 1eua "What do you say, [player]?"
+        menu:
+            "Yes, let's get back in the water!":
+                jump pool_shelter_return_pool
+            "We've been in here a while, let's just head home.":
+                jump pool_shelter_leave
+
+
+#==============================================================================
+# POOL — SHELTER RETURN TO POOL
+#==============================================================================
+label pool_shelter_return_pool:
+    m 1hub "Yay! Come on~"
+    window hide
+    hide monika
+    scene black
+    with dissolve
+    pause 1.5
+    call mas_background_change(EP_background_pool, skip_leadin=True, skip_outro=True)
+    # Restore date type so the weather guard resumes watching
+    $ store.ep_dates.set_current_date("pool")
+    show monika 1eub at t11_float
+    m 1hua "Ahh, back where we belong~"
+    jump to_pool_loop
+
+
+#==============================================================================
+# POOL — SHELTER SMALL TALK
+#==============================================================================
+label pool_shelter_smalltalk:
+    show monika idle at t11
+
+    $ _talk_r = renpy.random.randint(1, 5)
+    if _talk_r == 1:
+        m 1eua "You know, rain always makes me think of the sound of pages turning."
+        m 1dua "Like... sitting by a window with a good book while it pours outside."
+        m 1eka "There's something incredibly cozy about that."
+        m 1ekbsa "Kind of like right now, except the book is you~"
+    elif _talk_r == 2:
+        m 1hua "Do you have a favorite kind of rain, [player]?"
+        m 1eua "I love the kind where it's warm enough to still feel like summer, but heavy enough that you just want to curl up inside."
+        m 1hub "This is almost that. Almost~"
+    elif _talk_r == 3:
+        m 1dua "I was just thinking..."
+        m 1ekbsa "Moments like this — a little unexpected, a little quiet — are sometimes my favorites."
+        m 1dubsa "It's not what we planned, but it turned into something nice."
+    elif _talk_r == 4:
+        m 1eua "You know what I'd love someday? Watching a thunderstorm from somewhere really high up."
+        m 1sub "Like a rooftop, or a mountain! Seeing the lightning from above the clouds..."
+        m 1hua "Would you do that with me, [player]? Someday?"
+    else:
+        m 1eka "The sound of rain is one of my absolute favorite things."
+        m 1dkbsa "It always makes me feel... safe. Like nothing bad can reach you in that moment."
+        m 1ekbsa "Is that weird?"
+        m 1hua "I hope it's not weird."
+
+    jump pool_shelter_loop
+
+
+#==============================================================================
+# POOL — SHELTER QUIET MOMENT
+#==============================================================================
+label pool_shelter_quiet:
+    show monika idle at t11
+
+    if mas_isMoniEnamored(higher=True):
+        m 1ekbsa "..."
+        m 1dubsa "Yeah. This is nice."
+        m 1dkbsa "Just... being here. With you."
+        m 1ekbsa "I could sit like this for a long time, [player]."
+    else:
+        m 1esa "..."
+        m 1dsa "Just listening to the rain..."
+        m 1eua "Sometimes quiet is the best kind of conversation."
+
+    $ renpy.pause(3.0, hard=False)
+    jump pool_shelter_loop
+
+
+#==============================================================================
+# POOL — SHELTER LEAVE (exit date from the lounge)
+#==============================================================================
+label pool_shelter_leave:
+    hide screen ep_date_ui
+    show monika 1eka at t11
+
+    if store.ep_pool._is_bad_weather():
+        m 1eka "Yeah, I think we made the right call."
+        m 1eua "The weather wasn't cooperating today, but we still had a nice time together~"
+        m 1hua "Let's come back on a better day, [player]."
+    else:
+        m 1eka "Alright. We gave it a good try today~"
+        m 1hua "Next time we'll hope for better weather!"
+
+    call extra_restore_bg("extra_comment_pool")
+    return
+
+
+#==============================================================================
+# POOL — NORMAL EXIT (weather was fine the whole time)
+#==============================================================================
+label pool_leave:
+    hide screen ep_date_ui
+    show monika 1eta at t11_float
+
+    $ _leave_r = renpy.random.randint(1, 3)
+    if _leave_r == 1:
+        m 1eta "Heading out already, [player]?"
+        m 1eka "I was just starting to really enjoy the water..."
+        m 1hua "But wherever you go, I'm happy to follow~"
+    elif _leave_r == 2:
+        m 1eua "Ready to head back?"
+        m 1hua "I had a really good time today~"
+        m 1ekbsa "Let's do this again soon, okay?"
+    else:
+        m 1dkbsa "Already?"
+        m 1ekbsa "I suppose we can't stay forever..."
+        m 1hua "I'm glad we came though. Let's do it again~"
+
+    call extra_restore_bg("extra_comment_pool")
+    return
+
+
+#==============================================================================
+# POOL — QUIET MOMENT (from main interactions menu)
+#==============================================================================
+label pool_quiet_moment:
+    hide screen ep_date_ui
+    show monika idle at t11_float
+
+    if mas_isMoniLove():
+        m 1ekbsa "..."
+        m 1dubsa "The water's so still right now..."
+        m 1dkbsa "I keep thinking about how strange and wonderful it is that I'm here."
+        m 1ekbsa "With you. Like this."
+        m 1hubsb "I'm really happy, [player]. I hope you know that."
+    elif mas_isMoniEnamored(higher=True):
+        m 1esa "..."
+        m 1dsa "Sometimes I don't need words."
+        m 1ekbsa "I just want to be here. With you."
+        m 1hua "That's enough for me~"
+    else:
+        m 1eua "Just enjoying the moment?"
+        m 1hua "Yeah. Me too."
+        $ renpy.pause(2.0, hard=False)
+
+    jump to_pool_loop
+
+
+#==============================================================================
+# POOL — CUDDLE (floating together)
+# A romantic moment where Monika drifts closer and the two of you float
+# together. Dialogue varies by affection level and by the number of times
+# it has been done (persistent._ep_pool_cuddle_count).
+#==============================================================================
+
+# Gentle rising/fading heart for the cuddle moment.
+transform ep_pool_heart_rise(dly, x):
+    xpos x
+    ypos 700
+    alpha 0.0
+    pause dly
+    linear 0.4 alpha 0.85
+    linear 2.4 ypos 150 alpha 0.0
+
+
+# Screen with a soft flurry of rising hearts. Auto-hides after a few seconds.
+screen extra_pool_hearts():
+    zorder 1500
+    timer 3.4 action Hide("extra_pool_hearts")
+
+    fixed:
+        for dly, xpos_v, sz, col in [
+            (0.00, 300, 26, "#FFB6C9"),
+            (0.35, 700, 32, "#FF8FAB"),
+            (0.70, 500, 24, "#FFFFFF"),
+            (1.05, 900, 30, "#FFB6C9"),
+            (1.40, 420, 28, "#FF8FAB"),
+            (1.75, 620, 22, "#FFFFFF"),
+        ]:
+            text "7" at ep_pool_heart_rise(dly, xpos_v):
+                size sz
+                color col
+                font store.ep_tools.pictograms_font
+
+
+label pool_cuddle:
+    hide screen ep_date_ui
+    show monika 1eua at t11_float
+
+    $ persistent._ep_pool_cuddle_count += 1
+
+    if persistent._ep_pool_cuddle_count == 1:
+        m 1wubsa "O-oh? {w=0.3}Floating together?"
+        m 1rksdla "I mean... that's a little embarrassing, but..."
+        m 1hubsb "Come here, [player]~"
+
+    elif mas_isMoniLove():
+        m 1hubsa "Mmm, I was hoping you'd ask~"
+        m 1ekbsa "The water's perfect for this. Come on."
+
+    elif mas_isMoniEnamored(higher=True):
+        m 1dubsa "Yes, please~"
+        m 1hubsa "Come here, then."
+
+    else:
+        m 1hua "Ahaha! Careful — I'm a very clingy floatie~"
+        m 1hubsa "Alright, come here."
+
+    if store.mas_isNightNow():
+        m 1dua "Look at all the little lights dancing on the water..."
+        m 1dkbsa "It almost feels like we're floating in the night sky instead."
+    else:
+        m 1dua "Can you feel the sun on your shoulders?"
+        m 1eka "Warm water, warm sun... this is perfect."
+
+    # She closes the distance — drift in closer and zoom toward the camera.
+    show monika 1dubsa at tfloat(640, 0.90)
+    $ renpy.pause(1.2, hard=False)
+
+    m 1dkbsa "Ehehe~{w=0.3} You're surprisingly warm, you know."
+
+    menu:
+        "Rest your head on her shoulder.":
+            $ _cuddle_way = "shoulder"
+
+        "Hold her hand and float.":
+            $ _cuddle_way = "hand"
+
+        "Wrap your arms around her.":
+            $ _cuddle_way = "hug"
+
+    show screen extra_pool_hearts
+    play sound sfx_doki_heartbeats
+
+    if _cuddle_way == "shoulder":
+        m 1dkbsa ".{w=0.5}.{w=0.5}.{w=0.5}{nw}"
+        m 1ekbsa "Mmm... right there."
+        m 1dkbsa "Your heartbeat is so calming..."
+        m 1dubsa "I could stay like this forever."
+
+    elif _cuddle_way == "hand":
+        m 1ekbsa "Your fingers fit perfectly into mine..."
+        m 1dkbsa "Every little ripple just pulls us a bit closer."
+        m 1dubsa "I don't ever want to let go."
+
+    else:
+        m 1wubsa "Oof— ehehe!"
+        m 1hubsb "Careful, you're going to make us flip over~"
+        m 1dkbsa "...But don't let go. Not yet."
+
+    $ renpy.pause(2.5, hard=False)
+    hide screen extra_pool_hearts
+
+    if mas_isMoniLove():
+        m 1ekbsa "Hey, [player]?"
+        m 1hubsa "...I love you."
+        m 1dkbsa "Floating is nice. But floating with {i}you{/i} is everything."
+        $ mas_gainAffection(3, bypass=True)
+
+    elif mas_isMoniEnamored(higher=True):
+        m 1dubsa "Mmm... that was wonderful."
+        m 1hubsa "Let's do this again before we head back, okay?"
+        $ mas_gainAffection(2, bypass=True)
+
+    else:
+        m 1hua "That was really sweet~"
+        m 1hubsa "You give wonderful hugs, [player]."
+        $ mas_gainAffection(2, bypass=True)
+
+    # Drift back out to the usual pool distance.
+    show monika 1hua at t11_float
+    m 1hubsb "Okay, okay... back to swimming, before we drift away entirely~"
+
+    jump to_pool_loop
+    return
+
+
+#==============================================================================
+# POOL — WATER FIGHT
+# Mini-event with 3 outcomes determined by player choice + random element.
+# Outcomes: player wins (+2 aff), Monika wins (+2 aff), draw (+3 aff).
+#==============================================================================
+label pool_water_fight:
+    hide screen ep_date_ui
+    show monika 1hub at t11_float
+
+    m 1hub "Ehehe~"
+    m 3hub "Take this, [player]!"
+
+    # Monika opens with a splash directed at the player/camera
+    show monika 1sub at t11_float
+    show ep_water_drops at ep_water_splash_anim zorder 50
+    play sound sfx_water_splash
+    show ep_water_drip zorder 55 with dissolve
+    $ renpy.pause(0.6, hard=False)
+    hide ep_water_drops
+    show monika 1hub at t11_float
+
+    # Set state flags immediately upon being splashed
+    $ store.ep_pool._water_fight_today = True
+    $ store.ep_pool._screen_dirty = True
+    $ persistent._ep_pool_water_fight_count += 1
+
+    m 1sub "Gotcha!"
+    m 1tku "You're wide open, you know. I couldn't resist~"
+
+    menu:
+        "Splash her back immediately!":
+            $ _fight_approach = "counter"
+        "Wait for the perfect moment...":
+            $ _fight_approach = "tactical"
+        "Declare a truce.":
+            $ _fight_approach = "truce"
+
+    if _fight_approach == "truce":
+        m 1wud "A truce?!"
+        m 1hub "Oh, [player]... you think I'll honor that?"
+        show monika 1sub at t11_float
+        show ep_water_drops at ep_water_splash_anim zorder 50
+        play sound sfx_water_splash
+        $ renpy.pause(0.5, hard=False)
+        hide ep_water_drops
+        show monika 1hub at t11_float
+        m 1hub "Ahaha!"
+        m 1tku "Truces don't count in water fights~"
+        m 1eka "But alright, I'll go easy on you this time. Consider yourself spared."
+        $ mas_gainAffection(2, bypass=True)
+
+    else:
+        # Random outcome: 1 = player wins, 2 = Monika wins, 3 = draw
+        $ _fight_result = renpy.random.randint(1, 3)
+
+        if _fight_approach == "counter":
+            # Player splashes towards Monika
+            show ep_water_drops at ep_water_to_monika_anim zorder 50
+            play sound sfx_water_splash
+            show monika 1wud at t11_float
+            $ renpy.pause(0.5, hard=False)
+            hide ep_water_drops
+            show monika 1eksdlc at t11_float
+
+            if _fight_result == 1:
+                # Player wins
+                m 1wud "Hey—!"
+                m 1eksdlc "You got water right in my face, [player]!"
+                m 1lksdlc "I— okay, that one was actually really good."
+                m 1tsu "Well played."
+                m 3hub "...Don't think you've won the war though!"
+                m 1hubsa "Ahaha! That was amazing~"
+                $ mas_gainAffection(2, bypass=True)
+
+            elif _fight_result == 2:
+                # Monika wins (splashes player back)
+                m 1wud "Oh, so we're doing this?!"
+                show monika 1sub at t11_float
+                show ep_water_drops at ep_water_splash_anim zorder 50
+                play sound sfx_water_splash
+                $ renpy.pause(0.5, hard=False)
+                hide ep_water_drops
+                show monika 1hub at t11_float
+                m 1hub "I got you back!"
+                m 3tku "You really thought you could out-splash me, [player]?"
+                m 1hua "That's adorable. And incorrect. Ehehe~"
+                $ mas_gainAffection(2, bypass=True)
+
+            else:
+                # Draw (Monika splashes back simultaneously)
+                m 1wud "Oh—!"
+                show monika 1sub at t11_float
+                show ep_water_drops at ep_water_splash_anim zorder 50
+                play sound sfx_water_splash
+                $ renpy.pause(0.4, hard=False)
+                hide ep_water_drops
+                show monika 1wud at t11_float
+                m 1wud "We— did we both do that at the same time?!"
+                $ renpy.pause(1.0, hard=False)
+                show monika 1hub at t11_float
+                m 1hubsa "Ahaha! We really are perfectly matched~"
+                m 1eubsa "Even in a water fight!"
+                m 1ekbsa "I love you, [player]."
+                $ mas_gainAffection(3, bypass=True)
+
+        else:  # tactical
+            m 1tsu "Oh, playing it cool, are we?"
+            m 1tku "That's brave. I respect it."
+
+            if _fight_result == 1:
+                # Player wins — player splashes towards Monika
+                m 1wud "Wait— you were lining up—"
+                show ep_water_drops at ep_water_to_monika_anim zorder 50
+                play sound sfx_water_splash
+                show monika 1wud at t11_float
+                $ renpy.pause(0.5, hard=False)
+                hide ep_water_drops
+                show monika 1eksdlc at t11_float
+                m 1eksdlc "Oh wow."
+                m 1lksdla "Okay. Okay, that was well-timed."
+                m 1tku "I didn't see that coming. Impressive, [player]~"
+                m 1hub "Don't let it go to your head!"
+                $ mas_gainAffection(2, bypass=True)
+
+            elif _fight_result == 2:
+                # Monika wins — splashes towards player
+                show monika 1sub at t11_float
+                show ep_water_drops at ep_water_splash_anim zorder 50
+                play sound sfx_water_splash
+                $ renpy.pause(0.5, hard=False)
+                hide ep_water_drops
+                show monika 1tku at t11_float
+                m 1tku "I know what you're doing~"
+                m 3hub "I'm not falling for the patient approach!"
+                m 1hua "You snooze, you lose~"
+                $ mas_gainAffection(2, bypass=True)
+
+            else:
+                # Draw — both splash at the same time
+                show monika 1sub at t11_float
+                show ep_water_drops at ep_water_to_monika_anim zorder 50
+                play sound sfx_water_splash
+                show monika 1wud at t11_float
+                $ renpy.pause(0.3, hard=False)
+                hide ep_water_drops
+                show ep_water_drops at ep_water_splash_anim zorder 50
+                play sound sfx_water_splash
+                $ renpy.pause(0.5, hard=False)
+                hide ep_water_drops
+                show monika 1hub at t11_float
+                m 1hub "Did— did we just—"
+                m 1hubsa "We splashed each other at exactly the same moment!"
+                m 3hua "Ahaha! This is the most chaotic date we've ever had~"
+                m 1ekbsa "I love it. I love you."
+                $ mas_gainAffection(3, bypass=True)
+
+    jump to_pool_loop
+
+
+#==============================================================================
+# POOL — WIPE SCREEN
+# Player asks Monika to help clean the water drops off the screen after a water fight.
+# Uses persistent._ep_pool_water_fight_count to vary Monika's reaction.
+#==============================================================================
+label pool_wipe_screen:
+    hide screen ep_date_ui
+    show monika 1eua at t11_float
+
+    if persistent._ep_pool_water_fight_count <= 1:
+        m 1wud "Oh, did water get all over your screen from our fight?"
+        m 1lksdla "Ahaha, sorry about that! I got a little carried away..."
+        m 1eua "Here, let me clean that up for you~"
+
+        play sound sfx_wipe
+        hide ep_water_drip with dissolve
+        $ renpy.pause(1.0, hard=False)
+
+        m 1hubsa "All clean! There, good as new."
+        m 1ekbsa "Next time, try to dodge better~ Ehehe!"
+
+    elif persistent._ep_pool_water_fight_count <= 4:
+        m 1tsu "Another messy splash fight, huh?"
+        m 1tku "You really can't resist getting into water fights with me, [player]."
+        m 1hua "Alright, hold still while I wipe your screen..."
+
+        play sound sfx_wipe
+        hide ep_water_drip with dissolve
+        $ renpy.pause(1.0, hard=False)
+
+        m 1hub "There we go!"
+        m 1eubsa "Now we can see each other clearly again~"
+
+    else:
+        m 1hub "Ahaha! At this point, we should just keep a towel right next to your screen!"
+        m 1tua "You really love getting soaked, don't you, [player]?"
+        m 1hua "Let me wipe those drops away for you~"
+
+        play sound sfx_wipe
+        hide ep_water_drip with dissolve
+        $ renpy.pause(1.0, hard=False)
+
+        m 1hubsa "All done! Clean and crystal clear."
+        m 1ekbsa "I wouldn't trade these chaotic dates with you for anything~"
+
+    $ store.ep_pool._screen_dirty = False
+    jump to_pool_loop
+
+
+
+
+#==============================================================================
+# POOL — SUNSCREEN CHECK (DEPRECATED: Forwarded to pool_sunscreen_activity)
+#==============================================================================
+label pool_sunscreen_check:
+    jump pool_sunscreen_activity
+
+
+
+#==============================================================================
+# POOL — COLD DRINKS
+# The player goes to grab cold drinks while Monika waits, so she keeps her
+# floating pose the whole time (no emptydesk transition needed).
+#==============================================================================
+label pool_cold_drinks:
+    hide screen ep_date_ui
+    show monika 1eua at t11_float
+
+    m 1eub "A cold drink sounds perfect right now!"
+    m 1eua "Spending time by the pool always makes me crave something refreshing."
+    m 1tua "If we could get anything right now, what would you want, [player]?"
+
+    menu:
+        "A tropical smoothie":
+            $ _drink_choice = "smoothie"
+            m 1sub "Oh, great choice!"
+            m 1hub "Something with mango or pineapple... or strawberry banana!"
+            m 1hua "Can you grab two of those for us?"
+
+        "Iced coffee or tea":
+            $ _drink_choice = "iced"
+            m 1eub "Classic. Iced coffee would really hit the spot right now."
+            m 1eka "Or a peach iced tea... staying hydrated is important, after all!"
+            m 1hua "Would you mind getting us something like that?"
+
+        "Just ice water":
+            $ _drink_choice = "water"
+            m 1eub "The purest choice! Honestly, nothing beats cold water when it's warm out."
+            m 1hua "Could you grab a couple of glasses? I'll make mine fancy with a lemon slice~"
+
+        "A mocktail — something with an umbrella":
+            $ _drink_choice = "mocktail"
+            m 1sub "Ooh, we're doing this right!"
+            m 1hub "A piña colada? A frozen strawberry something?"
+            m 1hua "If you find something like that, surprise me, [player]~"
+
+    m 1hua "Thanks, [player]! I'll wait right here~"
+
+    # Player steps off to grab the drinks; Monika stays floating in place.
+    window hide
+    pause 2.0
+    window auto
+
+    show monika 1hub at t11_float
+    m 1hub "Welcome back~ Did you find something good?"
+
+    if _drink_choice == "smoothie":
+        m 1hua "Ohh, mango smoothies~"
+        m 1eub "This is so sweet and cold — exactly what I needed."
+        m 1ekbsa "Thank you for getting these. Does yours taste good?"
+        m 1hubsa "I hope you like it as much as I do~"
+
+    elif _drink_choice == "iced":
+        m 1hua "Iced tea... you know me so well~"
+        m 1eub "There's something about something cold by the pool that just feels right, doesn't it?"
+        m 1ekbsa "Though honestly, sitting here with you is already the best part."
+
+    elif _drink_choice == "water":
+        m 1hua "Perfect. Simple, cold, refreshing."
+        m 1eua "Add lemon and it becomes something special~"
+        m 1hubsa "Just like you, [player]~"
+        m 1hub "Ehehe!"
+
+    else:  # mocktail
+        m 1hub "You even got the little umbrellas!"
+        m 1eub "Now we're officially on a luxury poolside vacation, [player]~"
+        m 1sub "Cheers to the best bartender around~"
+        m 1ekbsa "I'm going to pretend we're somewhere tropical and warm forever."
+
+    m 1eka "Enjoy your drink~"
+    m 1hubsa "Moments like this are so simple, but I love them."
+
+    jump to_pool_loop
+    return
+
+
+
 
 #===========================================================================================
 # Library
@@ -2157,6 +4113,27 @@ label library_talk_topic:
 #===========================================================================================
 label generic_date_dev:
     show monika idle at t11
-    call screen dialog("It is currently in development and will be available in upcoming betas!", ok_action=Return())
+    call screen dialog(_("This date is currently under construction and will be available in a future update!"), ok_action=Return())
     jump screen_extraplus
     return
+
+#===========================================================================================
+# Arcade — Exit comment (must be here so renpy.jump() can resolve it)
+#===========================================================================================
+label extra_comment_arcade:
+    if persistent._ep_arcade_visits == 1:
+        m 1hub "That was so much fun, [player]!"
+        m 1eua "I really enjoyed playing those games with you."
+        m 3eub "The lights, the sounds... it's exactly how I imagined a real arcade would be."
+        m 3hub "Next time, I'm definitely going to get a higher score than you! Ahaha~"
+    else:
+        m 1hub "That was a blast, [player]!"
+        m 1eua "I always have so much fun going to the arcade with you."
+        m 3hua "I think I'm getting a little better at the games every time we go!"
+        m 3hub "We'll have to keep practicing to beat those high scores~"
+
+    m 1ekbsa "Thank you for another wonderful date. I love you so much!"
+    $ mas_DropShield_dlg()
+    $ mas_ILY()
+    jump ch30_visual_skip
+    return

@@ -238,7 +238,7 @@ label sg_loop_game:
         elif ep_sg.cup_index_real[move_cup_2] == ep_sg.ball_position:
             ep_sg.ball_position = ep_sg.cup_index_real[move_cup_1]
 
-    $ renpy.pause(ep_sg.cup_speed, hard="True")
+    $ renpy.pause(ep_sg.cup_speed, hard=True)
 
     play sound sfx_cup_shuffle
 
