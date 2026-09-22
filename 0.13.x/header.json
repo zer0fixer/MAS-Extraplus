@@ -1,0 +1,22 @@
+{
+    "header_version": 1,
+    "author": "ZeroFixer",
+    "name": "Extra Plus",
+    "version": "1.4.4",
+    "modules": [
+        "Extra_Plus_Main",
+        "Extra_Plus_Labels",
+        "Extra_Plus_Go_to",
+        "Extra_Plus_Volley",
+        "Extra_Plus_Misc",
+        "Extra_Plus_21",
+        "Extra_Plus_Chibis",
+        "Extra_Plus_Poem",
+        "Extra_Plus_PSR",
+        "Extra_Plus_Shell_Game",
+        "Extra_Plus_TTT"
+    ],
+    "description": "Expand your time with Monika with new minigames, dates, and interactions.",
+    "settings_pane": "_extra_plus_submod_settings",
+    "priority": 0
+}
